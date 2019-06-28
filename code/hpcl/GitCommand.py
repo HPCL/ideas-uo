@@ -1,5 +1,5 @@
 import os, sys, subprocess
-import Command
+from hpcl import Command
 
 class GitCommand(object):
 
@@ -13,6 +13,13 @@ class GitCommand(object):
 
         #Check if already exists in tmp folder
         os.system('git clone ' + url)
+
+        #pull for the latest in case it was previously cloned
+        repo = url[url.rfind('/')+1:len(url)-5]
+        os.chdir(repo)
+        os.system('git pull')
+
+        os.chdir(self.tmpdir)
 
         return True
 
@@ -52,7 +59,7 @@ class GitCommand(object):
             for line in lines:
 
                 #If the line is an author, then start to piece together the commit   
-                if line.startswith('Author: '):
+                if line.startswith(b'Author: '):
                     current_author = line[8:len(line)]
 
                     #track the number of commits for this author
@@ -70,14 +77,14 @@ class GitCommand(object):
                     message = ''
                     m = next(lines)
                     while len(m) > 1:
-                        message += (m + '\n')
+                        message += (m + b'\n').decode("utf-8") 
                         m = next(lines)
 
                     #get the diffs
                     diffs = []
                     diff = next(lines)
-                    while len(diff) > 1 and diff.startswith('\\') == False:
-                        if diff.startswith('diff'):
+                    while len(diff) > 1 and diff.startswith(b'\\') == False:
+                        if diff.startswith(b'diff'):
                             next(lines)
                             next(lines)
                             next(lines)
@@ -87,8 +94,8 @@ class GitCommand(object):
                             next(lines)
                             diff = next(lines)
                             diffinfo = ''
-                            while len(diff) > 1 and (diff.startswith('+') or diff.startswith('-')):
-                                diffinfo += diff
+                            while len(diff) > 1 and (diff.startswith(b'+') or diff.startswith(b'-')):
+                                diffinfo += diff.decode("utf-8") 
                                 diff = next(lines)
 
                             diffs.append({'filename':filename, 'diff':diff})
@@ -102,6 +109,9 @@ class GitCommand(object):
                 #ignore anything else until next author line      
 
         return commits
+
+
+
 
 
 #Helper Functions
