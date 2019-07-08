@@ -1,2 +1,0 @@
-https://github.com/spack/spack.git
-https://github.com/lanl/LATTE.git
