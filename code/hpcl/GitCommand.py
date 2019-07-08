@@ -15,7 +15,7 @@ class GitCommand(object):
         os.system('git clone ' + url)
 
         #pull for the latest in case it was previously cloned
-        repo = url[url.rfind('/')+1:len(url)-5]
+        repo = url[url.rfind('/')+1:url.rfind('.')]
         os.chdir(repo)
         os.system('git pull')
 
@@ -36,7 +36,7 @@ class GitCommand(object):
             return '',getYears(reponame) 
         return 'tags/',[x.strip() for x in open(filepath,'r').readlines()]
 
-    #Get all the versions of a repo
+    #Get all the commits of a repo for current branch
     def getRepoCommitData(self, reponame):
 
         prefix,versions = self.getRepoVersions(reponame)
@@ -95,7 +95,7 @@ class GitCommand(object):
                             diff = next(lines)
                             diffinfo = ''
                             while len(diff) > 1 and (diff.startswith(b'+') or diff.startswith(b'-')):
-                                diffinfo += diff.decode("utf-8") 
+                                diffinfo += diff.decode("utf-8", errors='ignore') 
                                 diff = next(lines)
 
                             diffs.append({'filename':filename, 'diff':diff})
