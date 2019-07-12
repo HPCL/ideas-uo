@@ -104,26 +104,39 @@ class GitCommand(object):
                                 #skip extra line if this line is seen
                                 if line.startswith(b'new file mode'):
                                     next(lines)
-                                next(lines)
-                                next(lines)
+                                
+                                if not line.startswith(b'deleted file mode') and not line.startswith(b'old mode'): 
+                                  
+                                    next(lines)
+                                    next(lines)
 
-                                #skip ahead until see first + or -
-                                diff = next(lines)
-                                while not (diff.startswith(b'+') or diff.startswith(b'-')):
+                                    #skip ahead until see first + or -
                                     diff = next(lines)
-
-                                diffinfo = []
-                                while len(diff) > 1:
-                                    
-                                    if (diff.startswith(b'+') or diff.startswith(b'-')):
-                                        diffinfo.append(diff.decode("utf-8", errors='ignore')) 
-                                    if diff.startswith(b'diff'):
-                                        break
-                                    else:    
+                                    while not (diff.startswith(b'+') or diff.startswith(b'-')) or (diff.startswith(b'+++') or diff.startswith(b'---')) :
                                         diff = next(lines)
 
-                                diffs.append({'filename':filename, 'diff':diffinfo})
-                                #print(diffinfo)
+                                    diffinfo = []
+                                    while len(diff) > 1:
+                                        
+                                        if (diff.startswith(b'+') or diff.startswith(b'-')):
+                                            diffinfo.append(diff.decode("utf-8", errors='ignore')) 
+
+                                            '''if diff.startswith(b'+++'):
+                                                print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                                                print(commitid)
+                                                print(filename)
+                                                print(diffinfo)'''
+
+                                        if diff.startswith(b'diff'):
+                                            break
+                                        else:    
+                                            diff = next(lines)
+
+                                    diffs.append({'filename':filename, 'diff':diffinfo})
+                                    #print(diffinfo)
+                                
+                                #else:
+                                    #ignore deleted files for now   
                             else:
                                 diff = next(lines)
 
