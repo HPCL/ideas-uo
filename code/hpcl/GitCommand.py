@@ -59,66 +59,86 @@ class GitCommand(object):
             for line in lines:
 
                 #If the line is an author, then start to piece together the commit   
-                if line.startswith(b'Author: '):
-                    current_author = line[8:len(line)]
+                #if line.startswith(b'Author: '):
+                if line.startswith(b'commit'):
 
-                    #track the number of commits for this author
-                    if current_author in commits:
-                        commits[current_author]['total_commits'] += 1
-                    else:    
-                        commits[current_author] = {'total_commits':1, 'commits':[]}
+                    commitid = line[7:len(line)]
 
-                    #get the commit date
-                    rawdate = next(lines)
-                    date = rawdate[8:len(rawdate)]
+                    line = next(lines)
 
-                    #get the commit message
-                    next(lines)
-                    message = ''
-                    m = next(lines)
-                    while len(m) > 1:
-                        message += (m + b'\n').decode("utf-8") 
+                    if line.startswith(b'Author: '):
+
+                        current_author = line[8:len(line)]
+
+                        #track the number of commits for this author
+                        if current_author in commits:
+                            commits[current_author]['total_commits'] += 1
+                        else:    
+                            commits[current_author] = {'total_commits':1, 'commits':[]}
+
+                        #get the commit date
+                        rawdate = next(lines)
+                        date = rawdate[8:len(rawdate)]
+
+                        #get the commit message
+                        next(lines)
+                        message = ''
                         m = next(lines)
+                        while len(m) > 1:
+                            message += (m + b'\n').decode("utf-8") 
+                            m = next(lines)
 
-                    #get the diffs
-                    diffs = []
-                    diff = next(lines)
-                    while len(diff) > 1 and diff.startswith(b'\\') == False:
-                        if diff.startswith(b'diff'):
-                            #next(lines)
-                            #next(lines)
-                            #next(lines)
-                            filenameline = diff.decode("utf-8")
-                            filename = filenameline[11:len(filenameline)]
-                            #print('FILENAME '+ filename)
-                     
-                            next(lines)
-                            next(lines)
-                            next(lines)
+                        #get the diffs
+                        diffs = []
+                        diff = next(lines)
+                        while len(diff) > 1 and diff.startswith(b'\\') == False:
+                            if diff.startswith(b'diff'):
+                                #next(lines)
+                                #next(lines)
+                                #next(lines)
+                                filenameline = diff.decode("utf-8")
+                                filename = filenameline[11:len(filenameline)]
+                                #print('FILENAME '+ filename)
+                         
+                                line = next(lines)
+                                #skip extra line if this line is seen
+                                if line.startswith(b'new file mode'):
+                                    next(lines)
+                                next(lines)
+                                next(lines)
 
-                            diff = next(lines)
-                            diffinfo = []
-                            while len(diff) > 1:
-                                
-                                if (diff.startswith(b'+') or diff.startswith(b'-')):
-                                    diffinfo.append(diff.decode("utf-8", errors='ignore')) 
-                                if diff.startswith(b'diff'):
-                                    break
-                                else:    
+                                #skip ahead until see first + or -
+                                diff = next(lines)
+                                while not (diff.startswith(b'+') or diff.startswith(b'-')):
                                     diff = next(lines)
 
-                            diffs.append({'filename':filename, 'diff':diffinfo})
-                            #print(diffinfo)
-                        else:
-                            diff = next(lines)
+                                diffinfo = []
+                                while len(diff) > 1:
+                                    
+                                    if (diff.startswith(b'+') or diff.startswith(b'-')):
+                                        diffinfo.append(diff.decode("utf-8", errors='ignore')) 
+                                    if diff.startswith(b'diff'):
+                                        break
+                                    else:    
+                                        diff = next(lines)
 
-                    #print(diffs)
-                    #add the commit to the author's list of commits.
-                    commits[current_author]['commits'].append({'date':date,'message':message, 'diffs':diffs})
+                                diffs.append({'filename':filename, 'diff':diffinfo})
+                                #print(diffinfo)
+                            else:
+                                diff = next(lines)
 
+                        #print(diffs)
+                        #add the commit to the author's list of commits.
+                        commits[current_author]['commits'].append({'id':commitid, 'date':date,'message':message, 'diffs':diffs})
+
+                    elif line.startswith(b'Merge: '):
+                        #ignore merges
+                        next(lines)
+                        
                 #else:
-                #ignore anything else until next author line      
+                    #ignore anything else until next author line      
 
+        #print(commits)
         return commits
 
 
