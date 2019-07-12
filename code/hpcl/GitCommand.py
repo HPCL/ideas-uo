@@ -36,7 +36,7 @@ class GitCommand(object):
             return '',getYears(reponame) 
         return 'tags/',[x.strip() for x in open(filepath,'r').readlines()]
 
-    #Get all the commits of a repo for current branch
+    #Get all the versions of a repo
     def getRepoCommitData(self, reponame):
 
         prefix,versions = self.getRepoVersions(reponame)
@@ -85,23 +85,34 @@ class GitCommand(object):
                     diff = next(lines)
                     while len(diff) > 1 and diff.startswith(b'\\') == False:
                         if diff.startswith(b'diff'):
+                            #next(lines)
+                            #next(lines)
+                            #next(lines)
+                            filenameline = diff.decode("utf-8")
+                            filename = filenameline[11:len(filenameline)]
+                            #print('FILENAME '+ filename)
+                     
                             next(lines)
                             next(lines)
                             next(lines)
-                            filenameline = next(lines)
-                            filename = filenameline[6:len(filenameline)]
-                            #print 'FILENAME '+ filename
-                            next(lines)
-                            diff = next(lines)
-                            diffinfo = ''
-                            while len(diff) > 1 and (diff.startswith(b'+') or diff.startswith(b'-')):
-                                diffinfo += diff.decode("utf-8", errors='ignore') 
-                                diff = next(lines)
 
-                            diffs.append({'filename':filename, 'diff':diff})
+                            diff = next(lines)
+                            diffinfo = []
+                            while len(diff) > 1:
+                                
+                                if (diff.startswith(b'+') or diff.startswith(b'-')):
+                                    diffinfo.append(diff.decode("utf-8", errors='ignore')) 
+                                if diff.startswith(b'diff'):
+                                    break
+                                else:    
+                                    diff = next(lines)
+
+                            diffs.append({'filename':filename, 'diff':diffinfo})
+                            #print(diffinfo)
                         else:
                             diff = next(lines)
 
+                    #print(diffs)
                     #add the commit to the author's list of commits.
                     commits[current_author]['commits'].append({'date':date,'message':message, 'diffs':diffs})
 
