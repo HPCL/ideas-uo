@@ -107,5 +107,3 @@ def getYears(repodir):
 
 def getGitCmd(year):
       return "git log --since '1 January %d' --before '31 December %d' | grep -e '^commit' | tail -1 | cut -d ' ' -f 2" % (year,year)
-
-
