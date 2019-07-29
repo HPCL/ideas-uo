@@ -4,23 +4,26 @@ import requests
 
 class RemoteCommand(object):
 
-    def __init__(self, dir):
-        self.tmpdir = dir
+    def __init__(self):
+        #self.tmpdir = dir
 
         #Prep for gitHub API
-        parser = argparse.ArgumentParser()
+        '''parser = argparse.ArgumentParser()
         parser.add_argument('-user','--username',
                             help='The github username', type=str)
         parser.add_argument('-pass','--password', 
                             help='The github password', type=str)
         args = parser.parse_args()
         
-        self.GITHUB_USER = args.username
+        self.GITHUB_USER = args.username'''
+
+        print("Enter GitHub credentials")
+        self.GITHUB_USER = input("Username: ")
         self.GITHUB_PASSWORD = getpass.getpass(prompt='Password: ', stream=None)
 
         if not self.GITHUB_USER or self.GITHUB_PASSWORD:
             'You must specify the username and password to access the issues of the desired github repository.'
-            parser.print_usage(sys.stderr)
+            #parser.print_usage(sys.stderr)
         pass
 
 
@@ -51,17 +54,14 @@ class RemoteCommand(object):
             ARGS = '?state=all&page='+str(page)
             print('Link accessing: ', PULLS_FOR_REPO_URL + ARGS)
             response = requests.get(PULLS_FOR_REPO_URL + ARGS, auth=AUTH)
-            print('Request successful...... ', response)
-            print('Request length...... ', str(len(response.json())))
+            #print('Request successful...... ', response)
+            #print('Request length...... ', str(len(response.json())))
             
             #if there is a result add it 
             result.extend(response.json())
 
         #Need to iterate over all pages (link)
         #&page=1
-        #if response.json() == []:
-        #    print("HAHAHAHAHAHA Done")
-
         #for issue in response.json():
         #    print(issue)
 
