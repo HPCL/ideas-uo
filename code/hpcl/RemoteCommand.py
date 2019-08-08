@@ -1,6 +1,9 @@
 import os, sys, subprocess
 import argparse, getpass
 import requests
+from bs4 import BeautifulSoup
+import gzip
+import mailbox
 
 class RemoteCommand(object):
 
@@ -72,14 +75,36 @@ class RemoteCommand(object):
 
 
 
+    def getPetscMail(self):
 
+        print('Downloading mail for petsc...')
 
+        result = [];
 
+        url = "https://lists.mcs.anl.gov/pipermail/petsc-users/"
+        response = requests.get(url)
+        soup = BeautifulSoup(response.content)
+        for link in soup.find_all('a'):
 
+            if "txt.gz" in link.get('href'):
+                
+                print(link.get('href'))
+                response2 = requests.get(url + link.get('href'))
+                open('mail.txt.gz', 'wb').write(response2.content)
 
+                file=gzip.open('mail.txt.gz','rb')
+                file_content=file.read()
+                open('archive.mbox', 'wb').write(file_content)
 
+                for message in mailbox.mbox('archive.mbox'):
+                    result.append(message)
 
+                os.remove('mail.txt.gz')
+                os.remove('archive.mbox')
 
+        print("Total emails: "+ str(len(result)))
+
+        return result
 
 
 
