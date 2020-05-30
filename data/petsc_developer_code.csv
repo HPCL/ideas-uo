@@ -1,0 +1,2089 @@
+source,target,value
+Barry Smith,src/dm/impls/da/grvtk.c,1.0
+Barry Smith,src/dm/impls/plex/plexvtk.c,3.6
+Barry Smith,src/dm/impls/plex/plex.c,0.96
+Barry Smith,config/install.py,2.61
+Barry Smith,src/dm/impls/network/network.c,2.0
+Barry Smith,src/snes/examples/tutorials/network/power/power.c,0.67
+Barry Smith,src/snes/examples/tutorials/network/power/power2.c,0.86
+Barry Smith,include/petscdmnetwork.h,0.5
+Barry Smith,src/snes/examples/tutorials/network/power/power.h,0.8
+Barry Smith,src/snes/examples/tutorials/network/water/water.h,0.8
+Barry Smith,src/snes/examples/tutorials/network/water/waterfunctions.c,0.83
+Barry Smith,src/ts/examples/tutorials/network/wash/pipes1.c,0.92
+Barry Smith,src/mat/examples/tests/ex72.c,0.54
+Barry Smith,src/sys/utils/pdisplay.c,0.94
+Barry Smith,src/vec/vec/impls/mpi/pbvec.c,5.63
+Barry Smith,src/dm/impls/plex/plexexodusii.c,0.75
+Barry Smith,src/dm/impls/plex/plexhdf5.c,3.5
+Barry Smith,src/docs/website/documentation/changes/dev.html,9.19
+Barry Smith,src/ksp/pc/impls/bddc/bddcprivate.c,1.0
+Barry Smith,src/mat/examples/tests/ex192.c,1.0
+Barry Smith,src/snes/examples/tutorials/ex69.c,0.93
+Barry Smith,src/sys/dll/dl.c,0.87
+Barry Smith,src/sys/dll/reg.c,10.0
+Barry Smith,src/sys/fileio/grpath.c,0.95
+Barry Smith,src/tao/constrained/examples/tutorials/maros.c,2.61
+Barry Smith,src/snes/examples/tutorials/ex12.c,2.71
+Barry Smith,src/snes/examples/tutorials/ex77.c,0.5
+Barry Smith,src/mat/impls/baij/seq/baij2.c,1.52
+Barry Smith,src/mat/impls/baij/seq/baijfact2.c,2.61
+Barry Smith,src/vec/vec/impls/seq/dvec2.c,0.77
+Barry Smith,bin/FASTMathInstaller.py,3.94
+Barry Smith,bin/configVars.py,0.89
+Barry Smith,bin/maint/confignightly/default,1.75
+Barry Smith,bin/maint/findvisibleprivatefunctions,1.73
+Barry Smith,bin/maint/gcov.py,2.91
+Barry Smith,bin/maint/runhtml.py,0.92
+Barry Smith,bin/maint/toclapack.sh,0.75
+Barry Smith,bin/parseargs.py,2.0
+Barry Smith,config/BuildSystem/config/packages/MPI.py,0.45
+Barry Smith,config/configure.py,0.18
+Barry Smith,config/examples/arch-mswin-borland.py,0.52
+Barry Smith,config/gmakegentest.py,1.87
+Barry Smith,src/sys/mpiuni/makefile,0.75
+Barry Smith,src/sys/utils/makefile,0.75
+Barry Smith,src/dm/examples/tests/ex36.c,15.0
+Barry Smith,src/ts/examples/tutorials/hybrid/ex1fd.c,1.95
+Barry Smith,src/mat/examples/tests/ex88.c,1.71
+Barry Smith,src/mat/examples/tests/ex75.c,2.3
+Barry Smith,src/ts/examples/tutorials/eimex/allen_cahn.c,4.52
+Barry Smith,src/ts/examples/tutorials/ex31.c,10.55
+Oana Marin,src/tao/unconstrained/examples/tutorials/burgers_spectral.c,10.32
+Oana Marin,src/ts/examples/tutorials/spectral-toy/adjointreads.m,6.73
+Oana Marin,src/ts/examples/tutorials/spectral-toy/makefile,2.81
+Junchao Zhang,include/petsc/private/vecimpl.h,1.59
+Junchao Zhang,src/vec/vec/utils/vpscat.c,24.74
+Junchao Zhang,src/vec/vec/utils/vpscat.h,0.94
+Junchao Zhang,src/mat/impls/aij/mpi/mmaij.c,0.98
+Junchao Zhang,src/mat/impls/aij/mpi/mpiaij.c,1.56
+Junchao Zhang,src/mat/impls/aij/mpi/mpiaij.h,0.55
+Junchao Zhang,include/petsc/private/petscimpl.h,0.67
+Junchao Zhang,include/petscsys.h,0.58
+Junchao Zhang,src/sys/objects/ftn-custom/zstart.c,1.63
+Junchao Zhang,src/sys/objects/pinit.c,3.26
+Junchao Zhang,src/sys/objects/tagm.c,21.29
+Junchao Zhang,src/vec/vec/utils/makefile,1.87
+Alp Dener,src/docs/tao_tex/manual/cover.tex,0.93
+Alp Dener,src/tao/unconstrained/examples/tutorials/output/minsurf2_1.out,1.0
+Alp Dener,src/tao/unconstrained/examples/tutorials/makefile,0.94
+Alp Dener,src/ts/examples/tutorials/output/ex16opt_ic_1.out,43.0
+Alp Dener,src/dm/interface/dm.c,0.64
+Alp Dener,src/tao/bound/examples/tutorials/output/plate2_1.out,0.71
+Alp Dener,src/tao/bound/examples/tutorials/output/plate2_3.out,0.71
+Alp Dener,src/tao/bound/examples/tutorials/output/plate2_4.out,0.71
+Alp Dener,src/tao/bound/examples/tutorials/output/plate2_5.out,0.71
+Alp Dener,src/tao/bound/examples/tutorials/output/plate2_7.out,0.43
+Alp Dener,src/tao/complementarity/examples/tutorials/output/minsurf1_1.out,1.0
+Alp Dener,src/tao/complementarity/examples/tutorials/output/minsurf1_2.out,1.0
+Alp Dener,src/tao/unconstrained/examples/tutorials/output/minsurf2_2.out,0.86
+Alp Dener,src/tao/leastsquares/impls/pounders/pounders.c,1.99
+Alp Dener,src/tao/interface/taosolver.c,2.68
+Alp Dener,src/tao/bound/examples/tutorials/output/plate2_2.out,1.0
+Alp Dener,src/tao/bound/examples/tutorials/output/plate2_6.out,1.0
+Alp Dener,src/tao/unconstrained/examples/tutorials/output/minsurf2_3.out,1.0
+Alp Dener,src/ts/examples/tutorials/output/ex20opt_ic_1.out,1.0
+Alp Dener,src/ksp/ksp/interface/iterativ.c,1.0
+Alp Dener,src/ksp/pc/interface/precon.c,3.0
+Alp Dener,src/snes/interface/snes.c,4.0
+Alp Dener,src/snes/linesearch/interface/linesearch.c,4.0
+Alp Dener,src/tao/bound/impls/tron/tron.c,1.0
+Alp Dener,src/tao/complementarity/impls/asls/asils.c,1.0
+Alp Dener,src/tao/unconstrained/impls/nls/nls.c,2.0
+Alp Dener,src/ts/interface/ts.c,1.48
+Stefano Zampini,src/ksp/ksp/interface/iguess.c,8.25
+Stefano Zampini,src/ksp/pc/impls/is/pcis.c,3.04
+Stefano Zampini,src/ksp/pc/impls/bddc/bddc.c,100.59
+Stefano Zampini,src/ksp/pc/impls/bddc/bddcnullspace.c,2.0
+Stefano Zampini,src/ksp/ksp/examples/tutorials/ex42.c,5.3
+Stefano Zampini,src/ksp/ksp/examples/tutorials/ex70.c,4.88
+Stefano Zampini,src/ksp/ksp/examples/tutorials/ex43.c,5.27
+Stefano Zampini,src/ksp/ksp/examples/tutorials/ex49.c,3.57
+Stefano Zampini,include/petscmat.h,1.0
+Stefano Zampini,src/mat/impls/aij/mpi/mpiaij.c,1.69
+Stefano Zampini,src/mat/impls/aij/seq/aij.c,2.59
+Stefano Zampini,src/mat/impls/baij/mpi/mpibaij.c,1.08
+Stefano Zampini,src/mat/impls/baij/seq/baij.c,1.75
+Stefano Zampini,src/ts/examples/tutorials/ex12.c,1.9
+Stefano Zampini,src/mat/examples/tests/makefile,5.91
+Stefano Zampini,src/mat/impls/dense/seq/dense.c,4.27
+Stefano Zampini,src/ksp/ksp/impls/fetidp/fetidp.c,1.9
+Stefano Zampini,src/vec/is/is/impls/block/block.c,0.9
+Stefano Zampini,src/vec/is/is/impls/general/general.c,7.54
+Stefano Zampini,src/dm/impls/plex/plexgeometry.c,2.81
+Stefano Zampini,src/mat/impls/aij/seq/superlu/superlu.c,0.73
+Stefano Zampini,src/ts/trajectory/impls/memory/trajmemory.c,16.91
+Stefano Zampini,src/snes/examples/tutorials/output/ex62_fetidp_2d_quad.out,3.96
+Stefano Zampini,src/snes/examples/tutorials/output/ex62_fetidp_2d_tri.out,3.96
+Stefano Zampini,src/snes/examples/tutorials/output/ex62_fetidp_3d_hex.out,10.58
+Stefano Zampini,include/petsc/finclude/petscksp.h,0.5
+Stefano Zampini,src/ksp/ksp/examples/tutorials/ex56.c,8.68
+Stefano Zampini,src/dm/impls/plex/plexcreate.c,4.75
+Stefano Zampini,src/dm/impls/plex/plexinterpolate.c,3.1
+Stefano Zampini,src/ts/examples/tutorials/ex11.c,0.9
+Stefano Zampini,src/vec/is/utils/vsectionis.c,1.84
+Stefano Zampini,src/dm/impls/plex/plexrefine.c,12.71
+Stefano Zampini,src/ts/examples/tests/makefile,1.85
+Stefano Zampini,src/ts/examples/tutorials/advection-diffusion-reaction/ex5adj.c,4.38
+Stefano Zampini,src/ts/examples/tutorials/advection-diffusion-reaction/makefile,1.67
+Stefano Zampini,src/ts/examples/tutorials/ex16opt_ic.c,3.61
+Stefano Zampini,src/ts/examples/tutorials/ex16opt_p.c,4.61
+Stefano Zampini,src/ts/examples/tutorials/ex20opt_p.c,3.69
+Stefano Zampini,src/ts/examples/tutorials/makefile,0.99
+Stefano Zampini,src/dm/impls/da/hypre/mhyp.c,1.19
+Stefano Zampini,src/ksp/ksp/examples/tutorials/ex34.c,14.99
+Stefano Zampini,src/ksp/pc/impls/hypre/hypre.c,5.94
+Stefano Zampini,src/ksp/ksp/examples/tutorials/output/ex59_1.out,1.56
+Stefano Zampini,src/ksp/ksp/examples/tutorials/output/ex59_3.out,1.21
+Stefano Zampini,src/ts/impls/glee/glee.c,0.95
+Stefano Zampini,src/ts/examples/tutorials/power_grid/ex9adj.c,0.97
+Stefano Zampini,src/sys/fileio/fdir.c,4.0
+Stefano Zampini,src/ts/adapt/impls/basic/adaptbasic.c,0.75
+Stefano Zampini,src/ts/adapt/impls/cfl/adaptcfl.c,0.75
+Stefano Zampini,src/ts/adapt/impls/glee/adaptglee.c,0.75
+Jed Brown,src/dm/dt/interface/dtfe.c,0.75
+Jed Brown,src/dm/impls/plex/plexfem.c,2.9
+Jed Brown,src/ksp/pc/impls/composite/composite.c,0.95
+Jed Brown,lib/petsc/conf/rules,4.33
+Jed Brown,makefile,1.0
+Jed Brown,lib/petsc/bin/maint/buildtest,0.93
+Jed Brown,lib/petsc/bin/maint/gcov.py,1.5
+Jed Brown,.travis.yml,0.79
+Jed Brown,config/PETSc/Configure.py,0.96
+Jed Brown,gmakefile,5.15
+Jed Brown,src/ts/examples/tutorials/ex26.c,0.89
+Jed Brown,include/petsc/finclude/petscsys.h,1.8
+Jed Brown,src/ksp/ksp/examples/tutorials/ex13f90.F90,0.97
+Jed Brown,src/ksp/ksp/examples/tutorials/ex1f.F90,0.97
+Jed Brown,src/mat/examples/tests/ex212f.F90,2.9
+Jed Brown,src/snes/examples/tests/ex1f.F90,1.94
+Jed Brown,src/snes/examples/tutorials/ex1f.F90,0.96
+Jed Brown,src/snes/examples/tutorials/ex5f.F90,0.97
+Jed Brown,src/snes/examples/tutorials/ex5f90.F90,0.98
+Jed Brown,src/snes/examples/tutorials/ex5f90t.F90,0.98
+Jed Brown,src/sys/examples/tests/ex13f.F90,0.95
+Jed Brown,src/sys/examples/tests/ex36f.F90,0.96
+Jed Brown,src/tao/leastsquares/examples/tutorials/chwirut1f.F90,0.97
+Jed Brown,src/tao/unconstrained/examples/tutorials/rosenbrock1f.F90,0.97
+Jed Brown,src/ts/examples/tutorials/advection-diffusion-reaction/shashi.F90,63.81
+Jed Brown,src/vec/is/is/examples/tests/ex1f.F90,10.54
+Jed Brown,src/vec/is/is/examples/tests/ex2f.F90,4.81
+Jed Brown,src/vec/is/sf/examples/tutorials/ex1f.F90,2.94
+Jed Brown,src/vec/vec/examples/tutorials/ex14f.F90,0.96
+Jed Brown,src/dm/impls/da/dagtol.c,0.92
+Jed Brown,src/sys/classes/matlabengine/matlab.c,1.66
+Jed Brown,src/sys/classes/viewer/impls/ams/ams.c,0.8
+Jed Brown,src/sys/classes/viewer/impls/ascii/filev.c,0.94
+Jed Brown,src/sys/classes/viewer/impls/ascii/vcreatea.c,0.94
+Jed Brown,src/sys/classes/viewer/impls/binary/binv.c,0.92
+Jed Brown,src/sys/classes/viewer/impls/hdf5/hdf5v.c,0.8
+Jed Brown,src/sys/classes/viewer/impls/matlab/vmatlab.c,0.8
+Jed Brown,src/sys/classes/viewer/impls/socket/send.c,4.25
+Jed Brown,src/sys/classes/viewer/interface/view.c,0.92
+Jed Brown,src/sys/fileio/fretrieve.c,2.15
+Jed Brown,src/sys/mpiuni/mpi.c,1.0
+Jed Brown,src/sys/objects/pname.c,1.2
+Jed Brown,src/sys/utils/mpiu.c,1.71
+Jed Brown,src/vec/vec/utils/comb.c,1.0
+Jed Brown,include/petsc/mpiuni/mpi.h,3.43
+Jed Brown,src/ksp/pc/impls/mg/mgfunc.c,0.83
+Jed Brown,src/mat/examples/tests/ex184.c,2.08
+Jed Brown,src/mat/examples/tests/output/ex184_mpiaij.out,0.8
+Jed Brown,src/mat/examples/tests/output/ex184_mpibaij.out,0.8
+Jed Brown,src/mat/examples/tests/output/ex184_seqaij.out,0.8
+Hong Zhang,include/petsc/private/tsimpl.h,1.0
+Hong Zhang,include/petscts.h,2.02
+Hong Zhang,src/ts/interface/makefile,0.99
+Hong Zhang,src/mat/impls/dense/mpi/mpidense.c,10.44
+Hong Zhang,src/mat/impls/dense/seq/dense.c,0.9
+Hong Zhang,src/mat/examples/tests/ex134.c,0.82
+Hong Zhang,src/ts/examples/tutorials/network/wash/pipes1.c,1.6
+Hong Zhang,src/tao/leastsquares/examples/tutorials/chwirut2.c,0.58
+Hong Zhang,src/vec/vscat/interface/vscreate.c,0.36
+Hong Zhang,src/snes/examples/tutorials/network/makefile,1.39
+Hong Zhang,src/snes/examples/tutorials/network/pflow/PFReadData.c,3.64
+Hong Zhang,src/snes/examples/tutorials/network/pflow/makefile,1.61
+Hong Zhang,src/snes/examples/tutorials/network/pflow/pf.h,1.0
+Hong Zhang,src/snes/examples/tutorials/network/waternet/makefile,1.0
+Hong Zhang,src/snes/examples/tutorials/network/waternet/waternet.c,8.23
+Hong Zhang,src/snes/examples/tutorials/network/waternet/waternet.h,3.5
+Hong Zhang,include/petscmat.h,0.98
+Hong Zhang,src/vec/vscat/examples/ex1.c,0.91
+Hong Zhang,include/petscvec.h,0.67
+Hong Zhang,src/ksp/ksp/examples/tests/ex56.c,14.9
+Hong Zhang,src/mat/impls/aij/mpi/mmaij.c,4.25
+Hong Zhang,src/mat/impls/aij/mpi/mpiaij.c,3.46
+Hong Zhang,src/vec/makefile,0.93
+Hong Zhang,src/vec/vec/impls/makefile,0.93
+Hong Zhang,src/vec/vec/impls/mpi/pbvec.c,1.91
+Hong Zhang,src/vec/vec/interface/vecreg.c,3.0
+Hong Zhang,src/vec/vec/utils/vpscat_mpi1.c,3.73
+Hong Zhang,include/petscdmnetwork.h,1.0
+Hong Zhang,src/snes/examples/tutorials/network/ex3.c,2.3
+Hong Zhang,src/ksp/ksp/examples/tutorials/network/ex2.c,3.96
+Hong Zhang,include/petsc/private/dmnetworkimpl.h,1.0
+Hong Zhang,src/snes/examples/tutorials/network/pflow/ex1.c,5.09
+Hong Zhang,config/BuildSystem/config/packages/SuperLU_DIST.py,0.89
+Hong Zhang,src/ksp/ksp/examples/tutorials/ex64.c,0.92
+Hong Zhang,src/mat/impls/aij/seq/aij.c,0.97
+Hong Zhang,src/ts/examples/tutorials/power_grid/output/ex3adj_1.out,1.16
+Hong Zhang,src/ksp/ksp/examples/tests/makefile,3.57
+Hong Zhang,src/mat/interface/matrix.c,2.94
+Hong Zhang,src/mat/impls/aij/mpi/superlu_dist/superlu_dist.c,2.5
+Hong Zhang,src/vec/vec/utils/vscat_mpi1.c,7.33
+Hong Zhang,src/ksp/ksp/examples/tests/benchmarkscatters/makefile,0.92
+Hong Zhang,include/petsc/private/matimpl.h,3.73
+Hong Zhang,src/ksp/ksp/examples/tests/benchmarkscatters/ex1.c,0.77
+Hong Zhang,src/dm/impls/da/da1.c,0.69
+Hong Zhang,src/dm/impls/da/da2.c,0.75
+Hong Zhang,src/vec/vec/examples/tests/makefile,0.96
+Hong Zhang,src/ksp/ksp/examples/tests/ex55.c,14.9
+Hong Zhang,src/sys/memory/mal.c,0.91
+Hong Zhang,src/mat/impls/aij/mpi/mpiptap.c,7.32
+Hong Zhang,src/mat/impls/aij/mpi/mpiov.c,15.82
+Matthew G. Knepley,src/snes/examples/tutorials/ex79.c,2.67
+Matthew G. Knepley,src/ksp/pc/impls/asm/asm.c,0.87
+Matthew G. Knepley,src/dm/impls/plex/plex.c,1.71
+Matthew G. Knepley,src/dm/impls/forest/examples/tests/ex2.c,0.91
+Matthew G. Knepley,src/dm/impls/plex/examples/tests/ex19.c,5.27
+Matthew G. Knepley,src/dm/impls/plex/examples/tests/ex3.c,12.89
+Matthew G. Knepley,src/snes/examples/tutorials/ex56.c,0.91
+Matthew G. Knepley,src/snes/examples/tutorials/ex63.c,1.86
+Matthew G. Knepley,src/tao/examples/tutorials/ex1.c,7.77
+Matthew G. Knepley,src/tao/examples/tutorials/ex3.c,0.95
+Matthew G. Knepley,src/ts/examples/tutorials/ex18.c,7.0
+Matthew G. Knepley,src/ts/examples/tutorials/ex45.c,4.92
+Matthew G. Knepley,src/snes/examples/tutorials/makefile,0.79
+Matthew G. Knepley,include/petsc/private/petscdsimpl.h,0.94
+Matthew G. Knepley,src/dm/impls/plex/examples/tutorials/makefile,0.91
+Matthew G. Knepley,include/petsc/private/petscfeimpl.h,0.99
+Matthew G. Knepley,src/dm/impls/plex/plexadapt.c,11.59
+Matthew G. Knepley,config/BuildSystem/config/packages/MPI.py,14.99
+Matthew G. Knepley,config/BuildSystem/config/packages/Trilinos.py,0.97
+Matthew G. Knepley,src/docs/website/documentation/faq.html,0.36
+Matthew G. Knepley,include/petsc/private/dmpleximpl.h,0.89
+Matthew G. Knepley,include/petscdmshell.h,0.98
+Matthew G. Knepley,src/dm/impls/da/dacreate.c,2.14
+Matthew G. Knepley,src/dm/impls/patch/patch.c,0.44
+Matthew G. Knepley,src/dm/impls/patch/patchcreate.c,0.44
+Matthew G. Knepley,src/ts/examples/tutorials/output/ex11_0.out,2.0
+Matthew G. Knepley,src/ts/examples/tutorials/output/ex11_1.out,2.0
+Matthew G. Knepley,src/ts/examples/tutorials/output/ex11_2.out,2.0
+Matthew G. Knepley,src/ts/examples/tutorials/output/ex11_3.out,2.0
+Matthew G. Knepley,src/ts/examples/tutorials/output/ex11_4.out,2.0
+Matthew G. Knepley,src/ts/examples/tutorials/output/ex11_5.out,2.0
+Matthew G. Knepley,src/ts/examples/tutorials/output/ex11_6.out,1.0
+Matthew G. Knepley,src/ts/examples/tutorials/output/ex11_p4est_advec_2d.out,1.0
+Matthew G. Knepley,src/dm/impls/plex/examples/tests/output/ex12_4.out,21.53
+Matthew G. Knepley,src/dm/impls/plex/examples/tests/output/ex12_5.out,21.53
+Matthew G. Knepley,src/dm/impls/plex/examples/tests/output/ex12_6.out,4.93
+Matthew G. Knepley,src/dm/impls/plex/examples/tests/output/ex18_0.out,2.0
+Matthew G. Knepley,src/dm/impls/plex/examples/tests/output/ex18_1.out,1.0
+Matthew G. Knepley,src/dm/impls/plex/examples/tests/output/ex18_2.out,1.0
+Matthew G. Knepley,src/dm/impls/plex/examples/tests/output/ex1_1d_0.out,0.6
+Matthew G. Knepley,src/dm/impls/plex/examples/tests/output/ex1_1d_1.out,0.6
+Matthew G. Knepley,src/dm/impls/plex/examples/tests/output/ex1_1d_2.out,0.6
+Matthew G. Knepley,src/dm/impls/plex/examples/tests/output/ex1_1d_refine_overlap_0.out,0.6
+Matthew G. Knepley,src/dm/impls/plex/examples/tests/output/ex1_1d_refine_overlap_1.out,1.4
+Matthew G. Knepley,src/dm/impls/plex/examples/tests/output/ex1_3.out,11.67
+Matthew G. Knepley,src/dm/impls/plex/examples/tests/output/ex1_4.out,10.27
+Matthew G. Knepley,src/dm/impls/plex/examples/tests/output/ex1_6.out,1.0
+Matthew G. Knepley,src/dm/impls/plex/examples/tests/output/ex1_7.out,7.33
+Matthew G. Knepley,src/dm/impls/plex/examples/tests/output/ex1_s2t2.out,0.6
+Matthew G. Knepley,src/dm/impls/plex/examples/tests/output/ex1_s2t3.out,0.6
+Satish Balay,include/makefile,0.32
+Satish Balay,config/gmakegentest.py,0.91
+Satish Balay,config/examples/arch-cuda-double.py,0.62
+Satish Balay,config/BuildSystem/config/compilers.py,0.89
+Satish Balay,config/BuildSystem/config/packages/SuperLU_DIST.py,11.88
+Satish Balay,config/BuildSystem/config/framework.py,0.93
+Satish Balay,src/vec/f90-mod/petscis.h,0.5
+Satish Balay,src/mat/utils/matstash.c,0.7
+Satish Balay,gmakefile.test,2.4
+Satish Balay,bin/maint/startnightly,2.9
+Satish Balay,bin/maint/buildtest,1.52
+Satish Balay,bin/maint/copylognightly,1.4
+Satish Balay,bin/maint/killnightly,0.94
+Satish Balay,include/petscerror.h,2.17
+Satish Balay,src/ksp/ksp/examples/tutorials/ex100.c,1.8
+Satish Balay,setup.py,0.85
+Satish Balay,src/snes/examples/tutorials/ex5f.F90,0.86
+Satish Balay,src/ksp/ksp/impls/minres/minres.c,1.9
+Satish Balay,src/vec/is/ao/examples/tests/ex3d/ex3.cxx,0.67
+Satish Balay,lib/petsc/conf/test,0.97
+Satish Balay,src/vec/is/sf/examples/tutorials/ex2.c,0.67
+Satish Balay,src/snes/examples/tests/ex4.c,40.7
+Satish Balay,src/sys/classes/draw/examples/tests/ex4f.F,1.47
+Satish Balay,src/docs/tao_tex/manual/makefile,0.8
+Satish Balay,include/petscvec.h,0.63
+Satish Balay,src/mat/impls/aij/mpi/mmaij.c,1.55
+Satish Balay,src/vec/vec/utils/vpscat.h,2.94
+Satish Balay,include/petsc/mpiuni/mpi.h,0.57
+Satish Balay,src/sys/classes/random/examples/tutorials/ex2.c,0.89
+Satish Balay,src/ts/examples/tutorials/eimex/makefile,4.99
+Satish Balay,include/petscversion.h,4.64
+Satish Balay,src/dm/examples/tutorials/makefile,1.0
+Satish Balay,src/snes/examples/tutorials/ex48.c,1.81
+Satish Balay,src/ts/examples/tutorials/ex34.c,0.97
+Satish Balay,config/PETSc/Configure.py,0.97
+Satish Balay,src/ts/examples/tests/makefile,0.29
+Satish Balay,src/ts/examples/tutorials/ex20adj.c,0.41
+Satish Balay,src/ts/examples/tutorials/extchem.c,0.82
+Satish Balay,config/BuildSystem/config/packages/mkl_cpardiso.py,0.9
+Satish Balay,config/configure.py,7.92
+Satish Balay,src/ts/examples/tests/ex1.c,0.6
+Satish Balay,src/docs/tex/manual/manual.tex,0.83
+Satish Balay,include/petscmat.h,1.65
+Satish Balay,src/mat/impls/aij/mpi/aijmkl/makefile,0.5
+Satish Balay,src/mat/impls/aij/seq/aijmkl/makefile,0.5
+Satish Balay,src/mat/impls/baij/mpi/baijmkl/makefile,0.5
+Satish Balay,src/mat/impls/baij/seq/baijmkl/makefile,0.5
+Satish Balay,src/mat/interface/dlregismat.c,0.86
+Satish Balay,src/mat/interface/matregis.c,0.9
+Satish Balay,src/docs/website/index.html,0.89
+Mark Adams,src/snes/examples/tutorials/makefile,1.85
+Mark Adams,src/dm/examples/tutorials/makefile,0.81
+Mark Adams,src/snes/examples/tutorials/ex63.c,6.68
+Mark Adams,src/dm/impls/plex/plexcreate.c,0.96
+Mark Adams,src/dm/impls/plex/plexhdf5.c,0.96
+Mark Adams,src/ksp/pc/impls/gamg/agg.c,0.58
+Mark Adams,include/petsc/private/makefile,0.87
+Mark Adams,src/ksp/pc/impls/gamg/gamg.c,1.69
+Mark Adams,src/snes/examples/tutorials/ex56.c,1.65
+Mark Adams,src/dm/impls/plex/examples/tutorials/ex2.c,4.18
+Mark Adams,src/dm/impls/plex/examples/tutorials/ex6.c,2.48
+Mark Adams,include/petsc/private/pcgamgimpl.h,0.6
+Mark Adams,src/ksp/pc/impls/gamg/geo.c,1.63
+Mark Adams,src/dm/impls/picell/examples/tutorial/makefile,0.99
+Mark Adams,src/ts/examples/tutorials/ex18.c,0.99
+Mark Adams,include/petsc/private/dmimpl.h,0.96
+Mark Adams,src/dm/impls/forest/p4est/pforest.c,3.61
+Mark Adams,src/dm/impls/plex/plexdistribute.c,0.96
+Mark Adams,src/dm/impls/plex/plexrefine.c,1.6
+Mark Adams,src/dm/impls/plex/plexsubmesh.c,0.78
+Mark Adams,src/dm/impls/picell/doc/picell.tex,0.03
+Mark Adams,src/ksp/ksp/examples/tutorials/makefile,1.0
+Mark Adams,src/ksp/ksp/examples/tutorials/output/ex56_0.out,2.91
+Mark Adams,src/ksp/ksp/examples/tutorials/output/ex55_sa.out,0.97
+Mark Adams,src/ksp/ksp/examples/tutorials/ex56.c,1.69
+Mark Adams,include/petscmatcoarsen.h,0.96
+Mark Adams,src/ksp/ksp/examples/tests/makefile,1.67
+Mark Adams,src/ksp/ksp/examples/tests/output/ex19_2.out,0.97
+Mark Adams,src/ksp/ksp/examples/tests/output/ex26_ml_3.out,0.96
+Mark Adams,src/ksp/ksp/examples/tutorials/output/ex25_1.out,14.69
+Mark Adams,src/ksp/ksp/examples/tutorials/output/ex25_2.out,19.27
+Mark Adams,src/ksp/ksp/examples/tutorials/output/ex34_1.out,3.29
+Mark Adams,src/ksp/ksp/examples/tutorials/output/ex34_2.out,5.36
+Mark Adams,src/ksp/ksp/examples/tutorials/output/ex43_3.out,3.32
+Mark Adams,src/ksp/ksp/examples/tutorials/output/ex43_4.out,3.32
+Mark Adams,src/ksp/ksp/examples/tutorials/output/ex49_hypre_nullspace.out,0.97
+Mark Adams,src/ksp/ksp/examples/tutorials/output/ex50_3.out,20.64
+Mark Adams,src/snes/examples/tutorials/output/ex18_1.out,1.56
+Mark Adams,src/snes/examples/tutorials/output/ex20_1.out,0.78
+Mark Adams,src/snes/examples/tutorials/output/ex40f90.out,0.89
+Mark Adams,src/snes/examples/tutorials/output/ex46_1.out,0.86
+Mark Adams,src/snes/examples/tutorials/output/ex58_1.out,5.73
+Mark Adams,src/snes/examples/tutorials/output/ex58_2.out,4.82
+Mark Adams,src/snes/examples/tutorials/output/ex5_1.out,43.6
+Mark Adams,src/snes/examples/tutorials/output/ex5_2.out,4.02
+Mark Adams,src/snes/examples/tutorials/output/ex5_3.out,1.56
+Mark Adams,src/snes/examples/tutorials/output/ex5_4.out,4.96
+Mark Adams,include/petscksp.h,0.78
+Mark Adams,src/dm/impls/plex/examples/tests/makefile,0.99
+Mark Adams,src/dm/impls/makefile,0.95
+Lawrence Mitchell,src/ksp/pc/impls/mg/mg.c,4.46
+Lawrence Mitchell,src/snes/impls/fas/fas.c,0.8
+Lawrence Mitchell,include/petscdm.h,0.87
+Lawrence Mitchell,src/dm/interface/dm.c,3.97
+Lawrence Mitchell,src/docs/tex/manual/part2.tex,0.5
+Lawrence Mitchell,src/ksp/ksp/examples/tutorials/ex35.cxx,0.9
+Lawrence Mitchell,src/ksp/ksp/examples/tutorials/ex36.cxx,0.9
+Lawrence Mitchell,src/vec/is/utils/isltog.c,8.94
+Lawrence Mitchell,include/petsc/private/isimpl.h,0.96
+Lawrence Mitchell,src/sys/classes/viewer/examples/tests/makefile,2.65
+Lawrence Mitchell,src/sys/examples/tests/makefile,3.63
+Lawrence Mitchell,src/vec/is/sf/examples/tutorials/makefile,2.59
+Lawrence Mitchell,include/petscsnes.h,0.91
+Lawrence Mitchell,config/BuildSystem/config/packages/MPI.py,0.91
+Lawrence Mitchell,include/petsc/private/sfimpl.h,0.94
+Lawrence Mitchell,src/snes/examples/tutorials/makefile,1.41
+Lawrence Mitchell,src/snes/impls/fas/fasfunc.c,1.5
+Lawrence Mitchell,src/vec/is/utils/vsectionis.c,0.89
+Lawrence Mitchell,include/petsc-private/dmimpl.h,0.86
+Lawrence Mitchell,src/dm/examples/tests/ex21.c,1.63
+Lawrence Mitchell,src/dm/impls/da/da.c,1.63
+Lawrence Mitchell,src/dm/impls/da/dacreate.c,0.87
+Lawrence Mitchell,src/dm/impls/da/dainterp.c,4.47
+Lawrence Mitchell,src/dm/impls/plex/plex.c,1.67
+Lawrence Mitchell,src/dm/impls/plex/plexcreate.c,0.82
+Lawrence Mitchell,include/petsc-private/petscfeimpl.h,0.98
+Lawrence Mitchell,src/dm/impls/plex/plexpartition.c,0.41
+Richard Tran Mills,src/mat/impls/aij/seq/aijmkl/aijmkl.c,5.45
+Richard Tran Mills,src/mat/impls/aij/mpi/mpiaij.c,0.97
+Richard Tran Mills,src/mat/interface/matregis.c,1.49
+Richard Tran Mills,src/mat/impls/aij/mpi/makefile,0.96
+Richard Tran Mills,src/mat/impls/aij/seq/makefile,0.97
+Richard Tran Mills,config/BuildSystem/config/packages/mkl_cpardiso.py,0.93
+Richard Tran Mills,src/dm/examples/tests/ex7.c,2.69
+Richard Tran Mills,src/dm/impls/da/da1.c,0.6
+Richard Tran Mills,src/dm/impls/da/da2.c,0.6
+Richard Tran Mills,src/dm/impls/da/da3.c,0.6
+Richard Tran Mills,src/dm/impls/da/daindex.c,1.47
+Richard Tran Mills,include/petscdmda.h,0.47
+Richard Tran Mills,src/dm/impls/da/daltol.c,6.8
+Richard Tran Mills,src/dm/impls/da/dascatter.c,1.61
+Richard Tran Mills,src/ksp/ksp/impls/ibcgs/ibcgs.c,5.31
+Richard Tran Mills,src/snes/examples/tutorials/makefile,0.98
+Richard Tran Mills,bin/taucc.py,0.76
+Todd Munson,src/tao/leastsquares/examples/tutorials/output/chwirut1f_1.out,3.51
+Todd Munson,src/tao/bound/examples/tutorials/output/plate2_1.out,0.87
+Todd Munson,src/tao/bound/examples/tutorials/output/plate2_3.out,0.91
+Todd Munson,src/tao/bound/examples/tutorials/output/plate2_4.out,0.91
+Todd Munson,src/tao/bound/examples/tutorials/output/plate2_5.out,0.91
+Todd Munson,src/tao/bound/examples/tutorials/output/plate2_7.out,3.36
+Todd Munson,src/tao/bound/impls/gpcg/gpcg.c,0.93
+Todd Munson,src/tao/bound/impls/tron/tron.c,0.93
+Todd Munson,src/tao/leastsquares/examples/tests/makefile,0.95
+Todd Munson,src/tao/leastsquares/examples/tests/output/chwirut1_1.out,6.1
+Todd Munson,src/tao/leastsquares/examples/tutorials/output/chwirut1_1.out,6.1
+Todd Munson,src/tao/leastsquares/examples/tutorials/output/chwirut2_1.out,2.72
+Todd Munson,src/tao/leastsquares/examples/tutorials/makefile,4.57
+Todd Munson,src/tao/leastsquares/examples/makefile,0.82
+Todd Munson,src/tao/bound/impls/blmvm/blmvm.c,1.85
+Todd Munson,src/tao/interface/taosolver.c,1.0
+Todd Munson,src/tao/bound/impls/bqpip/bqpip.c,78.62
+Todd Munson,src/tao/bound/impls/blmvm/blmvm.h,0.22
+Todd Munson,src/tao/unconstrained/impls/nls/nls.c,1.86
+Todd Munson,src/tao/unconstrained/impls/ntl/makefile,0.67
+Todd Munson,src/tao/unconstrained/impls/ntl/ntl.c,1.86
+Todd Munson,src/tao/unconstrained/impls/ntr/makefile,0.67
+Todd Munson,src/ksp/ksp/impls/cg/gltr/gltr.c,5.64
+Todd Munson,src/ksp/ksp/impls/cg/nash/nash.c,5.61
+Todd Munson,include/petscksp.h,0.92
+Todd Munson,src/ksp/ksp/impls/cg/gltr/gltrimpl.h,0.43
+Todd Munson,src/ksp/ksp/impls/cg/nash/nashimpl.h,0.43
+Todd Munson,src/ksp/ksp/impls/cg/cgtype.c,1.05
+Todd Munson,src/tao/constrained/impls/ipm/ipm.c,1.8
+Todd Munson,src/tao/interface/fdiff.c,9.01
+Todd Munson,src/tao/interface/fdtest.c,4.41
+Todd Munson,src/tao/interface/ftn-custom/ztaosolverf.c,2.76
+Todd Munson,include/petsc/private/taoimpl.h,0.89
+Todd Munson,include/petsctao.h,2.78
+Todd Munson,docs/tex/manual/manual.tex,0.67
+Todd Munson,docs/tex/manual/abstract.tex,2.35
+Todd Munson,docs/tex/manual/acknowl.tex,0.94
+Todd Munson,docs/tex/manual/part0.tex,4.74
+Todd Munson,docs/tex/manual/cover.tex,0.88
+Toby Isaac,src/dm/field/impls/ds/dmfieldds.c,5.4
+Toby Isaac,src/dm/dt/interface/dt.c,10.11
+Toby Isaac,src/dm/impls/swarm/examples/tests/ex1.c,0.98
+Toby Isaac,include/petsc/private/petscfeimpl.h,0.85
+Toby Isaac,src/dm/impls/da/dalocal.c,1.85
+Toby Isaac,src/dm/impls/plex/examples/tests/ex3.c,4.62
+Toby Isaac,src/dm/impls/plex/plextree.c,2.69
+Toby Isaac,src/dm/impls/plex/plexcreate.c,13.65
+Toby Isaac,src/dm/makefile,0.86
+Toby Isaac,src/dm/dt/examples/tests/makefile,1.65
+Toby Isaac,src/sys/classes/random/interface/randomc.c,0.87
+Toby Isaac,src/sys/classes/random/impls/makefile,0.91
+Toby Isaac,src/sys/classes/random/examples/makefile,0.82
+Toby Isaac,config/gmakegentest.py,2.81
+Toby Isaac,config/petsc_harness.sh,1.87
+Toby Isaac,src/snes/examples/tests/ex2.c,2.48
+Toby Isaac,src/ts/examples/tutorials/ex11.c,17.05
+Toby Isaac,src/dm/impls/plex/examples/tests/ex8.c,16.93
+Toby Isaac,src/snes/examples/tutorials/ex62.c,0.9
+Toby Isaac,src/snes/examples/tutorials/ex69.c,0.96
+Toby Isaac,src/ts/examples/tutorials/ex18.c,0.9
+Toby Isaac,src/snes/examples/tutorials/ex56.c,2.44
+Toby Isaac,src/ts/examples/tutorials/output/ex18_adv_3_ex.out,1.66
+Toby Isaac,src/snes/examples/tutorials/output/ex62_0.out,0.75
+Toby Isaac,src/snes/examples/tutorials/output/ex62_1.out,0.75
+Toby Isaac,src/snes/examples/tutorials/output/ex62_10.out,0.75
+Toby Isaac,src/snes/examples/tutorials/output/ex62_11.out,0.75
+Toby Isaac,src/snes/examples/tutorials/output/ex62_12.out,0.75
+Toby Isaac,src/snes/examples/tutorials/output/ex62_13.out,0.75
+Toby Isaac,src/snes/examples/tutorials/output/ex62_14.out,0.75
+Toby Isaac,src/snes/examples/tutorials/output/ex62_15.out,0.75
+Toby Isaac,src/snes/examples/tutorials/output/ex62_16.out,0.75
+Toby Isaac,src/snes/examples/tutorials/output/ex62_17.out,0.75
+Toby Isaac,src/snes/examples/tutorials/output/ex62_2.out,0.75
+Toby Isaac,src/snes/examples/tutorials/output/ex62_29.out,8.62
+Toby Isaac,src/snes/examples/tutorials/output/ex62_3.out,0.75
+Toby Isaac,src/snes/examples/tutorials/output/ex62_4.out,1.0
+Toby Isaac,src/snes/examples/tutorials/output/ex62_43.out,0.75
+Toby Isaac,src/snes/examples/tutorials/output/ex62_44.out,0.75
+Toby Isaac,src/snes/examples/tutorials/output/ex62_45.out,0.75
+Toby Isaac,src/snes/examples/tutorials/output/ex62_46.out,0.75
+Toby Isaac,src/snes/examples/tutorials/output/ex62_5.out,1.0
+Toby Isaac,src/snes/examples/tutorials/output/ex62_6.out,0.75
+Toby Isaac,src/snes/examples/tutorials/output/ex62_7.out,0.75
+Toby Isaac,src/snes/examples/tutorials/output/ex62_8.out,0.75
+Toby Isaac,src/snes/examples/tutorials/output/ex62_9.out,0.75
+Toby Isaac,src/snes/examples/tutorials/output/ex62_fetidp_2d_quad.out,16.05
+Toby Isaac,src/snes/examples/tutorials/output/ex62_quad_q2p1_full.out,0.6
+Toby Isaac,src/snes/examples/tutorials/output/ex62_quad_q2q1_full.out,0.6
+Toby Isaac,src/snes/examples/tutorials/output/ex69_0.out,2.73
+Karl Rupp,src/mat/impls/aij/mpi/mpicusp/mpiaijcusp.cu,4.0
+Karl Rupp,src/vec/vec/impls/mpi/mpicusp/mpicusp.cu,1.0
+Karl Rupp,src/vec/vec/impls/seq/seqcusp/cuspvecimpl.h,2.04
+Karl Rupp,src/sys/objects/pinit.c,3.0
+Karl Rupp,src/sys/objects/ftn-custom/zstart.c,0.41
+Karl Rupp,src/dm/impls/plex/plexgmsh.c,0.82
+Karl Rupp,src/ksp/ksp/impls/gmres/agmres/agmresorthog.c,4.0
+Karl Rupp,src/ksp/pc/impls/bddc/bddcprivate.c,3.51
+Karl Rupp,src/tao/unconstrained/impls/bmrm/bmrm.c,0.8
+Karl Rupp,src/vec/is/sf/interface/sf.c,1.63
+Karl Rupp,src/vec/vec/impls/mpi/pbvec.c,2.0
+Karl Rupp,src/vec/vec/utils/vpscat.c,13.0
+Karl Rupp,src/mat/impls/ell/mpi/mpiell.c,0.98
+Karl Rupp,src/mat/impls/ell/mpi/mmell.c,0.94
+Karl Rupp,src/mat/impls/aij/seq/matmatmult.c,4.0
+Karl Rupp,src/tao/examples/tutorials/ex2.c,8.3
+Karl Rupp,src/mat/impls/aij/seq/aij.h,5.0
+Karl Rupp,src/mat/examples/tests/ex38.c,9.0
+Karl Rupp,src/vec/vec/examples/tutorials/ex10.c,3.0
+Karl Rupp,src/vec/vec/impls/mpi/pdvec.c,5.0
+Karl Rupp,src/mat/impls/aij/seq/seqcusparse/aijcusparse.cu,20.0
+Karl Rupp,src/ksp/pc/impls/bjacobi/bjacobi.c,7.0
+Karl Rupp,include/petscdmswarm.h,1.0
+Karl Rupp,src/dm/impls/swarm/swarm_migrate.c,1.0
+Karl Rupp,src/mat/impls/aij/mpi/mpiaij.c,23.0
+Karl Rupp,src/ksp/pc/impls/makefile,0.96
+Karl Rupp,src/ksp/pc/interface/pcregis.c,2.0
+Karl Rupp,src/mat/impls/aij/seq/seqcusp/aijcusp.cu,15.0
+Karl Rupp,src/mat/interface/dlregismat.c,0.41
+Karl Rupp,src/sys/objects/init.c,3.0
+Karl Rupp,src/mat/impls/aij/mpi/makefile,0.95
+Karl Rupp,src/mat/impls/aij/seq/makefile,0.96
+Karl Rupp,src/vec/vec/impls/mpi/makefile,0.82
+Karl Rupp,src/vec/vec/impls/seq/makefile,0.89
+Karl Rupp,src/mat/examples/tests/ex49.c,3.0
+Karl Rupp,src/docs/website/index.html,0.87
+Karl Rupp,src/ksp/ksp/examples/tutorials/makefile,0.98
+Karl Rupp,src/mat/impls/aij/seq/aij.c,15.0
+Karl Rupp,src/snes/examples/tutorials/ex12.c,11.0
+Karl Rupp,src/mat/impls/aij/mpi/mpiaij.h,16.0
+Karl Rupp,src/vec/vec/impls/seq/seqcusp/veccusp.cu,39.0
+Karl Rupp,src/ksp/pc/impls/ainvcusp/makefile,0.5
+Karl Rupp,src/ksp/pc/impls/bicgstabcusp/makefile,0.5
+Karl Rupp,src/ksp/pc/impls/sacusp/makefile,0.5
+Karl Rupp,src/mat/impls/aij/mpi/mpicusp/mpiaijAssemble.cu,2.0
+Karl Rupp,src/mat/impls/aij/mpi/mpicusparse/mpiaijcusparse.cu,5.0
+Karl Rupp,src/mat/impls/aij/seq/seqcusp/aijAssemble.cu,34.0
+Karl Rupp,src/snes/examples/tutorials/ex70.c,1.0
+Karl Rupp,config/BuildSystem/config/packages/cusp.py,0.91
+Karl Rupp,src/ksp/pc/impls/sacusp/sacusp.cu,1.0
+Blaise Bourdin,config/BuildSystem/config/packages/netcdf.py,1.76
+Blaise Bourdin,src/sys/classes/bag/bag.c,2.78
+Blaise Bourdin,src/sys/classes/bag/f90-custom/zbagf90.c,1.0
+Blaise Bourdin,src/sys/examples/tutorials/ex5f90.F90,2.1
+Blaise Bourdin,src/sys/examples/tutorials/makefile,0.97
+Blaise Bourdin,src/sys/yaml/yamlimpls.c,2.68
+Blaise Bourdin,src/contrib/style/checks/PetscFunctionReturnFunction.sh,0.93
+Blaise Bourdin,src/contrib/style/checks/assert.sh,0.87
+Blaise Bourdin,src/contrib/style/checks/bool-condition.sh,0.98
+Blaise Bourdin,src/contrib/style/checks/chkxxx-space.sh,0.94
+Blaise Bourdin,src/contrib/style/checks/closing-bracket.sh,0.82
+Blaise Bourdin,src/contrib/style/checks/cpp-comments.sh,0.87
+Blaise Bourdin,src/contrib/style/checks/funct.sh,0.87
+Blaise Bourdin,src/contrib/style/checks/function-bracket.sh,0.87
+Blaise Bourdin,src/contrib/style/checks/ierr-chkerr.sh,0.87
+Blaise Bourdin,src/contrib/style/checks/if-indentation.sh,0.93
+Blaise Bourdin,src/contrib/style/checks/if0.sh,0.91
+Blaise Bourdin,src/contrib/style/checks/ifdef.sh,0.89
+Blaise Bourdin,src/contrib/style/checks/impl-include.sh,0.89
+Blaise Bourdin,src/contrib/style/checks/long-lines.sh,0.87
+Blaise Bourdin,src/contrib/style/checks/macros.sh,0.94
+Blaise Bourdin,src/contrib/style/checks/malloc-free.sh,0.89
+Blaise Bourdin,src/contrib/style/checks/mpi3-deprecated.sh,0.89
+Blaise Bourdin,src/contrib/style/checks/mpi3-removed.sh,0.89
+Blaise Bourdin,src/contrib/style/checks/null.sh,0.87
+Blaise Bourdin,src/contrib/style/checks/parentheses-space.sh,0.82
+Blaise Bourdin,src/contrib/style/checks/parenthesis-curly-brace.sh,0.82
+Blaise Bourdin,src/contrib/style/checks/space-in-cast.sh,0.97
+Blaise Bourdin,include/petscoptions.h,0.86
+Blaise Bourdin,src/sys/objects/options.c,0.91
+Blaise Bourdin,src/sys/yaml/makefile,0.58
+Blaise Bourdin,src/dm/interface/ftn-custom/makefile,1.45
+Blaise Bourdin,src/mat/interface/ftn-custom/makefile,0.94
+Blaise Bourdin,src/vec/vec/examples/tutorials/ex19.c,1.78
+Blaise Bourdin,src/sys/bag/bag.c,1.72
+Blaise Bourdin,include/taolapack.h,0.89
+Blaise Bourdin,maint/generatefortranstubs.py,0.99
+Blaise Bourdin,src/bound/impls/gpcg/gpcg.c,0.89
+Blaise Bourdin,src/bound/impls/tron/tron.c,0.88
+Blaise Bourdin,src/bound/utils/isutil.c,0.89
+Blaise Bourdin,src/gridsequencing/ftn-custom/ztaodmf.c,0.89
+Blaise Bourdin,src/gridsequencing/taodm.c,0.96
+Blaise Bourdin,src/interface/ftn-custom/ztaof.c,0.89
+Blaise Bourdin,src/interface/ftn-custom/ztaosolverf.c,0.89
+Blaise Bourdin,src/linesearch/interface/ftn-custom/ztaolinesearchf.c,0.89
+Blaise Bourdin,src/matrix/adamat.h,0.88
+Blaise Bourdin,src/matrix/lmvmmat.h,0.89
+Blaise Bourdin,src/matrix/submatfree.h,0.88
+Blaise Bourdin,src/unconstrained/impls/nls/nls.c,0.88
+Blaise Bourdin,src/unconstrained/impls/ntl/ntl.c,0.88
+Daniel Kokron,src/mat/impls/baij/seq/baij.c,1.91
+Daniel Kokron,src/mat/impls/baij/seq/baij2.c,1.0
+Daniel Kokron,src/mat/impls/baij/seq/dgefa2.c,3.62
+Daniel Kokron,src/mat/impls/baij/seq/makefile,0.99
+Daniel Kokron,src/vec/vec/impls/mpi/pvec2.c,0.88
+Shri Abhyankar,src/dm/impls/network/network.c,3.37
+Shri Abhyankar,src/ksp/ksp/examples/tutorials/network/ex1.c,3.98
+Shri Abhyankar,src/ksp/ksp/examples/tutorials/network/ex1_nest.c,3.85
+Shri Abhyankar,src/ksp/ksp/examples/tutorials/network/ex2.c,3.04
+Shri Abhyankar,src/snes/examples/tutorials/network/pflow/ex1.c,26.38
+Shri Abhyankar,src/ts/examples/tutorials/network/wash/pipes1.c,10.87
+Shri Abhyankar,src/ts/examples/tutorials/power_grid/stability_9bus/ex9bus.c,2.6
+Shri Abhyankar,src/ts/examples/tutorials/power_grid/ex3adj.c,1.83
+Shri Abhyankar,src/ts/examples/tutorials/power_grid/ex3opt.c,2.43
+Shri Abhyankar,src/ts/examples/tutorials/power_grid/output/ex3adj_1.out,0.5
+Shri Abhyankar,include/petsc-private/tsimpl.h,1.0
+Shri Abhyankar,src/ts/impls/implicit/sundials/sundials.c,0.75
+Shri Abhyankar,src/docs/tex/manual/intro.tex,0.97
+Shri Abhyankar,src/docs/tex/manual/part1.tex,1.91
+Shri Abhyankar,src/docs/website/documentation/referencing.html,1.91
+Shri Abhyankar,src/sys/objects/pinit.c,0.96
+Shri Abhyankar,src/snes/examples/tutorials/circuit/pflow/pfoptions,0.29
+Shri Abhyankar,src/snes/examples/tutorials/makefile,0.9
+Shri Abhyankar,src/dm/impls/makefile,0.96
+Shri Abhyankar,src/mat/impls/aij/seq/aij.c,2.79
+Shri Abhyankar,conf/test,0.99
+Shri Abhyankar,src/mat/impls/aij/seq/cholmod/makefile,1.0
+Shri Abhyankar,src/mat/impls/aij/seq/umfpack/makefile,1.0
+Shri Abhyankar,src/mat/impls/sbaij/seq/cholmod/makefile,1.0
+Shri Abhyankar,src/mat/order/amd/makefile,1.0
+Shri Abhyankar,src/mat/order/sregis.c,3.0
+Shri Abhyankar,include/petscmat.h,0.71
+Shri Abhyankar,src/mat/impls/aij/seq/makefile,0.71
+Shri Abhyankar,src/dm/impls/circuit/examples/tests/pflow/pfoptions,0.29
+Shri Abhyankar,src/ts/examples/tests/makefile,0.94
+Shri Abhyankar,src/sys/error/pstack.c,0.7
+Shri Abhyankar,src/sys/threadcomm/impls/pthread/tclockfree.c,0.96
+Shri Abhyankar,src/mat/examples/tutorials/ex15.c,1.0
+Shri Abhyankar,src/vec/vec/examples/tutorials/makefile,1.0
+Shri Abhyankar,include/petscerror.h,0.7
+Shri Abhyankar,src/sys/memory/mtr.c,3.08
+Shri Abhyankar,src/sys/threadcomm/impls/pthread/tcpthread.c,2.23
+Shri Abhyankar,include/finclude/petscdraw.h,1.0
+Shri Abhyankar,include/finclude/petscis.h,1.0
+Shri Abhyankar,include/finclude/petscisdef.h,1.0
+Shri Abhyankar,include/finclude/petscksp.h,1.0
+Shri Abhyankar,include/finclude/petsckspdef.h,1.0
+Shri Abhyankar,include/finclude/petscpc.h,1.0
+Shri Abhyankar,include/finclude/petscpcdef.h,1.0
+Shri Abhyankar,include/finclude/petscsnes.h,1.0
+Shri Abhyankar,include/finclude/petscsys.h,6.0
+Shri Abhyankar,include/finclude/petscsysdef.h,3.0
+Shri Abhyankar,include/finclude/petsctsdef.h,1.0
+Shri Abhyankar,include/finclude/petscvecdef.h,1.0
+Shri Abhyankar,include/petsc-private/daimpl.h,8.0
+Scott Kruger,bin/maint/exampleslog.py,1.7
+Scott Kruger,config/install.py,2.48
+Scott Kruger,src/dm/impls/plex/examples/tests/ex7.c,0.93
+Scott Kruger,src/dm/impls/plex/examples/tests/ex8.c,2.0
+Scott Kruger,src/dm/impls/plex/examples/tutorials/ex5.c,1.85
+Scott Kruger,src/mat/examples/tests/ex169.c,0.92
+Scott Kruger,src/mat/examples/tests/ex171.c,0.92
+Scott Kruger,src/mat/examples/tests/ex173.c,0.91
+Scott Kruger,src/mat/examples/tests/ex180.c,9.32
+Scott Kruger,src/mat/examples/tests/ex190.c,2.79
+Scott Kruger,src/mat/examples/tests/ex40.c,0.94
+Scott Kruger,src/mat/examples/tests/ex72.c,0.91
+Scott Kruger,bin/petscdiff,0.61
+Scott Kruger,gmakefile.examples,0.67
+Scott Kruger,src/sys/examples/tests/ex2.c,0.98
+Scott Kruger,src/ksp/ksp/examples/tutorials/ex10.c,2.97
+Scott Kruger,src/sys/examples/tests/ex6f.F,0.89
+Scott Kruger,src/sys/examples/tutorials/ex5f90.F90,0.86
+Scott Kruger,src/sys/examples/tests/ex33.c,2.94
+Scott Kruger,src/sys/examples/tutorials/ex4.c,0.52
+Scott Kruger,src/sys/examples/tutorials/ex4f.F,0.52
+Scott Kruger,config/gmakegen.py,2.59
+Scott Kruger,src/ts/examples/tutorials/makefile,1.5
+Vaclav Hapla,include/petscmat.h,0.94
+Vaclav Hapla,src/mat/interface/dlregismat.c,0.97
+Vaclav Hapla,src/dm/impls/plex/examples/tests/makefile,0.91
+Vaclav Hapla,src/dm/impls/plex/makefile,1.0
+Vaclav Hapla,src/vec/is/utils/vsectionis.c,2.0
+Václav Hapla,makefile,2.16
+Václav Hapla,src/docs/tao_tex/manual/makefile,2.81
+Patrick Sanan,lib/petsc/conf/rules,0.44
+Patrick Sanan,src/dm/impls/da/usfft/matusfft.c,0.83
+Patrick Sanan,src/dm/impls/moab/dmmbmg.cxx,2.68
+Patrick Sanan,src/mat/impls/aij/seq/inode.c,4.46
+Patrick Sanan,src/mat/impls/aij/seq/seqcusparse/aijcusparse.cu,8.07
+Patrick Sanan,src/snes/impls/tr/tr.c,5.12
+Patrick Sanan,src/ts/impls/bdf/bdf.c,2.73
+Patrick Sanan,src/ts/impls/implicit/alpha/alpha1.c,3.59
+Patrick Sanan,src/ts/impls/implicit/alpha/alpha2.c,3.59
+Patrick Sanan,src/ksp/pc/impls/telescope/telescope.c,0.77
+Patrick Sanan,src/dm/impls/da/da2.c,0.23
+Patrick Sanan,include/petscsys.h,0.92
+Patrick Sanan,src/dm/impls/plex/plexcgns.c,1.88
+Patrick Sanan,src/dm/impls/plex/plexcreate.c,0.94
+Patrick Sanan,src/dm/impls/plex/plexdistribute.c,0.8
+Patrick Sanan,src/dm/impls/plex/plexexodusii.c,1.83
+Patrick Sanan,src/docs/tex/manual/makefile,5.23
+Patrick Sanan,src/docs/tex/manual/manualpreamble.tex,2.38
+Patrick Sanan,src/docs/tex/manual/intro.tex,0.74
+Patrick Sanan,src/dm/examples/tutorials/makefile,0.76
+Patrick Sanan,src/tao/examples/tutorials/ex1.c,3.45
+Patrick Sanan,src/tao/examples/tutorials/ex2.c,3.45
+Patrick Sanan,src/ksp/ksp/examples/tutorials/ex1.c,2.83
+Patrick Sanan,src/ksp/ksp/examples/tutorials/ex10.c,0.91
+Patrick Sanan,src/ksp/ksp/examples/tutorials/ex12.c,0.83
+Patrick Sanan,src/ksp/ksp/examples/tutorials/ex16.c,0.83
+Patrick Sanan,src/ksp/ksp/examples/tutorials/ex18.c,0.83
+Patrick Sanan,src/ksp/ksp/examples/tutorials/ex2.c,2.83
+Patrick Sanan,src/ksp/ksp/examples/tutorials/ex23.c,0.83
+Patrick Sanan,src/ksp/ksp/examples/tutorials/ex27.c,0.91
+Patrick Sanan,src/ksp/ksp/examples/tutorials/ex2f.F,0.87
+Patrick Sanan,src/ksp/ksp/examples/tutorials/ex3.c,0.83
+Patrick Sanan,src/ksp/ksp/examples/tutorials/ex46.c,0.83
+Patrick Sanan,src/ksp/ksp/examples/tutorials/ex5.c,0.9
+Patrick Sanan,src/ksp/ksp/examples/tutorials/ex50.c,0.94
+Patrick Sanan,src/ksp/ksp/examples/tutorials/ex52.c,0.83
+Patrick Sanan,src/ksp/ksp/examples/tutorials/ex57f.F,0.87
+Patrick Sanan,bin/maint/mapnameslatex.py,4.37
+Patrick Sanan,src/docs/tex/manual/gettinginfo.tex,3.06
+Patrick Sanan,src/mat/examples/tests/makefile,1.73
+Patrick Sanan,src/ksp/ksp/examples/tutorials/makefile,2.49
+Patrick Sanan,src/dm/impls/da/gr2.c,0.74
+Patrick Sanan,include/petscksp.h,0.96
+Patrick Sanan,src/ksp/ksp/impls/gmres/makefile,0.91
+Patrick Sanan,src/ksp/ksp/impls/gcr/makefile,0.71
+Patrick Sanan,src/ksp/ksp/examples/tutorials/output/ex60_3.out,0.99
+Patrick Sanan,src/ksp/ksp/examples/tutorials/ex43.c,35.85
+Patrick Sanan,src/ksp/ksp/examples/tutorials/output/ex43_3.out,15.77
+Patrick Sanan,src/ksp/ksp/examples/tutorials/output/ex43_bjacobi.out,0.94
+Patrick Sanan,src/ksp/ksp/impls/makefile,0.95
+Jose E. Roman,src/ksp/ksp/examples/tests/ex43.c,5.13
+Jose E. Roman,src/ksp/ksp/examples/tutorials/ex1.c,2.45
+Jose E. Roman,src/ksp/ksp/examples/tutorials/ex46.c,0.82
+Jose E. Roman,src/ksp/ksp/examples/tutorials/ex7.c,4.01
+Jose E. Roman,src/mat/examples/tests/ex2.c,2.5
+Jose E. Roman,include/petscblaslapack.h,0.98
+Jose E. Roman,src/dm/dt/interface/dt.c,0.83
+Jose E. Roman,src/dm/dt/interface/dtfv.c,0.82
+Jose E. Roman,src/ksp/pc/impls/bddc/bddcprivate.c,1.85
+Jose E. Roman,include/petscmat.h,0.97
+Jose E. Roman,src/mat/examples/tests/ex102.c,1.62
+Jose E. Roman,src/mat/examples/tests/makefile,1.78
+Jose E. Roman,src/mat/impls/aij/seq/seqcusparse/aijcusparse.cu,11.3
+Jose E. Roman,src/vec/vec/impls/mpi/mpicuda/mpicuda.cu,0.92
+Jose E. Roman,src/mat/examples/tests/output/ex2_21_aijcusparse.out,1.0
+Jose E. Roman,src/mat/examples/tests/output/ex2_23_aijcusparse.out,1.0
+Jose E. Roman,src/ksp/ksp/examples/tests/makefile,5.77
+Jose E. Roman,src/dm/examples/tests/makefile,2.0
+Jose E. Roman,src/dm/impls/patch/examples/tests/output/ex1_0.out,18.0
+Jose E. Roman,src/dm/impls/patch/examples/tests/output/ex1_1.out,8.0
+Jose E. Roman,src/dm/impls/patch/examples/tests/output/ex1_2.out,8.0
+Jose E. Roman,src/dm/impls/patch/examples/tests/output/ex1_3.out,8.0
+Jose E. Roman,src/dm/impls/patch/examples/tests/output/ex1_4.out,32.0
+Jose E. Roman,src/dm/impls/plex/examples/tests/output/ex12_1.out,1.0
+Jose E. Roman,src/dm/impls/plex/examples/tests/output/ex12_2.out,1.0
+Jose E. Roman,src/dm/impls/plex/examples/tests/output/ex12_3.out,1.0
+Jose E. Roman,src/dm/impls/plex/examples/tests/output/ex12_4.out,1.0
+Jose E. Roman,src/dm/impls/plex/examples/tests/output/ex12_5.out,1.0
+Jose E. Roman,src/dm/impls/plex/examples/tests/output/ex12_6.out,1.0
+Jose E. Roman,src/dm/impls/plex/examples/tests/output/ex12_7.out,1.0
+Jose E. Roman,src/dm/impls/plex/examples/tests/output/ex12_8.out,1.0
+Jose E. Roman,src/dm/impls/plex/examples/tests/output/ex13_0.out,2.0
+Jose E. Roman,src/dm/impls/plex/examples/tests/output/ex13_1.out,2.0
+Jose E. Roman,src/dm/impls/plex/examples/tests/output/ex13_2.out,2.0
+Jose E. Roman,src/dm/impls/plex/examples/tests/output/ex13_3.out,2.0
+Jose E. Roman,src/dm/impls/plex/examples/tests/output/ex14_0.out,1.0
+Jose E. Roman,src/dm/impls/plex/examples/tests/output/ex15_0.out,2.0
+Jose E. Roman,src/dm/impls/plex/examples/tests/output/ex15_0_alt.out,2.0
+Jose E. Roman,src/dm/impls/plex/examples/tests/output/ex15_1.out,4.0
+Jose E. Roman,src/dm/impls/plex/examples/tests/output/ex16_0.out,3.0
+Jose E. Roman,src/dm/impls/plex/examples/tests/output/ex17_0.out,1.0
+Jose E. Roman,src/dm/impls/plex/examples/tests/output/ex1_0.out,1.0
+Jose E. Roman,src/dm/impls/plex/examples/tests/output/ex1_1.out,1.0
+Jose E. Roman,src/dm/impls/plex/examples/tests/output/ex1_10.out,1.0
+Jose E. Roman,src/dm/impls/plex/examples/tests/output/ex1_12.out,1.0
+Jose E. Roman,src/dm/impls/plex/examples/tests/output/ex1_13.out,2.0
+Jose E. Roman,src/dm/impls/plex/examples/tests/output/ex1_14.out,2.0
+Jose E. Roman,src/dm/impls/plex/examples/tests/output/ex1_15.out,1.0
+Jose E. Roman,src/dm/impls/plex/examples/tests/output/ex1_16.out,1.0
+Jose E. Roman,src/dm/impls/plex/examples/tests/output/ex1_17.out,1.0
+Fande Kong,src/mat/examples/tutorials/makefile,2.57
+Fande Kong,src/ts/examples/tutorials/ex9.c,0.9
+Lisandro Dalcin,src/ts/adapt/interface/tsadapt.c,7.89
+Lisandro Dalcin,src/ksp/pc/impls/bddc/bddcprivate.c,1.92
+Lisandro Dalcin,src/mat/impls/mffd/mffd.c,5.56
+Lisandro Dalcin,src/mat/interface/matnull.c,3.76
+Lisandro Dalcin,src/dm/impls/plex/plexgmsh.c,0.87
+Lisandro Dalcin,src/dm/impls/plex/plexrefine.c,1.57
+Lisandro Dalcin,src/dm/impls/da/grglvis.c,1.64
+Lisandro Dalcin,src/dm/examples/tests/ex34.c,2.45
+Lisandro Dalcin,src/dm/examples/tests/makefile,0.87
+Lisandro Dalcin,src/sys/examples/tests/ex1.c,1.0
+Lisandro Dalcin,src/sys/classes/viewer/interface/viewreg.c,0.86
+Lisandro Dalcin,src/mat/impls/baij/seq/aijbaij.c,1.9
+Lisandro Dalcin,src/mat/utils/convert.c,0.95
+Lisandro Dalcin,src/snes/examples/tutorials/ex13.c,2.63
+Lisandro Dalcin,src/dm/impls/plex/plexcreate.c,5.01
+Lisandro Dalcin,src/ts/examples/tutorials/ex19.c,0.87
+Lisandro Dalcin,src/dm/impls/plex/plexpartition.c,0.81
+Lisandro Dalcin,src/ts/adapt/impls/makefile,0.91
+Lisandro Dalcin,src/ts/event/tsevent.c,28.43
+Lisandro Dalcin,include/petsc/mpiuni/mpif.h,3.08
+Lisandro Dalcin,src/dm/impls/plex/plexadapt.c,0.81
+Lisandro Dalcin,src/ts/examples/tutorials/power_grid/stability_9bus/ex9bus.c,0.94
+Lisandro Dalcin,src/ts/examples/tutorials/power_grid/stability_9bus/ex9busopt_fd.c,0.94
+Lisandro Dalcin,src/sys/utils/sorti.c,4.33
+Lisandro Dalcin,src/vec/is/is/impls/block/block.c,5.59
+Lisandro Dalcin,src/vec/is/is/impls/general/general.c,7.11
+Lisandro Dalcin,src/mat/impls/shell/shell.c,0.8
+Lisandro Dalcin,src/dm/impls/plex/examples/tests/output/ex1_7.out,15.76
+Lisandro Dalcin,src/dm/impls/plex/examples/tests/output/ex3_nonconforming_tensor_2.out,4.78
+Lisandro Dalcin,src/dm/impls/plex/examples/tests/output/ex4_12.out,7.9
+Lisandro Dalcin,src/dm/impls/plex/examples/tests/output/ex4_13.out,7.68
+Lisandro Dalcin,src/dm/impls/plex/examples/tests/output/ex4_28.out,3.97
+Lisandro Dalcin,src/snes/examples/tutorials/output/ex12_p4est_fas_q2_conformal_serial.out,0.94
+Lisandro Dalcin,src/snes/examples/tutorials/output/ex12_p4est_fas_q2_nonconformal_serial.out,0.94
+Lisandro Dalcin,src/snes/examples/tutorials/output/ex12_p4est_full_q2_conformal_serial.out,0.94
+Lisandro Dalcin,src/sys/examples/tests/makefile,0.95
+Lisandro Dalcin,src/ts/examples/tutorials/ex9.c,0.87
+Lisandro Dalcin,include/petsc/private/petscimpl.h,6.86
+Lisandro Dalcin,src/sys/utils/makefile,0.94
+Lisandro Dalcin,src/sys/utils/mathclose.c,0.3
+Lisandro Dalcin,include/petsc.h,2.31
+Lisandro Dalcin,include/petsc/private/tsimpl.h,3.39
+Lisandro Dalcin,src/docs/tex/manual/part2.tex,1.83
+Lisandro Dalcin,src/tao/unconstrained/examples/tutorials/heat-data-assimulation.c,1.7
+Lisandro Dalcin,src/ts/examples/tests/ex2.c,0.87
+Lisandro Dalcin,src/ts/examples/tests/ex22.c,0.93
+Lisandro Dalcin,src/ts/examples/tests/ex25.c,0.87
+Lisandro Dalcin,src/ts/examples/tests/ex3.c,1.5
+Lisandro Dalcin,src/ts/examples/tests/ex4.c,0.87
+Lisandro Dalcin,src/ts/examples/tests/ex5.c,0.84
+Nicolas Barral,src/snes/examples/tutorials/ex12.c,2.74
+Alejandro Lamas Daviña,src/mat/impls/aij/mpi/mpicusparse/mpiaijcusparse.cu,3.35
+Alejandro Lamas Daviña,src/vec/vec/impls/seq/seqcusp/veccusp2.cu,6.41
+Alejandro Lamas Daviña,src/mat/examples/tests/makefile,1.42
+Alejandro Lamas Daviña,include/petsc/private/petscimpl.h,0.58
+Alejandro Lamas Daviña,config/BuildSystem/config/packages/cuda.py,0.48
+Alejandro Lamas Daviña,src/vec/vec/examples/tests/makefile,3.04
+Alejandro Lamas Daviña,include/petscvec.h,0.58
+Alejandro Lamas Daviña,src/mat/impls/aij/seq/seqcusparse/cusparsematimpl.h,0.82
+Alejandro Lamas Daviña,src/sys/objects/init.c,0.67
+Alejandro Lamas Daviña,include/petsc/private/matimpl.h,0.58
+Alejandro Lamas Daviña,src/ksp/pc/impls/bjacobi/bjacobi.c,1.22
+Alejandro Lamas Daviña,src/mat/impls/aij/mpi/mpicusparse/makefile,0.5
+Alejandro Lamas Daviña,src/mat/impls/aij/mpi/mpicusparse/mpicusparsematimpl.h,0.82
+Alejandro Lamas Daviña,src/mat/impls/aij/seq/seqcusparse/makefile,0.5
+Alejandro Lamas Daviña,src/mat/interface/dlregismat.c,1.33
+Alejandro Lamas Daviña,src/mat/interface/matregis.c,1.33
+Alejandro Lamas Daviña,src/mat/interface/matrix.c,10.39
+Alejandro Lamas Daviña,src/mat/utils/axpy.c,1.15
+Alejandro Lamas Daviña,include/petsc/private/vecimpl.h,1.15
+Alejandro Lamas Daviña,src/mat/impls/aij/seq/seqcusp/cuspmatimpl.h,0.75
+Alejandro Lamas Daviña,src/vec/vec/utils/makefile,0.87
+Alejandro Lamas Daviña,src/sys/objects/ftn-custom/zstart.c,5.7
+Alejandro Lamas Daviña,src/sys/objects/pinit.c,0.97
+Alejandro Lamas Daviña,src/vec/vec/impls/mpi/makefile,0.87
+Alejandro Lamas Daviña,src/vec/vec/impls/seq/makefile,0.91
+Alejandro Lamas Daviña,src/vec/vec/interface/dlregisvec.c,0.58
+Alejandro Lamas Daviña,src/vec/vec/interface/rvector.c,1.73
+Alejandro Lamas Daviña,src/vec/vec/interface/vecregall.c,1.15
+Pieter Ghysels,src/ksp/ksp/examples/tutorials/ex52.c,1.1
+Pieter Ghysels,src/ksp/ksp/examples/tutorials/makefile,0.79
+Pieter Ghysels,lib/petsc/conf/test,1.7
+Pieter Ghysels,src/mat/impls/aij/mpi/makefile,0.96
+Pieter Ghysels,src/mat/impls/aij/seq/makefile,0.89
+Pieter Ghysels,src/mat/impls/aij/seq/strumpack/strumpack.c,3.61
+Dave May,src/docs/tex/manual/intro.tex,0.98
+Dave May,src/docs/tex/manual/manual.tex,0.97
+Dave May,src/ksp/ksp/examples/tutorials/ex70.c,1.97
+Dave May,src/ksp/ksp/examples/tutorials/ex68.c,0.93
+Dave May,src/ksp/ksp/examples/tutorials/makefile,5.29
+Dave May,src/dm/examples/tutorials/makefile,1.95
+Dave May,src/dm/impls/swarm/data_bucket.h,9.67
+Dave May,src/dm/impls/makefile,0.96
+Dave May,src/ksp/pc/impls/telescope/telescope.h,0.82
+Dave May,src/ksp/pc/impls/makefile,0.94
+Dave May,src/dm/impls/da/gr2.c,1.75
+Dave May,src/vec/vec/impls/mpi/pdvec.c,0.87
+Dave May,src/vec/vec/impls/seq/bvec2.c,0.87
+Dave May,src/ksp/pc/impls/bfbt/bfbt.c,3.07
+Dave May,src/mat/impls/nest/matnest.c,6.83
+Dave May,src/dm/examples/tests/makefile,3.63
+Dave May,src/mat/examples/tests/makefile,2.61
+Dave May,src/mat/impls/makefile,0.98
+Dave May,src/vec/vec/examples/tests/makefile,3.47
+Dave May,src/vec/vec/impls/makefile,0.91
+Debojyoti Ghosh,src/mat/impls/makefile,0.98
+Debojyoti Ghosh,src/ts/impls/glee/glee.c,2.65
+Debojyoti Ghosh,include/petscts.h,0.95
+Debojyoti Ghosh,src/ts/examples/tutorials/ex31.c,19.47
+Debojyoti Ghosh,src/ts/impls/explicit/glee/glee.c,4.99
+Debojyoti Ghosh,src/ts/impls/explicit/makefile,0.89
+Debojyoti Ghosh,src/mat/impls/taij/taij.c,5.83
+Debojyoti Ghosh,src/mat/examples/tests/makefile,3.34
+Debojyoti Ghosh,src/ksp/ksp/examples/tutorials/ex60.c,2.6
+Debojyoti Ghosh,src/ts/impls/irk/irk.c,17.4
+Debojyoti Ghosh,include/finclude/petsctsdef.h,0.95
+Debojyoti Ghosh,src/ts/impls/explicit/rk/rk.c,6.53
+Debojyoti Ghosh,src/ts/impls/implicit/sundials/sundials.c,0.98
+Lois Curfman McInnes,src/docs/tex/petsc.bib,1.29
+Lois Curfman McInnes,src/docs/website/developers/index.html,8.91
+Lois Curfman McInnes,src/docs/website/documentation/ams.html,2.0
+Lois Curfman McInnes,src/docs/website/documentation/bugreporting.html,0.94
+Lois Curfman McInnes,src/docs/website/documentation/codemanagement.html,12.06
+Lois Curfman McInnes,src/docs/website/documentation/installation.html,2.0
+Lois Curfman McInnes,src/docs/website/documentation/tutorials/index.html,2.85
+Lois Curfman McInnes,src/docs/website/features/gpus.html,9.82
+Lois Curfman McInnes,src/docs/website/features/threads.html,3.94
+Lois Curfman McInnes,src/docs/website/miscellaneous/external.html,1.0
+Lois Curfman McInnes,src/docs/website/miscellaneous/acknwldg.html,1.0
+Lois Curfman McInnes,src/docs/website/miscellaneous/funding.html,5.71
+Lois Curfman McInnes,src/docs/website/miscellaneous/index.html,0.9
+Lois Curfman McInnes,src/mat/matfd/fdmatrix.c,1.56
+Lois Curfman McInnes,src/sles/pc/impls/ilu/ilu.c,7.1
+Lois Curfman McInnes,docs/tex/manual/intro.tex,1.65
+Lois Curfman McInnes,docs/tex/manual/part1.tex,3.3
+Lois Curfman McInnes,src/snes/examples/tests/ex1.c,35.5
+Lois Curfman McInnes,src/snes/examples/tests/ex11.c,0.94
+Lois Curfman McInnes,src/snes/examples/tests/ex13.c,0.93
+Lois Curfman McInnes,src/snes/examples/tests/ex4.c,36.41
+Lois Curfman McInnes,src/snes/examples/tests/ex5.c,0.94
+Lois Curfman McInnes,src/snes/examples/tests/ex7.c,0.94
+Lois Curfman McInnes,src/snes/examples/tests/ex9.c,8.15
+Lois Curfman McInnes,include/petscsnes.h,1.54
+Lois Curfman McInnes,include/finclude/petscsnes.h,1.71
+Lois Curfman McInnes,src/fortran/custom/zsnes.c,1.7
+Lois Curfman McInnes,src/snes/examples/tutorials/ex10d/ex10.c,1.93
+Lois Curfman McInnes,src/snes/examples/tutorials/ex21.c,0.94
+Lois Curfman McInnes,src/snes/examples/tutorials/ex22.c,1.75
+Lois Curfman McInnes,src/snes/examples/tutorials/ex23.c,1.75
+Lois Curfman McInnes,src/snes/examples/tutorials/ex24.c,1.75
+Lois Curfman McInnes,src/snes/examples/tutorials/ex3.c,0.94
+Lois Curfman McInnes,src/snes/examples/tutorials/ex5.c,0.67
+Lois Curfman McInnes,src/snes/examples/tutorials/ex5f90.F,0.91
+Lois Curfman McInnes,src/snes/examples/tutorials/ex5s.c,0.94
+Lois Curfman McInnes,src/snes/impls/ls/lsparams.c,4.21
+Lois Curfman McInnes,src/snes/impls/test/snestest.c,0.69
+Lois Curfman McInnes,src/snes/impls/tr/tr.c,0.69
+Lois Curfman McInnes,src/snes/interface/snes.c,1.45
+Lois Curfman McInnes,src/ts/impls/pseudo/posindep.c,14.32
+Lois Curfman McInnes,src/mat/impls/sbaij/mpi/mpisbaij.c,1.43
+Lois Curfman McInnes,src/ts/examples/tutorials/ex2f.F,48.94
+Lois Curfman McInnes,src/mat/impls/sbaij/seq/sbaij.c,1.4
+Lois Curfman McInnes,src/sles/pc/impls/cholesky/makefile,2.72
+Lois Curfman McInnes,bmake/rs6000_64/rules,0.69
+Lois Curfman McInnes,bmake/rs6000_gnu/rules,0.53
+Lois Curfman McInnes,bmake/t3d/rules,0.53
+Lois Curfman McInnes,bmake/t3e/rules,0.57
+Lois Curfman McInnes,docs/tex/release28/petsc.new.local.version,0.67
+Tristan Konolige,include/petscksp.h,0.91
+Tristan Konolige,src/docs/tex/manual/part2.tex,0.96
+Tristan Konolige,src/ksp/ksp/examples/tests/ex21.c,4.72
+Tristan Konolige,src/ksp/ksp/examples/tests/makefile,2.99
+Tristan Konolige,src/ksp/ksp/utils/schurm.c,6.31
+Irina Sokolova,src/mat/impls/aij/seq/aijmkl/aijmkl.c,0.71
+Irina Sokolova,src/mat/impls/baij/mpi/makefile,0.71
+Irina Sokolova,src/mat/impls/baij/seq/baij.c,0.97
+Irina Sokolova,src/mat/impls/baij/seq/makefile,0.87
+Vijay Mahadevan,src/dm/impls/moab/dmmoab.cxx,19.21
+Vijay Mahadevan,src/dm/impls/moab/examples/tests/makefile,2.5
+Vijay Mahadevan,src/ksp/ksp/examples/tutorials/ex36.cxx,37.26
+Vijay Mahadevan,src/ksp/ksp/examples/tutorials/makefile,0.72
+Vijay Mahadevan,src/ts/examples/tutorials/makefile,2.47
+Vijay Mahadevan,include/petsc/private/dmmbimpl.h,1.08
+Vijay Mahadevan,src/dm/impls/moab/examples/tests/ex1.cxx,3.0
+Vijay Mahadevan,src/dm/impls/moab/examples/tutorials/ex2.cxx,0.92
+Vijay Mahadevan,src/dm/impls/moab/examples/tests/output/ex1_1.out,0.61
+Vijay Mahadevan,src/dm/impls/moab/examples/tests/ex3.c,37.42
+Emil Constantinescu,src/ts/examples/tutorials/spectral-toy/heatEDMlinear_adj.c,10.71
+Emil Constantinescu,src/docs/tex/manual/developers.tex,5.06
+Emil Constantinescu,src/ts/impls/glee/glee.c,11.64
+Emil Constantinescu,src/ts/adapt/interface/tsadapt.c,0.8
+Emil Constantinescu,src/ts/impls/explicit/rk/rk.c,15.97
+Emil Constantinescu,src/docs/tex/manual/part2.tex,1.72
+Emil Constantinescu,src/ts/interface/ts.c,1.0
+Emil Constantinescu,include/petsc/private/tsimpl.h,0.86
+Emil Constantinescu,src/ts/adapt/impls/basic/adaptbasic.c,0.94
+Emil Constantinescu,src/ts/adapt/impls/cfl/adaptcfl.c,1.89
+Emil Constantinescu,src/ts/adapt/impls/none/adaptnone.c,0.94
+Emil Constantinescu,src/ts/impls/bdf/bdf.c,0.92
+Emil Constantinescu,src/ts/impls/implicit/alpha/alpha1.c,0.92
+Emil Constantinescu,src/ts/impls/implicit/alpha/alpha2.c,1.61
+Emil Constantinescu,src/ts/impls/implicit/theta/theta.c,0.92
+Emil Constantinescu,src/ts/adapt/impls/makefile,0.89
+Emil Constantinescu,src/ts/adapt/impls/glee/makefile,1.5
+Emil Constantinescu,src/ts/impls/implicit/gl/gl.c,121.39
+Emil Constantinescu,src/ts/impls/implicit/gl/gl.h,4.47
+Emil Constantinescu,src/ts/impls/implicit/gl/gladapt.c,40.53
+Emil Constantinescu,include/petsc/finclude/petsctsdef.h,1.17
+Emil Constantinescu,lib/petsc/conf/bfort-petsc.txt,0.5
+Emil Constantinescu,share/petsc/saws/linearsolveroptions.html,0.07
+Emil Constantinescu,src/ts/examples/tutorials/ex36.c,0.63
+Emil Constantinescu,src/ts/examples/tutorials/tstest.py,11.45
+Emil Constantinescu,src/ts/examples/tutorials/ex22.c,1.0
+Emil Constantinescu,src/ts/examples/tutorials/ex22f.F,1.0
+Patrick Farrell,src/ksp/pc/impls/mg/mg.c,0.97
+Patrick Farrell,config/BuildSystem/config/packages/pragmatic.py,0.67
+Patrick Farrell,src/tao/matrix/lmvmmat.c,2.73
+Patrick Farrell,src/tao/matrix/lmvmmat.h,1.11
+Patrick Farrell,include/petsc/private/dmimpl.h,0.85
+Patrick Farrell,src/snes/impls/vi/rs/virs.c,14.88
+Patrick Farrell,src/snes/examples/tutorials/makefile,0.78
+Patrick Farrell,src/snes/linesearch/impls/makefile,0.93
+Siegfried Cools,src/ksp/ksp/examples/tutorials/makefile,1.72
+Siegfried Cools,src/ksp/ksp/impls/bcgs/makefile,0.87
+Siegfried Cools,src/ksp/ksp/impls/cg/makefile,0.94
+Ce Qin,src/ksp/pc/impls/hypre/hypre.c,1.0
+Ce Qin,src/tao/linesearch/impls/armijo/armijo.c,0.97
+Ce Qin,src/tao/linesearch/impls/morethuente/morethuente.c,0.97
+stefano_zampini,src/ksp/pc/impls/bddc/bddc.c,94.07
+stefano_zampini,src/ksp/pc/impls/bddc/bddcfetidp.c,12.04
+stefano_zampini,src/ksp/pc/impls/bddc/bddcprivate.c,2.84
+stefano_zampini,src/ksp/ksp/examples/tutorials/ex59.c,0.95
+stefano_zampini,src/mat/impls/makefile,0.98
+stefano_zampini,src/mat/impls/aij/mpi/mpimatmatmatmult.c,0.85
+stefano_zampini,src/mat/impls/aij/seq/matmatmatmult.c,0.85
+stefano_zampini,src/mat/examples/tests/makefile,2.92
+stefano_zampini,src/mat/impls/aij/mpi/mpimatmatmult.c,1.76
+stefano_zampini,src/mat/impls/aij/seq/matmatmult.c,1.48
+stefano_zampini,src/mat/impls/aij/seq/matptap.c,1.52
+stefano_zampini,src/mat/impls/nest/matnest.c,1.0
+stefano_zampini,src/snes/examples/tutorials/output/ex12_p4est_full_q2_nonconformal_parallel_bddc.out,3.65
+stefano_zampini,src/snes/examples/tutorials/output/ex12_p4est_full_q2_nonconformal_parallel_bddcfas.out,10.17
+stefano_zampini,src/ksp/pc/impls/bddc/bddcgraph.c,7.21
+stefano_zampini,src/ksp/pc/impls/bddc/bddc.h,1.0
+stefano_zampini,src/snes/examples/tutorials/makefile,1.68
+stefano_zampini,src/ksp/pc/impls/bddc/bddcprivate.h,0.95
+stefano_zampini,src/mat/impls/baij/mpi/mpibaij.c,0.5
+stefano_zampini,src/mat/impls/baij/seq/baij.c,0.5
+stefano_zampini,src/mat/examples/tests/ex23.c,2.99
+stefano_zampini,src/mat/examples/tests/output/ex23_1.out,0.89
+stefano_zampini,src/mat/examples/tests/output/ex23_2.out,0.93
+stefano_zampini,src/mat/examples/tests/output/ex23_3.out,0.93
+stefano_zampini,src/mat/examples/tests/output/ex23_4.out,0.94
+stefano_zampini,src/mat/impls/sbaij/seq/sbaij.c,0.5
+stefano_zampini,src/ksp/ksp/examples/tutorials/ex56.c,5.04
+stefano_zampini,include/petsc/private/matimpl.h,0.22
+stefano_zampini,src/vec/is/is/examples/tests/makefile,1.9
+stefano_zampini,src/mat/impls/sbaij/mpi/mpisbaij.c,0.5
+Adrian Maldonado,src/docs/tex/petscapp.bib,0.97
+Adrian Maldonado,src/docs/tex/petsc.bib,1.36
+Adrian Maldonado,src/dm/impls/network/network.c,1.5
+Adrian Maldonado,src/ksp/ksp/examples/tutorials/network/ex1.c,10.83
+Adrian Maldonado,src/snes/impls/test/snestest.c,2.6
+Adrian Maldonado,src/snes/examples/tutorials/network/pflow/makefile,1.91
+Michael Lange,src/dm/impls/plex/examples/tests/ex12.c,0.81
+Michael Lange,src/dm/impls/plex/plexmed.c,9.45
+Michael Lange,src/dm/impls/plex/makefile,1.0
+Michael Lange,src/dm/impls/plex/plexfluent.c,15.47
+Michael Lange,src/dm/impls/plex/plexdistribute.c,0.94
+Michael Lange,include/petsc/private/dmpleximpl.h,0.97
+Michael Lange,src/dm/impls/plex/examples/tests/ex14.c,1.82
+Michael Lange,src/dm/impls/plex/ftn-custom/makefile,0.99
+Michael Lange,src/dm/impls/plex/examples/tests/ex1.c,0.57
+Michael Lange,src/dm/impls/plex/examples/tests/output/ex1_6.out,0.75
+Michael Lange,src/dm/impls/network/network.c,0.99
+Michael Lange,src/dm/impls/plex/ftn-custom/zplex.c,0.96
+Michael Lange,src/snes/examples/tutorials/ex12.c,0.42
+Michael Lange,src/dm/impls/plex/examples/tests/ex7.c,0.44
+Sander Arens,src/dm/impls/plex/plexfem.c,6.79
+Sander Arens,include/petsc/private/petscfeimpl.h,1.84
+Sander Arens,src/snes/examples/tutorials/ex56.c,0.82
+Sander Arens,include/petscfe.h,0.9
+Sander Arens,src/dm/impls/plex/examples/tests/output/ex1_gmsh_6.out,1.0
+SanderA,config/builder.py,0.99
+SanderA,src/snes/examples/tutorials/ex77.c,1.35
+SanderA,src/snes/utils/dmplexsnes.c,4.79
+SanderA,include/petsc/private/petscfeimpl.h,8.65
+SanderA,src/dm/dt/interface/dtfe.c,27.23
+Alex Fikl,src/sys/objects/ftn-custom/makefile,0.99
+Alex Fikl,src/sys/objects/ftn-custom/zgtype.c,0.83
+Alex Fikl,src/mat/f90-mod/petscmatmod.F,0.83
+Alex Fikl,src/mat/examples/tests/makefile,3.71
+Alex Fikl,src/mat/examples/tests/output/ex88_1.out,0.77
+Alex Fikl,src/dm/impls/composite/ftn-custom/zfddaf.c,2.49
+Alex Fikl,src/sys/classes/viewer/impls/hdf5/ftn-custom/zhdf5f.c,7.83
+Alex Fikl,src/sys/classes/viewer/impls/hdf5/hdf5v.c,1.91
+Alex Fikl,src/sys/classes/random/interface/ftn-custom/zrandomf.c,0.97
+Alex Fikl,src/sys/objects/ftn-custom/zstart.c,0.91
+Alex Fikl,src/tao/linesearch/interface/ftn-custom/ztaolinesearchf.c,9.71
+Shri,src/ts/examples/tutorials/power_grid/stability_9bus/makefile,1.72
+Shri,src/ts/event/tsevent.c,0.88
+Shri,src/ts/impls/arkimex/arkimex.c,1.2
+Shri,src/ts/examples/tutorials/power_grid/output/ex3adj_1.out,1.58
+Shri,src/ts/examples/tutorials/power_grid/output/ex3opt_1.out,0.92
+Shri,src/mat/impls/aij/seq/umfpack/umfpack.c,0.91
+Shri,src/ts/examples/tests/ex21.c,0.82
+Shri,src/ts/examples/tests/ex22.c,6.46
+Shri,src/ts/examples/tests/ex23.c,3.96
+Shri,src/dm/impls/circuit/circuitcreate.c,1.94
+Shri,src/ts/examples/tests/makefile,1.94
+Shri,src/ts/impls/implicit/theta/theta.c,0.53
+Shri,src/ts/impls/rosw/rosw.c,0.32
+Shri,src/ts/examples/tutorials/power_grid/petscopt_ex10,3.35
+Shri,src/ts/adapt/impls/basic/adaptbasic.c,0.89
+Shri,src/ts/impls/eimex/eimex.c,0.97
+Shri,src/ts/examples/tests/ex10.c,2.72
+Shri,src/ts/impls/makefile,0.94
+Matthias Liertzer,include/petscvec.h,2.0
+Vincent Le Chenadec,src/dm/examples/tests/makefile,2.7
+Vincent Le Chenadec,include/petsc/private/fortranimpl.h,6.9
+Vincent Le Chenadec,src/dm/impls/da/ftn-custom/zdaghostf.c,0.6
+Vincent Le Chenadec,src/dm/impls/da/ftn-custom/makefile,0.99
+Koos Huijssen,src/dm/impls/plex/plexdistribute.c,0.68
+Ed Bueler,src/snes/examples/tutorials/output/ex9_7.out,2.93
+Ed Bueler,src/snes/examples/tutorials/output/ex9_8.out,4.86
+Ed Bueler,src/snes/impls/vi/rs/virs.c,2.48
+Ed Bueler,src/snes/impls/vi/ss/viss.c,3.18
+Ed Bueler,src/snes/examples/tutorials/makefile,0.98
+barral,src/dm/impls/plex/plexadapt.c,2.24
+barral,src/dm/impls/plex/makefile,1.0
+Tadeu Manoel,src/sys/objects/ftn-custom/zstart.c,0.75
+Jason Sarich,src/docs/website/documentation/tutorials/HandsOnExercise.html,0.96
+Jason Sarich,src/docs/website/documentation/tutorials/index.html,0.74
+Jason Sarich,config/BuildSystem/config/packages/exodusii.py,0.6
+Jason Sarich,config/BuildSystem/config/packages/ascem-io.py,0.93
+Jason Sarich,config/BuildSystem/config/setCompilers.py,5.29
+Jason Sarich,src/tao/bound/impls/gpcg/gpcg.c,3.83
+Jason Sarich,src/snes/examples/tests/makefile,2.69
+Jason Sarich,src/snes/impls/newtonaugas/newtonaugas.c,4.64
+Jason Sarich,src/snes/impls/vi/rs/virs.c,15.16
+Jason Sarich,src/tao/bound/impls/tron/tron.c,2.87
+Jason Sarich,src/tao/bound/utils/isutil.c,3.32
+Jason Sarich,src/tao/bound/examples/tutorials/makefile,2.53
+Jason Sarich,src/tao/complementarity/examples/tutorials/makefile,4.63
+Jason Sarich,src/tao/complementarity/impls/asls/asfls.c,5.73
+Jason Sarich,src/mat/interface/matrix.c,0.94
+Jason Sarich,src/snes/impls/vi/vi.c,0.87
+Jason Sarich,src/mat/impls/submat/makefile,0.87
+Jason Sarich,include/petsc-private/dmimpl.h,0.75
+Jason Sarich,src/snes/impls/makefile,0.94
+Jason Sarich,src/snes/impls/newtonaugas/makefile,2.13
+Jason Sarich,config/configure.py,3.65
+Jason Sarich,src/docs/tao_tex/manual/addsolver.tex,0.67
+Jason Sarich,src/tao/bound/impls/blmvm/blmvm.c,0.08
+Jason Sarich,src/tao/bound/impls/bqpip/bqpip.c,0.96
+Jason Sarich,src/tao/complementarity/impls/ssls/ssfls.c,0.39
+Jason Sarich,src/tao/complementarity/impls/ssls/ssils.c,0.39
+Jason Sarich,src/tao/constrained/impls/ipm/ipm.c,0.98
+Jason Sarich,src/tao/unconstrained/examples/tests/makefile,1.31
+Jason Sarich,src/tao/unconstrained/impls/cg/taocg.c,2.99
+Jason Sarich,src/tao/unconstrained/impls/lmvm/lmvm.c,0.07
+Jason Sarich,src/tao/unconstrained/impls/ntl/ntl.c,1.37
+Jason Sarich,src/tao/unconstrained/impls/ntr/ntr.c,0.46
+Jason Sarich,src/snes/impls/newtonas/newtonas.c,16.08
+Jason Sarich,src/tao/leastsquares/examples/tutorials/chwirut1f.F,1.57
+Jason Sarich,src/snes/examples/tutorials/makefile,1.85
+Jason Sarich,bin/maint/jenkins/jenkins_configure.sh,0.07
+Jason Sarich,config/examples/arch-jenkins-linux-icc-ifort-icpc-c-yes-yes-real-yes-double.py,0.94
+Jason Sarich,config/examples/arch-jenkins-osx-clang-gfortran-clang++-yes-yes-complex-no-single.py,0.26
+Jason Sarich,src/snes/linesearch/interface/linesearch.c,3.65
+Jason Sarich,src/tao/pde_constrained/examples/tutorials/elliptic.c,0.66
+Jason Sarich,src/tao/pde_constrained/examples/tutorials/hyperbolic.c,0.66
+Jason Sarich,config/examples/arch-linux-gcc-real-env.py,1.54
+Jason Sarich,src/snes/linesearch/impls/makefile,0.93
+Jason Sarich,src/tao/leastsquares/examples/tutorials/chwirut1.c,2.86
+Jason Sarich,src/tao/bound/impls/blmvm/makefile,0.71
+Jason Sarich,src/tao/bound/impls/bqpip/makefile,1.71
+Jason Sarich,src/tao/bound/impls/gpcg/makefile,1.71
+Jason Sarich,src/tao/bound/impls/tron/makefile,1.71
+Jason Sarich,src/tao/complementarity/impls/asls/makefile,1.71
+Jason Sarich,src/tao/complementarity/impls/ssls/makefile,1.71
+Dominic Meiser,include/petsccusp.h,0.95
+Dominic Meiser,src/vec/vec/impls/seq/seqcusp/makefile,0.76
+Dominic Meiser,src/vec/vec/impls/mpi/mpicusp/mpicusp.cu,1.0
+Dominic Meiser,config/BuildSystem/config/packages/cuda.py,0.49
+Dominic Meiser,src/mat/impls/aij/mpi/mpicusparse/mpiaijcusparse.cu,2.61
+Dominic Meiser,src/vec/vec/utils/vscat.c,1.58
+Dominic Meiser,src/dm/examples/tests/makefile,0.68
+Dominic Meiser,config/BuildSystem/config/packages/cusp.py,2.3
+Dominic Meiser,src/vec/vec/utils/vpscat.c,15.39
+jason sarich,config/BuildSystem/config/packages/alquimia.py,2.93
+Cian Wilson,src/ksp/pc/impls/fieldsplit/fieldsplit.c,2.7
+Steven G. Johnson,config/BuildSystem/config/packages/BlasLapack.py,11.32
+Steven G. Johnson,include/petscblaslapack.h,0.62
+zianekhodja,src/ksp/ksp/impls/gmres/makefile,0.99
+zianekhodja,src/ksp/ksp/impls/makefile,0.95
+zianekhodja,src/ksp/ksp/impls/cg/makefile,0.97
+Sylvain Mercier,src/ksp/ksp/impls/gmres/gmres.c,1.83
+John O'Sullivan,share/petsc/saws/js/PETSc.js,7.25
+John O'Sullivan,src/sys/classes/draw/impls/x/xinit.c,2.7
+John O'Sullivan,src/sys/objects/aoptions.c,1.42
+Jack Poulson,src/mat/examples/tests/ex145.c,0.74
+Jack Poulson,config/PETSc/packages/elemental.py,0.91
+Dmitry Karpeev,src/ksp/ksp/examples/tutorials/ex62.c,4.59
+Dmitry Karpeev,config/BuildSystem/config/package.py,5.25
+Dmitry Karpeev,src/mat/examples/tests/makefile,0.94
+Dmitry Karpeev,src/ksp/ksp/examples/tutorials/makefile,1.63
+Dmitry Karpeev,bin/maint/buildtest,1.91
+Dmitry Karpeev,bin/maint/checkBuilds.py,0.46
+Dmitry Karpeev,bin/maint/confignightly/bb,0.8
+Dmitry Karpeev,bin/maint/confignightly/bb2,0.83
+Dmitry Karpeev,bin/maint/confignightly/bb3,0.83
+Dmitry Karpeev,bin/maint/confignightly/bb4,0.83
+Dmitry Karpeev,bin/maint/generateetags.py,1.54
+Dmitry Karpeev,bin/maint/update-docs.py,0.55
+Dmitry Karpeev,config/BuildSystem/config/base.py,1.12
+Dmitry Karpeev,config/BuildSystem/config/compilerOptions.py,10.87
+Dmitry Karpeev,config/BuildSystem/config/compilers.py,7.12
+Dmitry Karpeev,config/BuildSystem/config/framework.py,3.06
+Dmitry Karpeev,config/BuildSystem/config/functions.py,0.45
+Dmitry Karpeev,config/BuildSystem/config/packages/BlasLapack.py,3.64
+Dmitry Karpeev,config/BuildSystem/config/packages/Chaco.py,1.91
+Dmitry Karpeev,config/BuildSystem/config/packages/Chombo.py,1.0
+Dmitry Karpeev,config/BuildSystem/config/packages/MPI.py,0.87
+Dmitry Karpeev,config/BuildSystem/config/packages/MPICH.py,0.89
+Dmitry Karpeev,config/BuildSystem/config/packages/MUMPS.py,1.0
+Dmitry Karpeev,config/BuildSystem/config/packages/MatlabEngine.py,0.88
+Dmitry Karpeev,config/BuildSystem/config/packages/PTScotch.py,0.88
+Dmitry Karpeev,config/BuildSystem/config/packages/PaStiX.py,5.11
+Dmitry Karpeev,config/BuildSystem/config/packages/SuiteSparse.py,1.0
+Dmitry Karpeev,config/BuildSystem/config/packages/SuperLU.py,2.0
+Dmitry Karpeev,config/BuildSystem/config/packages/SuperLU_DIST.py,1.71
+Dmitry Karpeev,config/BuildSystem/config/packages/Triangle.py,1.87
+Dmitry Karpeev,config/BuildSystem/config/packages/cmake.py,0.9
+Dmitry Karpeev,config/BuildSystem/config/packages/cuda.py,1.91
+Dmitry Karpeev,config/BuildSystem/config/packages/elemental.py,1.73
+Dmitry Karpeev,config/BuildSystem/config/packages/f2cblaslapack.py,0.97
+Dmitry Karpeev,config/BuildSystem/config/packages/fblaslapack.py,0.93
+Dmitry Karpeev,config/BuildSystem/config/packages/hwloc.py,0.88
+Dmitry Karpeev,config/BuildSystem/config/packages/hypre.py,0.94
+Dmitry Karpeev,config/BuildSystem/config/packages/make.py,1.81
+Dmitry Karpeev,config/BuildSystem/config/packages/mpi4py.py,1.77
+Dmitry Karpeev,config/BuildSystem/config/packages/petsc4py.py,3.41
+Dmitry Karpeev,config/BuildSystem/config/packages/sowing.py,0.92
+Dmitry Karpeev,config/BuildSystem/config/packages/tchem.py,1.97
+Dmitry Karpeev,config/BuildSystem/config/packages/valgrind.py,0.91
+Dmitry Karpeev,config/BuildSystem/config/programs.py,3.44
+Dmitry Karpeev,config/BuildSystem/config/setCompilers.py,76.13
+Dmitry Karpeev,config/BuildSystem/config/sourceControl.py,3.63
+Dmitry Karpeev,config/BuildSystem/nargs.py,0.9
+Dmitry Karpeev,config/BuildSystem/script.py,0.61
+Dmitry Karpeev,config/PETSc/Configure.py,5.44
+Dmitry Karpeev,config/PETSc/Regression.py,0.25
+Pierre Barbier de Reuille,include/petscts.h,0.82
+Pierre Barbier de Reuille,src/ts/adapt/interface/tsadapt.c,2.13
+Pierre Barbier de Reuille,src/ts/impls/arkimex/arkimex.c,0.83
+Pierre Barbier de Reuille,src/ts/impls/eimex/eimex.c,0.83
+Pierre Barbier de Reuille,src/ts/impls/explicit/rk/rk.c,0.79
+Pierre Barbier de Reuille,src/ts/impls/implicit/theta/theta.c,0.75
+Pierre Barbier de Reuille,src/ts/impls/rosw/rosw.c,0.83
+Pierre Barbier de Reuille,src/ts/impls/implicit/alpha/alpha.c,0.93
+Pierre Barbier de Reuille,src/ts/impls/pseudo/posindep.c,0.9
+Pierre Barbier de Reuille,src/ts/examples/tutorials/makefile,1.75
+unknown,src/ksp/ksp/impls/fcg/fcg.c,0.95
+unknown,src/ksp/ksp/impls/cg/cgeig.c,1.2
+unknown,docs/website/index.html,1.82
+franklin5,src/mat/impls/normal/makefile,0.87
+Eike Mueller,src/ksp/ksp/examples/tutorials/makefile,1.6
+Tom Klotz,src/dm/dt/examples/tests/makefile,2.5
+Asbjørn Nilsen Riseth,src/snes/examples/tutorials/makefile,0.65
+Asbjørn Nilsen Riseth,src/snes/impls/ngmres/anderson.c,0.96
+Asbjørn Nilsen Riseth,src/snes/impls/ngmres/ngmresfunc.c,0.98
+Dmitry Karpeyev,include/petsc-private/snesimpl.h,0.38
+Dmitry Karpeyev,include/petscsnes.h,0.97
+Dmitry Karpeyev,src/snes/interface/snes.c,0.34
+Dmitry Karpeyev,src/snes/impls/makefile,0.97
+Håkon Strandenes,src/dm/examples/tutorials/makefile,1.78
+Håkon Strandenes,src/sys/classes/viewer/impls/hdf5/hdf5v.c,2.46
+Håkon Strandenes,src/dm/examples/tutorials/ex9.c,3.53
+Andrew Spott,src/mat/examples/tests/makefile,3.46
+Andrew Spott,src/mat/impls/transpose/makefile,0.87
+dmay,src/dm/examples/tutorials/makefile,2.7
+dmay,src/sys/classes/viewer/examples/tutorials/ex3.c,0.85
+Surtai Han,saws/js/PETSc.js,3.0
+Surtai Han,saws/js/treeInterface.js,0.13
+Surtai Han,saws/js/lists.js,10.35
+Surtai Han,src/snes/examples/tutorials/ex19.c,1.9
+Surtai Han,saws/js/finalTex.js,21.57
+Vasiliy Kozyrev,config/configure.py,1.98
+Vasiliy Kozyrev,config/BuildSystem/config/packages/BlasLapack.py,3.66
+Vasiliy Kozyrev,src/mat/impls/aij/mpi/makefile,0.95
+Vasiliy Kozyrev,src/mat/impls/aij/seq/mkl_pardiso/mkl_pardiso.c,1.89
+Rémi Lacroix,src/mat/examples/tests/ex151.c,1.0
+Rémi Lacroix,src/mat/examples/tests/output/ex151_1.out,1.52
+Rémi Lacroix,src/mat/examples/tests/output/ex151_2.out,2.0
+Rémi Lacroix,src/mat/examples/tests/output/ex151_2b.out,2.0
+Rémi Lacroix,src/mat/examples/tests/output/ex151_3.out,2.57
+Rémi Lacroix,src/mat/examples/tests/makefile,2.56
+Geoffrey Irving,include/petsc-private/dmpleximpl.h,0.97
+Geoffrey Irving,include/petscdmplex.h,0.9
+Geoffrey Irving,include/petscfe.h,1.73
+Geoffrey Irving,src/dm/dt/interface/dtfe.c,1.78
+Geoffrey Irving,src/dm/impls/plex/plexfem.c,12.02
+Geoffrey Irving,src/dm/impls/plex/examples/tests/ex3.c,16.08
+Geoffrey Irving,include/petscdmda.h,0.9
+Geoffrey Irving,src/dm/impls/da/dalocal.c,5.52
+Geoffrey Irving,src/snes/examples/tutorials/ex31.c,17.55
+Geoffrey Irving,src/snes/examples/tutorials/ex52.c,5.41
+Geoffrey Irving,src/tao/bound/impls/blmvm/blmvm.c,0.94
+Geoffrey Irving,src/tao/bound/impls/bqpip/bqpip.c,0.94
+Geoffrey Irving,src/tao/bound/impls/gpcg/gpcg.c,0.94
+Geoffrey Irving,src/tao/bound/impls/tron/tron.c,0.94
+Geoffrey Irving,src/tao/complementarity/impls/asls/asfls.c,0.94
+Geoffrey Irving,src/tao/complementarity/impls/asls/asils.c,0.94
+Geoffrey Irving,src/tao/complementarity/impls/ssls/ssfls.c,0.94
+Geoffrey Irving,src/tao/complementarity/impls/ssls/ssils.c,0.94
+Geoffrey Irving,src/tao/constrained/impls/ipm/ipm.c,0.94
+Geoffrey Irving,src/tao/interface/fdtest.c,0.94
+Geoffrey Irving,src/tao/leastsquares/impls/pounders/pounders.c,0.94
+Geoffrey Irving,src/tao/leastsquares/impls/poundersb/poundersb.c,0.94
+Geoffrey Irving,src/tao/linesearch/impls/armijo/armijo.c,0.94
+Geoffrey Irving,src/tao/linesearch/impls/gpcglinesearch/gpcglinesearch.c,0.94
+Geoffrey Irving,src/tao/linesearch/impls/morethuente/morethuente.c,0.94
+Geoffrey Irving,src/tao/linesearch/impls/owarmijo/owarmijo.c,0.94
+Geoffrey Irving,src/tao/matrix/adamat.c,0.94
+Geoffrey Irving,src/tao/matrix/submatfree.c,0.94
+Geoffrey Irving,src/tao/pde_constrained/impls/lcl/lcl.c,0.94
+Geoffrey Irving,src/tao/pde_constrained/impls/sqpcon/sqpcon.c,0.94
+Geoffrey Irving,src/tao/unconstrained/impls/bmrm/bmrm.c,0.94
+Geoffrey Irving,src/tao/unconstrained/impls/cg/cg.c,0.94
+Geoffrey Irving,src/tao/unconstrained/impls/lmvm/lmvm.c,0.94
+Geoffrey Irving,src/tao/unconstrained/impls/neldermead/neldermead.c,0.94
+Geoffrey Irving,src/tao/unconstrained/impls/nls/nls.c,0.94
+Geoffrey Irving,src/tao/unconstrained/impls/ntl/ntl.c,0.94
+Geoffrey Irving,src/tao/unconstrained/impls/ntr/ntr.c,0.94
+Geoffrey Irving,src/tao/unconstrained/impls/owlqn/owlqn.c,0.94
+Geoffrey Irving,src/tao/unconstrained/impls/pounder/pounder.c,0.94
+Paul Eller,src/docs/tex/manual/developers.tex,3.64
+Paul Eller,src/sys/threadcomm/impls/nothread/nothread.c,0.87
+Paul Eller,src/sys/threadcomm/impls/openmp/tcopenmp.c,0.2
+Paul Eller,src/sys/threadcomm/impls/pthread/tcpthread.c,17.4
+Paul Eller,src/sys/threadcomm/interface/dlregisthreadcomm.c,1.31
+Paul Eller,src/sys/threadcomm/interface/threadcomm.c,29.63
+Paul Eller,include/petsc-private/vecimpl.h,0.69
+Paul Eller,include/petsclog.h,0.94
+Paul Eller,include/petscoptions.h,1.0
+Paul Eller,src/sys/logging/plog.c,1.49
+Paul Eller,src/sys/memory/mtr.c,21.94
+Paul Eller,src/sys/objects/inherit.c,0.89
+Paul Eller,src/sys/objects/options.c,0.55
+Paul Eller,src/sys/objects/tagm.c,0.94
+Paul Eller,src/vec/vec/utils/comb.c,15.66
+Paul Eller,src/sys/objects/subcomm.c,4.19
+Paul Eller,src/sys/threadcomm/examples/tutorials/ex1.c,0.85
+Paul Eller,src/sys/threadcomm/examples/tutorials/ex2.c,0.82
+Paul Eller,src/sys/threadcomm/examples/tutorials/ex3.c,0.91
+Paul Eller,src/sys/threadcomm/examples/tutorials/ex4.c,0.86
+Paul Eller,src/sys/threadcomm/examples/tutorials/ex5.c,0.8
+Paul Eller,src/sys/threadcomm/examples/tutorials/makefile,0.96
+Paul Eller,src/sys/threadcomm/impls/nothread/nothreadimpl.h,0.75
+Paul Eller,src/sys/threadcomm/impls/openmp/tcopenmpimpl.h,0.86
+Paul Eller,src/sys/threadcomm/impls/pthread/tcpthreadimpl.h,5.81
+Paul Eller,src/sys/threadcomm/interface/threadcommred.c,30.44
+Paul Eller,include/petsc-private/logimpl.h,0.91
+Paul Eller,src/vec/vec/interface/dlregisvec.c,5.92
+Paul Eller,src/vec/vec/interface/vector.c,16.28
+Paul Eller,src/vec/vec/utils/vinv.c,2.44
+Paul Eller,src/ksp/ksp/impls/bcgs/fbcgsr/fbcgsr.c,9.8
+Paul Eller,src/ksp/ksp/impls/ibcgs/ibcgs.c,9.8
+Paul Eller,src/mat/interface/matrix.c,1.93
+Paul Eller,src/vec/vec/interface/rvector.c,38.74
+Paul Eller,src/vec/vec/utils/vecio.c,0.97
+Paul Eller,include/petscerror.h,1.0
+Paul Eller,src/sys/threadcomm/interface/makefile,0.98
+Paul Eller,src/mat/impls/aij/mpi/mmaij.c,1.66
+Paul Eller,src/mat/impls/aij/mpi/mpiaij.c,1.64
+Paul Eller,src/sys/threadcomm/impls/pthread/makefile,0.87
+Paul Eller,src/sys/threadcomm/impls/pthread/tclockfree.c,10.08
+Paul Eller,src/sys/threadcomm/impls/makefile,0.89
+Jose David Bermeol,config/PETSc/packages/mkl-pardiso.py,0.29
+Jose David Bermeol,src/mat/impls/aij/seq/makefile,0.87
+Peter Brune,src/snes/impls/fas/fasfunc.c,0.16
+Peter Brune,src/mat/color/utils/weights.c,0.64
+Peter Brune,include/petscmat.h,1.4
+Peter Brune,src/mat/impls/aij/seq/matmatmult.c,0.71
+Peter Brune,src/mat/impls/aij/seq/matrart.c,0.71
+Peter Brune,src/snes/impls/composite/snescomposite.c,2.95
+Peter Brune,src/snes/impls/fas/fas.c,4.38
+Peter Brune,src/snes/impls/nasm/aspin.c,0.5
+Peter Brune,include/finclude/petscmatdef.h,0.92
+Peter Brune,src/snes/examples/tutorials/makefile,0.75
+Peter Brune,src/ksp/pc/impls/gamg/classical.c,10.88
+Peter Brune,src/ksp/ksp/examples/tutorials/ex54.c,0.96
+Peter Brune,src/dm/interface/dm.c,3.52
+Peter Brune,src/snes/impls/ls/ls.c,31.73
+Peter Brune,src/snes/impls/ncg/snesncg.c,0.82
+Peter Brune,src/mat/color/utils/graph.c,1.56
+Peter Brune,src/ksp/pc/impls/makefile,0.94
+Peter Brune,src/mat/coarsen/impls/makefile,0.87
+Peter Brune,src/vec/is/sf/examples/tutorials/ex1.c,1.82
+Peter Brune,src/sys/objects/aoptions.c,3.79
+Peter Brune,include/petscsnesfas.h,0.95
+Peter Brune,src/mat/color/ftn-custom/makefile,0.58
+Peter Brune,src/mat/examples/tutorials/ex16.c,0.74
+Peter Brune,src/mat/matfd/fdmatrix.c,1.93
+Peter Brune,src/snes/examples/tests/ex1.c,0.72
+Peter Brune,src/snes/examples/tutorials/ex10d/ex10.c,0.74
+Peter Brune,src/ts/examples/tests/ex4.c,0.74
+Peter Brune,src/sys/examples/tests/makefile,2.64
+Peter Brune,src/mat/color/makefile,0.05
+Peter Brune,src/dm/dt/interface/dt.c,2.59
+Peter Brune,src/dm/impls/plex/plexgeometry.c,4.82
+Peter Brune,src/ksp/ksp/impls/cg/gltr/gltr.c,7.89
+Peter Brune,src/ksp/ksp/impls/cg/nash/nash.c,0.86
+Peter Brune,src/ksp/ksp/impls/cg/stcg/stcg.c,0.86
+Peter Brune,src/ksp/ksp/impls/gmres/agmres/agmres.c,0.8
+Peter Brune,src/ksp/ksp/impls/gmres/agmres/agmresorthog.c,1.66
+Peter Brune,src/ksp/ksp/impls/gmres/dgmres/dgmres.c,0.69
+Peter Brune,src/ksp/ksp/interface/xmon.c,3.67
+Peter Brune,src/ksp/pc/impls/tfs/xxt.c,2.84
+Peter Brune,src/ksp/pc/impls/tfs/xyt.c,1.9
+Peter Brune,src/mat/partition/impls/scotch/scotch.c,0.92
+Peter Brune,src/mat/partition/partition.c,1.27
+Peter Brune,src/sys/classes/draw/impls/win32/win32draw.c,1.6
+Peter Brune,src/sys/classes/draw/utils/axis.c,0.83
+Peter Brune,src/sys/classes/draw/utils/hue.c,0.95
+Peter Brune,src/mat/examples/tests/ex161.c,1.72
+Peter Brune,src/ksp/ksp/examples/tutorials/makefile,2.57
+Peter Brune,src/snes/examples/tutorials/output/ex58_1.out,1.93
+Peter Brune,src/ts/examples/tutorials/makefile,0.99
+Peter Brune,src/snes/impls/ms/ms.c,1.74
+Victor Eijkhout,src/sys/random/interface/random.c,2.0
+Victor Eijkhout,src/snes/interface/snes.c,0.82
+Victor Eijkhout,python/PETSc/packages/MPE.py,0.94
+Paul Mullowney,src/vec/vec/examples/tests/makefile,1.73
+Paul Mullowney,src/mat/impls/aij/seq/seqcusp/aijcusp.cu,10.0
+Paul Mullowney,config/PETSc/packages/txpetscgpu.py,1.62
+Paul Mullowney,include/finclude/petscmat.h,0.62
+Paul Mullowney,src/ksp/ksp/examples/tests/makefile,2.74
+Paul Mullowney,src/ksp/pc/impls/ainvcusp/ainvcusp.cu,2.94
+Paul Mullowney,src/ksp/pc/impls/factor/ilu/ilu.c,0.65
+Paul Mullowney,src/ksp/pc/impls/sacusp/sacusp.cu,1.32
+Paul Mullowney,src/ksp/pc/impls/sacusp/sacusppoly.cu,1.36
+Paul Mullowney,src/sys/objects/init.c,0.87
+Paul Mullowney,src/vec/vec/impls/seq/seqcusp/veccusp.cu,12.4
+Paul Mullowney,src/vec/vec/utils/veccusp/vscatcusp.c,1.0
+Paul Mullowney,conf/test,0.97
+Paul Mullowney,include/petscvec.h,0.89
+Paul Mullowney,src/vec/vec/impls/seq/seqcusp/cuspvecimpl.h,0.45
+Paul Mullowney,src/vec/vec/utils/veccusp/makefile,0.5
+Paul Mullowney,src/ksp/ksp/examples/tutorials/makefile,0.68
+Paul Mullowney,src/mat/impls/aij/mpi/mpiaij.c,0.97
+Paul Mullowney,src/mat/impls/aij/seq/aij.c,0.96
+Paul Mullowney,src/ksp/pc/impls/bjacobi/bjacobi.c,3.83
+Paul Mullowney,include/petscmath.h,0.95
+Paul Mullowney,src/mat/impls/aij/mpi/mpicusp/makefile,0.58
+Paul Mullowney,config/PETSc/packages/cuda.py,1.45
+Paul Mullowney,include/petsc-private/matimpl.h,0.94
+Paul Mullowney,src/ksp/pc/impls/bicgstabcusp/bicgstabcusp.cu,1.82
+Paul Mullowney,src/ksp/pc/impls/factor/factor.c,0.94
+Paul Mullowney,src/mat/impls/aij/mpi/makefile,0.94
+Paul Mullowney,src/mat/impls/aij/seq/makefile,0.82
+Paul Mullowney,src/mat/impls/aij/seq/seqcusp/aijAssemble.cu,0.39
+Paul Mullowney,src/mat/order/sorder.c,1.88
+Andy R. Terrel,src/dm/mesh/examples/tutorials/bratu_quadrature.fiat,0.93
+Andy R. Terrel,src/dm/mesh/examples/tutorials/grade2_quadrature.fiat,0.93
+Matthew G Knepley,include/petscdmplex.h,0.91
+Matthew G Knepley,src/dm/impls/plex/makefile,0.99
+Matthew G Knepley,src/dm/impls/plex/plex.c,13.07
+Matthew G Knepley,src/snes/examples/tutorials/ex52.c,0.97
+Matthew G Knepley,src/snes/examples/tutorials/output/ex52_0.out,0.51
+Matthew G Knepley,src/snes/examples/tutorials/output/ex52_1.out,0.51
+Matthew G Knepley,src/snes/examples/tutorials/output/ex52_2.out,0.51
+Matthew G Knepley,src/snes/examples/tutorials/output/ex52_3.out,0.51
+Matthew G Knepley,src/snes/examples/tutorials/output/ex52_4.out,0.51
+Matthew G Knepley,src/snes/examples/tutorials/output/ex52_5.out,0.51
+Matthew G Knepley,src/snes/examples/tutorials/output/ex52_6.out,0.51
+Matthew G Knepley,src/snes/examples/tutorials/output/ex52_7.out,0.51
+Matthew G Knepley,src/snes/examples/tutorials/output/ex52_8.out,0.51
+Matthew G Knepley,src/dm/impls/plex/plexcreate.c,1.16
+Matthew G Knepley,src/dm/impls/plex/f90-custom/zplexf90.c,1.65
+Matthew G Knepley,src/ts/examples/tutorials/ex11.c,1.07
+Matthew G Knepley,src/dm/impls/plex/plexexodusii.c,0.66
+Matthew G Knepley,src/dm/impls/plex/plexvtk.c,2.36
+Matthew G Knepley,src/snes/examples/tutorials/output/ex5_1.out,3.71
+Matthew G Knepley,src/snes/examples/tutorials/output/ex5_2.out,3.59
+Matthew G Knepley,src/snes/examples/tutorials/output/ex5_3.out,13.28
+Matthew G Knepley,src/snes/examples/tutorials/output/ex48_2.out,2.46
+Matthew G Knepley,src/snes/examples/tutorials/output/ex18_1.out,3.88
+Matthew G Knepley,src/snes/examples/tutorials/output/ex19_14.out,0.89
+Matthew G Knepley,src/snes/examples/tutorials/output/ex2_1.out,0.5
+Matthew G Knepley,src/snes/examples/tests/makefile,1.0
+Matthew G Knepley,src/snes/examples/tutorials/ex31.c,0.17
+Matthew G Knepley,src/snes/examples/tutorials/ex56.c,1.69
+Matthew G Knepley,src/dm/ao/examples/tests/makefile,12.16
+Matthew G Knepley,src/dm/impls/plex/examples/tests/output/ex1_2.out,0.32
+Matthew G Knepley,src/dm/impls/plex/examples/tests/output/ex1_3.out,16.22
+Matthew G Knepley,src/dm/impls/plex/examples/tests/output/ex1_4.out,17.04
+Matthew G Knepley,src/dm/impls/plex/examples/tests/output/ex1_5.out,0.63
+Matthew G Knepley,src/dm/impls/plex/examples/tests/output/ex1_8.out,0.61
+Matthew G Knepley,src/dm/impls/plex/examples/tests/output/ex5_6.out,0.8
+Matthew G Knepley,src/sys/objects/init.c,0.97
+Matthew G Knepley,src/dm/impls/patch/patch.c,1.85
+Matthew G Knepley,src/dm/impls/plex/plexvtu.c,0.87
+Matthew G Knepley,src/dm/impls/plex/examples/tests/ex1.c,1.3
+Matthew G Knepley,src/ksp/ksp/impls/cg/pipecg/pipecg.c,0.8
+Matthew G Knepley,src/sys/classes/viewer/interface/viewreg.c,1.67
+Matthew G Knepley,include/petscctable.h,2.0
+Matthew G Knepley,src/dm/impls/complex/plexvtu.c,0.95
+Matthew G Knepley,src/mat/coarsen/impls/hem/hem.c,2.51
+Matthew G Knepley,src/sys/threadcomm/interface/threadcomm.c,1.64
+Matthew G Knepley,include/petsclog.h,0.58
+Matthew G Knepley,src/dm/impls/complex/complexlabel.c,0.41
+Matthew G Knepley,src/snes/examples/tutorials/ex22.c,1.75
+Matthew G Knepley,src/ts/examples/tutorials/output/ex11_2.out,0.86
+Matthew G Knepley,src/ksp/ksp/impls/gmres/agmres/agmres.c,0.89
+Jose Roman,bin/matlab/classes/PetscDMDACreate2d.m,1.12
+Jose Roman,bin/matlab/classes/PetscTS.m,0.76
+Jose Roman,bin/matlab/classes/examples/tutorials/exKSPDM.m,0.91
+Jose Roman,bin/matlab/classes/examples/tutorials/exSNES.m,0.67
+Jose Roman,bin/matlab/classes/examples/tutorials/exSNES_DVI.m,0.8
+Jose Roman,bin/matlab/classes/PetscInitialize.m,0.85
+Jose Roman,bin/matlab/classes/PetscDM.m,0.94
+Jose Roman,bin/matlab/classes/examples/tutorials/exSNES_DVI2.m,0.8
+Jose Roman,bin/matlab/classes/matlabheader.h,0.83
+Jose Roman,config/PETSc/packages/Chaco.py,0.8
+Jose Roman,include/petscblaslapack_caps.h,1.0
+Jose Roman,include/petscblaslapack_stdcall.h,6.55
+Jose Roman,src/mat/partition/impls/chaco/chaco.c,34.47
+Jose Roman,include/petscmat.h,0.83
+Jose Roman,src/mat/partition/impls/makefile,0.91
+Jungho Lee,src/ksp/pc/impls/fieldsplit/fieldsplit.c,2.43
+Jungho Lee,include/petscpc.h,0.98
+Jungho Lee,src/ksp/ksp/examples/tests/makefile,2.0
+Jungho Lee,src/mat/matfd/fdmatrix.c,0.46
+Jungho Lee,src/ts/examples/tutorials/phasefield/biharmonictest.m,1.95
+Jungho Lee,src/ts/examples/tutorials/phasefield/biharmonic.c,8.74
+Jungho Lee,src/sys/draw/impls/x/xops.c,0.97
+Jungho Lee,include/petscsnes.h,0.6
+Jungho Lee,src/ksp/pc/impls/mg/mg.c,1.45
+Chetan Jhurani,include/petsccusp.h,0.09
+Chetan Jhurani,src/snes/examples/tutorials/ex47cu.cu,2.0
+John Fettig,src/ksp/ksp/impls/bcgsl/bcgsl.c,2.86
+John Fettig,src/ksp/ksp/impls/bcgsl/bcgslimpl.h,0.76
+Mark F. Adams,src/ksp/ksp/examples/tutorials/ex56.c,1.89
+Mark F. Adams,include/petsc-private/matimpl.h,0.94
+Mark F. Adams,src/ksp/ksp/examples/tutorials/ex54f.F,0.99
+Mark F. Adams,src/dm/impls/mesh/meshcreate.c,1.05
+Mark F. Adams,src/ksp/pc/impls/gamg/sa.c,7.76
+Mark F. Adams,src/ksp/pc/impls/gamg/createProlongation.c,2.86
+Tim Tautges,conf/test,0.97
+Tim Tautges,src/dm/impls/moab/examples/makefile,1.52
+Tim Tautges,src/ts/examples/tutorials/makefile,1.93
+Tim Tautges,src/vec/vec/impls/makefile,0.93
+Tim Tautges,src/dm/impls/makefile,0.96
+Glenn Hammond,src/dm/da/utils/fdda.c,1.55
+Glenn Hammond,src/dm/da/utils/mhyp.c,0.65
+Glenn Hammond,src/ksp/pc/impls/hypre/hypre.c,0.71
+Glenn Hammond,src/dm/mesh/impls/cartesian/makefile,0.58
+Glenn Hammond,src/dm/mesh/makefile,1.98
+Brad Aagaard,src/ksp/pc/impls/ml/ml.c,3.0
+Brad Aagaard,include/sieve/ALE_exception.hh,1.19
+Brad Aagaard,include/sieve/Selection.hh,1.0
+Brad Aagaard,src/dm/da/src/da.c,0.98
+Sean Farley,src/docs/website/documentation/installation.html,13.15
+Sean Farley,config/PETSc/packages/MUMPS.py,1.88
+Sean Farley,src/sys/examples/tests/makefile,2.72
+Sean Farley,src/sys/makefile,0.97
+Sean Farley,src/ts/examples/tutorials/makefile,1.74
+Sean Farley,src/ts/impls/implicit/sundials/sundials.c,2.76
+Sean Farley,src/ts/examples/tutorials/ex12.c,1.81
+Sean Farley,src/ts/examples/tutorials/ex11.c,1.81
+Sean Farley,src/docs/website/index.html,1.44
+Sean Farley,src/docs/website/miscellaneous/index.html,3.19
+Sean Farley,src/docs/website/documentation/faq.html,2.41
+Sean Farley,src/docs/website/miscellaneous/mailing-lists.html,4.59
+Sean Farley,src/docs/website/developers/index.html,24.48
+Sean Farley,src/docs/website/developers/projects.html,5.77
+Sean Farley,src/docs/website/documentation/ams.html,8.47
+Sean Farley,src/docs/website/documentation/bugreporting.html,4.43
+Sean Farley,src/docs/website/documentation/changes/212.html,0.62
+Sean Farley,src/docs/website/documentation/changes/213.html,0.89
+Sean Farley,src/docs/website/documentation/changes/215.html,0.94
+Sean Farley,src/docs/website/documentation/changes/216.html,16.11
+Sean Farley,src/docs/website/documentation/changes/220.html,7.55
+Sean Farley,src/docs/website/documentation/changes/221.html,10.91
+Sean Farley,src/docs/website/documentation/changes/230.html,18.43
+Sean Farley,src/docs/website/documentation/changes/231.html,19.17
+Sean Farley,src/docs/website/documentation/changes/232.html,9.41
+Sean Farley,src/docs/website/documentation/changes/233.html,12.72
+Sean Farley,src/docs/website/documentation/changes/300.html,15.82
+Sean Farley,src/docs/website/documentation/changes/31.html,14.49
+Sean Farley,src/docs/website/documentation/changes/32.html,2.25
+Sean Farley,src/docs/website/documentation/changes/dev.html,2.1
+Sean Farley,src/docs/website/documentation/changes/index.html,2.26
+Sean Farley,src/docs/website/documentation/codemanagement.html,11.17
+Sean Farley,src/docs/website/documentation/copyright.html,1.41
+Sean Farley,src/docs/website/documentation/index.html,6.21
+Sean Farley,src/docs/website/documentation/linearsolvertable.html,2.29
+Sean Farley,src/docs/website/documentation/referencing.html,3.11
+Sean Farley,src/docs/website/documentation/tutorials/index.html,9.52
+Sean Farley,src/docs/website/download/petsc-patches.html,0.99
+Sean Farley,src/docs/website/features/details.html,1.47
+Sean Farley,src/docs/website/features/diagram.html,0.87
+Sean Farley,src/docs/website/features/gpus.html,4.15
+Sean Farley,src/docs/website/features/index.html,2.52
+Sean Farley,src/docs/website/features/threads.html,1.45
+Sean Farley,src/docs/website/miscellaneous/acknwldg.html,5.02
+Sean Farley,src/docs/website/miscellaneous/external.html,8.28
+Sean Farley,src/docs/website/miscellaneous/funding.html,4.7
+Sean Farley,src/docs/website/miscellaneous/petscthreads.html,2.23
+Sean Farley,src/docs/website/publications/index.html,11.29
+Sean Farley,src/docs/website/publications/prizes.html,10.93
+Sean Farley,src/mat/impls/aij/mpi/mpimatmatmult.c,0.94
+Xuan Zhou,src/mat/examples/tests/ex168.c,4.76
+Xuan Zhou,config/PETSc/utilities/languages.py,0.94
+Xuan Zhou,src/mat/examples/tests/output/ex145.out,0.75
+Xuan Zhou,src/mat/examples/tests/ex38.c,0.71
+Xuan Zhou,src/mat/examples/tests/makefile,0.92
+Xuan Zhou,src/ksp/ksp/examples/tests/makefile,0.94
+Stefan M. Wild,docs/tex/manual/part2.tex,27.68
+Stefan M. Wild,docs/tex/manual/addsolver.tex,0.75
+Stefan M. Wild,docs/tex/manual/changes.tex,1.81
+Stefan M. Wild,docs/tex/manual/part1.tex,1.0
+Stefan M. Wild,docs/tex/manual/part0.tex,1.0
+Stefan M. Wild,docs/tex/manual/abstract.tex,1.0
+petsc,python/PETSc/utilities/getResidentSetSize.py,3.45
+petsc,src/ts/examples/tests/ex1f.F,6.76
+petsc,bmake/predefined/linux64/packages,0.83
+petsc,bmake/predefined/linux64/petscconf.h,2.34
+petsc,bmake/predefined/linux_pgi/packages,0.22
+petsc,bmake/predefined/linux_alpha/packages,0.9
+petsc,bmake/predefined/linux_alpha/petscconf.h,2.7
+petsc,src/docs/tex/manual/part2.tex,1.84
+petsc,config/solaris2.9.py,0.96
+petsc,maint/buildtests/freebsd5.1,0.83
+petsc,bmake/linux_jazz_intel/packages,0.94
+petsc,src/contrib/fun3d/flow.c,1.9
+petsc,src/contrib/fun3d/userJac.F,4.53
+petsc,src/fortran/kernels/fsolvebaij.F,1.75
+petsc,src/fortran/kernels/makefile,1.83
+petsc,src/benchmarks/PetscVecNorm.c,2.86
+xavier lacoste,config/PETSc/packages/PTScotch.py,5.44
+xavier lacoste,config/PETSc/packages/PaStiX.py,10.73
+ecoon,bin/pythonscripts/PetscBinaryIO.py,3.72
+mahadevan,src/vec/vec/examples/tests/makefile,0.91
+Victor Minden,src/snes/examples/tutorials/ex47cu.cu,2.64
+Victor Minden,src/ksp/pc/impls/sacusp/makefile,1.75
+Victor Minden,src/ksp/pc/interface/pcregis.c,2.81
+Victor Minden,src/dm/ao/impls/basic/aobasic.c,0.94
+Victor Minden,src/dm/ao/impls/mapping/aomapping.c,0.94
+Victor Minden,src/ksp/pc/impls/bicgstabcusp/bicgstabcusp.cu,0.95
+Victor Minden,src/ksp/pc/impls/makefile,0.97
+Victor Minden,src/ksp/pc/impls/sacusp/sacusp.cu,10.0
+Victor Minden,config/examples/arch-cuda.py,0.71
+Victor Minden,include/private/vecimpl.h,2.4
+Victor Minden,src/vec/vec/utils/vpscat.h,2.0
+Victor Minden,src/ksp/ksp/impls/rich/rich.c,1.5
+Victor Minden,src/dm/da/utils/sliced.c,0.94
+Victor Minden,src/mat/impls/aij/mpi/makefile,0.94
+Victor Minden,conf/rules,2.84
+Victor Minden,config/examples/arch-cuda-double.py,0.8
+Victor Minden,src/docs/website/documentation/zope.html,5.98
+Victor Minden,src/ksp/ksp/interface/itcl.c,0.89
+Victor Minden,src/mat/impls/dense/mpi/mpidense.c,0.99
+Victor Minden,src/mat/impls/dense/seq/dense.c,1.61
+Victor Minden,src/mat/impls/sbaij/mpi/mpisbaij.c,0.07
+Victor Minden,src/mat/impls/aij/seq/makefile,0.96
+Victor Minden,src/vec/vec/impls/seq/bvec1.c,1.78
+Victor Minden,src/vec/vec/impls/seq/makefile,0.87
+Victor Minden,config/builder.py,0.93
+Victor Minden,src/mat/examples/tests/ex131.c,0.85
+Victor Minden,conf/variables,0.87
+Victor Minden,src/ts/impls/implicit/gl/gladapt.c,1.69
+Victor Minden,src/vec/vec/impls/mpi/pvec2.c,0.71
+Victor Minden,src/vec/vec/impls/mpi/pdvec.c,0.71
+adams,src/ksp/pc/impls/gamg/createProlongation.c,0.93
+Evan Gawlik,src/pde_constrained/impls/lcl/lcl.c,17.74
+Evan Gawlik,src/pde_constrained/impls/sqpcon/sqpcon.c,10.9
+Evan Gawlik,tests/esqp/makefile,0.86
+Evan Gawlik,include/private/taosolver_impl.h,0.98
+Evan Gawlik,include/taosolver.h,2.82
+Evan Gawlik,src/interface/taosolver_hj.c,2.9
+Evan Gawlik,src/matrix/lmvmmat.c,0.98
+Ethan Coon,src/sys/bag/bag.c,10.41
+Ethan Coon,src/dm/impls/da/da3.c,6.18
+Ethan Coon,src/dm/impls/da/da1.c,4.35
+Ethan Coon,src/dm/impls/da/da2.c,5.95
+Ethan Coon,include/finclude/petscdm.h,0.41
+Ethan Coon,include/petscdm.h,6.59
+Ethan Coon,include/private/daimpl.h,0.86
+Ethan Coon,src/characteristic/examples/tutorials/ex1.c,0.5
+Ethan Coon,src/characteristic/examples/tutorials/ex2.c,0.5
+Ethan Coon,src/characteristic/examples/tutorials/ex4.c,0.5
+Ethan Coon,src/characteristic/impls/da/slda.c,0.5
+Ethan Coon,src/characteristic/interface/characteristic.c,1.0
+Ethan Coon,src/contrib/blopex/driver/driver.c,2.69
+Ethan Coon,src/contrib/helmholtz_2/ex12.c,0.79
+Ethan Coon,src/contrib/keyes/ex15.c,0.77
+Ethan Coon,src/dm/examples/tests/ex1.c,0.63
+Ethan Coon,src/dm/examples/tests/ex11.c,0.89
+Ethan Coon,src/dm/examples/tests/ex12.c,0.92
+Ethan Coon,src/dm/examples/tests/ex14.c,0.63
+Ethan Coon,src/dm/examples/tests/ex15.c,0.67
+Ethan Coon,src/dm/examples/tests/ex16.c,1.87
+Ethan Coon,src/dm/examples/tests/ex17.c,1.81
+Ethan Coon,src/dm/examples/tests/ex18.c,0.63
+Ethan Coon,src/dm/examples/tests/ex19.c,1.63
+Ethan Coon,src/dm/examples/tests/ex2.c,1.6
+Ethan Coon,src/dm/examples/tests/ex21.c,0.5
+Ethan Coon,src/dm/examples/tests/ex22.c,0.73
+Ethan Coon,src/dm/examples/tests/ex23.c,1.33
+Ethan Coon,src/dm/examples/tests/ex24.c,0.89
+Ethan Coon,src/dm/examples/tests/ex25.c,0.85
+Ethan Coon,src/dm/examples/tests/ex26.c,0.84
+Ethan Coon,src/dm/examples/tests/ex27.c,0.5
+Ethan Coon,src/dm/examples/tests/ex28.c,0.99
+Ethan Coon,src/dm/examples/tests/ex3.c,0.93
+Ethan Coon,src/dm/examples/tests/ex31.c,0.9
+Ethan Coon,src/dm/examples/tests/ex32.c,1.74
+Ethan Coon,src/dm/examples/tests/ex33.c,1.33
+Ethan Coon,src/dm/examples/tests/ex35.c,0.5
+Ethan Coon,src/dm/examples/tests/ex36.c,5.87
+Ethan Coon,src/dm/examples/tests/ex4.c,0.67
+Ethan Coon,src/dm/examples/tests/ex5.c,0.92
+Ethan Coon,src/dm/examples/tests/ex6.c,0.67
+Ethan Coon,src/dm/examples/tests/ex8.c,0.67
+Ethan Coon,src/dm/examples/tests/ex9.c,0.81
+Ethan Coon,src/dm/examples/tutorials/ex1.c,0.67
+Ethan Coon,src/dm/examples/tutorials/ex10.c,0.9
+Ethan Coon,src/dm/examples/tutorials/ex11f90.F,3.71
+Ethan Coon,src/dm/examples/tutorials/ex12.c,0.67
+Ethan Coon,src/dm/examples/tutorials/ex2.c,0.67
+Ethan Coon,src/dm/examples/tutorials/ex3.c,0.67
+Amlan Barua,include/petscmat.h,0.93
+Amlan Barua,src/mat/examples/tests/ex143.c,1.38
+xuemin,src/ksp/ksp/impls/ngmres/ngmres.c,14.25
+Gwynneth Davidoff,src/ts/examples/tutorials/ex2.c,0.83
+Kerry Stevens,src/mat/impls/aij/seq/aij.c,4.0
+Kerry Stevens,src/sys/objects/pinit.c,0.92
+Kerry Stevens,src/vec/vec/impls/seq/seqpthread/vecpthread.c,4.92
+Kerry Stevens,src/vec/vec/examples/tutorials/ex1.c,0.89
+Kerry Stevens,src/mat/examples/tutorials/makefile,1.94
+Kerry Stevens,src/vec/vec/impls/seq/bvec1.c,0.39
+Kerry Stevens,src/vec/vec/impls/seq/bvec2.c,0.89
+Kerry Stevens,src/vec/vec/impls/seq/makefile,0.89
+Dahai Guo,src/mat/impls/baij/seq/bstream/bstream.c,8.46
+Dahai Guo,src/mat/impls/sbaij/seq/sbstream/sbstrmfact.c,4.74
+Dahai Guo,src/mat/impls/sbaij/mpi/makefile,0.82
+Dahai Guo,src/mat/impls/sbaij/seq/makefile,0.87
+Dahai Guo,src/mat/impls/baij/mpi/makefile,0.82
+hzhang,src/snes/examples/tutorials/output/ex19_10.out,0.61
+hzhang,src/snes/examples/tutorials/output/ex19_7.out,0.61
+hzhang,src/snes/examples/tutorials/output/ex19_9.out,0.61
+Matthew Knepley,config/PETSc/packages/hdf5.py,0.83
+Matthew Knepley,include/petscmath.h,0.62
+Matthew Knepley,include/petscerror.h,2.53
+Matthew Knepley,src/mat/impls/dense/seq/dense.c,0.61
+Matthew Knepley,src/mat/impls/aij/seq/aijfact.c,0.67
+Matthew Knepley,src/dm/da/utils/dm.c,0.61
+Matthew Knepley,src/mat/impls/aij/mpi/mumps/mumps.c,1.89
+Matthew Knepley,src/vec/vec/examples/tutorials/makefile,0.93
+Matthew Knepley,include/petscmat.h,0.63
+Matthew Knepley,src/mat/interface/matrix.c,1.71
+Matthew Knepley,config/PETSc/packages/Scotch.py,3.7
+Matthew Knepley,src/sys/objects/ftn-custom/makefile,0.99
+Matthew Knepley,src/mat/interface/matnull.c,0.52
+Matthew Knepley,src/mat/impls/aij/seq/aij.h,0.62
+Matthew Knepley,src/mat/impls/dense/seq/dense.h,0.55
+Matthew Knepley,src/ksp/pc/impls/asa/asa.c,14.94
+Matthew Knepley,config/builder.py,8.04
+Matthew Knepley,src/dm/mesh/examples/tutorials/watson.cxx,5.98
+Matthew Knepley,src/ksp/pc/impls/ml/ml.c,1.0
+Matthew Knepley,config/packages/ExodusII.py,0.94
+Matthew Knepley,src/vec/vec/impls/mpi/pdvec.c,2.69
+Matthew Knepley,config/PETSc/packages/NetCDF.py,1.3
+Matthew Knepley,config/PETSc/packages/ml.py,2.33
+Matthew Knepley,config/PETSc/packages/SuperLU.py,5.13
+Matthew Knepley,config/PETSc/packages/Jostle.py,1.42
+Matthew Knepley,config/PETSc/packages/MUMPS.py,2.47
+Matthew Knepley,config/PETSc/packages/P3Dlib.py,1.76
+Matthew Knepley,config/PETSc/packages/PARTY.py,1.63
+Matthew Knepley,config/PETSc/packages/PLAPACK.py,4.22
+Matthew Knepley,config/PETSc/packages/Prometheus.py,7.78
+Matthew Knepley,config/PETSc/packages/SCALAPACK.py,7.8
+Matthew Knepley,config/PETSc/packages/Suggar.py,2.46
+Matthew Knepley,config/PETSc/packages/SuperLU_DIST.py,5.24
+Matthew Knepley,config/PETSc/packages/babel.py,2.13
+Matthew Knepley,config/PETSc/packages/blacs.py,3.33
+Matthew Knepley,config/PETSc/packages/blopex.py,2.33
+Matthew Knepley,config/PETSc/packages/ccafe.py,2.5
+Matthew Knepley,config/PETSc/packages/cproto.py,2.43
+Matthew Knepley,config/PETSc/packages/expat.py,1.63
+Matthew Knepley,config/PETSc/packages/fftw.py,3.02
+Matthew Knepley,config/PETSc/packages/mpe.py,2.52
+Matthew Knepley,config/PETSc/packages/pARMS.py,2.33
+Matthew Knepley,config/PETSc/packages/spai.py,2.92
+Matthew Knepley,config/PETSc/packages/spooles.py,2.33
+Matthew Knepley,config/PETSc/packages/sprng.py,2.52
+Matthew Knepley,config/PETSc/packages/sowing.py,4.05
+Matthew Knepley,config/PETSc/packages/lgrind.py,2.61
+Matthew Knepley,config/PETSc/packages/c2html.py,5.1
+Matthew Knepley,config/PETSc/packages/papi.py,1.63
+Matthew Knepley,config/PETSc/packages/petsc4py.py,3.6
+tmunson,src/ksp/ksp/impls/cg/stcg/stcg.c,1.81
+tmunson,include/petscksp.h,0.83
+tmunson,src/ksp/ksp/impls/cg/makefile,0.87
+tmunson,src/ksp/ksp/impls/qcg/qcg.c,2.59
+tmunson,src/ksp/ksp/interface/dlregisksp.c,0.33
+Dinesh Kaushik,config/PETSc/packages/Suggar.py,1.48
+Dinesh Kaushik,src/ts/examples/tests/ex4.c,0.87
+Dinesh Kaushik,src/contrib/dvr/dvr.F,4.24
+Dinesh Kaushik,src/contrib/dvr/makefile,1.46
+Dinesh Kaushik,src/vec/impls/mpi/pdvec.c,0.93
+Dinesh Kaushik,src/sys/src/objects/init.c,0.89
+Dinesh Kaushik,src/vec/impls/seq/bvec2.c,0.93
+Dinesh Kaushik,bmake/rs6000_64/buildtest,0.48
+Dinesh Kaushik,python/PETSc/Configure.py,0.96
+Dinesh Kaushik,src/dm/da/src/gr2.c,0.71
+Dinesh Kaushik,bmake/common/variables,1.79
+Dinesh Kaushik,src/dm/da/src/makefile,0.82
+Dinesh Kaushik,src/sles/examples/tutorials/ex31.c,1.0
+Dinesh Kaushik,src/sys/src/viewer/impls/makefile,0.95
+Dinesh Kaushik,src/vec/utils/makefile,0.82
+Dinesh Kaushik,src/vec/impls/mpi/makefile,0.71
+Dinesh Kaushik,src/vec/interface/vector.c,3.37
+Dinesh Kaushik,include/petscvec.h,0.96
+Dinesh Kaushik,src/sles/ksp/impls/gmres/gmres.c,2.17
+Dinesh Kaushik,docs/tex/manual/manual.tex,0.87
+Dinesh Kaushik,src/snes/examples/tutorials/ex27.c,6.56
+Dinesh Kaushik,docs/tex/manual/acknowl.tex,1.0
+victor,src/docs/tex/manual/part2.tex,0.96
+victor,include/petscerror.h,0.99
+victor,src/mat/impls/shell/shell.c,0.87
+victor,src/sys/error/err.c,1.03
+victor,src/ksp/ksp/impls/cg/cg.c,1.96
+victor,src/mat/impls/aij/mpi/mpiov.c,9.24
+victor,src/docs/website/index.html,0.73
+victor,src/mat/impls/rowbs/mpi/cholbs.c,1.77
+bcordonn,src/docs/website/documentation/changes/2022.html,0.95
+bcordonn,src/docs/website/documentation/changes/2024.html,0.95
+bcordonn,src/docs/website/documentation/changes/2028.html,0.95
+bcordonn,src/docs/website/documentation/changes/2029.html,0.95
+bcordonn,src/docs/website/documentation/changes/21.html,0.95
+bcordonn,src/docs/website/documentation/changes/212.html,0.95
+bcordonn,src/docs/website/documentation/changes/213.html,0.95
+bcordonn,src/docs/website/documentation/changes/220.html,0.95
+bcordonn,src/docs/website/documentation/changes/221.html,0.95
+bcordonn,src/docs/website/documentation/changes/230.html,0.95
+bcordonn,src/docs/website/documentation/copyright.html,0.96
+bcordonn,src/docs/website/documentation/index.html,0.96
+bcordonn,src/docs/website/documentation/referencing.html,0.96
+bcordonn,src/docs/website/documentation/troubleshooting.html,0.96
+bcordonn,src/docs/website/documentation/tutorials/index.html,6.01
+bcordonn,src/docs/website/index.html,0.97
+bcordonn,src/sys/objects/init.c,0.91
+bcordonn,src/ksp/ksp/examples/tutorials/makefile,1.94
+bcordonn,src/sys/objects/pinit.c,0.82
+bcordonn,zope/zope.conf,0.5
+bcordonn,src/sys/objects/makefile,1.98
+sdaitch,src/ksp/pc/impls/makefile,0.95
+emppter,src/dm/mesh/sieve/Sieve.hh,1.0
+emppter,src/dm/mesh/mesh.c,0.2
+emppter,src/dm/mesh/examples/tutorials/ex6.c,2.0
+Boyana Norris,conf/rules.shared.basic,1.0
+Boyana Norris,src/tops/examples/cxx/ex4/server/cxx/Ex4_System_Impl.hxx,11.23
+Boyana Norris,src/tops/makefile,0.92
+Boyana Norris,python/PETSc/packages/ccafe.py,1.38
+Boyana Norris,src/tops/examples/c++/ex1/Ex1.sidl,0.95
+Boyana Norris,src/tops/examples/c++/ex2/Ex2.sidl,0.98
+Boyana Norris,src/tops/examples/c++/ex2/makefile,0.99
+Boyana Norris,src/tops/examples/c++/ex3/Ex3.sidl,0.98
+Boyana Norris,src/tops/examples/c++/ex3/makefile,0.99
+Boyana Norris,src/tops/examples/c++/ex4/Ex4.sidl,0.95
+Boyana Norris,src/tops/examples/c++/ex4/makefile,0.99
+Boyana Norris,src/tops/server/c++/TOPS_StructuredSolver_Impl.cc,4.39
+Boyana Norris,src/tops/server/c++/TOPS_UnstructuredSolver_Impl.cc,6.41
+Boyana Norris,python/PETSc/packages/babel.py,1.6
+Boyana Norris,makefile,0.98
+Boyana Norris,src/tops/examples/c++/ex4/ex4.sidl,0.92
+Boyana Norris,src/tops/examples/c++/ex3/ex3.sidl,0.52
+Boyana Norris,bmake/common/rules.shared.basic,0.97
+Boyana Norris,src/tops/examples/c++/ex1/ex1.sidl,0.89
+prbrune,src/dm/mesh/examples/tutorials/bratu.cxx,1.71
+prbrune,src/dm/mesh/mesh.c,1.1
+prbrune,src/dm/mesh/sieve/Hierarchy.hh,4.94
+dalcinl,include/petscsnes.h,1.11
+dalcinl,src/snes/impls/ls/ls.c,0.88
+dalcinl,src/snes/impls/tr/tr.c,1.85
+dalcinl,src/snes/interface/snesut.c,0.86
+dalcinl,src/ksp/ksp/interface/itcreate.c,0.77
+dalcinl,src/ksp/ksp/interface/itfunc.c,0.77
+dalcinl,src/mat/interface/matrix.c,0.86
+dalcinl,src/vec/vec/utils/vinv.c,4.67
+dalcinl,include/petscvec.h,0.76
+dalcinl,include/private/pcimpl.h,0.33
+dalcinl,src/bilinear/interface/bilinear.c,0.69
+dalcinl,src/docs/tex/manual/developers.tex,0.81
+dalcinl,src/ksp/ksp/impls/bcgs/bcgs.c,0.53
+dalcinl,src/ksp/ksp/impls/bcgsl/bcgsl.c,0.53
+dalcinl,src/ksp/ksp/impls/bicg/bicg.c,0.53
+dalcinl,src/ksp/ksp/impls/cg/cgctx.h,0.53
+dalcinl,src/ksp/ksp/impls/cg/stcg/stcg.c,0.77
+dalcinl,src/ksp/ksp/impls/cgs/cgs.c,0.53
+dalcinl,src/ksp/ksp/impls/cheby/cheby.c,0.77
+dalcinl,src/ksp/ksp/impls/cr/cr.c,0.53
+dalcinl,src/ksp/ksp/impls/gmres/fgmres/fgmresp.h,0.53
+dalcinl,src/ksp/ksp/impls/gmres/gmresp.h,0.77
+dalcinl,src/ksp/ksp/impls/gmres/lgmres/lgmresp.h,0.72
+dalcinl,src/ksp/ksp/impls/lcd/lcdctx.h,0.53
+dalcinl,src/ksp/ksp/impls/lsqr/lsqr.c,0.53
+dalcinl,src/ksp/ksp/impls/minres/minres.c,0.53
+dalcinl,src/ksp/ksp/impls/preonly/preonly.c,0.53
+dalcinl,src/ksp/ksp/impls/qcg/qcg.c,0.77
+dalcinl,src/ksp/ksp/impls/rich/rich.c,0.77
+dalcinl,src/ksp/ksp/impls/rich/richscale.c,0.77
+dalcinl,src/ksp/ksp/impls/symmlq/symmlq.c,0.53
+dalcinl,src/ksp/ksp/impls/tcqmr/tcqmr.c,0.53
+dalcinl,src/ksp/ksp/impls/tfqmr/tfqmr.c,0.53
+dalcinl,src/ksp/ksp/interface/dlregisksp.c,0.53
+dalcinl,src/ksp/ksp/interface/eige.c,0.77
+dalcinl,src/ksp/ksp/interface/iguess.c,0.77
+dalcinl,src/ksp/ksp/interface/itcl.c,0.77
+dalcinl,src/ksp/ksp/interface/iterativ.c,0.77
+dalcinl,src/ksp/ksp/interface/itregis.c,0.77
+dalcinl,src/ksp/ksp/interface/itres.c,0.77
+dalcinl,src/ksp/ksp/interface/xmon.c,0.77
+dalcinl,src/ksp/ksp/makefile,0.92
+dalcinl,src/ksp/pc/impls/bjacobi/bjacobi.c,0.68
+dalcinl,src/ksp/pc/impls/factor/ilu/ilu.c,0.68
+dalcinl,src/ksp/pc/impls/redundant/redundant.c,0.86
+dalcinl,src/mat/color/color.c,0.68
+dalcinl,src/mat/impls/adic/matadic.c,0.68
+dalcinl,src/mat/impls/adj/mpi/mpiadj.h,0.68
+dalcinl,src/mat/impls/aij/aij/aijtype.c,0.68
+dalcinl,src/mat/impls/aij/seq/aij.h,0.68
+Richard Katz,src/dm/da/examples/tutorials/makefile,0.93
+Richard Katz,src/sys/examples/tutorials/makefile,0.93
+Richard Katz,src/ksp/ksp/interface/itcreate.c,2.47
+Richard Katz,src/sys/src/viewer/impls/socket/matlab/closeport.c,0.69
+Richard Katz,src/sys/src/viewer/impls/socket/matlab/launch.c,2.37
+Richard Katz,src/sys/src/viewer/impls/socket/matlab/makefile,4.94
+Richard Katz,src/sys/src/viewer/impls/socket/matlab/openport.c,1.57
+Richard Katz,src/sys/src/viewer/impls/socket/matlab/readinvecs.c,5.31
+Richard Katz,src/sys/src/viewer/impls/socket/matlab/receive.c,1.54
+Richard Katz,src/sys/src/viewer/impls/socket/matlab/receivedense.c,3.31
+Richard Katz,bin/adprocess.py,2.5
+xht,bmake/common/rules,3.7
+xht,src/dm/da/src/dalocal.c,0.17
+xht,src/mat/impls/adic/nladic.c,1.91
+xht,src/snes/examples/tutorials/ex19.c,3.91
+xht,src/snes/utils/damgsnes.c,2.63
+Kris Buschelman,python/PETSc/Configure.py,1.56
+Kris Buschelman,python/PETSc/packages/MPI.py,0.95
+Kris Buschelman,bmake/common/rules,1.0
+Kris Buschelman,bmake/common/rules.shared.basic,8.88
+Kris Buschelman,src/sys/src/dll/makefile,0.86
+Kris Buschelman,src/sys/src/f90/f90_common.c,5.49
+Kris Buschelman,src/sys/src/f90/f90_intel.c,1.95
+Kris Buschelman,src/sys/src/f90/f90_intel8.c,1.95
+Kris Buschelman,src/sys/src/f90/f90_win32.c,2.87
+Kris Buschelman,src/sys/src/memory/mal.c,2.83
+Kris Buschelman,src/sys/src/memory/mtr.c,7.25
+Kris Buschelman,src/ksp/pc/impls/mg/mg.c,7.36
+Kris Buschelman,include/petscmatlab.h,0.89
+Kris Buschelman,include/petscts.h,7.2
+Kris Buschelman,src/snes/impls/ls/ls.c,8.7
+Kris Buschelman,src/snes/impls/ls/lsparams.c,1.94
+Kris Buschelman,src/snes/impls/tr/tr.c,2.0
+Kris Buschelman,src/snes/interface/snes.c,49.71
+Kris Buschelman,src/snes/interface/snesj.c,0.97
+Kris Buschelman,src/snes/interface/snesj2.c,0.97
+Kris Buschelman,src/snes/interface/snesregi.c,1.79
+Kris Buschelman,src/snes/interface/snesut.c,9.47
+Kris Buschelman,src/snes/mf/mfregis.c,1.79
+Kris Buschelman,src/snes/mf/snesmfjdef.c,1.82
+Kris Buschelman,src/snes/mf/wp.c,4.6
+Kris Buschelman,src/ts/impls/explicit/euler/euler.c,0.89
+Kris Buschelman,src/ts/impls/explicit/rk/rk.c,2.75
+Kris Buschelman,src/ts/impls/implicit/beuler/beuler.c,0.89
+Kris Buschelman,src/ts/impls/implicit/cn/cn.c,0.89
+Kris Buschelman,src/ts/impls/implicit/pvode/petscpvode.c,16.78
+Kris Buschelman,src/ts/impls/pseudo/posindep.c,12.15
+Kris Buschelman,src/ts/interface/dlregis.c,1.81
+Kris Buschelman,src/ts/interface/ts.c,45.04
+Kris Buschelman,src/ts/interface/tscreate.c,0.93
+Kris Buschelman,src/ts/interface/tsfd.c,0.97
+Kris Buschelman,src/ts/interface/tsreg.c,3.71
+Kris Buschelman,include/petscmg.h,0.9
+Kris Buschelman,src/ksp/ksp/impls/bcgs/bcgs.c,0.89
+Kris Buschelman,src/ksp/ksp/impls/bcgsl/bcgsl.c,3.67
+Kris Buschelman,src/ksp/ksp/impls/bicg/bicg.c,0.89
+Kris Buschelman,src/ksp/ksp/impls/cg/cg.c,1.82
+Kris Buschelman,src/ksp/ksp/impls/cg/cgtype.c,0.93
+Kris Buschelman,src/ksp/ksp/impls/cgne/cgne.c,1.82
+Kris Buschelman,src/ksp/ksp/impls/cgs/cgs.c,0.89
+Kris Buschelman,src/ksp/ksp/impls/cheby/cheby.c,2.8
+Kris Buschelman,src/ksp/ksp/impls/cr/cr.c,0.89
+Kris Buschelman,src/ksp/ksp/impls/fgmres/fgmres.c,1.5
+Kris Buschelman,src/ksp/ksp/impls/fgmres/modpcf.c,2.92
+Kris Buschelman,src/ksp/ksp/impls/gmres/borthog.c,0.93
+Kris Buschelman,src/ksp/ksp/impls/gmres/borthog2.c,1.62
+jroman,bmake/common/variables,1.15
+jroman,src/mat/partition/impls/makefile,0.58
+victorle,src/vec/is/impls/general/general.c,3.0
+victorle,src/dm/ao/interface/aodata.c,2.49
+victorle,src/docs/website/documentation/changes/221.html,0.92
+victorle,src/mat/examples/tutorials/makefile,3.0
+victorle,src/ksp/examples/tutorials/makefile,1.6
+victorle,src/ksp/ksp/impls/bcgsl/bcgsl.c,8.4
+victorle,src/ksp/ksp/impls/makefile,0.97
+victorle,src/vec/makefile,0.94
+victorle,src/vec/pf/impls/constant/const.c,0.96
+victorle,src/vec/pf/impls/matlab/cmatlab.c,0.96
+victorle,src/vec/pf/impls/string/cstring.c,0.96
+victorle,src/ksp/ksp/interface/itfunc.c,10.52
+victorle,src/ksp/ksp/interface/iterativ.c,0.97
+victorle,bmake/common/rules,0.89
+victorle,src/ksp/pc/impls/makefile,0.97
+victorle,src/mat/impls/dense/seq/dense.c,41.87
+victorle,src/mat/impls/aij/seq/aij.c,1.0
+victorle,src/mat/impls/aij/seq/aijfact.c,2.0
+victorle,src/vec/impls/esi/ebvec1.c,0.87
+victorle,src/vec/impls/mpi/pvec2.c,0.87
+victorle,src/vec/examples/tests/makefile,3.54
+victorle,src/sles/ksp/impls/makefile,0.97
+victorle,src/vec/utils/comb.c,1.15
+victorle,src/sys/src/objects/inherit.c,0.58
+victorle,src/sles/ksp/impls/fgmres/fgmres.c,1.96
+victorle,src/sles/ksp/impls/cgs/cgs.c,2.06
+victorle,src/sles/ksp/impls/cr/cr.c,2.09
+victorle,src/sles/ksp/impls/lsqr/lsqr.c,2.06
+victorle,src/sles/ksp/impls/minres/minres.c,2.06
+victorle,src/sles/ksp/impls/symmlq/symmlq.c,2.11
+victorle,src/sles/ksp/impls/bicg/bicg.c,2.19
+victorle,src/sles/pc/impls/cholesky/cholesky.c,2.23
+victorle,src/sles/ksp/impls/bcgs/bcgs.c,2.06
+victorle,src/sys/src/objects/makefile,1.89
+victorle,src/mat/impls/sbaij/seq/sbaijfact.c,2.76
+victorle,src/mat/impls/aij/mpi/mpiaij.c,1.0
+victorle,src/sles/pc/impls/spai/src/ispai.c,3.67
+victorle,src/mat/partition/impls/pmetis/pmetis.c,0.33
+victorle,src/mat/partition/partition.c,1.52
+victorle,src/mat/impls/sbaij/seq/sbaijfact2.c,0.94
+kris,include/petscversion.h,0.8
+orheinba,src/mat/impls/feti/feti.h,9.19
+orheinba,src/sles/pc/impls/is/feti/examples/ex1.c,5.45
+orheinba,src/sles/pc/impls/is/feti/fetipc.h,3.58
+Administrator,include/petscpc.h,1.06
+Administrator,src/mat/order/sorder.c,0.82
+Administrator,src/sles/ksp/interface/itcreate.c,0.82
+Administrator,src/sles/ksp/interface/itfunc.c,0.82
+Administrator,src/sles/pc/impls/asm/asm.c,1.18
+Administrator,src/sles/pc/impls/cholesky/cholesky.c,0.24
+Administrator,src/sles/pc/impls/composite/composite.c,0.78
+Administrator,src/sles/pc/impls/eisens/eisen.c,0.22
+Administrator,src/sles/pc/impls/hypre/hyppilut.c,0.5
+Administrator,src/sles/pc/impls/lu/lu.c,0.13
+Administrator,src/sles/pc/impls/shell/shellpc.c,1.29
+Administrator,src/sles/pc/impls/sor/sor.c,0.45
+Administrator,src/snes/interface/snes.c,0.82
+Administrator,src/snes/utils/damgsnes.c,0.82
+Administrator,src/sys/src/draw/interface/drawreg.c,0.82
+Administrator,src/sys/src/error/err.c,0.82
+Administrator,src/sys/src/fileio/sysio.c,1.63
+Administrator,src/sys/src/viewer/impls/binary/binv.c,0.82
+William Gropp,src/sys/src/draw/impls/x/tone.c,0.67
+William Gropp,src/sys/src/draw/impls/x/wmap.c,0.7
+William Gropp,src/sys/src/draw/impls/x/frame.c,0.7
+William Gropp,bmake/solaris/rules,0.67
+Adam Oberman,src/contrib/src/burgers_vertex_based_q1/makefile,0.9
+Ibrahima Ba,bmake/solaris/packages,1.56
+Ibrahima Ba,include/petscerror.h,0.61
+David Keyes,src/contrib/euler/resid_fp.F,5.28
+David Keyes,src/contrib/euler/monitor.c,2.56
+David Keyes,src/contrib/euler/rbuild_fp.F,3.7
