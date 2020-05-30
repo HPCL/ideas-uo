@@ -1,0 +1,1045 @@
+source,target,value
+Massimiliano Culpo,var/spack/repos/builtin/packages/hwloc/package.py,1.23
+Massimiliano Culpo,lib/spack/llnl/util/lang.py,0.91
+Massimiliano Culpo,lib/spack/spack/test/concretize.py,31.77
+Massimiliano Culpo,var/spack/repos/builtin/packages/espresso/package.py,1.24
+Massimiliano Culpo,lib/spack/spack/test/cmd/graph.py,3.21
+Massimiliano Culpo,lib/spack/spack/test/cmd/versions.py,0.32
+Massimiliano Culpo,lib/spack/spack/test/database.py,0.72
+Massimiliano Culpo,lib/spack/spack/test/spec_syntax.py,7.21
+Massimiliano Culpo,lib/spack/spack/cmd/install.py,0.75
+Massimiliano Culpo,lib/spack/spack/spec.py,0.55
+Massimiliano Culpo,lib/spack/spack/cmd/spec.py,0.67
+Massimiliano Culpo,bin/spack,0.93
+Massimiliano Culpo,lib/spack/external/__init__.py,0.15
+Massimiliano Culpo,lib/spack/spack/config.py,2.19
+Massimiliano Culpo,lib/spack/spack/test/config.py,23.25
+Massimiliano Culpo,lib/spack/spack/build_environment.py,2.02
+Massimiliano Culpo,lib/spack/spack/package.py,0.66
+Massimiliano Culpo,lib/spack/spack/cmd/__init__.py,2.0
+Massimiliano Culpo,var/spack/repos/builtin/packages/flux/package.py,0.87
+Massimiliano Culpo,var/spack/repos/builtin/packages/py-brian2/package.py,0.87
+Massimiliano Culpo,var/spack/repos/builtin/packages/py-elephant/package.py,0.87
+Massimiliano Culpo,var/spack/repos/builtin/packages/py-pythonqwt/package.py,0.86
+Massimiliano Culpo,var/spack/repos/builtin/packages/py-qtconsole/package.py,0.86
+Massimiliano Culpo,var/spack/repos/builtin/packages/star-ccm-plus/package.py,0.87
+Massimiliano Culpo,lib/spack/docs/tutorial_modules.rst,3.21
+Massimiliano Culpo,lib/spack/llnl/util/filesystem.py,4.96
+Massimiliano Culpo,lib/spack/spack/cmd/common/arguments.py,2.0
+Massimiliano Culpo,var/spack/repos/builtin/packages/plumed/package.py,0.83
+Massimiliano Culpo,var/spack/repos/builtin/packages/git/package.py,1.0
+Massimiliano Culpo,lib/spack/spack/environment.py,1.16
+Massimiliano Culpo,etc/spack/defaults/config.yaml,0.67
+Massimiliano Culpo,lib/spack/spack/__init__.py,1.74
+Massimiliano Culpo,lib/spack/spack/build_systems/r.py,2.55
+Massimiliano Culpo,lib/spack/spack/build_systems/waf.py,5.58
+Massimiliano Culpo,lib/spack/spack/schema/modules.py,0.27
+Massimiliano Culpo,lib/spack/spack/test/modules.py,12.11
+Massimiliano Culpo,lib/spack/spack/test/util/prefix.py,0.88
+Massimiliano Culpo,var/spack/repos/builtin/packages/r-rmpi/package.py,0.85
+Massimiliano Culpo,var/spack/repos/builtin/packages/adios/package.py,0.73
+Massimiliano Culpo,lib/spack/spack/build_systems/autotools.py,10.54
+Massimiliano Culpo,var/spack/repos/builtin.mock/packages/a/package.py,0.67
+Massimiliano Culpo,lib/spack/spack/cmd/find.py,2.47
+Massimiliano Culpo,lib/spack/spack/cmd/info.py,0.12
+Massimiliano Culpo,lib/spack/spack/cmd/list.py,2.46
+Massimiliano Culpo,lib/spack/spack/repository.py,0.86
+Massimiliano Culpo,lib/spack/spack/cmd/env.py,2.82
+Massimiliano Culpo,lib/spack/spack/directives.py,1.85
+Massimiliano Culpo,lib/spack/spack/patch.py,1.51
+Massimiliano Culpo,lib/spack/spack/test/optional_deps.py,0.92
+Massimiliano Culpo,lib/spack/spack/test/spec_dag.py,41.54
+Veselin Dobrev,var/spack/repos/builtin/packages/libceed/package.py,1.8
+Veselin Dobrev,var/spack/repos/builtin/packages/ceed/package.py,5.82
+Veselin Dobrev,var/spack/repos/builtin/packages/mfem/package.py,12.03
+Veselin Dobrev,var/spack/repos/builtin/packages/petsc/package.py,0.82
+Veselin Dobrev,var/spack/repos/builtin/packages/occa/package.py,1.26
+Veselin Dobrev,var/spack/repos/builtin/packages/hpgmg/package.py,0.8
+Veselin Dobrev,var/spack/repos/builtin/packages/laghos/package.py,1.37
+Gregory L. Lee,lib/spack/spack/build_systems/python.py,0.84
+Gregory L. Lee,var/spack/repos/builtin/packages/stat/package.py,1.0
+Gregory L. Lee,var/spack/repos/builtin/packages/graphlib/package.py,0.85
+Gregory L. Lee,var/spack/repos/builtin/packages/freetype/package.py,0.82
+Gregory L. Lee,var/spack/repos/builtin/packages/intel/package.py,0.5
+Gregory L. Lee,lib/spack/spack/hooks/licensing.py,0.93
+Gregory L. Lee,var/spack/packages/hdf5/package.py,0.8
+Gregory L. Lee,lib/spack/spack/packages/launchmon/__init__.py,0.96
+Gregory L. Lee,lib/spack/spack/util/executable.py,0.87
+Gregory L. Lee,lib/spack/spack/util/prefix.py,1.06
+Tzanio,var/spack/repos/builtin/packages/libceed/package.py,1.18
+Tzanio,var/spack/repos/builtin/packages/ceed/package.py,1.97
+Tzanio,var/spack/repos/builtin/packages/petsc/package.py,1.0
+Tzanio,var/spack/repos/builtin/packages/hpgmg/package.py,1.56
+Tzanio,var/spack/repos/builtin/packages/magma/package.py,2.31
+Michael Kuhn,var/spack/repos/builtin/packages/json-c/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/likwid/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/flex/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/gtkplus/package.py,0.63
+Michael Kuhn,var/spack/repos/builtin/packages/autoconf/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/canu/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/repeatmasker/package.py,0.81
+Michael Kuhn,var/spack/repos/builtin/packages/vcftools/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/glib/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/openssl/package.py,0.89
+Michael Kuhn,lib/spack/spack/fetch_strategy.py,0.89
+Michael Kuhn,lib/spack/spack/build_systems/autotools.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/applewmproto/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/appres/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/atk/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/autogen/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/bdftopcf/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/beforelight/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/bigreqsproto/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/bitmap/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/cairo/package.py,1.69
+Michael Kuhn,var/spack/repos/builtin/packages/compositeproto/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/constype/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/cscope/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/czmq/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/damageproto/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/dmxproto/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/dri2proto/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/dri3proto/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/editres/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/emacs/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/encodings/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/evieext/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/exonerate/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/fixesproto/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/folly/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/font-adobe-100dpi/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/font-adobe-75dpi/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/font-adobe-utopia-100dpi/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/font-adobe-utopia-75dpi/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/font-adobe-utopia-type1/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/font-alias/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/font-arabic-misc/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/font-bh-100dpi/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/font-bh-75dpi/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/font-bh-lucidatypewriter-100dpi/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/font-bh-lucidatypewriter-75dpi/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/font-bh-ttf/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/font-bh-type1/package.py,0.89
+Michael Kuhn,var/spack/repos/builtin/packages/font-bitstream-100dpi/package.py,0.89
+Levi Baber,lib/spack/spack/cmd/module.py,0.75
+Federico Ficarelli,var/spack/repos/builtin/packages/tcl/package.py,0.69
+Federico Ficarelli,lib/spack/spack/cmd/install.py,2.29
+Federico Ficarelli,var/spack/repos/builtin/packages/dia/package.py,0.91
+Federico Ficarelli,var/spack/repos/builtin/packages/emacs/package.py,0.95
+Federico Ficarelli,var/spack/repos/builtin/packages/gtkplus/package.py,0.7
+Federico Ficarelli,var/spack/repos/builtin/packages/icedtea/package.py,1.9
+Federico Ficarelli,var/spack/repos/builtin/packages/py-pygtk/package.py,0.94
+Kelly (KT) Thompson,lib/spack/spack/test/module_parsing.py,0.82
+Kelly (KT) Thompson,var/spack/repos/builtin/packages/glib/package.py,2.0
+Cameron Smith,var/spack/repos/builtin/packages/pumi/package.py,0.5
+Yifan Zhu,var/spack/repos/builtin/packages/r-igraph/package.py,0.83
+Yifan Zhu,var/spack/repos/builtin/packages/r-matrix/package.py,0.78
+Yifan Zhu,var/spack/repos/builtin/packages/r-hexbin/package.py,0.86
+Yifan Zhu,var/spack/repos/builtin/packages/r-biobase/package.py,1.04
+Stephen McDowell,var/spack/repos/builtin/packages/armadillo/package.py,0.83
+Todd Gamblin,lib/spack/spack/graph.py,3.01
+Todd Gamblin,lib/spack/spack/package.py,0.67
+Todd Gamblin,lib/spack/spack/cmd/buildcache.py,0.87
+Todd Gamblin,lib/spack/spack/cmd/diy.py,2.9
+Todd Gamblin,lib/spack/spack/cmd/gpg.py,0.88
+Todd Gamblin,lib/spack/spack/cmd/setup.py,1.68
+Todd Gamblin,var/spack/repos/builtin/packages/r-dbi/package.py,0.88
+Todd Gamblin,var/spack/repos/builtin/packages/r-dorng/package.py,0.89
+Todd Gamblin,var/spack/repos/builtin/packages/r-downloader/package.py,0.89
+Todd Gamblin,var/spack/repos/builtin/packages/r-dplyr/package.py,0.88
+Todd Gamblin,var/spack/repos/builtin/packages/r-futile-logger/package.py,0.89
+Todd Gamblin,var/spack/repos/builtin/packages/r-getoptlong/package.py,0.89
+Todd Gamblin,var/spack/repos/builtin/packages/r-ggvis/package.py,0.88
+Todd Gamblin,var/spack/repos/builtin/packages/r-glmnet/package.py,0.88
+Todd Gamblin,var/spack/repos/builtin/packages/r-hms/package.py,0.89
+Todd Gamblin,var/spack/repos/builtin/packages/r-htmltools/package.py,0.88
+Todd Gamblin,var/spack/repos/builtin/packages/r-httpuv/package.py,0.88
+Todd Gamblin,var/spack/repos/builtin/packages/r-hwriter/package.py,0.89
+Todd Gamblin,var/spack/repos/builtin/packages/r-jsonlite/package.py,0.88
+Todd Gamblin,var/spack/repos/builtin/packages/r-lattice/package.py,0.88
+Todd Gamblin,var/spack/repos/builtin/packages/r-locfit/package.py,0.89
+Todd Gamblin,var/spack/repos/builtin/packages/r-matrix/package.py,0.88
+Todd Gamblin,var/spack/repos/builtin/packages/r-matrixstats/package.py,0.89
+Todd Gamblin,var/spack/repos/builtin/packages/r-memoise/package.py,0.88
+Todd Gamblin,var/spack/repos/builtin/packages/r-mpm/package.py,0.89
+Todd Gamblin,var/spack/repos/builtin/packages/r-nor1mix/package.py,0.89
+Todd Gamblin,var/spack/repos/builtin/packages/r-pkgconfig/package.py,0.89
+Todd Gamblin,var/spack/repos/builtin/packages/r-r6/package.py,0.88
+Todd Gamblin,var/spack/repos/builtin/packages/r-rcpp/package.py,0.88
+Todd Gamblin,var/spack/repos/builtin/packages/r-rcurl/package.py,0.89
+Todd Gamblin,var/spack/repos/builtin/packages/r-shiny/package.py,0.88
+Todd Gamblin,var/spack/repos/builtin/packages/r-tibble/package.py,0.88
+Todd Gamblin,lib/spack/spack/relocate.py,0.89
+Todd Gamblin,lib/spack/docs/contribution_guide.rst,4.85
+Todd Gamblin,lib/spack/docs/known_issues.rst,2.72
+Todd Gamblin,lib/spack/docs/workflows.rst,4.58
+Todd Gamblin,lib/spack/llnl/util/lock.py,7.63
+Todd Gamblin,lib/spack/spack/build_systems/__init__.py,0.88
+Todd Gamblin,lib/spack/spack/build_systems/aspell_dict.py,0.89
+Todd Gamblin,lib/spack/spack/build_systems/autotools.py,0.83
+Todd Gamblin,lib/spack/spack/build_systems/cmake.py,0.88
+Todd Gamblin,lib/spack/spack/build_systems/intel.py,0.89
+Todd Gamblin,lib/spack/spack/build_systems/perl.py,0.88
+Todd Gamblin,lib/spack/spack/build_systems/python.py,0.25
+Todd Gamblin,lib/spack/spack/build_systems/qmake.py,0.89
+Todd Gamblin,lib/spack/spack/build_systems/r.py,0.88
+Todd Gamblin,lib/spack/spack/build_systems/scons.py,0.89
+Todd Gamblin,lib/spack/spack/build_systems/waf.py,0.88
+Todd Gamblin,lib/spack/spack/cmd/clone.py,2.37
+Todd Gamblin,lib/spack/spack/cmd/common/__init__.py,0.88
+Denis Davydov,var/spack/repos/builtin/packages/fftw/package.py,0.87
+Denis Davydov,var/spack/repos/builtin/packages/intel-parallel-studio/package.py,0.82
+Denis Davydov,var/spack/repos/builtin/packages/libxsmm/package.py,1.25
+Denis Davydov,var/spack/repos/builtin/packages/netlib-xblas/package.py,0.75
+Denis Davydov,var/spack/repos/builtin/packages/suite-sparse/package.py,0.67
+Denis Davydov,var/spack/repos/builtin/packages/py-numpy/package.py,1.1
+Denis Davydov,var/spack/repos/builtin/packages/elpa/package.py,0.93
+Denis Davydov,var/spack/repos/builtin/packages/gnuplot/package.py,1.58
+Denis Davydov,var/spack/repos/builtin/packages/boost/package.py,7.0
+Denis Davydov,var/spack/repos/builtin/packages/elemental/package.py,11.56
+Denis Davydov,var/spack/repos/builtin/packages/expat/package.py,0.61
+Denis Davydov,var/spack/repos/builtin/packages/lammps/package.py,0.79
+Denis Davydov,lib/spack/spack/build_environment.py,0.96
+Denis Davydov,var/spack/repos/builtin/packages/cantera/package.py,0.24
+Denis Davydov,var/spack/repos/builtin/packages/ipopt/package.py,0.12
+Denis Davydov,var/spack/repos/builtin/packages/mfem/package.py,0.4
+Denis Davydov,var/spack/repos/builtin/packages/netlib-lapack/package.py,0.6
+Denis Davydov,var/spack/repos/builtin/packages/tar/gnutar-configure-xattrs.patch,0.85
+Denis Davydov,lib/spack/llnl/util/filesystem.py,0.82
+Denis Davydov,lib/spack/spack/concretize.py,0.78
+Denis Davydov,var/spack/repos/builtin/packages/arpack-ng/parpack_cmake.patch,1.0
+Denis Davydov,var/spack/repos/builtin/packages/openblas/test_cblas_dgemm.output,0.42
+Denis Davydov,var/spack/repos/builtin/packages/oce/null.patch,0.48
+Denis Davydov,var/spack/repos/builtin/packages/mumps/Makefile.inc,0.41
+Denis Davydov,var/spack/repos/builtin/packages/eigen/package.py,0.67
+Aaron Fisher,var/spack/repos/builtin/packages/ceed/package.py,0.37
+Patrick Gartung,lib/spack/spack/package.py,0.87
+Patrick Gartung,var/spack/repos/builtin/packages/libgcrypt/package.py,0.63
+Patrick Gartung,var/spack/repos/builtin/packages/libgpg-error/package.py,0.69
+Patrick Gartung,var/spack/repos/builtin/packages/heppdt/package.py,1.0
+sknigh,var/spack/repos/builtin/packages/py-csvkit/package.py,0.79
+sknigh,var/spack/repos/builtin/packages/flex/package.py,0.71
+Eric,var/spack/repos/builtin/packages/r-rcurl/package.py,0.22
+Eric,var/spack/repos/builtin/packages/r-dbi/package.py,0.22
+Eric,var/spack/repos/builtin/packages/r-dorng/package.py,0.22
+Eric,var/spack/repos/builtin/packages/r-downloader/package.py,0.22
+Eric,var/spack/repos/builtin/packages/r-futile-logger/package.py,0.21
+Eric,var/spack/repos/builtin/packages/r-getoptlong/package.py,0.22
+Eric,var/spack/repos/builtin/packages/r-ggvis/package.py,0.22
+Eric,var/spack/repos/builtin/packages/r-glmnet/package.py,0.22
+Eric,var/spack/repos/builtin/packages/r-htmltools/package.py,0.22
+Eric,var/spack/repos/builtin/packages/r-httpuv/package.py,0.22
+Eric,var/spack/repos/builtin/packages/r-hwriter/package.py,0.22
+Eric,var/spack/repos/builtin/packages/r-jsonlite/package.py,0.22
+Eric,var/spack/repos/builtin/packages/r-lattice/package.py,0.22
+Eric,var/spack/repos/builtin/packages/r-locfit/package.py,0.22
+Eric,var/spack/repos/builtin/packages/r-matrix/package.py,0.22
+Eric,var/spack/repos/builtin/packages/r-matrixstats/package.py,0.22
+Eric,var/spack/repos/builtin/packages/r-memoise/package.py,0.22
+Eric,var/spack/repos/builtin/packages/r-mpm/package.py,0.22
+Eric,var/spack/repos/builtin/packages/r-nor1mix/package.py,0.22
+Eric,var/spack/repos/builtin/packages/r-pkgconfig/package.py,0.22
+Eric,var/spack/repos/builtin/packages/r-r6/package.py,0.22
+Eric,var/spack/repos/builtin/packages/r-shiny/package.py,0.22
+Eric,lib/spack/spack/cmd/create.py,0.82
+Eric,bin/sbang,0.85
+scheibelp,lib/spack/spack/repository.py,1.32
+scheibelp,lib/spack/spack/test/git_fetch.py,0.85
+scheibelp,lib/spack/spack/test/hg_fetch.py,0.85
+scheibelp,lib/spack/spack/test/svn_fetch.py,0.85
+scheibelp,lib/spack/spack/binary_distribution.py,1.06
+scheibelp,lib/spack/spack/relocate.py,4.85
+scheibelp,lib/spack/spack/compiler.py,0.81
+scheibelp,lib/spack/spack/concretize.py,4.96
+scheibelp,lib/spack/spack/cmd/load.py,0.47
+scheibelp,lib/spack/spack/cmd/unload.py,0.47
+scheibelp,lib/spack/spack/cmd/unuse.py,0.47
+scheibelp,lib/spack/spack/cmd/buildcache.py,1.56
+scheibelp,lib/spack/spack/package_prefs.py,0.5
+scheibelp,lib/spack/spack/test/conftest.py,0.66
+scheibelp,lib/spack/spack/test/spec_dag.py,3.35
+scheibelp,lib/spack/spack/build_systems/cmake.py,0.71
+scheibelp,lib/spack/spack/test/cmd/dependents.py,0.79
+scheibelp,lib/spack/spack/directory_layout.py,1.41
+scheibelp,share/spack/spack-completion.bash,0.95
+scheibelp,lib/spack/spack/compilers/__init__.py,1.66
+scheibelp,lib/spack/spack/cmd/config.py,0.77
+scheibelp,lib/spack/spack/test/cmd/test_compiler_cmd.py,2.43
+scheibelp,lib/spack/spack/operating_systems/cnl.py,0.87
+scheibelp,lib/spack/spack/fetch_strategy.py,2.45
+scheibelp,lib/spack/docs/basic_usage.rst,0.54
+scheibelp,lib/spack/spack/mirror.py,0.52
+scheibelp,lib/spack/spack/modules.py,7.32
+scheibelp,var/spack/repos/builtin/packages/boost/package.py,2.76
+scheibelp,lib/spack/spack/url.py,0.67
+scheibelp,lib/spack/spack/cmd/test.py,0.91
+Axel Huebl,var/spack/repos/builtin/packages/protobuf/package.py,1.77
+Axel Huebl,lib/spack/spack/cmd/flake8.py,3.45
+Gregory Becker,lib/spack/spack/test/concretize.py,0.5
+Gregory Becker,lib/spack/env/cc,3.27
+Gregory Becker,lib/spack/spack/build_environment.py,1.06
+Gregory Becker,lib/spack/spack/cmd/__init__.py,0.8
+Gregory Becker,lib/spack/spack/compiler.py,0.18
+Gregory Becker,lib/spack/spack/test/build_environment.py,0.82
+Gregory Becker,lib/spack/spack/cmd/setup.py,2.24
+Gregory Becker,lib/spack/spack/database.py,1.92
+Gregory Becker,lib/spack/docs/basic_usage.rst,12.41
+Gregory Becker,lib/spack/spack/repository.py,0.77
+Gregory Becker,lib/spack/docs/Makefile,0.41
+Gregory Becker,lib/spack/docs/basic_usage_tutorial.rst,8.34
+Gregory Becker,var/spack/repos/builtin/packages/boost/package.py,0.91
+Gregory Becker,lib/spack/spack/compilers/__init__.py,2.52
+Gregory Becker,lib/spack/spack/test/config.py,2.89
+Gregory Becker,lib/spack/spack/cmd/find.py,1.72
+Gregory Becker,lib/spack/spack/cmd/uninstall.py,0.8
+Gregory Becker,lib/spack/spack/test/spec_semantics.py,7.55
+Gregory Becker,lib/spack/spack/test/spec_dag.py,0.9
+Gregory Becker,lib/spack/docs/configuration.rst,1.95
+Gregory Becker,lib/spack/docs/features.rst,2.33
+Gregory Becker,lib/spack/spack/test/__init__.py,0.71
+Gregory Becker,lib/spack/spack/test/multimethod.py,4.63
+Gregory Becker,lib/spack/spack/modules.py,1.77
+Gregory Becker,var/spack/repos/builtin/packages/libpciaccess/package.py,0.91
+Gregory Becker,lib/spack/spack/cmd/compiler.py,0.71
+Gregory Becker,lib/spack/spack/test/spec_yaml.py,2.67
+Gregory Becker,var/spack/packages/graphviz/package.py,1.42
+Gregory Becker,var/spack/packages/py-mock/package.py,0.5
+Gregory Becker,var/spack/packages/adios/package.py,0.58
+Gregory Becker,lib/spack/spack/platforms/bgq.py,0.8
+Gregory Becker,lib/spack/spack/abi.py,1.58
+Gregory Becker,lib/spack/spack/architectures/linux.py,1.25
+Gregory Becker,lib/spack/spack/preferred_packages.py,0.87
+Gregory Becker,lib/spack/spack/compilers/gcc.py,0.95
+Gregory Becker,lib/spack/spack/compilers/intel.py,0.95
+Gregory Becker,lib/spack/spack/variant.py,0.91
+Gregory Becker,lib/spack/spack/cmd/deactivate.py,0.8
+Gregory Becker,lib/spack/spack/cmd/diy.py,6.91
+Gregory Becker,lib/spack/spack/cmd/extensions.py,0.93
+Gregory Becker,lib/spack/spack/cmd/module.py,1.84
+Greg Lee,var/spack/repos/builtin/packages/intel-parallel-studio/package.py,14.67
+snehring,var/spack/repos/builtin/packages/ant/package.py,0.5
+snehring,var/spack/repos/builtin/packages/antlr/package.py,0.88
+snehring,var/spack/repos/builtin/packages/bazel/package.py,0.67
+snehring,var/spack/repos/builtin/packages/beast2/package.py,0.5
+snehring,var/spack/repos/builtin/packages/fastqc/package.py,0.75
+snehring,var/spack/repos/builtin/packages/fseq/package.py,0.8
+snehring,var/spack/repos/builtin/packages/gradle/package.py,0.5
+snehring,var/spack/repos/builtin/packages/graphviz/package.py,0.82
+snehring,var/spack/repos/builtin/packages/hadoop/package.py,0.75
+snehring,var/spack/repos/builtin/packages/jmol/package.py,0.75
+snehring,var/spack/repos/builtin/packages/maven/package.py,0.5
+snehring,var/spack/repos/builtin/packages/nextflow/package.py,0.5
+snehring,var/spack/repos/builtin/packages/octave/package.py,1.77
+snehring,var/spack/repos/builtin/packages/opencv/package.py,0.82
+snehring,var/spack/repos/builtin/packages/openmpi/package.py,1.71
+snehring,var/spack/repos/builtin/packages/picard/package.py,1.73
+snehring,var/spack/repos/builtin/packages/py-jpype/package.py,0.8
+snehring,var/spack/repos/builtin/packages/r/package.py,0.5
+snehring,var/spack/repos/builtin/packages/rose/package.py,0.82
+snehring,var/spack/repos/builtin/packages/sbt/package.py,0.5
+snehring,var/spack/repos/builtin/packages/scala/package.py,0.5
+snehring,var/spack/repos/builtin/packages/spark/package.py,1.63
+snehring,var/spack/repos/builtin/packages/stc/package.py,0.5
+snehring,var/spack/repos/builtin/packages/thrift/package.py,1.3
+Jim Galarowicz,var/spack/repos/builtin/packages/cbtf-argonavis/package.py,3.96
+Jim Galarowicz,var/spack/repos/builtin/packages/cbtf-krell/package.py,5.23
+Jim Galarowicz,var/spack/repos/builtin/packages/cbtf-lanl/package.py,2.5
+Jim Galarowicz,var/spack/repos/builtin/packages/cbtf/package.py,4.27
+Jim Galarowicz,var/spack/packages/boost/package.py,0.98
+Jim Galarowicz,var/spack/packages/qt/package.py,1.41
+lingnanyuan,var/spack/repos/builtin/packages/r-glmnet/package.py,0.44
+lingnanyuan,var/spack/repos/builtin/packages/r-lattice/package.py,0.67
+Christoph Junghans,lib/spack/docs/tutorial/examples/Autotools/0.package.py,0.89
+Christoph Junghans,lib/spack/docs/tutorial/examples/Autotools/1.package.py,0.89
+Christoph Junghans,lib/spack/docs/tutorial/examples/Autotools/autotools_class.py,0.89
+Christoph Junghans,lib/spack/docs/tutorial/examples/Cmake/0.package.py,0.89
+Christoph Junghans,lib/spack/docs/tutorial/examples/Cmake/1.package.py,0.89
+Christoph Junghans,lib/spack/docs/tutorial/examples/Cmake/2.package.py,0.89
+Christoph Junghans,lib/spack/docs/tutorial/examples/Cmake/cmake_class.py,0.89
+Christoph Junghans,lib/spack/docs/tutorial/examples/Makefile/0.package.py,0.89
+Christoph Junghans,lib/spack/docs/tutorial/examples/Makefile/1.package.py,0.89
+Christoph Junghans,lib/spack/docs/tutorial/examples/Makefile/2.package.py,0.89
+Christoph Junghans,lib/spack/docs/tutorial/examples/Makefile/3.package.py,0.89
+Christoph Junghans,lib/spack/docs/tutorial/examples/Makefile/makefile_class.py,0.89
+Christoph Junghans,lib/spack/docs/tutorial/examples/PyPackage/0.package.py,0.89
+Christoph Junghans,lib/spack/docs/tutorial/examples/PyPackage/1.package.py,0.89
+Christoph Junghans,lib/spack/docs/tutorial/examples/PyPackage/python_package_class.py,0.89
+Christoph Junghans,var/spack/repos/builtin/packages/miniamr/package.py,0.91
+Christoph Junghans,lib/spack/env/cc,1.9
+Christoph Junghans,lib/spack/docs/packaging_guide.rst,1.52
+Christoph Junghans,lib/spack/spack/directives.py,1.87
+Mike Pozulp,var/spack/repos/builtin/packages/llvm/package.py,0.69
+Geoffrey Oxberry,var/spack/repos/builtin/packages/argp-standalone/argp-fmtstream.h.patch,0.19
+Geoffrey Oxberry,var/spack/repos/builtin/packages/metis/package.py,2.9
+Geoffrey Oxberry,var/spack/repos/builtin/packages/dealii/package.py,0.93
+Geoffrey Oxberry,var/spack/repos/builtin/packages/eigen/package.py,0.93
+Geoffrey Oxberry,var/spack/repos/builtin/packages/parmetis/package.py,0.82
+Geoffrey Oxberry,var/spack/repos/builtin/packages/petsc/package.py,0.93
+Geoffrey Oxberry,var/spack/repos/builtin/packages/superlu-dist/package.py,0.82
+å¥ç¾ç«,var/spack/repos/builtin/packages/libtiff/package.py,0.92
+å¥ç¾ç«,var/spack/repos/builtin/packages/octave/package.py,0.95
+å¥ç¾ç«,var/spack/repos/builtin/packages/gdbm/package.py,0.94
+å¥ç¾ç«,var/spack/repos/builtin/packages/mesa-glu/package.py,0.71
+å¥ç¾ç«,var/spack/repos/builtin/packages/gromacs/package.py,0.93
+å¥ç¾ç«,var/spack/repos/builtin/packages/bash/package.py,0.94
+å¥ç¾ç«,var/spack/repos/builtin/packages/cdd/package.py,1.1
+å¥ç¾ç«,var/spack/repos/builtin/packages/cfitsio/package.py,0.89
+å¥ç¾ç«,var/spack/repos/builtin/packages/darshan-runtime/package.py,0.95
+å¥ç¾ç«,var/spack/repos/builtin/packages/darshan-util/package.py,0.95
+å¥ç¾ç«,var/spack/repos/builtin/packages/gconf/package.py,0.96
+å¥ç¾ç«,var/spack/repos/builtin/packages/ghostscript-fonts/package.py,0.71
+å¥ç¾ç«,var/spack/repos/builtin/packages/gmake/package.py,0.94
+å¥ç¾ç«,var/spack/repos/builtin/packages/gnutls/package.py,0.73
+å¥ç¾ç«,var/spack/repos/builtin/packages/guile/package.py,0.95
+å¥ç¾ç«,var/spack/repos/builtin/packages/libffi/package.py,0.84
+å¥ç¾ç«,var/spack/repos/builtin/packages/libgcrypt/package.py,0.65
+å¥ç¾ç«,var/spack/repos/builtin/packages/libgpg-error/package.py,0.7
+å¥ç¾ç«,var/spack/repos/builtin/packages/libsigsegv/package.py,0.94
+å¥ç¾ç«,var/spack/repos/builtin/packages/m4/package.py,0.95
+å¥ç¾ç«,var/spack/repos/builtin/packages/mesa/package.py,0.85
+å¥ç¾ç«,var/spack/repos/builtin/packages/mpc/package.py,0.95
+å¥ç¾ç«,var/spack/repos/builtin/packages/mpe2/package.py,0.94
+å¥ç¾ç«,var/spack/repos/builtin/packages/mrnet/package.py,0.9
+å¥ç¾ç«,var/spack/repos/builtin/packages/ncview/package.py,0.6
+å¥ç¾ç«,var/spack/repos/builtin/packages/netcdf/package.py,0.65
+å¥ç¾ç«,var/spack/repos/builtin/packages/openssl/package.py,1.74
+å¥ç¾ç«,var/spack/repos/builtin/packages/pcre/package.py,0.74
+å¥ç¾ç«,var/spack/repos/builtin/packages/pcre2/package.py,0.69
+å¥ç¾ç«,var/spack/repos/builtin/packages/readline/package.py,0.6
+å¥ç¾ç«,var/spack/repos/builtin/packages/unixodbc/package.py,0.73
+Sergey Kosukhin,var/spack/repos/builtin/packages/cdo/package.py,1.38
+Sergey Kosukhin,var/spack/repos/builtin/packages/grib-api/package.py,2.36
+Sergey Kosukhin,lib/spack/spack/fetch_strategy.py,0.67
+Sergey Kosukhin,var/spack/repos/builtin/packages/isaac-server/package.py,0.67
+Sergey Kosukhin,var/spack/repos/builtin/packages/isaac/package.py,0.67
+Sergey Kosukhin,var/spack/repos/builtin/packages/jasper/package.py,0.41
+Sergey Kosukhin,lib/spack/spack/architecture.py,0.9
+Sergey Kosukhin,lib/spack/spack/compilers/__init__.py,0.9
+Sergey Kosukhin,lib/spack/spack/compilers/cce.py,1.0
+Elizabeth Fischer,var/spack/repos/builtin/packages/gdal/package.py,0.73
+Elizabeth Fischer,lib/spack/spack/cmd/install.py,1.53
+Elizabeth Fischer,lib/spack/spack/test/setup.py,3.4
+Elizabeth Fischer,lib/spack/spack/directory_layout.py,1.58
+Elizabeth Fischer,lib/spack/spack/modules.py,0.82
+Elizabeth Fischer,lib/spack/spack/cmd/__init__.py,1.59
+Elizabeth Fischer,lib/spack/docs/packaging_guide.rst,10.3
+Elizabeth Fischer,lib/spack/spack/cmd/create.py,1.77
+Elizabeth Fischer,var/spack/repos/builtin/packages/cantera/package.py,0.78
+Elizabeth Fischer,var/spack/repos/builtin/packages/cask/package.py,0.67
+Elizabeth Fischer,var/spack/repos/builtin/packages/cmor/package.py,0.8
+Elizabeth Fischer,var/spack/repos/builtin/packages/environment-modules/package.py,0.61
+Elizabeth Fischer,var/spack/repos/builtin/packages/espressopp/package.py,0.91
+Elizabeth Fischer,var/spack/repos/builtin/packages/fenics/package.py,0.66
+Elizabeth Fischer,var/spack/repos/builtin/packages/global/package.py,0.73
+Elizabeth Fischer,var/spack/repos/builtin/packages/go-bootstrap/package.py,0.61
+Elizabeth Fischer,var/spack/repos/builtin/packages/go/package.py,0.61
+Elizabeth Fischer,var/spack/repos/builtin/packages/hoomd-blue/package.py,0.73
+Elizabeth Fischer,var/spack/repos/builtin/packages/ibmisc/package.py,0.79
+Elizabeth Fischer,var/spack/repos/builtin/packages/lmod/package.py,0.65
+Elizabeth Fischer,var/spack/repos/builtin/packages/lua/package.py,0.87
+Elizabeth Fischer,var/spack/repos/builtin/packages/nwchem/package.py,0.86
+Elizabeth Fischer,var/spack/repos/builtin/packages/opencv/package.py,0.8
+Elizabeth Fischer,var/spack/repos/builtin/packages/psi4/package.py,0.73
+Elizabeth Fischer,var/spack/repos/builtin/packages/py-astroid/package.py,2.43
+Elizabeth Fischer,var/spack/repos/builtin/packages/py-astropy/package.py,2.11
+Elizabeth Fischer,var/spack/repos/builtin/packages/py-autopep8/package.py,0.9
+Elizabeth Fischer,var/spack/repos/builtin/packages/py-babel/package.py,0.73
+Elizabeth Fischer,var/spack/repos/builtin/packages/py-biopython/package.py,0.7
+Elizabeth Fischer,var/spack/repos/builtin/packages/py-bottleneck/package.py,0.73
+Elizabeth Fischer,var/spack/repos/builtin/packages/py-cclib/package.py,0.8
+Elizabeth Fischer,var/spack/repos/builtin/packages/py-cdo/package.py,0.7
+Elizabeth Fischer,var/spack/repos/builtin/packages/py-cffi/package.py,0.73
+Elizabeth Fischer,var/spack/repos/builtin/packages/py-configparser/package.py,0.91
+Elizabeth Fischer,var/spack/repos/builtin/packages/py-csvkit/package.py,0.8
+Elizabeth Fischer,var/spack/repos/builtin/packages/py-cycler/package.py,0.73
+Elizabeth Fischer,var/spack/repos/builtin/packages/py-dateutil/package.py,0.73
+Elizabeth Fischer,var/spack/repos/builtin/packages/py-emcee/package.py,0.73
+Elizabeth Fischer,var/spack/repos/builtin/packages/py-enum34/package.py,0.86
+Elizabeth Fischer,var/spack/repos/builtin/packages/py-flake8/package.py,7.27
+Elizabeth Fischer,var/spack/repos/builtin/packages/py-gnuplot/package.py,0.73
+Elizabeth Fischer,var/spack/repos/builtin/packages/py-h5py/package.py,1.59
+Elizabeth Fischer,var/spack/repos/builtin/packages/py-iminuit/package.py,0.7
+Elizabeth Fischer,var/spack/repos/builtin/packages/py-ipython/package.py,0.7
+Elizabeth Fischer,var/spack/repos/builtin/packages/py-jinja2/package.py,0.77
+Elizabeth Fischer,var/spack/repos/builtin/packages/py-logilab-common/package.py,1.66
+Elizabeth Fischer,var/spack/repos/builtin/packages/py-macs2/package.py,0.73
+Elizabeth Fischer,var/spack/repos/builtin/packages/py-mako/package.py,0.82
+Elizabeth Fischer,var/spack/repos/builtin/packages/py-meep/package.py,0.69
+Elizabeth Fischer,var/spack/repos/builtin/packages/py-mock/package.py,0.73
+healther,lib/spack/spack/filesystem_view.py,0.8
+healther,var/spack/repos/builtin/packages/py-enum34/package.py,2.11
+healther,var/spack/repos/builtin/packages/py-backports-shutil-get-terminal-size/package.py,0.46
+healther,var/spack/repos/builtin/packages/py-ipython/package.py,1.59
+healther,var/spack/repos/builtin/packages/py-coverage/package.py,0.82
+healther,var/spack/repos/builtin/packages/py-pbr/package.py,0.8
+healther,var/spack/repos/builtin/packages/log4cxx/log4cxx-0.10.0-missing_includes.patch,0.24
+healther,var/spack/repos/builtin/packages/log4cxx/log4cxx-0.10.0-narrowing-fixes-from-upstream.patch,0.78
+Mario Melara,lib/spack/docs/tutorial.rst,0.83
+Mario Melara,lib/spack/docs/tutorial/examples/1.package.py,0.97
+Mario Melara,lib/spack/docs/tutorial_buildsystems.rst,4.7
+Mario Melara,lib/spack/docs/basic_usage.rst,23.6
+Mario Melara,lib/spack/spack/operating_system/mac_osx.py,1.18
+Mario Melara,lib/spack/spack/architectures/cray.py,3.26
+Adam J. Stewart,var/spack/repos/builtin/packages/py-bsddb3/package.py,0.86
+Adam J. Stewart,lib/spack/spack/compilers/intel.py,4.0
+Adam J. Stewart,var/spack/repos/builtin/packages/pango/package.py,0.67
+Adam J. Stewart,lib/spack/external/__init__.py,4.76
+Adam J. Stewart,lib/spack/external/_pytest/_argcomplete.py,3.58
+Adam J. Stewart,lib/spack/external/_pytest/_code/_py2traceback.py,1.0
+Adam J. Stewart,lib/spack/external/_pytest/_code/code.py,31.96
+Adam J. Stewart,lib/spack/external/_pytest/_code/source.py,18.99
+Adam J. Stewart,lib/spack/external/_pytest/assertion/__init__.py,0.64
+Adam J. Stewart,lib/spack/external/_pytest/assertion/rewrite.py,12.17
+Adam J. Stewart,lib/spack/external/_pytest/assertion/util.py,6.87
+Adam J. Stewart,lib/spack/external/_pytest/cacheprovider.py,9.41
+Adam J. Stewart,lib/spack/external/_pytest/capture.py,4.89
+Adam J. Stewart,lib/spack/external/_pytest/compat.py,8.19
+Adam J. Stewart,lib/spack/external/_pytest/config.py,48.05
+Adam J. Stewart,lib/spack/external/_pytest/debugging.py,5.68
+Adam J. Stewart,lib/spack/external/_pytest/deprecated.py,1.0
+Adam J. Stewart,lib/spack/external/_pytest/doctest.py,9.76
+Adam J. Stewart,lib/spack/external/_pytest/fixtures.py,37.55
+Adam J. Stewart,lib/spack/external/_pytest/helpconfig.py,8.06
+Adam J. Stewart,lib/spack/external/_pytest/hookspec.py,12.37
+Adam J. Stewart,lib/spack/external/_pytest/junitxml.py,6.47
+Adam J. Stewart,lib/spack/external/_pytest/main.py,39.61
+Adam J. Stewart,lib/spack/external/_pytest/mark.py,9.21
+Adam J. Stewart,lib/spack/external/_pytest/monkeypatch.py,2.89
+Adam J. Stewart,lib/spack/external/_pytest/nose.py,7.82
+Adam J. Stewart,lib/spack/external/_pytest/pastebin.py,1.0
+Adam J. Stewart,lib/spack/external/_pytest/pytester.py,46.78
+Adam J. Stewart,lib/spack/external/_pytest/python.py,54.07
+Adam J. Stewart,lib/spack/external/_pytest/recwarn.py,6.63
+Adam J. Stewart,lib/spack/external/_pytest/resultlog.py,4.54
+Adam J. Stewart,lib/spack/external/_pytest/runner.py,15.56
+Adam J. Stewart,lib/spack/external/_pytest/skipping.py,24.65
+Adam J. Stewart,lib/spack/external/_pytest/terminal.py,26.23
+Adam J. Stewart,lib/spack/external/_pytest/tmpdir.py,2.94
+Adam J. Stewart,lib/spack/external/_pytest/unittest.py,14.41
+Adam J. Stewart,lib/spack/external/_pytest/vendored_packages/pluggy.py,0.88
+Adam J. Stewart,lib/spack/external/jinja2/__init__.py,1.28
+Adam J. Stewart,lib/spack/external/jinja2/asyncsupport.py,4.15
+Adam J. Stewart,lib/spack/external/jinja2/bccache.py,0.98
+Adam J. Stewart,lib/spack/external/jinja2/compiler.py,6.4
+Adam J. Stewart,lib/spack/external/jinja2/debug.py,0.87
+Adam J. Stewart,lib/spack/external/jinja2/defaults.py,1.64
+Adam J. Stewart,lib/spack/external/jinja2/environment.py,0.93
+Adam J. Stewart,lib/spack/external/jinja2/ext.py,0.82
+Adam J. Stewart,lib/spack/external/jinja2/filters.py,10.66
+Adam J. Stewart,lib/spack/external/jinja2/idtracking.py,1.76
+Adam J. Stewart,lib/spack/external/jinja2/lexer.py,1.48
+Adam J. Stewart,lib/spack/external/jinja2/nodes.py,3.27
+Adam J. Stewart,lib/spack/external/jinja2/parser.py,4.72
+Mark C. Miller,var/spack/repos/builtin/packages/boxlib/package.py,0.27
+Mark C. Miller,var/spack/repos/builtin/packages/moab/package.py,0.03
+Jon Rood,var/spack/repos/builtin/packages/cgns/package.py,1.82
+Brian Van Essen,var/spack/repos/builtin/packages/libtiff/package.py,0.32
+Pramod S Kumbhar,var/spack/repos/builtin/packages/intel-parallel-studio/package.py,1.0
+Pramod S Kumbhar,var/spack/repos/builtin/packages/hpctoolkit-externals/package.py,0.23
+Pramod S Kumbhar,var/spack/repos/builtin/packages/allinea-forge/package.py,0.83
+Pramod S Kumbhar,var/spack/repos/builtin/packages/cbtf-krell/package.py,0.63
+alalazo,var/spack/repos/builtin/packages/elemental/package.py,0.9
+alalazo,var/spack/repos/builtin/packages/hdf5/package.py,3.56
+alalazo,var/spack/repos/builtin/packages/intel-mpi/package.py,1.75
+alalazo,var/spack/repos/builtin/packages/libxc/package.py,0.9
+alalazo,var/spack/repos/builtin/packages/netcdf-fortran/package.py,0.9
+alalazo,var/spack/repos/builtin/packages/netlib-lapack/package.py,2.41
+alalazo,var/spack/repos/builtin/packages/openspeedshop/package.py,1.67
+alalazo,var/spack/repos/builtin/packages/r/package.py,1.34
+alalazo,var/spack/repos/builtin/packages/scotch/package.py,0.9
+alalazo,var/spack/repos/builtin/packages/veclibfort/package.py,0.9
+alalazo,lib/spack/llnl/util/filesystem.py,1.76
+alalazo,lib/spack/spack/test/llnl/util/file_list.py,3.85
+alalazo,lib/spack/spack/__init__.py,1.78
+alalazo,lib/spack/spack/directives.py,2.72
+alalazo,lib/spack/spack/package.py,0.66
+alalazo,var/spack/repos/builtin/packages/armadillo/package.py,3.75
+alalazo,var/spack/repos/builtin/packages/astyle/package.py,1.97
+alalazo,lib/spack/spack/cmd/setup.py,1.0
+alalazo,var/spack/repos/builtin/packages/lzo/package.py,0.41
+alalazo,var/spack/repos/builtin/packages/autoconf/package.py,1.14
+alalazo,lib/spack/spack/cmd/create.py,13.16
+alalazo,var/spack/repos/builtin/packages/gmp/package.py,1.67
+alalazo,lib/spack/spack/cmd/uninstall.py,3.3
+alalazo,lib/spack/spack/database.py,0.82
+alalazo,lib/spack/spack/modules.py,13.47
+alalazo,var/spack/repos/builtin/packages/ibmisc/package.py,0.67
+alalazo,var/spack/repos/builtin/packages/openjpeg/package.py,1.93
+alalazo,var/spack/repos/builtin/packages/blitz/package.py,1.67
+alalazo,bin/spack,0.87
+alalazo,lib/spack/spack/cmd/module.py,1.0
+alalazo,lib/spack/spack/test/cmd/find.py,1.0
+alalazo,lib/spack/spack/config.py,1.73
+alalazo,share/spack/csh/spack.csh,3.67
+alalazo,var/spack/repos/builtin/packages/mxml/package.py,3.0
+alalazo,var/spack/repos/builtin/packages/automake/package.py,1.0
+alalazo,var/spack/repos/builtin/packages/espresso/package.py,3.77
+alalazo,var/spack/repos/builtin/packages/lmod/package.py,2.42
+alalazo,var/spack/repos/builtin/packages/lua/package.py,1.93
+alalazo,lib/spack/docs/basic_usage.rst,2.43
+alalazo,flake8-framework.ini,0.89
+alalazo,lib/spack/spack/cmd/compiler.py,0.48
+alalazo,lib/spack/spack/directory_layout.py,0.89
+alalazo,var/spack/repos/builtin/packages/qt/package.py,0.73
+alalazo,var/spack/repos/builtin/packages/ruby/package.py,3.05
+alalazo,lib/spack/spack/test/database.py,0.26
+alalazo,lib/spack/spack/cmd/checksum.py,3.43
+alalazo,lib/spack/spack/cmd/md5.py,0.62
+alalazo,lib/spack/spack/test/configure_guess.py,1.68
+alalazo,lib/spack/spack/test/directory_layout.py,0.63
+alalazo,lib/spack/spack/test/git_fetch.py,5.92
+Luigi Calori,bin/sbang,0.97
+David Beckingsale,var/spack/packages/SAMRAI/package.py,1.38
+becker33,lib/spack/spack/build_environment.py,0.71
+becker33,lib/spack/docs/tutorial_buildsystems.rst,1.09
+becker33,lib/spack/spack/test/cc.py,0.77
+becker33,lib/spack/docs/tutorial.rst,0.94
+becker33,lib/spack/docs/tutorial_configuration.rst,9.05
+becker33,lib/spack/spack/cmd/setup.py,2.03
+becker33,var/spack/repos/builtin/packages/clhep/package.py,1.73
+becker33,var/spack/repos/builtin/packages/elpa/package.py,0.83
+becker33,var/spack/repos/builtin/packages/ferret/package.py,0.47
+becker33,var/spack/repos/builtin/packages/git/package.py,0.86
+becker33,var/spack/repos/builtin/packages/libxc/package.py,0.72
+becker33,var/spack/repos/builtin/packages/libxpm/package.py,0.86
+becker33,var/spack/repos/builtin/packages/llvm-lld/package.py,0.87
+becker33,var/spack/repos/builtin/packages/llvm/package.py,0.83
+becker33,lib/spack/spack/package_prefs.py,0.63
+becker33,lib/spack/spack/platforms/cray.py,0.45
+becker33,lib/spack/docs/configuration.rst,4.99
+becker33,lib/spack/spack/__init__.py,0.94
+becker33,lib/spack/spack/compilers/__init__.py,0.95
+becker33,lib/spack/spack/config.py,0.96
+becker33,lib/spack/spack/cmd/dependents.py,1.0
+becker33,lib/spack/spack/cmd/uninstall.py,1.0
+becker33,lib/spack/spack/database.py,1.0
+becker33,lib/spack/spack/graph.py,1.0
+becker33,lib/spack/docs/basic_usage.rst,2.35
+becker33,lib/spack/docs/features.rst,1.0
+becker33,lib/spack/docs/getting_started.rst,1.0
+becker33,lib/spack/docs/tutorial_sc16_spack_basics.rst,4.87
+becker33,lib/spack/spack/parse.py,1.24
+becker33,lib/spack/spack/architecture.py,0.87
+becker33,lib/spack/spack/cmd/compiler.py,3.3
+becker33,lib/spack/spack/compiler.py,0.91
+becker33,lib/spack/spack/concretize.py,4.14
+Erik Schnetter,var/spack/repos/builtin/packages/intel-gpu-tools/package.py,0.71
+Erik Schnetter,var/spack/repos/builtin/packages/libdrm/package.py,0.71
+Erik Schnetter,var/spack/repos/builtin/packages/libpciaccess/package.py,0.67
+Erik Schnetter,var/spack/repos/builtin/packages/qthreads/package.py,0.82
+Erik Schnetter,var/spack/repos/builtin/packages/hdf5-blosc/package.py,2.3
+Erik Schnetter,lib/spack/docs/packaging_guide.rst,2.0
+Erik Schnetter,var/spack/repos/builtin/packages/bliss/package.py,0.87
+Erik Schnetter,var/spack/repos/builtin/packages/lrslib/Makefile.spack.patch,1.67
+Erik Schnetter,lib/spack/spack/test/cc.py,0.99
+Erik Schnetter,lib/spack/spack/package.py,1.0
+Erik Schnetter,var/spack/packages/gdb/package.py,1.87
+Erik Schnetter,var/spack/packages/git/package.py,0.96
+Erik Schnetter,var/spack/packages/python/package.py,1.85
+Erik Schnetter,var/spack/packages/texinfo/package.py,1.83
+George Hartzell,var/spack/repos/builtin/packages/r/package.py,0.8
+George Hartzell,var/spack/repos/builtin/packages/go/package.py,0.7
+George Hartzell,var/spack/repos/builtin/packages/perl/package.py,3.06
+George Hartzell,var/spack/repos/builtin/packages/libx11/package.py,1.79
+George Hartzell,var/spack/repos/builtin/packages/libxau/package.py,0.89
+George Hartzell,var/spack/repos/builtin/packages/lmod/package.py,0.71
+George Hartzell,var/spack/repos/builtin/packages/samtools/package.py,4.77
+George Hartzell,lib/spack/spack/modules.py,1.41
+George Hartzell,var/spack/repos/builtin/packages/gobject-introspection/package.py,0.61
+George Hartzell,var/spack/repos/builtin/packages/go-bootstrap/package.py,2.25
+George Hartzell,var/spack/repos/builtin/packages/r-jsonlite/package.py,1.25
+George Hartzell,var/spack/repos/builtin/packages/r-mime/package.py,1.42
+Benedikt Riedel,var/spack/repos/builtin/packages/geant4/package.py,2.77
+Scott Wittenburg,var/spack/repos/builtin/packages/qt/package.py,0.68
+Milton Woods,var/spack/repos/builtin/packages/libemos/package.py,1.3
+Milton Woods,lib/spack/spack/__init__.py,0.71
+Milton Woods,lib/spack/spack/build_systems/autotools.py,2.78
+Milton Woods,lib/spack/spack/cmd/build.py,0.87
+Milton Woods,lib/spack/spack/cmd/configure.py,0.87
+Milton Woods,lib/spack/spack/cmd/create.py,0.66
+Gregory Lee,var/spack/repos/builtin/packages/apex/package.py,0.75
+Gregory Lee,var/spack/repos/builtin/packages/callpath/package.py,0.74
+Gregory Lee,var/spack/repos/builtin/packages/kealib/package.py,0.91
+Gregory Lee,var/spack/repos/builtin/packages/llvm-lld/package.py,0.9
+Gregory Lee,var/spack/repos/builtin/packages/py-pylint/package.py,0.21
+Gregory Lee,var/spack/repos/builtin/packages/intel-daal/package.py,0.65
+Gregory Lee,var/spack/repos/builtin/packages/intel-ipp/package.py,0.94
+Gregory Lee,var/spack/repos/builtin/packages/dyninst/package.py,0.89
+Gregory Lee,var/spack/repos/builtin/packages/elfutils/package.py,0.82
+Gregory Lee,var/spack/repos/builtin/packages/extrae/package.py,2.17
+Gregory Lee,var/spack/repos/builtin/packages/libdwarf/package.py,1.43
+Gregory Lee,var/spack/repos/builtin/packages/libelf/package.py,1.21
+Gregory Lee,var/spack/repos/builtin/packages/openspeedshop/package.py,1.0
+Gregory Lee,var/spack/repos/builtin/packages/fontconfig/package.py,0.67
+Gregory Lee,var/spack/repos/builtin/packages/py-pygobject/package.py,0.67
+Gregory Lee,var/spack/repos/builtin/packages/py-logilab-common/package.py,0.58
+Gregory Lee,var/spack/repos/builtin/packages/py-six/package.py,0.58
+Gregory Lee,var/spack/repos/builtin/packages/py-pyqt/package.py,0.77
+Gregory Lee,lib/spack/docs/packaging_guide.rst,0.83
+Gregory Lee,var/spack/repos/builtin/packages/cairo/package.py,0.67
+Gregory Lee,var/spack/repos/builtin/packages/graphviz/package.py,1.28
+Gregory Lee,var/spack/repos/builtin/packages/libiconv/package.py,1.1
+Gregory Lee,var/spack/repos/builtin/packages/libtiff/package.py,0.67
+Gregory Lee,var/spack/repos/builtin/packages/lzma/package.py,0.67
+Michael Kuron,var/spack/repos/builtin/packages/nfft/package.py,1.52
+David Hows,lib/spack/spack/cmd/gpg.py,0.82
+serbanmaerean,var/spack/repos/builtin/packages/mumps/package.py,1.58
+serbanmaerean,lib/spack/spack/compilers/xl.py,3.19
+serbanmaerean,lib/spack/env/cc,3.74
+Mark Olesen,var/spack/repos/builtin/packages/foam-extend/package.py,3.77
+Mark Olesen,var/spack/repos/builtin/packages/paraview/package.py,2.07
+Mark Olesen,etc/spack/defaults/packages.yaml,0.8
+Mark Olesen,var/spack/repos/builtin/packages/opari2/package.py,1.24
+Mark Olesen,var/spack/repos/builtin/packages/otf2/package.py,2.24
+Mark Olesen,var/spack/repos/builtin/packages/scalasca/package.py,3.16
+Mark Olesen,share/spack/spack-completion.bash,0.91
+nshtg,var/spack/repos/builtin/packages/gnupg/package.py,0.9
+nshtg,var/spack/repos/builtin/packages/libassuan/package.py,0.93
+nshtg,var/spack/repos/builtin/packages/libgcrypt/package.py,0.88
+David BÃ¶hme,var/spack/repos/builtin/packages/cube/package.py,1.55
+David BÃ¶hme,var/spack/repos/builtin/packages/scalasca/package.py,1.54
+Audrey Thoma,var/spack/repos/builtin/packages/ruby/package.py,1.4
+Audrey Thoma,var/spack/repos/builtin/packages/mariadb/package.py,0.59
+Audrey Thoma,var/spack/repos/builtin/packages/r-mvtnorm/package.py,0.92
+Satish Balay,var/spack/repos/builtin/packages/netlib-lapack/package.py,1.8
+Johann KlÃ¤hn,var/spack/repos/builtin/packages/bazel/fix_env_handling.patch,0.9
+Johann KlÃ¤hn,lib/spack/spack/cmd/view.py,0.91
+Matthew LeGendre,lib/spack/docs/tutorial/examples/0.package.py,0.67
+Matthew LeGendre,lib/spack/docs/tutorial/examples/1.package.py,0.67
+Matthew LeGendre,lib/spack/docs/tutorial/examples/2.package.py,0.67
+Matthew LeGendre,lib/spack/docs/tutorial/examples/3.package.py,0.67
+Matthew LeGendre,lib/spack/docs/tutorial/examples/4.package.py,0.67
+Matthew LeGendre,lib/spack/docs/tutorial_packaging.rst,20.3
+Matthew LeGendre,lib/spack/docs/index.rst,0.5
+Matthew LeGendre,lib/spack/spack/concretize.py,5.75
+Matthew LeGendre,var/spack/repos/builtin.mock/packages/externalvirtual/package.py,0.63
+Matthew LeGendre,var/spack/repos/builtin/packages/gcc/package.py,0.82
+Matthew LeGendre,lib/spack/spack/config.py,2.59
+Matthew LeGendre,lib/spack/spack/test/mock_packages_test.py,3.62
+Matthew LeGendre,lib/spack/docs/packaging_guide.rst,1.0
+Matthew LeGendre,lib/spack/spack/cmd/mirror.py,2.48
+Matthew LeGendre,lib/spack/spack/stage.py,0.64
+Matthew LeGendre,lib/spack/docs/basic_usage.rst,4.28
+Matthew LeGendre,lib/spack/docs/mirrors.rst,1.77
+Matthew LeGendre,lib/spack/spack/packages.py,4.69
+Matthew LeGendre,lib/spack/spack/cmd/compiler.py,0.88
+Matthew LeGendre,lib/spack/spack/cmd/config.py,2.49
+Matthew LeGendre,lib/spack/spack/compilers/__init__.py,4.94
+Matthew LeGendre,lib/spack/spack/test/config.py,1.24
+Alfredo Adolfo Gimenez,lib/spack/spack/build_systems/autotools.py,1.17
+Matthew Scott Krafczyk,share/spack/setup-env.sh,0.85
+Matthew Scott Krafczyk,lib/spack/docs/getting_started.rst,4.67
+Matthew Scott Krafczyk,lib/spack/docs/module_file_support.rst,1.25
+Matthew Scott Krafczyk,lib/spack/spack/cmd/bootstrap.py,0.94
+Matthew Scott Krafczyk,lib/spack/spack/cmd/__init__.py,1.5
+James Dickson,var/spack/repos/builtin/packages/macsio/package.py,2.72
+Ben Boeckel,var/spack/repos/builtin/packages/r-assertthat/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-backports/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-base64/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-beanplot/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-bh/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-bit/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-bit64/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-blob/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-boot/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-cluster/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-crayon/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-curl/package.py,0.78
+Ben Boeckel,var/spack/repos/builtin/packages/r-data-table/package.py,0.6
+Ben Boeckel,var/spack/repos/builtin/packages/r-doparallel/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-formatr/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-gdata/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-ggally/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-globaloptions/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-gplots/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-gridextra/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-httr/package.py,0.78
+Ben Boeckel,var/spack/repos/builtin/packages/r-knitr/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-lsei/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-markdown/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-mass/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-methodss3/package.py,0.21
+Ben Boeckel,var/spack/repos/builtin/packages/r-nlme/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-openssl/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-plogr/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-prettyunits/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-progress/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-proxy/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-rcpparmadillo/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-rda/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-reshape/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-rlang/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-rmpi/package.py,0.4
+Ben Boeckel,var/spack/repos/builtin/packages/r-rsqlite/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-scales/package.py,0.78
+Ben Boeckel,var/spack/repos/builtin/packages/r-segmented/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-seqinr/package.py,0.67
+Ben Boeckel,var/spack/repos/builtin/packages/r-sfsmisc/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-sourcetools/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-stringi/package.py,0.67
+Ben Boeckel,var/spack/repos/builtin/packages/r-stringr/package.py,0.67
+Ben Boeckel,var/spack/repos/builtin/packages/r-survival/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-testit/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-threejs/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-xml/package.py,0.22
+Ben Boeckel,var/spack/repos/builtin/packages/r-yaml/package.py,0.22
+Adam Moody,var/spack/packages/callpath/package.py,1.66
+Peter Scheibel,lib/spack/spack/spec.py,0.78
+Peter Scheibel,lib/spack/spack/fetch_strategy.py,1.33
+Peter Scheibel,lib/spack/spack/package.py,0.91
+Peter Scheibel,lib/spack/spack/database.py,0.8
+Peter Scheibel,lib/spack/docs/developer_guide.rst,0.86
+Peter Scheibel,lib/spack/spack/stage.py,0.53
+Peter Scheibel,lib/spack/spack/util/package_hash.py,0.51
+Peter Scheibel,lib/spack/spack/cmd/find.py,0.71
+Peter Scheibel,lib/spack/spack/cmd/test-install.py,2.81
+Peter Scheibel,lib/spack/spack/directory_layout.py,0.71
+Peter Scheibel,lib/spack/spack/modules.py,1.33
+Peter Scheibel,lib/spack/spack/test/database.py,0.75
+Peter Scheibel,lib/spack/spack/test/__init__.py,0.71
+Peter Scheibel,lib/spack/spack/__init__.py,0.67
+Peter Scheibel,lib/spack/spack/test/mock_packages_test.py,0.26
+Peter Scheibel,lib/spack/spack/cmd/activate.py,0.71
+Peter Scheibel,lib/spack/spack/cmd/checksum.py,0.71
+Peter Scheibel,lib/spack/spack/cmd/clean.py,0.71
+Peter Scheibel,lib/spack/spack/cmd/compiler.py,0.71
+Peter Scheibel,lib/spack/spack/cmd/config.py,0.71
+Peter Scheibel,lib/spack/spack/cmd/create.py,0.67
+Peter Scheibel,lib/spack/spack/cmd/deactivate.py,0.71
+Peter Scheibel,lib/spack/spack/cmd/dependents.py,0.71
+Peter Scheibel,lib/spack/spack/cmd/diy.py,0.71
+Peter Scheibel,lib/spack/spack/cmd/env.py,0.71
+Peter Scheibel,lib/spack/spack/cmd/extensions.py,2.34
+Peter Scheibel,lib/spack/spack/cmd/fetch.py,0.71
+Peter Scheibel,lib/spack/spack/cmd/graph.py,0.71
+Peter Scheibel,lib/spack/spack/cmd/install.py,0.71
+Peter Scheibel,lib/spack/spack/cmd/list.py,0.71
+Peter Scheibel,lib/spack/spack/cmd/load.py,0.71
+Peter Scheibel,lib/spack/spack/cmd/location.py,0.71
+Peter Scheibel,lib/spack/spack/cmd/md5.py,0.71
+Peter Scheibel,lib/spack/spack/cmd/mirror.py,0.71
+Peter Scheibel,lib/spack/spack/cmd/module.py,0.71
+Peter Scheibel,lib/spack/spack/cmd/patch.py,0.71
+Peter Scheibel,lib/spack/spack/cmd/pkg.py,0.71
+Peter Scheibel,lib/spack/spack/cmd/providers.py,0.71
+Peter Scheibel,lib/spack/spack/cmd/python.py,0.71
+Peter Scheibel,lib/spack/spack/cmd/reindex.py,0.71
+Peter Scheibel,lib/spack/spack/cmd/restage.py,0.71
+Peter Scheibel,lib/spack/spack/cmd/spec.py,0.71
+Peter Scheibel,lib/spack/spack/cmd/stage.py,0.71
+Peter Scheibel,lib/spack/spack/cmd/uninstall.py,0.71
+Peter Scheibel,lib/spack/spack/cmd/unload.py,0.71
+Peter Scheibel,lib/spack/spack/cmd/unuse.py,0.71
+Peter Scheibel,lib/spack/spack/cmd/use.py,0.71
+Peter Scheibel,lib/spack/spack/config.py,1.46
+Peter Scheibel,lib/spack/spack/test/python_version.py,0.71
+Oliver Breitwieser,lib/spack/spack/package.py,3.54
+Oliver Breitwieser,lib/spack/spack/cmd/extensions.py,0.87
+Oliver Breitwieser,lib/spack/spack/hooks/extensions.py,0.67
+Oliver Breitwieser,lib/spack/spack/cmd/deactivate.py,3.32
+Oliver Breitwieser,lib/spack/spack/cmd/activate.py,0.75
+Oliver Breitwieser,lib/spack/spack/cmd/common/arguments.py,0.67
+Akhil Reddy Patlolla,var/spack/repos/builtin/packages/lulesh/package.py,1.57
+Carlos BederiÃ¡n,var/spack/repos/builtin/packages/bcftools/package.py,0.66
+Carlos BederiÃ¡n,var/spack/repos/builtin/packages/silo/package.py,0.43
+William Scullin,var/spack/repos/builtin/packages/espresso/package.py,0.92
+William Scullin,var/spack/repos/builtin/packages/intel-mkl/package.py,1.68
+Tom Scogland,var/spack/repos/builtin/packages/flux/package.py,2.71
+Tom Scogland,var/spack/repos/builtin/packages/libffi/package.py,0.67
+Tom Scogland,var/spack/repos/builtin/packages/libjson-c/package.py,0.67
+Tom Scogland,var/spack/repos/builtin/packages/libxslt/package.py,0.67
+Tom Scogland,var/spack/repos/builtin/packages/rust/package.py,0.73
+Tom Scogland,lib/spack/spack/spec.py,99.73
+Tom Scogland,lib/spack/spack/cmd/find.py,0.37
+Tom Scogland,lib/spack/spack/database.py,6.78
+Tom Scogland,var/spack/repos/builtin/packages/go/package.py,0.35
+Tom Scogland,var/spack/repos/builtin/packages/flex/package.py,1.0
+Tom Scogland,var/spack/repos/builtin/packages/lua/package.py,11.79
+Tom Scogland,lib/spack/spack/util/executable.py,0.8
+Tom Scogland,lib/spack/spack/environment.py,13.5
+Tom Scogland,lib/spack/spack/directives.py,9.83
+Tom Scogland,var/spack/packages/gcc/package.py,1.45
+Tom Scogland,var/spack/packages/llvm/package.py,1.66
+Tom Scogland,var/spack/packages/clang/package.py,0.42
+Tom Scogland,lib/spack/spack/cmd/mirror.py,0.89
+Tom Scogland,var/spack/packages/jemalloc/package.py,0.35
+Alicia Klinvex,var/spack/repos/builtin/packages/boxlib/package.py,0.5
+paulhopkins,lib/spack/llnl/util/tty/color.py,2.81
+paulhopkins,lib/spack/spack/cmd/__init__.py,3.07
+paulhopkins,lib/spack/spack/cmd/dependents.py,0.78
+paulhopkins,lib/spack/spack/cmd/mirror.py,0.9
+paulhopkins,lib/spack/spack/cmd/module.py,1.65
+paulhopkins,lib/spack/spack/cmd/spec.py,0.87
+paulhopkins,lib/spack/spack/cmd/uninstall.py,0.62
+paulhopkins,lib/spack/spack/database.py,2.83
+paulhopkins,lib/spack/spack/directory_layout.py,0.87
+paulhopkins,lib/spack/spack/main.py,0.32
+paulhopkins,lib/spack/spack/mirror.py,2.55
+paulhopkins,lib/spack/spack/package.py,2.64
+paulhopkins,lib/spack/spack/spec.py,1.3
+Barry Smith,var/spack/repos/builtin/packages/mfem/package.py,1.53
+kiel friedt,lib/spack/docs/testing_guide.rst,0.42
+kiel friedt,lib/spack/spack/cmd/test.py,0.92
+kiel friedt,lib/spack/spack/hooks/dashboards.py,1.1
+kiel friedt,lib/spack/spack/spec.py,2.0
+kiel friedt,var/spack/repos/builtin/packages/petsc/package.py,4.93
+kiel friedt,lib/spack/spack/schema/test_suite.py,1.41
+kiel friedt,lib/spack/spack/test/spec_set.py,0.91
+kiel friedt,lib/spack/spack/main.py,0.81
+Benedikt Hegner,lib/spack/docs/testing_guide.rst,3.54
+Benedikt Hegner,lib/spack/spack/build_environment.py,0.73
+Benedikt Hegner,lib/spack/spack/cmd/__init__.py,0.73
+Benedikt Hegner,lib/spack/spack/cmd/common/arguments.py,0.87
+Benedikt Hegner,lib/spack/spack/cmd/deactivate.py,0.73
+Benedikt Hegner,lib/spack/spack/cmd/extensions.py,1.5
+Benedikt Hegner,lib/spack/spack/cmd/find.py,1.57
+Benedikt Hegner,lib/spack/spack/cmd/uninstall.py,0.73
+Benedikt Hegner,lib/spack/spack/database.py,6.35
+Benedikt Hegner,lib/spack/spack/directory_layout.py,1.66
+Benedikt Hegner,lib/spack/spack/package.py,20.06
+Benedikt Hegner,lib/spack/spack/spec.py,2.17
+Benedikt Hegner,lib/spack/spack/test/cmd/uninstall.py,0.77
+Benedikt Hegner,lib/spack/spack/test/database.py,35.72
+Benedikt Hegner,lib/spack/spack/test/install.py,2.74
+Benedikt Hegner,lib/spack/spack/test/mock_database.py,5.6
+Benedikt Hegner,var/spack/repos/builtin/packages/py-storm/package.py,0.77
+Darach Golden,var/spack/repos/builtin/packages/mumps/package.py,1.93
+iulian787,var/spack/repos/builtin/packages/cgm/package.py,1.91
+iulian787,var/spack/repos/builtin/packages/moab/package.py,5.08
+Nicolas Richart,lib/spack/spack/util/prefix.py,1.0
+Nicolas Richart,var/spack/repos/builtin/packages/charm/package.py,3.4
+Nicolas Richart,var/spack/repos/builtin/packages/fenics/package.py,0.71
+Nicolas Richart,var/spack/repos/builtin/packages/scotch/package.py,9.0
+Josh Asplund,var/spack/repos/builtin/packages/rose/package.py,1.99
+Josh Asplund,var/spack/repos/builtin/packages/spot/package.py,0.87
+Josh Asplund,var/spack/repos/builtin/packages/boost/package.py,0.84
+eklee15,var/spack/repos/builtin/packages/mumps/package.py,3.53
+eklee15,var/spack/repos/builtin/packages/boost/package.py,0.55
+Jeffrey Salmond,lib/spack/spack/operating_systems/linux_distro.py,0.76
+Jeffrey Salmond,var/spack/repos/builtin/packages/everytrace/package.py,0.67
+Jeffrey Salmond,var/spack/repos/builtin/packages/ImageMagick/package.py,0.71
+Matthew Krafczyk,lib/spack/spack/cmd/diy.py,0.67
+Matthew Krafczyk,var/spack/repos/builtin/packages/node-js/package.py,2.5
+Matthew Krafczyk,var/spack/repos/builtin/packages/npm/package.py,0.17
+Matthew Krafczyk,var/spack/repos/builtin/packages/py-functools32/package.py,0.71
+Matthew Krafczyk,var/spack/repos/builtin/packages/py-ipython/package.py,1.31
+Matthew Krafczyk,var/spack/repos/builtin/packages/py-jsonschema/package.py,0.65
+Matthew Krafczyk,var/spack/repos/builtin/packages/py-pexpect/package.py,0.89
+Matthew Krafczyk,var/spack/repos/builtin/packages/py-pycurl/package.py,0.63
+Matthew Krafczyk,var/spack/repos/builtin/packages/py-tornado/package.py,0.53
+Matthew Krafczyk,lib/spack/llnl/util/tty/__init__.py,3.81
+Paul Hopkins,lib/spack/spack/directory_layout.py,3.39
+Paul Hopkins,lib/spack/spack/spec.py,2.0
+Paul Hopkins,lib/spack/spack/test/__init__.py,0.99
+Paul Hopkins,lib/spack/spack/concretize.py,40.51
+Javier,var/spack/repos/builtin/packages/geant4/package.py,3.21
+Jean-Paul Pelteret,var/spack/repos/builtin/packages/py-zmq/package.py,0.86
+Jean-Paul Pelteret,var/spack/repos/builtin/packages/mpc/package.py,1.34
+Jean-Paul Pelteret,var/spack/repos/builtin/packages/mpfr/package.py,0.45
+Jean-Paul Pelteret,var/spack/repos/builtin/packages/paradiseo/enable_eoserial.patch,0.38
+Mayeul d'Avezac,var/spack/repos/builtin/packages/glib/package.py,0.91
+Mayeul d'Avezac,lib/spack/spack/spec.py,5.82
+Kenneth Hoste,var/spack/repos/builtin/packages/py-easybuild-framework/package.py,0.78
+Kenneth Hoste,lib/spack/spack/cmd/pkg.py,1.58
+Kim Serradell,var/spack/repos/builtin/packages/extrae/package.py,0.56
+Jason Sarich,var/spack/repos/builtin/packages/bzip2/package.py,3.57
+Peter Josef Scheibel,var/spack/repos/builtin/packages/libxcb/package.py,0.75
+Friedt,lib/spack/spack/stage.py,0.87
+Ben Morgan,lib/spack/spack/compilers/clang.py,0.38
+Joseph Ciurej,lib/spack/spack/build_environment.py,1.86
+Joseph Ciurej,lib/spack/spack/compilers/__init__.py,4.97
+Joseph Ciurej,lib/spack/spack/concretize.py,1.05
+Joseph Ciurej,lib/spack/spack/package.py,0.27
+Joseph Ciurej,lib/spack/spack/platforms/test.py,1.42
+Joseph Ciurej,lib/spack/spack/test/architecture.py,4.2
+Joseph Ciurej,lib/spack/spack/test/concretize.py,0.85
+Joseph Ciurej,lib/spack/spack/test/spec_semantics.py,1.88
+Joseph Ciurej,lib/spack/spack/test/spec_syntax.py,1.0
+Joseph Ciurej,var/spack/repos/builtin/packages/visit/package.py,1.58
+Joseph Ciurej,lib/spack/docs/getting_started.rst,8.58
+Joseph Ciurej,lib/spack/spack/cmd/compiler.py,0.53
+Joseph Ciurej,lib/spack/spack/schema/compilers.py,0.67
+Joseph Ciurej,lib/spack/spack/test/cc.py,0.75
+Joseph Ciurej,lib/spack/spack/test/config.py,2.31
+Joseph Ciurej,var/spack/repos/builtin/packages/fenics/package.py,0.76
+Joseph Ciurej,var/spack/repos/builtin/packages/py-astropy/package.py,0.68
+Joseph Ciurej,var/spack/repos/builtin/packages/py-h5py/package.py,0.87
+Joseph Ciurej,var/spack/repos/builtin/packages/py-shiboken/package.py,1.35
+Joseph Ciurej,var/spack/repos/builtin/packages/git-lfs/package.py,1.65
+Joseph Ciurej,var/spack/repos/builtin/packages/go-bootstrap/package.py,1.63
+Joseph Ciurej,var/spack/repos/builtin/packages/metis/package.py,7.13
+Joseph Ciurej,var/spack/repos/builtin/packages/parmetis/package.py,7.68
+Joseph Ciurej,share/spack/qa/run-flake8,0.94
+Ian Lee,README.md,1.58
+Ian Lee,lib/spack/docs/getting_started.rst,0.8
+Ian Lee,lib/spack/spack/cmd/repo.py,0.75
+Ian Lee,lib/spack/spack/repository.py,0.75
+Ian Lee,lib/spack/spack/resource.py,0.75
+Ian Lee,lib/spack/spack/test/namespace_trie.py,0.75
+Ian Lee,lib/spack/spack/test/tally_plugin.py,0.78
+Ian Lee,var/spack/repos/builtin/packages/gdb/package.py,0.75
+Glenn Johnson,var/spack/repos/builtin/packages/intel-parallel-studio/package.py,2.43
+Glenn Johnson,lib/spack/docs/basic_usage.rst,0.95
+Glenn Johnson,var/spack/repos/builtin/packages/r-plyr/package.py,0.84
+Glenn Johnson,lib/spack/docs/packaging_guide.rst,2.52
+Glenn Johnson,lib/spack/spack/cmd/create.py,0.79
+Glenn Johnson,var/spack/repos/builtin/packages/binutils/package.py,1.91
+Glenn Johnson,var/spack/repos/builtin/packages/r-withr/package.py,1.0
+Glenn Johnson,var/spack/repos/builtin/packages/py-xlrd/package.py,1.0
+Kelly Thompson,var/spack/repos/builtin/packages/moab/package.py,0.8
+Stephen Herbein,var/spack/repos/builtin/packages/libsodium/package.py,0.95
+Alfredo Gimenez,var/spack/repos/builtin/packages/boost/package.py,3.98
+Alfredo Gimenez,var/spack/packages/libxml2/package.py,0.87
+Alfredo Gimenez,var/spack/packages/qt/package.py,0.86
+Alfredo Gimenez,share/spack/setup-env.sh,0.81
+citibeth,var/spack/repos/builtin/packages/environment-modules/package.py,1.16
+citibeth,lib/spack/spack/package.py,12.0
+citibeth,var/spack/repos/builtin/packages/netcdf-cxx4/package.py,0.82
+citibeth,var/spack/repos/builtin/packages/netcdf-fortran/package.py,0.82
+citibeth,lib/spack/spack/cmd/checksum.py,3.0
+citibeth,lib/spack/spack/cmd/compiler.py,3.0
+citibeth,lib/spack/spack/cmd/create.py,4.0
+citibeth,lib/spack/spack/cmd/mirror.py,2.0
+citibeth,lib/spack/spack/cmd/module.py,3.0
+citibeth,lib/spack/spack/cmd/repo.py,6.0
+citibeth,lib/spack/spack/config.py,3.0
+citibeth,lib/spack/spack/database.py,1.0
+citibeth,lib/spack/spack/directives.py,2.0
+citibeth,lib/spack/spack/directory_layout.py,2.0
+citibeth,lib/spack/spack/fetch_strategy.py,7.0
+citibeth,lib/spack/spack/mirror.py,2.0
+citibeth,lib/spack/spack/repository.py,3.0
+citibeth,var/spack/repos/builtin/packages/blitz/package.py,0.22
+Elizabeth F,lib/spack/spack/package.py,6.48
+Elizabeth F,lib/spack/spack/cmd/load.py,0.84
+Elizabeth F,var/spack/repos/builtin/packages/tcl/package.py,0.55
+Elizabeth F,var/spack/repos/builtin/packages/tk/package.py,0.54
+Elizabeth F,var/spack/repos/builtin/packages/curl/package.py,2.0
+robertdfrench,lib/spack/spack/operating_systems/cnl.py,5.0
+David Boehme,var/spack/packages/cube/package.py,0.17
+David Boehme,var/spack/packages/otf2/package.py,4.55
+Orion Poplawski,lib/spack/spack/cmd/repo.py,0.71
+Mike Nolta,bin/spack,0.94
+karenyyng,var/spack/packages/py-ipython/package.py,1.19
+karenyyng,var/spack/packages/graphviz/package.py,1.42
+karenyyng,var/spack/packages/libdrm/package.py,1.0
+karenyyng,var/spack/packages/libffi/package.py,0.91
+karenyyng,var/spack/packages/libpciaccess/package.py,2.11
+karenyyng,var/spack/packages/libxml2/package.py,0.87
+karenyyng,var/spack/packages/mesa/package.py,2.0
+karenyyng,var/spack/packages/py-mock/package.py,0.5
+karenyyng,var/spack/packages/py-pyside/package.py,0.77
+karenyyng,var/spack/packages/py-setuptools/package.py,0.59
+karenyyng,var/spack/packages/scorep/package.py,4.87
+karenyyng,var/spack/packages/stat/package.py,0.68
+karenyyng,var/spack/packages/vim/package.py,0.83
+Saravan Pantham,var/spack/packages/hdf5/package.py,2.0
+Saravan Pantham,var/spack/packages/arpack/package.py,0.18
+Saravan Pantham,var/spack/packages/metis/package.py,0.88
+FranÃ§ois Bissey,lib/spack/env/cc,3.38
+FranÃ§ois Bissey,lib/spack/spack/compilers/__init__.py,0.91
+FranÃ§ois Bissey,lib/spack/spack/compilers/xl.py,0.88
+Benjamin Walters,var/spack/packages/netlib_blas/package.py,0.86
+Luc Jaulmes,var/spack/packages/wxpropgrid/package.py,1.71
+Bob Robey,var/spack/packages/libtiff/package.py,0.67
+Bob Robey,var/spack/packages/cmake/package.py,0.6
