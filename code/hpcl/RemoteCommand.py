@@ -74,6 +74,84 @@ class RemoteCommand(object):
         return result
 
 
+    #Get all of the comments for a repo
+    def getComments(self, reponame):
+        
+        print('Checking: ' + reponame)
+        
+        page = 1
+        result = [];
+
+        PULLS_FOR_REPO_URL = 'https://api.github.com/repos/%s/issues/comments' % reponame
+        ARGS = '?state=all&page=1&per_page=100'
+        AUTH = (self.GITHUB_USER, self.GITHUB_PASSWORD)
+        print('Link accessing: ', PULLS_FOR_REPO_URL + ARGS)
+        response = requests.get(PULLS_FOR_REPO_URL + ARGS, auth=AUTH)
+        print('Request successful...... ', response)
+        print('Request length...... ', str(len(response.json())))
+        if not response.status_code == 200:
+            raise Exception(response.status_code)
+
+        #if there is a result add it 
+        result.extend(response.json())
+
+
+        while len(response.json()) > 0:
+            page = page+1
+            ARGS = '?state=all&page='+str(page)+'&per_page=100'
+            print('Link accessing: ', PULLS_FOR_REPO_URL + ARGS)
+            response = requests.get(PULLS_FOR_REPO_URL + ARGS, auth=AUTH)
+            #print('Request successful...... ', response)
+            print('Request length...... ', str(len(response.json())))
+            
+            #if there is a result add it 
+            result.extend(response.json())
+
+        print('RESULTS '+str(len(result)))
+
+        #need to return a dict of all the comments
+        return result
+
+
+    #Get all of the comments for a specific issue
+    def getCommentsForIssue(self, reponame, issueNumber):
+        
+        print('Checking: ' + reponame)
+        
+        page = 1
+        result = [];
+
+        PULLS_FOR_REPO_URL = 'https://api.github.com/repos/%s/issues/%s/comments' % (reponame,str(issueNumber))
+        ARGS = '?state=all&page=1&per_page=100'
+        AUTH = (self.GITHUB_USER, self.GITHUB_PASSWORD)
+        print('Link accessing: ', PULLS_FOR_REPO_URL + ARGS)
+        response = requests.get(PULLS_FOR_REPO_URL + ARGS, auth=AUTH)
+        print('Request successful...... ', response)
+        print('Request length...... ', str(len(response.json())))
+        if not response.status_code == 200:
+            raise Exception(response.status_code)
+
+        #if there is a result add it 
+        result.extend(response.json())
+
+
+        while len(response.json()) > 0:
+            page = page+1
+            ARGS = '?state=all&page='+str(page)+'&per_page=100'
+            print('Link accessing: ', PULLS_FOR_REPO_URL + ARGS)
+            response = requests.get(PULLS_FOR_REPO_URL + ARGS, auth=AUTH)
+            #print('Request successful...... ', response)
+            print('Request length...... ', str(len(response.json())))
+            
+            #if there is a result add it 
+            result.extend(response.json())
+
+        print('RESULTS '+str(len(result)))
+
+        #need to return a dict of all the comments
+        return result
+
+
 
     def getPetscMail(self):
 
@@ -132,3 +210,5 @@ def getYears(repodir):
 
 def getGitCmd(year):
       return "git log --since '1 January %d' --before '31 December %d' | grep -e '^commit' | tail -1 | cut -d ' ' -f 2" % (year,year)
+
+
