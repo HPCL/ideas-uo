@@ -140,9 +140,9 @@ class SpackMongoClient:
                 last_updated = datetime.datetime.fromtimestamp(0)
             else:
                 import dateutil
-                last_update = dateutil.parser.isoparse(str(last_updated))
+                #last_update = dateutil.parser.isoparse(str(last_updated))
                 # TODO: Improve versioning issue
-                #last_updated = datetime.datetime.fromisoformat(str(last_updated)) # only works on python 3.7+ (Google Colab 3.6.9)
+                last_updated = datetime.datetime.fromisoformat(str(last_updated)) # only works on python 3.7+ (Google Colab 3.6.9)
 
 
             # only care about records after last update
