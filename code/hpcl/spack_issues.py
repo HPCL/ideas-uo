@@ -5,6 +5,28 @@ import pymongo
 
 from github_api import GitHubAPIClient
 
+def fromisoformat(current):
+    # For Python 3.7+ use datetime.datetime.fromisoformat()
+    year = current[:current.index("-")]
+    current = current[current.index("-")+1:]
+    month = current[:current.index("-")]
+    current = current[current.index("-")+1:]
+    day = current[:current.index("T")]
+    current = current[current.index("T")+1:]
+    hour = current[:current.index(":")]
+    current = current[current.index(":")+1:]
+    minute = current[:current.index(":")]
+    current = current[current.index(":")+1:]
+    try:
+        second = current[:current.index(".")]
+        current = current[current.index(".")+1:]
+        microsecond = current
+    except:
+        second = current
+        microsecond = 0
+    date = datetime.datetime(year=int(year), month=int(month), day=int(day), hour=int(hour),
+    minute=int(minute), second=int(second), microsecond=int(microsecond))
+    return date
 
 class SpackMongoClient:
     """A client for retrieving the latest spack issues and comments.
@@ -18,22 +40,7 @@ class SpackMongoClient:
     the data is.
 
     The MongoDB server is organized as follows:
-
-    +-- spack_issues: Root database that contains the collections necessary for
-                      keeping spack issues and comments up-to-date
-        +-- latest_issue: Collection that keeps track of the state of issues
-                          stored on the server. Contains two keyword:
-                          `latest_issue` and `last_updated`. The first is a
-                          monotonic increasing integer which is the latest issue
-                          number currently residing in the `issues` collection.
-                          The latter keyword simply determines the last time new
-                          issues were fetched from the GitHub REST API (UTC time,
-                          ISO 8601 format).
-        +-- issues: Collection that stores the individual issues.
-        +-- latest_comments:  Collection that keeps track of the state of comments
-                              stored on the server. (NOT YET IMPLEMENTED)
-        +-- comments: Collection that stores the individual comments.
-                      (NOT YET IMPLEMENTED)
+        TODO: ADD
 
     Attributes:
       client: MongoDB client instance for accessing the databases
@@ -42,14 +49,16 @@ class SpackMongoClient:
     # MongoDB Client
     client = None
 
-    def __init__(self, mongo_username, mongo_password, github_username, github_token):
+    def __init__(self, mongo_username, mongo_password, github_username=None, github_token=None):
         """Creates an instance of SpackMongoClient for accessing spack issues and comments.
+
+        GitHub credentials are only required when checking for updates.
 
         Args:
             mongo_username: username for HPCL MongoDB
             mongo_password: password for HPCL MongoDB
-            github_username: GitHub username
-            github_token: GitHub private access token (see GitHubAPIClient for more details)
+            github_username: GitHub username (default: None)
+            github_token: GitHub private access token (Default: None)
         """
 
         GitHubAPIClient.set_credentials(username=github_username, token=github_token)
@@ -119,13 +128,15 @@ class SpackMongoClient:
 
         if key == "issues":
             if self.get_issue_status():
-                last_updated = datetime.datetime.fromisoformat(self.get_issue_status())
+                last_updated = fromisoformat(self.get_issue_status())
+                #last_updated = datetime.datetime.fromisoformat(self.get_issue_status())
             print(f"Fetching {key} updated since {last_updated}...")
             api_result = GitHubAPIClient.fetch_issues(
                 owner="spack", repository="spack", last_updated=last_updated)
         else:
             if self.get_comment_status():
-                last_updated = datetime.datetime.fromisoformat(self.get_comment_status())
+                last_updated = fromisoformat(self.get_comment_status())
+                #last_updated = datetime.datetime.fromisoformat(self.get_comment_status())
             print(f"Fetching {key} updated since {last_updated}...")
             api_result = GitHubAPIClient.fetch_issue_comments(
                 owner="spack", repository="spack", last_updated=last_updated)
@@ -139,16 +150,19 @@ class SpackMongoClient:
             if not last_updated:
                 last_updated = datetime.datetime.fromtimestamp(0)
             else:
-                import dateutil
-                #last_update = dateutil.parser.isoparse(str(last_updated))
-                # TODO: Improve versioning issue
-                last_updated = datetime.datetime.fromisoformat(str(last_updated)) # only works on python 3.7+ (Google Colab 3.6.9)
+                last_updated = fromisoformat(last_updated.isoformat())                
+                #last_updated = datetime.datetime.fromisoformat(str(last_updated)) # only works on python 3.7+ (Google Colab 3.6.9)
 
 
             # only care about records after last update
             # https://stackoverflow.com/questions/19654578/python-utc-datetime-objects-iso-format-doesnt-include-z-zulu-or-zero-offset
+            #records_to_add = [record for record in api_result
+            #    if datetime.datetime.fromisoformat(record["updated_at"][:-1]) > last_updated]
+            foo = api_result[0]["updated_at"][:-1]
+            print(foo)
+            print(fromisoformat(foo))
             records_to_add = [record for record in api_result
-                if datetime.datetime.fromisoformat(record["updated_at"][:-1]) > last_updated]
+                if fromisoformat(record["updated_at"][:-1]) > last_updated]
 
             urls = [record["url"] for record in records_to_add]
             replaced = spack_issues_db[key].delete_many({"url": {"$in": urls}})
@@ -199,22 +213,22 @@ class SpackMongoClient:
         cursor = db[key].find({})
         return pd.DataFrame(list(cursor)).drop("_id", axis=1)
 
-    def load_issues(self, update=True):
+    def load_issues(self, update=False):
         """Wrapper for loading issues.
 
         Args:
             update: boolean whether to check for the latest spack issues before
-                    retrieval of the issue from the server (default: True)
+                    retrieval of the issue from the server (default: False)
         """
 
         return self.load("issues", update)
 
-    def load_comments(self, update=True):
+    def load_comments(self, update=False):
         """Wrapper for loading comments.
 
         Args:
             update: boolean whether to check for the latest spack issues before
-                    retrieval of the issue from the server (default: True)
+                    retrieval of the issue from the server (default: False)
         """
 
         return self.load("comments", update)
