@@ -1,5 +1,9 @@
-import requests
+"""Static class interface for using the GitHub REST API.
 
+See https://docs.github.com/en/free-pro-team@latest/rest for more details.
+"""
+
+import requests
 
 class GitHubAPIClient:
     """An interface for accessing the GitHub API Client.
@@ -113,7 +117,6 @@ class GitHubAPIClient:
         """
 
         url = f"https://api.github.com/repos/{owner}/{repository}/{resource}"
-
         data = []
         page = start_page
         while True:  # do while loop to utilize pagination
