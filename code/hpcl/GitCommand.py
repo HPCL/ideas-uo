@@ -65,6 +65,7 @@ class GitCommand(object):
                 commitid = line[7:len(line)]
 
                 line = next(lines)
+                #print(line)
 
                 if line.startswith(b'Author: '):
 
@@ -80,18 +81,25 @@ class GitCommand(object):
                     rawdate = next(lines)
                     date = rawdate[8:len(rawdate)]
 
+                    #print(rawdate)
+
                     #get the commit message
                     next(lines)
                     message = ''
                     m = next(lines)
+                    #print(m)
                     while len(m) > 1:
-                        message += (m + b'\n').decode("utf-8") 
-                        m = next(lines)
+                        message += (m + b'\n').decode("utf-8")
+                        try: 
+                            m = next(lines)
+                        except StopIteration:
+                            m = ''    
 
                     #get the diffs
+                    #this code will iterate over the lines trying to pull just the +/- info from the diff output
                     diffs = []
                     diff = next(lines)
-                    while len(diff) > 1 and diff.startswith(b'\\') == False:
+                    while len(diff) > 0 and diff.startswith(b'\\') == False:
                         if diff.startswith(b'diff'):
                             #next(lines)
                             #next(lines)
@@ -121,8 +129,15 @@ class GitCommand(object):
                                     if (diff.startswith(b'+') or diff.startswith(b'-')):
                                         diffinfo.append(diff.decode("utf-8", errors='ignore')) 
 
-                                    elif diff.startswith(b'diff') or len(diff) < 2:
+                                    elif diff.startswith(b'diff'): 
                                         break
+                                    elif len(diff) < 2:
+                                        try:
+                                            diff = next(lines)
+                                            if len(diff) < 2:
+                                                break
+                                        except:
+                                            break
                                     
                                     try:
                                         diff = next(lines)
