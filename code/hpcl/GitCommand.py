@@ -51,7 +51,7 @@ class GitCommand(object):
             
     
         #git log -p # this will list all commits and the code additions in addition to dates and messages.
-        retcode, out, err = Command.Command('git log -p').run()
+        retcode, out, err = Command.Command('git log -p --date=iso-strict-local --function-context').run()
         lines = iter(out.splitlines())
 
         current_author = ''
