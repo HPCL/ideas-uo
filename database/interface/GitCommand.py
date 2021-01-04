@@ -1,6 +1,6 @@
 import os, sys, subprocess
 import datetime
-from hpcl import Command
+import Command
 
 class GitCommand(object):
 
@@ -52,8 +52,6 @@ class GitCommand(object):
 
 
         #git log -p # this will list all commits and the code additions in addition to dates and messages.
-        # function-context for python just adds all the surrounding lines of code to the diff output
-        #retcode, out, err = Command.Command('git log -p --date=iso-strict-local --function-context').run()
         retcode, out, err = Command.Command(f'git log -p --since={since}').run()
         lines = iter(out.splitlines())
 
@@ -115,19 +113,11 @@ class GitCommand(object):
                             #skip extra line if this line is seen
                             if line.startswith(b'new file mode'):
                                 next(lines)
-                                diff = next(lines)
-                                if diff.startswith(b'diff'): 
-                                    break
-                            
-                            if not line.startswith(b'deleted file mode') and not line.startswith(b'old mode'): 
-                              
-                                #skip just one line if this line is seen
-                                if line.startswith(b'new file mode'):
-                                    next(lines)
 
-                                else:
-                                    next(lines)
-                                    next(lines)
+                            if not line.startswith(b'deleted file mode') and not line.startswith(b'old mode'):
+
+                                next(lines)
+                                next(lines)
 
                                 #skip ahead until see first + or -
                                 diff = next(lines)
