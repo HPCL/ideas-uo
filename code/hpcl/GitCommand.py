@@ -39,34 +39,37 @@ class GitCommand(object):
 
 
     #Get all commits in all the versions of a repo since data (default: utc epoch) and group by author
-    def getRepoCommitData(self, reponame, since=datetime.datetime.utcfromtimestamp(0).isoformat()):
+    def getRepoCommitData(self, reponame):
 
         prefix,versions = self.getRepoVersions(reponame)
 
         commits = {}
 
-        for version in versions:
+        for version in versions:   
             #checkout the versions
             print('git checkout %s%s' % (prefix,version))
             retcode, out, err = Command.Command('git checkout %s%s' % (prefix,version)).run(dryrun=False)
             print(out)
-
-
+            
+    
         #git log -p # this will list all commits and the code additions in addition to dates and messages.
         # function-context for python just adds all the surrounding lines of code to the diff output
-        #retcode, out, err = Command.Command('git log -p --date=iso-strict-local --function-context').run()
-        retcode, out, err = Command.Command(f'git log -p --since={since}').run()
+        retcode, out, err = Command.Command('git log -p --date=iso-strict-local --function-context').run()
         lines = iter(out.splitlines())
 
         current_author = ''
         for line in lines:
 
 
-            #If the line is an author, then start to piece together the commit
+            #If the line is an author, then start to piece together the commit   
             #if line.startswith(b'Author: '):
             if line.startswith(b'commit'):
 
                 commitid = line[7:len(line)]
+
+                #Retrieve all branches that contains this commit
+                #git branch -a --contains <commit>
+                retcode, branches, err = Command.Command('git branch -a --contains %s' % commitid).run()
 
                 line = next(lines)
                 #print(line)
@@ -78,7 +81,7 @@ class GitCommand(object):
                     #track the number of commits for this author
                     if current_author in commits:
                         commits[current_author]['total_commits'] += 1
-                    else:
+                    else:    
                         commits[current_author] = {'total_commits':1, 'commits':[]}
 
                     #get the commit date
@@ -94,10 +97,10 @@ class GitCommand(object):
                     #print(m)
                     while len(m) > 1:
                         message += (m + b'\n').decode("utf-8")
-                        try:
+                        try: 
                             m = next(lines)
                         except StopIteration:
-                            m = ''
+                            m = ''    
 
                     #get the diffs
                     #this code will iterate over the lines trying to pull just the +/- info from the diff output
@@ -111,8 +114,9 @@ class GitCommand(object):
                             filenameline = diff.decode("utf-8")
                             filename = filenameline[11:len(filenameline)]
                             #print('FILENAME '+ filename)
-
+                     
                             line = next(lines)
+
                             #skip extra line if this line is seen
                             if line.startswith(b'new file mode'):
                                 next(lines)
@@ -139,9 +143,9 @@ class GitCommand(object):
                                 while len(diff) >= 1:
 
                                     if (diff.startswith(b'+') or diff.startswith(b'-')):
-                                        diffinfo.append(diff.decode("utf-8", errors='ignore'))
+                                        diffinfo.append(diff.decode("utf-8", errors='ignore')) 
 
-                                    elif diff.startswith(b'diff'):
+                                    elif diff.startswith(b'diff'): 
                                         break
                                     elif len(diff) < 2:
                                         try:
@@ -150,16 +154,16 @@ class GitCommand(object):
                                                 break
                                         except:
                                             break
-
+                                    
                                     try:
                                         diff = next(lines)
                                     except:
                                         break
 
                                 diffs.append({'filename':filename, 'diff':diffinfo})
-
+                                                            
                             #else:
-                                #ignore deleted files for now
+                                #ignore deleted files for now   
                         else:
                             try:
                                 diff = next(lines)
@@ -168,14 +172,14 @@ class GitCommand(object):
 
                     #print(diffs)
                     #add the commit to the author's list of commits.
-                    commits[current_author]['commits'].append({'id':commitid, 'date':date,'message':message, 'diffs':diffs})
+                    commits[current_author]['commits'].append({'id':commitid, 'date':date, 'message':message, 'diffs':diffs, 'branches':branches})
 
                 elif line.startswith(b'Merge: '):
                     #ignore merges
                     next(lines)
-
+                    
             #else:
-                #ignore anything else until next author line
+                #ignore anything else until next author line      
 
         #print(commits)
         return commits
@@ -208,6 +212,10 @@ class GitCommand(object):
             if line.startswith(b'commit'):
 
                 commitid = line[7:len(line)]
+
+                #Retrieve all branches that contains this commit
+                #git branch -a --contains <commit>
+                retcode, branches, err = Command.Command('git branch -a --contains %s' % commitid).run()
 
                 line = next(lines)
                 #print(line)
@@ -302,7 +310,7 @@ class GitCommand(object):
 
                     #print(diffs)
                     #add the commit to the author's list of commits.
-                    commits.append({'id':commitid, 'date':date,'message':message, 'diffs':diffs})
+                    commits.append({'id':commitid, 'date':date, 'message':message, 'diffs':diffs, 'branches':branches})
 
                 elif line.startswith(b'Merge: '):
                     #ignore merges
