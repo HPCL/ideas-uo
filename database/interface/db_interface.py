@@ -18,6 +18,8 @@ formatter = logging.Formatter(fmt="[%(levelname)s]: %(asctime)s - %(message)s")
 ch.setFormatter(fmt=formatter)
 logger.addHandler(hdlr=ch)
 
+FORCE_EPOCH = False # if true checks from utc epoch
+
 class DatabaseInterface:
 
     def __init__(self, host='127.0.0.1', port=3306, user='root', passwd='admin', db='djangostack'):
@@ -40,18 +42,20 @@ class DatabaseInterface:
             name = name[:name.index('.')]
             return name
 
-    def add_project(self, url, name=None, since=datetime.datetime.now().isoformat()):
+    def add_project(self, url, name=None, since=datetime.datetime.utcfromtimestamp(0).isoformat(), fork_of=None):
         '''
             url: url to git file
             name: descriptive name of project, defaults to .git file name
+            since: ISO8601 datetime of when to grab git data from, defaults to utc epoch
+            fork_of: url of git_project that it is a fork of, defaults None
         '''
+
         if not name:
             name = self.get_git_name(url)
 
         cursor = self.db.cursor()
-
-        # TODO: Check similar urls (i.e. https://example.org, http://example.org, example.org/)
-        cursor.execute(f'select count(*) from project where source_url="{url}"')
+        query = 'select count(*) from project where source_url=%s'
+        cursor.execute(query, (url,))
         exists = cursor.fetchone()[0] == 1
 
         if exists:
@@ -59,25 +63,39 @@ class DatabaseInterface:
             new_project = False
 
             # Update existing project
-            cursor.execute(f'select id from project where source_url="{url}"')
+            query = 'select id from project where source_url=%s'
+            cursor.execute(query, (url,))
             project_id = cursor.fetchone()[0]
-            cursor.execute(f'update project set last_updated=utc_timestamp() where id={project_id}')
+            query = 'update project set last_updated=utc_timestamp() where id=%s'
+            cursor.execute(query, (project_id,))
         else:
             logger.debug('Unknown git project.')
             new_project = True
 
+            # If fork, find parent project_id
+            if fork_of:
+                #TODO: Currently assumers parent project already exists -- throw error otherwise?
+                query = 'select id from project where source_url=%s'
+                cursor.execute(query, (fork_of,))
+                fork_of = cursor.fetchone()[0]
+
             # Insert new project
-            cursor.execute(f'insert into project (name, source_url, last_updated) values ("{name}", "{url}", utc_timestamp())')
+            query = 'insert into project (name, source_url, last_updated, fork_of_id) values (%s, %s, utc_timestamp(), %s)'
+            cursor.execute(query, (name, url, fork_of,))
 
         self.db.commit()
 
+        if FORCE_EPOCH:
+            logger.debug('FORCE_EPOCH set to True.')
+
         # If new project grab everything, otherwise grab utc epoch
-        if new_project:
+        if new_project or FORCE_EPOCH:
             since = datetime.datetime.utcfromtimestamp(0).isoformat()
             logger.debug(f'New project, grabbing all commit data since {since}.')
         else:
             # Find last time updated
-            cursor.execute(f'select last_updated from project where source_url="{url}"')
+            query = 'select last_updated from project where source_url=%s'
+            cursor.execute(query, (url,))
             since = cursor.fetchone()[0]
             logger.debug(f'Existing project, grabbing all commit data since {since}.')
 
@@ -86,9 +104,9 @@ class DatabaseInterface:
         self.process_project(url, since=since)
 
         if exists:
-            logger.debug(f'Project from "{url}" updated.')
+            logger.debug(f'Project from {url} updated.')
         else:
-            logger.debug(f'New project from "{url}" inserted.')
+            logger.debug(f'New project from {url} inserted.')
 
     def process_project(self, url, since):
         name = self.get_git_name(url)
@@ -102,7 +120,8 @@ class DatabaseInterface:
         cursor = self.db.cursor()
 
         # Get project id
-        cursor.execute(f'select id from project where source_url="{url}"')
+        query = 'select id from project where source_url=%s'
+        cursor.execute(query, (url,))
         project_id = cursor.fetchone()[0]
 
         # Insert authors
@@ -110,23 +129,29 @@ class DatabaseInterface:
             entry = author.decode('utf-8')
             username = entry[:entry.index('<') - 1]
             email = entry[entry.index('<') + 1:-1]
-            cursor.execute(f'select count(*) from author where username="{username}" and email="{email}"')
+
+            query = 'select count(*) from author where username=%s and email=%s'
+            cursor.execute(query, (username, email,))
             exists = cursor.fetchone()[0] == 1
             if not exists:
-                cursor.execute(f'insert into author (username, email) values ("{username}", "{email}")')
+                query = 'insert into author (username, email) values (%s, %s)'
+                cursor.execute(query, (username, email,))
                 self.db.commit()
 
-                logger.debug(f'Inserted new author "{username}".')
+                logger.debug(f'Inserted new author {username}.')
 
             # Get author id
-            cursor.execute(f'select id from author where username="{username}" and email="{email}"')
+            query = 'select id from author where username=%s and email=%s'
+            cursor.execute(query, (username, email,))
             author_id = cursor.fetchone()[0]
 
             # Update bridge table
-            cursor.execute(f'select count(*) from project_has_author where author_id={author_id} and project_id={project_id}')
+            query = 'select count(*) from project_has_author where author_id=%s and project_id=%s'
+            cursor.execute(query, (author_id, project_id,))
             exists = cursor.fetchone()[0] == 1
             if not exists:
-                cursor.execute(f'insert into project_has_author (author_id, project_id) values ({author_id}, {project_id})')
+                query = 'insert into project_has_author (author_id, project_id) values (%s, %s)'
+                cursor.execute(query, (author_id, project_id,))
                 self.db.commit()
 
                 logger.debug(f'Inserted author {author_id} works on project {project_id}')
@@ -134,46 +159,61 @@ class DatabaseInterface:
             # Insert commits
             for commit in data[author]['commits']:
                 hash = commit['id'].decode('utf-8')
-                cursor.execute(f'select count(*) from commit where hash="{hash}"')
+
+                query = 'select count(*) from commit where hash=%s'
+                cursor.execute(query, (hash,))
                 exists = cursor.fetchone()[0] == 1
                 # Skip existing commits
                 if exists:
-                    logger.debug(f'Commit "{hash}" already exists.')
+                    logger.debug(f'Commit {hash} already exists.')
                     continue
 
                 date = commit['date'].decode('utf-8')
-                dt = datetime.datetime.strptime(date, '%a %b %d %H:%M:%S %Y %z').strftime('%Y-%m-%d %H:%M:%S')
-                message = commit['message']
-                #cursor.execute(f'insert into commit (hash, datetime, author_id, project_id, message) values ("{hash}", "{dt}", {author_id}, {project_id}, "{message}")')
-                #self.db.commit()
+                dt = datetime.datetime.strptime(date, '%Y-%m-%dT%H:%M:%S%z').strftime('%Y-%m-%d %H:%M:%S')
+                message = commit['message'].strip()
+                branches = commit['branches'].decode('utf-8')
+                logger.critical(f'BRANCHES: {branches}')
+                branch = 'master' #TODO: Replace with branches info above
+                query = f'insert into commit (hash, datetime, author_id, project_id, message, branch) values (%s, %s, %s, %s, %s, %s)'
 
-                logger.debug(f'Inserted new commit "{hash}".')
+                cursor.execute(query, (hash, dt, author_id, project_id, message, branch,))
+                self.db.commit()
+
+                logger.debug(f'Inserted new commit {hash}.')
 
                 # Get commit id
-                #cursor.execute(f'select id from commit where hash="{hash}"')
-                #commit_id = cursor.fetchone()[0]
+                query = 'select id from commit where hash=%s'
+                cursor.execute(query, (hash,))
+                commit_id = cursor.fetchone()[0]
 
                 # Insert diffs
                 for diff in commit['diffs']:
-                    continue # TODO: insert diffs once GitCommand fixed
                     body = '\n'.join(diff['diff'])
+
                     filename = diff['filename']
-                    filename = filename[filename.index('/'):filename.index(' ')]
-                    print(f'\t\t{filename}')
-                    c = body.count('\n')
-                    print(f'\t\t{c}')
-                    if filename == '/code/__init.py':
-                        print(body)
-                    print('-' * 50)
-                print('=' * 50)
+                    filename = filename[filename.index('/'):filename.index(' ')][1:]
+
+                    # TODO: Source analysis - programming language
+                    language = 'PLACEHOLDER'
+                    query = f'insert into diff (file_path, language, commit_id, body) values (%s, %s, %s, %s)'
+                    cursor.execute(query, (filename, language, commit_id, body,))
+                    self.db.commit()
+
+                    logger.debug(f'Inserted diff in file {filename} for commit {hash}')
 
         # Remove cloned repo
         os.chdir('..')
         shutil.rmtree(f'./{name}/')
-        logger.debug(f'Removed repository "{name}".')
+        logger.debug(f'Removed repository {name}')
         cursor.close()
 
 if __name__ == '__main__':
     interface = DatabaseInterface()
-    url = 'https://github.com/HPCL/ideas-uo.git'
-    interface.add_project(url)
+    url = 'https://github.com/spotify/dockerfile-maven.git'
+    #url = 'https://github.com/google/gvisor.git' - StopIteration line 108 GitCommand.py
+    #url = 'https://github.com/petsc/petsc.git' - Killed
+    #url = 'https://github.com/HPCL/p2z-tests.git'
+    #url = 'https://github.com/fickas/ideas-uo.git'
+    #fork_of = 'https://github.com/HPCL/ideas-uo.git'
+    fork_of = None
+    interface.add_project(url, fork_of=fork_of)
