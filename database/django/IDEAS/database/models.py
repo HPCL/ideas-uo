@@ -19,6 +19,7 @@ class Project(models.Model):
     name = models.CharField(max_length=64)
     last_updated = models.DateTimeField(auto_now=True)
     authors = models.ManyToManyField(Author, through='ProjectAuthor')
+    fork_of = models.ForeignKey('self', on_delete=models.CASCADE, null=True)
 
     class Meta:
         db_table = 'project'
@@ -42,12 +43,41 @@ class ProjectAuthor(models.Model):
     def __str__(self):
         return f'{self.project} has {self.author}'
 
+class Person(models.Model):
+    alias = models.CharField(max_length=64)
+    email = models.EmailField()
+    github_username = models.CharField(max_length=64, null=True)
+    gitlab_username = models.CharField(max_length=64, null=True)
+
+    class Meta:
+        db_table = 'person'
+        ordering = ['id']
+        verbose_name = 'person'
+        verbose_name_plural = 'people'
+
+    def __str__(self):
+        return self.alias
+
+class PersonAuthor(models.Model):
+    person = models.ForeignKey(Person, on_delete=models.CASCADE)
+    author = models.ForeignKey(Author, on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = 'person_has_auhtor'
+        ordering = ['id']
+        verbose_name = 'person has author'
+        verbose_name_plural = 'person has authors'
+
+    def __str__(self):
+        return f'{self.person} has {self.author}'
+
 class Commit(models.Model):
     hash = models.CharField(max_length=64)
     datetime = models.DateTimeField()
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     message = models.TextField()
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
+    branch = models.CharField(max_length=64, default='master')
 
     class Meta:
         db_table = 'commit'
@@ -71,4 +101,4 @@ class Diff(models.Model):
         verbose_name_plural ='diffs'
 
     def __str__(self):
-        return f'Diff {file_path}'
+        return f'Diff {self.file_path}'
