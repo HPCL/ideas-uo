@@ -12,7 +12,7 @@ class AuthorAdmin(admin.ModelAdmin):
 
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'source_url', 'last_updated')
+    list_display = ('id', 'name', 'source_url', 'last_updated', 'fork_of')
 
 @admin.register(ProjectAuthor)
 class ProjecAuthorAdmin(admin.ModelAdmin):
