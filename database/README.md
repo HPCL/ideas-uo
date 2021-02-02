@@ -5,6 +5,7 @@
 | Name          | Description                                                         |
 | ------------  | ------------------------------------------------------------------- | 
 | `django/`     | Django project and corresponding applications for the database.     |
+| `examples/`   | Tutorial notebooks on how to access the database.                   |
 | `interface/`  | Script for interfacing with database. Use this file in your script. |
 | `resources/`  | ER diagrams, website description blurbs, and similar files.         |
 
