@@ -66,6 +66,7 @@ class GitCommand(object):
             if line.startswith(b'commit'):
 
                 commitid = line[7:len(line)]
+                commitid = commitid.strip('\n')
 
                 #Retrieve all branches that contains this commit
                 #git branch -a --contains <commit>
@@ -212,6 +213,7 @@ class GitCommand(object):
             if line.startswith(b'commit'):
 
                 commitid = line[7:len(line)]
+                commitid = commitid.strip('\n')
 
                 #Retrieve all branches that contains this commit
                 #git branch -a --contains <commit>
