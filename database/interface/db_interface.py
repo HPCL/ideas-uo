@@ -18,7 +18,7 @@ formatter = logging.Formatter(fmt="[%(levelname)s]: %(asctime)s - %(message)s")
 ch.setFormatter(fmt=formatter)
 logger.addHandler(hdlr=ch)
 
-FORCE_EPOCH = False # if true checks from utc epoch
+FORCE_EPOCH = True # if true checks from utc epoch
 
 class DatabaseInterface:
 
@@ -74,7 +74,7 @@ class DatabaseInterface:
 
             # If fork, find parent project_id
             if fork_of:
-                #TODO: Currently assumers parent project already exists -- throw error otherwise?
+                #TODO: Currently assumes parent project already exists -- throw error otherwise?
                 query = 'select id from project where source_url=%s'
                 cursor.execute(query, (fork_of,))
                 fork_of = cursor.fetchone()[0]
@@ -158,7 +158,7 @@ class DatabaseInterface:
 
             # Insert commits
             for commit in data[author]['commits']:
-                hash = commit['id'].decode('utf-8')
+                hash = commit['id']
 
                 query = 'select count(*) from commit where hash=%s'
                 cursor.execute(query, (hash,))
@@ -171,12 +171,12 @@ class DatabaseInterface:
                 date = commit['date'].decode('utf-8')
                 dt = datetime.datetime.strptime(date, '%Y-%m-%dT%H:%M:%S%z').strftime('%Y-%m-%d %H:%M:%S')
                 message = commit['message'].strip()
-                branches = commit['branches'].decode('utf-8')
+                branches = commit['branches']
+                logger.critical(f'KEYS: {commit.keys()}')
                 logger.critical(f'BRANCHES: {branches}')
-                branch = 'master' #TODO: Replace with branches info above
                 query = f'insert into commit (hash, datetime, author_id, project_id, message, branch) values (%s, %s, %s, %s, %s, %s)'
 
-                cursor.execute(query, (hash, dt, author_id, project_id, message, branch,))
+                cursor.execute(query, (hash, dt, author_id, project_id, message, branches,))
                 self.db.commit()
 
                 logger.debug(f'Inserted new commit {hash}.')
@@ -209,11 +209,15 @@ class DatabaseInterface:
 
 if __name__ == '__main__':
     interface = DatabaseInterface()
-    url = 'https://github.com/spotify/dockerfile-maven.git'
-    #url = 'https://github.com/google/gvisor.git' - StopIteration line 108 GitCommand.py
-    #url = 'https://github.com/petsc/petsc.git' - Killed
+    #url = 'https://github.com/spotify/dockerfile-maven.git'
+    #url = 'https://github.com/google/gvisor.git' #- StopIteration line 108 GitCommand.py
+    #url = 'https://github.com/petsc/petsc.git' #- Killed
     #url = 'https://github.com/HPCL/p2z-tests.git'
     #url = 'https://github.com/fickas/ideas-uo.git'
     #fork_of = 'https://github.com/HPCL/ideas-uo.git'
+    url = 'https://github.com/HPCL/ideas-uo.git'
+    #url = 'https://github.com/HPCL/autoperf.git'
+    #url = 'https://github.com/HPCL/SLiM.git'
+    #url = 'https://github.com/HPCL/easy-parallel-graph.git'
     fork_of = None
     interface.add_project(url, fork_of=fork_of)

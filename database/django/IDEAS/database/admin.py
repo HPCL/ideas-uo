@@ -20,7 +20,7 @@ class ProjecAuthorAdmin(admin.ModelAdmin):
 
 @admin.register(Commit)
 class CommitAdmin(admin.ModelAdmin):
-    list_display = ('id', 'hash', 'datetime', 'message', 'project', 'author')
+    list_display = ('id', 'hash', 'branch', 'datetime', 'message', 'project', 'author')
 
 @admin.register(Diff)
 class DiffAdmin(admin.ModelAdmin):
