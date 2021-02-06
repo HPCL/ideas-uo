@@ -72,12 +72,12 @@ class PersonAuthor(models.Model):
         return f'{self.person} has {self.author}'
 
 class Commit(models.Model):
-    hash = models.CharField(max_length=64)
+    hash = models.CharField(max_length=128)
     datetime = models.DateTimeField()
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     message = models.TextField()
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
-    branch = models.CharField(max_length=64, default='master')
+    branch = models.CharField(max_length=128, default='master')
 
     class Meta:
         db_table = 'commit'

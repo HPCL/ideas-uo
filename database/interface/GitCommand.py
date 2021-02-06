@@ -66,11 +66,13 @@ class GitCommand(object):
             if line.startswith(b'commit'):
 
                 commitid = line[7:len(line)]
+                commitid = commitid.decode('utf-8')
+                commitid = commitid.strip('\n')
 
                 #Retrieve all branches that contains this commit
                 #git branch -a --contains <commit>
                 retcode, branches, err = Command.Command('git branch -a --contains %s' % commitid).run()
-
+                #print(retcode, branches, err)
                 line = next(lines)
                 #print(line)
 
