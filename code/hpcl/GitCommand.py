@@ -1,5 +1,4 @@
 import os, sys, subprocess
-import datetime
 from hpcl import Command
 
 class GitCommand(object):
@@ -9,8 +8,8 @@ class GitCommand(object):
 
     #Clone a repo
     def cloneRepo(self, url):
-
-        os.chdir(self.tmpdir)
+        
+        os.chdir(self.tmpdir) 
 
         #Check if already exists in tmp folder
         os.system('git clone ' + url)
@@ -26,20 +25,20 @@ class GitCommand(object):
 
     #Get all the versions of a repo
     def getRepoVersions(self, reponame):
-
-        os.chdir(self.tmpdir)
+        
+        os.chdir(self.tmpdir)   
 
         currdir = os.getcwd()
         tmpdir = os.path.join(currdir,'tmp')
 
         filepath=os.path.join(reponame,'Releases.txt')
-        if not os.path.exists(filepath):
-            return '',getYears(reponame)
+        if not os.path.exists(filepath): 
+            return '',getYears(reponame) 
         return 'tags/',[x.strip() for x in open(filepath,'r').readlines()]
 
 
     #Get all commits in all the versions of a repo since data (default: utc epoch) and group by author
-    def getRepoCommitData(self, reponame):
+    def getRepoCommitData(self, reponame, includebranches = False):
 
         prefix,versions = self.getRepoVersions(reponame)
 
@@ -69,8 +68,9 @@ class GitCommand(object):
                 commitid = commitid.strip('\n')
 
                 #Retrieve all branches that contains this commit
-                #git branch -a --contains <commit>
-                retcode, branches, err = Command.Command('git branch -a --contains %s' % commitid).run()
+                branches = ''
+                if includebranches:
+                    retcode, branches, err = Command.Command('git branch -a --contains %s' % commitid).run()
 
                 line = next(lines)
                 #print(line)
@@ -106,72 +106,74 @@ class GitCommand(object):
                     #get the diffs
                     #this code will iterate over the lines trying to pull just the +/- info from the diff output
                     diffs = []
-                    diff = next(lines)
-                    while len(diff) > 0 and diff.startswith(b'\\') == False:
-                        if diff.startswith(b'diff'):
-                            #next(lines)
-                            #next(lines)
-                            #next(lines)
-                            filenameline = diff.decode("utf-8")
-                            filename = filenameline[11:len(filenameline)]
-                            #print('FILENAME '+ filename)
-                     
-                            line = next(lines)
+                    try:
+                        diff = next(lines)
+                        while len(diff) > 0 and diff.startswith(b'\\') == False:
+                            if diff.startswith(b'diff'):
+                                #next(lines)
+                                #next(lines)
+                                #next(lines)
+                                filenameline = diff.decode("utf-8")
+                                filename = filenameline[11:len(filenameline)]
+                                #print('FILENAME '+ filename)
+                         
+                                line = next(lines)
 
-                            #skip extra line if this line is seen
-                            if line.startswith(b'new file mode'):
-                                next(lines)
-                                diff = next(lines)
-                                if diff.startswith(b'diff'): 
-                                    break
-                            
-                            if not line.startswith(b'deleted file mode') and not line.startswith(b'old mode'): 
-                              
-                                #skip just one line if this line is seen
+                                #skip extra line if this line is seen
                                 if line.startswith(b'new file mode'):
                                     next(lines)
-
-                                else:
-                                    next(lines)
-                                    next(lines)
-
-                                #skip ahead until see first + or -
-                                diff = next(lines)
-                                while not (diff.startswith(b'+') or diff.startswith(b'-')) or (diff.startswith(b'+++') or diff.startswith(b'---')) :
                                     diff = next(lines)
-
-                                diffinfo = []
-                                while len(diff) >= 1:
-
-                                    if (diff.startswith(b'+') or diff.startswith(b'-')):
-                                        diffinfo.append(diff.decode("utf-8", errors='ignore')) 
-
-                                    elif diff.startswith(b'diff'): 
+                                    if diff.startswith(b'diff'): 
                                         break
-                                    elif len(diff) < 2:
+                                
+                                if not line.startswith(b'deleted file mode') and not line.startswith(b'old mode'): 
+                                  
+                                    #skip just one line if this line is seen
+                                    if line.startswith(b'new file mode'):
+                                        next(lines)
+
+                                    else:
+                                        next(lines)
+                                        next(lines)
+
+                                    #skip ahead until see first + or -
+                                    diff = next(lines)
+                                    while not (diff.startswith(b'+') or diff.startswith(b'-')) or (diff.startswith(b'+++') or diff.startswith(b'---')) :
+                                        diff = next(lines)
+
+                                    diffinfo = []
+                                    while len(diff) >= 1:
+
+                                        if (diff.startswith(b'+') or diff.startswith(b'-')):
+                                            diffinfo.append(diff.decode("utf-8", errors='ignore')) 
+
+                                        elif diff.startswith(b'diff'): 
+                                            break
+                                        elif len(diff) < 2:
+                                            try:
+                                                diff = next(lines)
+                                                if len(diff) < 2:
+                                                    break
+                                            except:
+                                                break
+                                        
                                         try:
                                             diff = next(lines)
-                                            if len(diff) < 2:
-                                                break
                                         except:
                                             break
-                                    
-                                    try:
-                                        diff = next(lines)
-                                    except:
-                                        break
 
-                                diffs.append({'filename':filename, 'diff':diffinfo})
-                                                            
-                            #else:
-                                #ignore deleted files for now   
-                        else:
-                            try:
-                                diff = next(lines)
-                            except:
-                                break
-
-                    #print(diffs)
+                                    diffs.append({'filename':filename, 'diff':diffinfo})
+                                                                
+                                #else:
+                                    #ignore deleted files for now   
+                            else:
+                                try:
+                                    diff = next(lines)
+                                except:
+                                    break
+                    except:
+                        print('Done with commits from this repo.')                
+                    
                     #add the commit to the author's list of commits.
                     commits[current_author]['commits'].append({'id':commitid, 'date':date, 'message':message, 'diffs':diffs, 'branches':branches})
 
@@ -187,7 +189,7 @@ class GitCommand(object):
 
 
     #Get all commits in all versions of repo and put in flat list
-    def getAllCommits(self, reponame):
+    def getAllCommits(self, reponame, includebranches = False):
 
         prefix,versions = self.getRepoVersions(reponame)
 
@@ -216,8 +218,9 @@ class GitCommand(object):
                 commitid = commitid.strip('\n')
 
                 #Retrieve all branches that contains this commit
-                #git branch -a --contains <commit>
-                retcode, branches, err = Command.Command('git branch -a --contains %s' % commitid).run()
+                branches = ''
+                if includebranches:
+                    retcode, branches, err = Command.Command('git branch -a --contains %s' % commitid).run()
 
                 line = next(lines)
                 #print(line)
@@ -245,72 +248,74 @@ class GitCommand(object):
                     #get the diffs
                     #this code will iterate over the lines trying to pull just the +/- info from the diff output
                     diffs = []
-                    diff = next(lines)
-                    while len(diff) > 0 and diff.startswith(b'\\') == False:
-                        if diff.startswith(b'diff'):
-                            #next(lines)
-                            #next(lines)
-                            #next(lines)
-                            filenameline = diff.decode("utf-8")
-                            filename = filenameline[11:len(filenameline)]
-                            #print('FILENAME '+ filename)
-                     
-                            line = next(lines)
+                    try:
+                        diff = next(lines)
+                        while len(diff) > 0 and diff.startswith(b'\\') == False:
+                            if diff.startswith(b'diff'):
+                                #next(lines)
+                                #next(lines)
+                                #next(lines)
+                                filenameline = diff.decode("utf-8")
+                                filename = filenameline[11:len(filenameline)]
+                                #print('FILENAME '+ filename)
+                         
+                                line = next(lines)
 
-                            #skip extra line if this line is seen
-                            if line.startswith(b'new file mode'):
-                                next(lines)
-                                diff = next(lines)
-                                if diff.startswith(b'diff'): 
-                                    break
-                            
-                            if not line.startswith(b'deleted file mode') and not line.startswith(b'old mode'): 
-                              
-                                #skip just one line if this line is seen
+                                #skip extra line if this line is seen
                                 if line.startswith(b'new file mode'):
                                     next(lines)
-
-                                else:
-                                    next(lines)
-                                    next(lines)
-
-                                #skip ahead until see first + or -
-                                diff = next(lines)
-                                while not (diff.startswith(b'+') or diff.startswith(b'-')) or (diff.startswith(b'+++') or diff.startswith(b'---')) :
                                     diff = next(lines)
-
-                                diffinfo = []
-                                while len(diff) >= 1:
-
-                                    if (diff.startswith(b'+') or diff.startswith(b'-')):
-                                        diffinfo.append(diff.decode("utf-8", errors='ignore')) 
-
-                                    elif diff.startswith(b'diff'): 
+                                    if diff.startswith(b'diff'): 
                                         break
-                                    elif len(diff) < 2:
+                                
+                                if not line.startswith(b'deleted file mode') and not line.startswith(b'old mode'): 
+                                  
+                                    #skip just one line if this line is seen
+                                    if line.startswith(b'new file mode'):
+                                        next(lines)
+
+                                    else:
+                                        next(lines)
+                                        next(lines)
+
+                                    #skip ahead until see first + or -
+                                    diff = next(lines)
+                                    while not (diff.startswith(b'+') or diff.startswith(b'-')) or (diff.startswith(b'+++') or diff.startswith(b'---')) :
+                                        diff = next(lines)
+
+                                    diffinfo = []
+                                    while len(diff) >= 1:
+
+                                        if (diff.startswith(b'+') or diff.startswith(b'-')):
+                                            diffinfo.append(diff.decode("utf-8", errors='ignore')) 
+
+                                        elif diff.startswith(b'diff'): 
+                                            break
+                                        elif len(diff) < 2:
+                                            try:
+                                                diff = next(lines)
+                                                if len(diff) < 2:
+                                                    break
+                                            except:
+                                                break
+                                        
                                         try:
                                             diff = next(lines)
-                                            if len(diff) < 2:
-                                                break
                                         except:
                                             break
-                                    
-                                    try:
-                                        diff = next(lines)
-                                    except:
-                                        break
 
-                                diffs.append({'filename':filename, 'diff':diffinfo})
-                                                            
-                            #else:
-                                #ignore deleted files for now   
-                        else:
-                            try:
-                                diff = next(lines)
-                            except:
-                                break
-
-                    #print(diffs)
+                                    diffs.append({'filename':filename, 'diff':diffinfo})
+                                                                
+                                #else:
+                                    #ignore deleted files for now   
+                            else:
+                                try:
+                                    diff = next(lines)
+                                except:
+                                    break
+                    except:                
+                        print('Done with commits for this repo.')
+                    
                     #add the commit to the author's list of commits.
                     commits.append({'id':commitid, 'date':date, 'message':message, 'diffs':diffs, 'branches':branches})
 
@@ -325,6 +330,9 @@ class GitCommand(object):
         return commits
 
 
+
+
+
 #Helper Functions
 
 def getYears(repodir):
@@ -335,7 +343,7 @@ def getYears(repodir):
     retcode, out, err = Command.Command('git log | grep Date | head -1').run()
     if not out.strip(): repoError(repodir,err)
     endyear = out.split()[-2]
-
+                    
     changesets = []
     for year in range(int(startyear),int(endyear)+1):
         retcode, out, err = Command.Command(getGitCmd(year)).run()
