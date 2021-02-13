@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+
+import argparse
 import atexit
 import datetime
 import logging
@@ -18,19 +21,34 @@ formatter = logging.Formatter(fmt="[%(levelname)s]: %(asctime)s - %(message)s")
 ch.setFormatter(fmt=formatter)
 logger.addHandler(hdlr=ch)
 
-FORCE_EPOCH = True # if true checks from utc epoch
-
 class DatabaseInterface:
 
-    def __init__(self, host='127.0.0.1', port=3306, user='root', passwd='admin', db='djangostack'):
+    def __init__(self, args):
+        self.args = args
+
         try:
-            self.db = MySQLdb.connect(host=host, port=port, user=user, passwd=passwd, db=db)
+            self.db = MySQLdb.connect(host=self.args.host, port=self.args.port, user=self.args.username, passwd=self.args.password, db=self.args.database)
         except:
             logger.critical('Could not establish a connection to the database.')
             raise ConnectionError('Could not establish a connection to the database.')
 
         atexit.register(self.terminate)
         logger.debug('Established MySQL connection.')
+
+        if self.args.update:
+            logger.debug('Updating existing projects on database...')
+            cursor = self.db.cursor()
+            query = 'select source_url from project'
+            cursor.execute(query)
+            projects = cursor.fetchall()
+            cursor.close()
+
+            for project in projects:
+                self.add_project(project[0])
+        else:
+            logger.debug('Adding new project(s) to database...')
+            for project in self.args.add_project:
+                self.add_project(project)
 
     def terminate(self):
         self.db.close()
@@ -85,11 +103,11 @@ class DatabaseInterface:
 
         self.db.commit()
 
-        if FORCE_EPOCH:
+        if self.args.force_epoch:
             logger.debug('FORCE_EPOCH set to True.')
 
         # If new project grab everything, otherwise grab utc epoch
-        if new_project or FORCE_EPOCH:
+        if new_project or self.args.force_epoch:
             since = datetime.datetime.utcfromtimestamp(0).isoformat()
             logger.debug(f'New project, grabbing all commit data since {since}.')
         else:
@@ -114,7 +132,7 @@ class DatabaseInterface:
         # Cloned repo
         project = GitCommand('.')
         project.cloneRepo(url)
-        data = project.getRepoCommitData('.', since=since)
+        data = project.getRepoCommitData('.', since=since, includebranches=True)
         logger.debug(f'Cloned repository "{name}".')
 
         cursor = self.db.cursor()
@@ -172,8 +190,6 @@ class DatabaseInterface:
                 dt = datetime.datetime.strptime(date, '%Y-%m-%dT%H:%M:%S%z').strftime('%Y-%m-%d %H:%M:%S')
                 message = commit['message'].strip()
                 branches = commit['branches']
-                logger.critical(f'KEYS: {commit.keys()}')
-                logger.critical(f'BRANCHES: {branches}')
                 query = f'insert into commit (hash, datetime, author_id, project_id, message, branch) values (%s, %s, %s, %s, %s, %s)'
 
                 cursor.execute(query, (hash, dt, author_id, project_id, message, branches,))
@@ -202,22 +218,31 @@ class DatabaseInterface:
                     logger.debug(f'Inserted diff in file {filename} for commit {hash}')
 
         # Remove cloned repo
-        os.chdir('..')
-        shutil.rmtree(f'./{name}/')
-        logger.debug(f'Removed repository {name}')
+        if not self.args.keep_repos:
+            os.chdir('..')
+            shutil.rmtree(f'./{name}/')
+            logger.debug(f'Removed repository {name}')
+
         cursor.close()
 
 if __name__ == '__main__':
-    interface = DatabaseInterface()
-    #url = 'https://github.com/spotify/dockerfile-maven.git'
-    #url = 'https://github.com/google/gvisor.git' #- StopIteration line 108 GitCommand.py
-    #url = 'https://github.com/petsc/petsc.git' #- Killed
-    #url = 'https://github.com/HPCL/p2z-tests.git'
-    #url = 'https://github.com/fickas/ideas-uo.git'
-    #fork_of = 'https://github.com/HPCL/ideas-uo.git'
-    url = 'https://github.com/HPCL/ideas-uo.git'
-    #url = 'https://github.com/HPCL/autoperf.git'
-    #url = 'https://github.com/HPCL/SLiM.git'
-    #url = 'https://github.com/HPCL/easy-parallel-graph.git'
-    fork_of = None
-    interface.add_project(url, fork_of=fork_of)
+    parser = argparse.ArgumentParser()
+
+    # Connection Arguments
+    parser.add_argument('--host', help='host for mysql connection', type=str)
+    parser.add_argument('--username', help='username for mysql connection', type=str)
+    parser.add_argument('--password', help='password for mysql connection', type=str)
+    parser.add_argument('--port', help='port for mysql connection', type=int)
+    parser.add_argument('--database', help='database for mysql connection', type=str)
+
+    # Update Arguments
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('--update', help='update existing projects on database', action='store_true')
+    group.add_argument('--add_project', help='add git url(s) to database', type=str, nargs='+')
+
+    # Misc Arguments
+    parser.add_argument('--force_epoch', help='force update from utc epoch', action='store_true')
+    parser.add_argument('--keep_repos', help='keep repos on disk after update', action='store_true')
+
+    args = parser.parse_args()
+    DatabaseInterface(args)
