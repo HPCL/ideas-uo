@@ -8,6 +8,7 @@ import os
 import shutil
 from urllib.parse import urlparse
 
+import arrow
 import MySQLdb
 
 from GitCommand import GitCommand
@@ -187,7 +188,9 @@ class DatabaseInterface:
                     continue
 
                 date = commit['date'].decode('utf-8')
-                dt = datetime.datetime.strptime(date, '%Y-%m-%dT%H:%M:%S%z').strftime('%Y-%m-%d %H:%M:%S')
+
+                dt = arrow.get(date).datetime.strftime('%Y-%m-%d %H:%M:%S')
+                #dt = datetime.datetime.strptime(date, '%Y-%m-%dT%H:%M:%S%z').strftime('%Y-%m-%d %H:%M:%S')
                 message = commit['message'].strip()
                 branches = commit['branches']
                 query = f'insert into commit (hash, datetime, author_id, project_id, message, branch) values (%s, %s, %s, %s, %s, %s)'
@@ -229,11 +232,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     # Connection Arguments
-    parser.add_argument('--host', help='host for mysql connection', type=str)
+    parser.add_argument('--host', help='host for mysql connection', type=str, default='localhost')
     parser.add_argument('--username', help='username for mysql connection', type=str)
     parser.add_argument('--password', help='password for mysql connection', type=str)
-    parser.add_argument('--port', help='port for mysql connection', type=int)
-    parser.add_argument('--database', help='database for mysql connection', type=str)
+    parser.add_argument('--port', help='port for mysql connection', type=int, default=3331)
+    parser.add_argument('--database', help='database for mysql connection', type=str, default='ideas_db')
 
     # Update Arguments
     group = parser.add_mutually_exclusive_group(required=True)
