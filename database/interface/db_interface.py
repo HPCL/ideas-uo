@@ -116,6 +116,11 @@ class DatabaseInterface:
             query = 'select last_updated from project where source_url=%s'
             cursor.execute(query, (url,))
             since = cursor.fetchone()[0]
+
+            # Shift last update by 1 hour earlier to account for potential commits missed during last update
+            dt = arrow.get(since).datetime - datetime.timedelta(hours=1)
+            since = dt.strftime('%Y-%m-%d %H:%M:%S')
+
             logger.debug(f'Existing project, grabbing all commit data since {since}.')
 
         cursor.close()
@@ -131,9 +136,11 @@ class DatabaseInterface:
         name = self.get_git_name(url)
 
         # Cloned repo
+        logger.debug(f'Cloning repository "{name}". This may take a while...')
         project = GitCommand('.')
         project.cloneRepo(url)
-        data = project.getRepoCommitData('.', since=since, includebranches=True)
+        branches = not self.args.no_branches
+        data = project.getRepoCommitData('.', since=since, includebranches=branches)
         logger.debug(f'Cloned repository "{name}".')
 
         cursor = self.db.cursor()
@@ -233,8 +240,8 @@ if __name__ == '__main__':
 
     # Connection Arguments
     parser.add_argument('--host', help='host for mysql connection', type=str, default='localhost')
-    parser.add_argument('--username', help='username for mysql connection', type=str)
-    parser.add_argument('--password', help='password for mysql connection', type=str)
+    parser.add_argument('--username', help='username for mysql connection', type=str, required=True)
+    parser.add_argument('--password', help='password for mysql connection', type=str, required=True)
     parser.add_argument('--port', help='port for mysql connection', type=int, default=3331)
     parser.add_argument('--database', help='database for mysql connection', type=str, default='ideas_db')
 
@@ -246,6 +253,7 @@ if __name__ == '__main__':
     # Misc Arguments
     parser.add_argument('--force_epoch', help='force update from utc epoch', action='store_true')
     parser.add_argument('--keep_repos', help='keep repos on disk after update', action='store_true')
+    parser.add_argument('--no_branches', help='does not fetch branch names for each commit', action='store_true')
 
     args = parser.parse_args()
     DatabaseInterface(args)
