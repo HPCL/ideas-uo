@@ -11,23 +11,29 @@
 
 ## Interface Usage
 
-***NOT YET READY***
-Built to run on Google Colab (Python 3.6.9). Make sure the packages in `interface/requirements.txt` are installed. Then copy all the python files in `interface/` to your current working directory. 
+Command line script for updating and adding new projects to the database. This script should be used by just the admins and users should look at the `examples/` on how to access the data.
 
-```python
-
-from db_interface import DatabaseInterface
-
-# Add/update a git project.
-interface = DatabaseInterface()
-url = 'https://github.com/HPCL/ideas-uo.git'
-interface.add_project(url)
+#### Updating existing projects:
+```bash
+./db_interface.py --host HOST --username USERNAME --password PASSWORD --port PORT --database DATABASE --update
 ```
 
-## Django Notable Changes
+#### Adding new projects:
+```bash
+./db_interface.py --host HOST --username USERNAME --password PASSWORD --port PORT --database DATABASE --add_project PROJECT [PROJECT ...]
+```
+
+#### Debugging and special flags:
+
+To check for commits from the beginning and not since the last update use the `--force_epoch` flag.
+To keep repo folders on disk after the script use `--keep_repos`.
+To not fetch branch info (DO THIS FOR DEBUGGING) use `--no_branches`.
+
+## Django/MySQL Notable Changes
 
 | Source File               | Change                                                               |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | `IDEAS/IDEAS/settings.py` | Add `'database'` to `INSTALLED_APPS`. Connects database application to the project. Does not automatically occur when running `migrate.py`. |
 | `IDEAS/IDEAS/settings.py` | May want to change `SECRET_KEY` once closer to use.                                                                                         |
-
+| `IDEAS/IDEAS/settings.py` | Under `DATABASE` set `options` to include: `charset: utf8mb4` and `use_unicode: True`.                                                      |
+| `MySQL Tables & Database` | Need to alter database and tables to collate to `utf8mb4` charset.                                                                          |
