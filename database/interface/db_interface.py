@@ -117,8 +117,8 @@ class DatabaseInterface:
             cursor.execute(query, (url,))
             since = cursor.fetchone()[0]
 
-            # Shift last update by 1 hour earlier to account for potential commits missed during last update
-            dt = arrow.get(since).datetime - datetime.timedelta(hours=1)
+            # Shift last update by 30 hours (server timeout) earlier to account for potential commits missed during last update
+            dt = arrow.get(since).datetime - datetime.timedelta(hours=30)
             since = dt.strftime('%Y-%m-%d %H:%M:%S')
 
             logger.debug(f'Existing project, grabbing all commit data since {since}.')
