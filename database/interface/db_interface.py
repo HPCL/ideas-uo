@@ -45,11 +45,11 @@ class DatabaseInterface:
             cursor.close()
 
             for project in projects:
-                self.add_project(project[0])
+                self.add_project(project[0], since=self.args.since, until=self.args.until)
         else:
             logger.debug('Adding new project(s) to database...')
             for project in self.args.add_project:
-                self.add_project(project)
+                self.add_project(project, since=self.args.since, until=self.args.until)
 
     def terminate(self):
         self.db.close()
@@ -61,7 +61,7 @@ class DatabaseInterface:
             name = name[:name.index('.')]
             return name
 
-    def add_project(self, url, name=None, since=datetime.datetime.utcfromtimestamp(0).isoformat(), fork_of=None):
+    def add_project(self, url, name=None, since=datetime.datetime.utcfromtimestamp(0).isoformat(), until=datetime.datetime.today().isoformat(), fork_of=None):
         '''
             url: url to git file
             name: descriptive name of project, defaults to .git file name
@@ -109,8 +109,8 @@ class DatabaseInterface:
 
         # If new project grab everything, otherwise grab utc epoch
         if new_project or self.args.force_epoch:
-            since = datetime.datetime.utcfromtimestamp(0).isoformat()
-            logger.debug(f'New project, grabbing all commit data since {since}.')
+            since = self.args.since
+            logger.debug(f'New project, grabbing all commit data since {since} until {until}.')
         else:
             # Find last time updated
             query = 'select last_updated from project where source_url=%s'
@@ -121,18 +121,18 @@ class DatabaseInterface:
             dt = arrow.get(since).datetime - datetime.timedelta(hours=30)
             since = dt.strftime('%Y-%m-%d %H:%M:%S')
 
-            logger.debug(f'Existing project, grabbing all commit data since {since}.')
+            logger.debug(f'Existing project, grabbing all commit data since {since} until {until}.')
 
         cursor.close()
 
-        self.process_project(url, since=since)
+        self.process_project(url, since=since, until=until)
 
         if exists:
             logger.debug(f'Project from {url} updated.')
         else:
             logger.debug(f'New project from {url} inserted.')
 
-    def process_project(self, url, since):
+    def process_project(self, url, since, until):
         name = self.get_git_name(url)
 
         # Cloned repo
@@ -140,7 +140,7 @@ class DatabaseInterface:
         project = GitCommand('.')
         project.cloneRepo(url)
         branches = not self.args.no_branches
-        data = project.getRepoCommitData('.', since=since, includebranches=branches)
+        data = project.getRepoCommitData('.', since=since, until=until, includebranches=branches)
         logger.debug(f'Cloned repository "{name}".')
 
         cursor = self.db.cursor()
@@ -254,6 +254,8 @@ if __name__ == '__main__':
     parser.add_argument('--force_epoch', help='force update from utc epoch', action='store_true')
     parser.add_argument('--keep_repos', help='keep repos on disk after update', action='store_true')
     parser.add_argument('--no_branches', help='does not fetch branch names for each commit', action='store_true')
+    parser.add_argument('--since', help='fetch commits from this date (ISO8601)', type=str, default=datetime.datetime.utcfromtimestamp(0).isoformat())
+    parser.add_argument('--until', help='fetch commits to this date (ISO8601)', type=str, default=datetime.datetime.today().isoformat())
 
     args = parser.parse_args()
     DatabaseInterface(args)
