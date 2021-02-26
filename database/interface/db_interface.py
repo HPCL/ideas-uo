@@ -28,7 +28,7 @@ class DatabaseInterface:
         self.args = args
 
         try:
-            self.db = MySQLdb.connect(host=self.args.host, port=self.args.port, user=self.args.username, password=self.args.password, database=self.args.database, use_unicode=True, charset='utf8')
+            self.db = MySQLdb.connect(host=self.args.host, port=self.args.port, user=self.args.username, password=self.args.password, database=self.args.database, use_unicode=True, charset='utf8mb4')
         except:
             logger.critical('Could not establish a connection to the database.')
             raise ConnectionError('Could not establish a connection to the database.')
@@ -117,8 +117,8 @@ class DatabaseInterface:
             cursor.execute(query, (url,))
             since = cursor.fetchone()[0]
 
-            # Shift last update by 1 hour earlier to account for potential commits missed during last update
-            dt = arrow.get(since).datetime - datetime.timedelta(hours=1)
+            # Shift last update by 30 hours (server timeout) earlier to account for potential commits missed during last update
+            dt = arrow.get(since).datetime - datetime.timedelta(hours=30)
             since = dt.strftime('%Y-%m-%d %H:%M:%S')
 
             logger.debug(f'Existing project, grabbing all commit data since {since}.')
