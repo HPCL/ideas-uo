@@ -1,0 +1,44 @@
+group ::= (term)
+term ::= ( term ) | word | number | term_list | comma_separated_term_list
+word ::= \w+ | \w*
+number ::= \d+ | \d+.\d* | .\d+    # etc -- you can add more number formats here
+term_list ::= term \s term_list | empty
+comma_separated_term_list ::= term\s*,\s* comma_separated_term_list | empty
+term_sep ::= \s+ | , | ;      # other punctuation
+
+
+
+<group> ::= "(" <expr> ")" | "(:" <expr> ")" | "(?=" <expr> ")" | "(?!" <expr> ")" | "\" <digit>
+
+<expr> ::= <anchor> <expr> <anchor> | <anchor> <expr> | <expr> <anchor> | <expr> "|" <expr> 
+           | <expr_list> | <word> | <number> | <string> | <group>
+
+<anchor> ::= "^" | "$" | "\b" | "\B"
+
+<digit> ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
+
+<quantifier> ::= "*" | "+" | "?" | "{" <digit> "}" | "{" <digit> ",}" | "{" <digit> "," <digit> "}"
+                 | <quantifier> "?"
+
+<letter> ::= "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z" | "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
+
+<symbol> ::= "#" | "$" | "%" | "&" | "'" | "(" | ")" | "*" | "+" | "," | "-" | "." | "/" | ":" | ";" | "<" | "=" | ">" | "?" | "@" | "[" | "\" | "]" | "^" | "_" | "`" | "{" | "|" | "}" | "~" | " " 
+
+<ascii> ::= <symbol> | <letter> | <digit>
+
+<string> ::= <ascii> | <ascii> <string>
+
+<char_range> ::= <ascii> "-" <ascii> 
+
+<char_expr> ::= <string> | <char_range> | <anchor> <char_expr> <anchor> | <anchor> <char_expr> 
+                | <char_expr> <anchor> | <char_expr> <char_expr> | ""
+
+<char_class> ::= "[" <char_expr> "]" 
+
+<number> ::= "\d+" | "\d"
+<expr_list> ::= <expr> <expr_list> | ""
+<word> ::= "\w+" | "\w*"
+<string> ::= ".*" | ".+"
+<opening_symbol> ::= "{" | "[" | "(" | "<"
+<closing_symbol> ::= "}" | "]" | ")" | ">"
+

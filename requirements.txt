@@ -5,3 +5,5 @@ seaborn
 networkx
 pydot
 graphviz
+arrow
+mysqlclient
