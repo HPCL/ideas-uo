@@ -1,2 +1,48 @@
-https://github.com/spack/spack.git
+# URLs for ECP software projects; subrepositories are indented under the parent repo
+# Private repo lines start with -
+https://github.com/E3SM-Project/E3SM.git
+https://bitbucket.org/einsteintoolkit/einsteintoolkit
+  https://bitbucket.org/eloisa/ctthorns.git
+  https://bitbucket.org/cactuscode/cactusbase.git
+  https://bitbucket.org/cactuscode/cactusconnect.git
+  https://bitbucket.org/cactuscode/coredoc.git
+  https://bitbucket.org/cactuscode/cactuselliptic.git
+  https://bitbucket.org/cactuscode/cactusexamples.git
+  https://bitbucket.org/cactuscode/cactusio.git
+  https://bitbucket.org/cactuscode/cactusnumerical.git
+  https://bitbucket.org/cactuscode/cactuspugh.git
+  https://bitbucket.org/cactuscode/cactuspughio.git
+  https://bitbucket.org/cactuscode/cactustest.git
+  https://bitbucket.org/cactuscode/cactusutils.git
+  https://bitbucket.org/cactuscode/cactuswave.git
+  https://bitbucket.org/einsteintoolkit/einsteinanalysis.git
+  https://bitbucket.org/einsteintoolkit/einsteinbase.git
+  https://bitbucket.org/einsteintoolkit/einsteineos.git
+  https://bitbucket.org/einsteintoolkit/einsteinevolve.git
+  https://bitbucket.org/einsteintoolkit/einsteinexamples.git
+  https://bitbucket.org/einsteintoolkit/einsteininitialdata.git
+  https://bitbucket.org/einsteintoolkit/einsteinutils.git
+  https://bitbucket.org/llamacode/Llama.git
+  https://bitbucket.org/cactuscode/numerical.git
+  https://bitbucket.org/einsteintoolkit/pittnullcode.git
+  https://bitbucket.org/zach_etienne/wvuthorns.git
+  https://bitbucket.org/cactuscode/cactus.git
+  https://bitbucket.org/einsteintoolkit/manifest.git
+  https://github.com/gridaphobe/CRL.git
+  https://github.com/barrywardell/EinsteinExact.git
+  https://github.com/ianhinder/Kranc.git
+  https://bitbucket.org/einsteintoolkit/mclachlan
+  https://bitbucket.org/eschnett/carpet.git
+  https://bitbucket.org/simfactory/simfactory2.git
+  https://bitbucket.org/cactuscode/utilities.git
+https://github.com/enzo-project/enzo-dev
+https://github.com/frej/fast-export.git
+-https://gitta.rzg.mpg.de/~GENE/guest/git.py/gene.git
+https://github.com/lammps/lammps.git
 https://github.com/lanl/LATTE.git
+https://charm.cs.illinois.edu/gerrit/namd.git
+https://github.com/usqcd-software/qdpxx.git
+https://github.com/QMCPACK/qmcpack.git
+https://github.com/Nek5000/Nek5000.git
+https://github.com/nwchemgit/nwchem.git
+https://github.com/spack/spack.git
