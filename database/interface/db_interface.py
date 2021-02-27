@@ -11,7 +11,7 @@ from urllib.parse import urlparse
 import arrow
 import MySQLdb
 
-from GitCommand import GitCommand
+from gitcommand import GitCommand
 
 # Setup Logger
 logger = logging.getLogger()

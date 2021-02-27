@@ -1,26 +1,47 @@
 import os, sys, subprocess
-from hpcl import Command
+
+
+import code.gitutils.command as command
+from code.gitutils.utils import *
 
 class GitCommand(object):
 
-    def __init__(self, dir):
-        self.tmpdir = dir
+    def __init__(self, dir=None):
+        if dir == None:
+            self.tmpdir = os.path.abspath(os.path.join(os.environ['HOME'], '.ideas-temp'))
+            if not os.path.exists(self.tmpdir): os.mkdir(self.tmpdir)
+        else:
+            self.tmpdir = dir
 
     #Clone a repo
     def cloneRepo(self, url):
-        
-        os.chdir(self.tmpdir) 
+        """
+        Clone a reposotory into a temporary local directory.
+        :argument url the repository URL
+        returns True if successful, False otherwise
+        """
+        try:
+            os.chdir(self.tmpdir)
+        except Exception as e:
+            return err("Could not change to directory %s: %s" % (self.tmpdir, e.message))
 
-        #Check if already exists in tmp folder
-        os.system('git clone ' + url)
+        local_repo_path = url[url.rfind('/')+1:url.rfind('.')]
+        if not local_repo_path: local_repo_path=url.split('/')[-1]
+        if not os.path.exists(local_repo_path):
+            try:
+                os.system('git clone ' + url)
+            except Exception as e:
+                return err("Could not clone repository %s: %s" % (url, e.message))
 
-        #pull for the latest in case it was previously cloned
-        repo = url[url.rfind('/')+1:url.rfind('.')]
-        os.chdir(repo)
-        os.system('git pull')
+        os.chdir(local_repo_path)
 
-        os.chdir(self.tmpdir)
+        # pull for the latest in case it was previously cloned
+        try:
+            os.system('git pull')
+        except Exception as e:
+            return err("Could not 'git pull' repository %s: %s" % (local_repo_path, e.message))
 
+        os.chdir(self.tmpdir)  # back to the parent dir
         return True
 
     #Get all the versions of a repo
@@ -47,13 +68,13 @@ class GitCommand(object):
         for version in versions:   
             #checkout the versions
             print('git checkout %s%s' % (prefix,version))
-            retcode, out, err = Command.Command('git checkout %s%s' % (prefix,version)).run(dryrun=False)
+            retcode, out, err = command.Command('git checkout %s%s' % (prefix,version)).run(dryrun=False)
             print(out)
             
     
         #git log -p # this will list all commits and the code additions in addition to dates and messages.
         # function-context for python just adds all the surrounding lines of code to the diff output
-        retcode, out, err = Command.Command('git log -p --date=iso-strict-local --function-context').run()
+        retcode, out, err = command.Command('git log -p --date=iso-strict-local --function-context').run()
         lines = iter(out.splitlines())
 
         current_author = ''
@@ -70,7 +91,7 @@ class GitCommand(object):
                 #Retrieve all branches that contains this commit
                 branches = ''
                 if includebranches:
-                    retcode, branches, err = Command.Command('git branch -a --contains %s' % commitid).run()
+                    retcode, branches, err = command.Command('git branch -a --contains %s' % commitid).run()
 
                 line = next(lines)
                 #print(line)
@@ -198,13 +219,13 @@ class GitCommand(object):
         for version in versions:   
             #checkout the versions
             print('git checkout %s%s' % (prefix,version))
-            retcode, out, err = Command.Command('git checkout %s%s' % (prefix,version)).run(dryrun=False)
+            retcode, out, err = command.Command('git checkout %s%s' % (prefix,version)).run(dryrun=False)
             print(out)
             
     
         #git log -p # this will list all commits and the code additions in addition to dates and messages.
         # function-context for python just adds all the surrounding lines of code to the diff output
-        retcode, out, err = Command.Command('git log -p --date=iso-strict-local --function-context').run()
+        retcode, out, err = command.Command('git log -p --date=iso-strict-local --function-context').run()
         lines = iter(out.splitlines())
 
         #current_author = ''
@@ -220,7 +241,7 @@ class GitCommand(object):
                 #Retrieve all branches that contains this commit
                 branches = ''
                 if includebranches:
-                    retcode, branches, err = Command.Command('git branch -a --contains %s' % commitid).run()
+                    retcode, branches, err = command.Command('git branch -a --contains %s' % commitid).run()
 
                 line = next(lines)
                 #print(line)
@@ -337,21 +358,21 @@ class GitCommand(object):
 
 def getYears(repodir):
     os.chdir(repodir)
-    retcode, out, err = Command.Command('git log | grep Date | tail -1').run()
+    retcode, out, err = command.Command('git log | grep Date | tail -1').run()
     if not out.strip(): repoError(repodir,err)
     startyear = out.split()[-2]
-    retcode, out, err = Command.Command('git log | grep Date | head -1').run()
+    retcode, out, err = command.Command('git log | grep Date | head -1').run()
     if not out.strip(): repoError(repodir,err)
     endyear = out.split()[-2]
                     
     changesets = []
     for year in range(int(startyear),int(endyear)+1):
-        retcode, out, err = Command.Command(getGitCmd(year)).run()
+        retcode, out, err = command.Command(getGitCmd(year)).run()
         if out.strip(): changesets.append(out.strip())
 
     if not changesets:
         for year in range(int(endyear),2000,-1):
-            retcode, out, err = Command.Command(getGitCmd(year)).run()
+            retcode, out, err = command.Command(getGitCmd(year)).run()
             if out.strip(): changesets.append(out.strip())
     return changesets
 

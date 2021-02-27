@@ -190,21 +190,21 @@ class RemoteCommand(object):
 
 def getYears(repodir):
     os.chdir(repodir)
-    retcode, out, err = Command.Command('git log | grep Date | tail -1').run()
+    retcode, out, err = command.Command('git log | grep Date | tail -1').run()
     if not out.strip(): repoError(repodir,err)
     startyear = out.split()[-2]
-    retcode, out, err = Command.Command('git log | grep Date | head -1').run()
+    retcode, out, err = command.Command('git log | grep Date | head -1').run()
     if not out.strip(): repoError(repodir,err)
     endyear = out.split()[-2]
                     
     changesets = []
     for year in range(int(startyear),int(endyear)+1):
-        retcode, out, err = Command.Command(getGitCmd(year)).run()
+        retcode, out, err = command.Command(getGitCmd(year)).run()
         if out.strip(): changesets.append(out.strip())
 
     if not changesets:
         for year in range(int(endyear),2000,-1):
-            retcode, out, err = Command.Command(getGitCmd(year)).run()
+            retcode, out, err = command.Command(getGitCmd(year)).run()
             if out.strip(): changesets.append(out.strip())
     return changesets
 
