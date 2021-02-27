@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: gitutils
+name: library code
 
 # Controls when the action will run. 
 on:
@@ -35,6 +35,5 @@ jobs:
 
       - name: Test with pytest
         run: |
-          python -m pytest -v code
-          echo Add other actions to build,
-          echo test, and deploy your project.
+          python -m pytest -v src
+          echo Done!
