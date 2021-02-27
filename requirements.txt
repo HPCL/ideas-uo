@@ -2,8 +2,10 @@ pytest
 requests
 pandas
 seaborn
+plotly
 networkx
 pydot
 graphviz
+bs4
 arrow
 mysqlclient

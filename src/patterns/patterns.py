@@ -1,14 +1,13 @@
 import pandas as pd 
-import numpy as np 
+#import numpy as np
 import matplotlib.pyplot as plt 
 import seaborn as sb 
-import nltk 
+#import nltk
 import re 
 from collections import Counter 
 import math 
-from sklearn.feature_extraction.text import TfidfVectorizer 
-from patterns.Fetcher import Fetcher
-
+#from sklearn.feature_extraction.text import TfidfVectorizer
+from patterns.fetcher import Fetcher
 
 
 WORD = re.compile(r"\w+")
@@ -76,14 +75,14 @@ def process_diff(diff_str):
 
 class Patterns(Fetcher): 
     def __init__(self, project_name): 
-        Fetcher.__init__(self, project_name)
-        Fetcher.close_session(self) 
+        super().__init__(project_name)
+        # self.close_session()
         # to store store list of dataframes sorted in descending order by who made the most commits 
         self.ranked_by_people  = None 
         # to store list (file_name, count) sorted by count 
         self.ranked_files      = None 
-        # 2d-matrix (dataframe) of user and files they've touched 
-        self.user_file_mat     = None 
+        # 2d-matrix (dataframe) of developers and files they've touched
+        self.developer_file_mat     = None
         self.year              = None 
         self.month             = None 
         self.year_tup          = None 
@@ -138,7 +137,7 @@ class Patterns(Fetcher):
         self.year = y 
         self.month = mo 
 
-    def make_file_user_df(self, dims=None): 
+    def make_file_developer_df(self, dims=None):
         authors     = {} 
         files       = {} 
         seen_sha    = {} 
@@ -224,16 +223,17 @@ class Patterns(Fetcher):
             column_labels = list(column_labels)[:cols] 
             mat = [r[:cols] for r in mat[:rows]]
         to_ret = pd.DataFrame.from_records(mat, index=index_labels, columns=column_labels)
-        self.user_file_mat = to_ret
+        self.developer_file_mat = to_ret
         return to_ret  
 
-    def view_user_file_map(self):
+    def view_developer_file_map(self):
         fig, ax = plt.subplots(figsize=(12,8)) 
-        sb.heatmap(self.user_file_mat, annot=True, linewidths=.5, cmap='icefire') 
+        sb.heatmap(self.developer_file_mat, annot=True, linewidths=.5, cmap='icefire')
         if self.year is None: 
-            plt.title('Overall users vs files (' + str(self.project_name) + ')')
+            plt.title('Overall developers vs files (' + str(self.project_name) + ')')
         else: 
-            plt.title(str(self.year) + ' : users vs files (' + self.project_name + ')')
+            plt.title(str(self.year) + ' : developers vs files (' + self.project_name +
+                      ')')
         plt.show()
 
 

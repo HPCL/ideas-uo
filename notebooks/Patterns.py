@@ -127,7 +127,7 @@ class Patterns:
         to_return     = pd.DataFrame.from_records(mat, index=index_labels, columns=column_labels) 
         return to_return 
 
-    def set_user_file_mat(self, dims=None): 
+    def set_developer_file_mat(self, dims=None):
         self.user_file_mat = self.make_file_user_df(dims)
 
 
@@ -142,7 +142,7 @@ class Visualizer(Patterns):
         self.dimensions = (height, width)
 
     def extend_patterns(self):
-        self.set_user_file_mat(self.dimensions) 
+        self.set_developer_file_mat(self.dimensions)
 
     def refresh(self):
         self.extend_patterns()

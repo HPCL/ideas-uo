@@ -1,8 +1,8 @@
-import os, sys, subprocess
+import os
 
+import gitutils.command as command
+from gitutils.utils import *
 
-import code.gitutils.command as command
-from code.gitutils.utils import *
 
 class GitCommand(object):
 
@@ -23,7 +23,7 @@ class GitCommand(object):
         try:
             os.chdir(self.tmpdir)
         except Exception as e:
-            return err("Could not change to directory %s: %s" % (self.tmpdir, e.message))
+            return err("Could not change to directory %s: %s" % (self.tmpdir, str(e)))
 
         local_repo_path = url[url.rfind('/')+1:url.rfind('.')]
         if not local_repo_path: local_repo_path=url.split('/')[-1]
@@ -31,7 +31,7 @@ class GitCommand(object):
             try:
                 os.system('git clone ' + url)
             except Exception as e:
-                return err("Could not clone repository %s: %s" % (url, e.message))
+                return err("Could not clone repository %s: %s" % (url, str(e)))
 
         os.chdir(local_repo_path)
 
@@ -39,7 +39,8 @@ class GitCommand(object):
         try:
             os.system('git pull')
         except Exception as e:
-            return err("Could not 'git pull' repository %s: %s" % (local_repo_path, e.message))
+            return err("Could not 'git pull' repository %s: %s" % (local_repo_path,
+                                                                   str(e)))
 
         os.chdir(self.tmpdir)  # back to the parent dir
         return True

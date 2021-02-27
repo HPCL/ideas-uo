@@ -1,5 +1,6 @@
 import os
-from code.gitutils.tests.testutils import *
+from gitutils.tests.testutils import *
+from gitutils.utils import *
 
 def test_instantiateGitCommand(capsys, caplog):
     try:
@@ -7,7 +8,7 @@ def test_instantiateGitCommand(capsys, caplog):
         if gitcmd != None:
             success = True
     except Exception as e:
-        success = err("Could not instantiate GitCommand class: %e" % e.message)
+        success = err("Could not instantiate GitCommand class: %s" % str(e))
     assert success is True
 
 def test_cloneRepo(capsys, caplog):

@@ -2,8 +2,10 @@ from os import kill
 from signal import alarm, signal, SIGALRM, SIGKILL
 from subprocess import PIPE, Popen
 
+
 class Alarm(Exception):
     pass
+
 
 class Command(object):
     def __init__(self, cmd):

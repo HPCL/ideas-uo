@@ -1,17 +1,23 @@
 import matplotlib.pyplot as plt 
 import plotly.express as px 
-import seaborn as sb 
-import numpy as np 
+import numpy as np
 import pandas as pd 
-from patterns.Patterns import Patterns 
+from patterns.patterns import Patterns
 
 
 class Visualizer(Patterns): 
-    def __init__(self, project_name): 
-        Patterns.__init__(self, project_name) 
+    def __init__(self, project_name: str): 
+        super().__init__(project_name)
         self.dimensions = None 
         self.months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August'
                        , 'September', 'October', 'November', 'December']
+        self.commit_data = None
+        self.yearly_commits = None
+        self.monthly_commits = None
+
+    def get_data(self, db=None):
+        self.fetch(db)  # loads up the self.commit_data
+        self.close_session()
         self.commit_data.index   = self.commit_data['datetime']
         self.commit_data = self.commit_data.drop(columns=['index', 'datetime'])
         self.annotate_metrics()
@@ -22,51 +28,53 @@ class Visualizer(Patterns):
         self.dimensions = (height, width)
 
     def extend_patterns(self):
-        self.set_user_file_mat(self.dimensions) 
+        self.set_developer_file_mat(self.dimensions)
 
     def refresh(self):
         self.extend_patterns()
  
 
-    # def view_user_contributions(self, num_users=3):
-    #     fig, ax = plt.subplots() 
-    #     names = [] 
-    #     for i in range(num_users): 
-    #         pd_i = self.ranked_by_people[i] 
-    #         n    = list(pd_i['author'])[0] 
-    #         names.append(n) 
-
-    #         pd_i.index = pd.to_datetime(pd_i['datetime']) 
-    #         pd_i.index = pd.to_datetime(pd_i.index, utc=True) 
-    #         quarter_checkin_i = pd_i.groupby(pd.Grouper(freq='Q')).sum() 
-    #         quarter_checkin_i['locc'].plot(figsize=(20,8), grid=True, ax=ax, logy=True) 
-
+    # def view_developer_contributions(self, num_developers=3):
+    #     fig, ax = plt.subplots()
+    #     names = []
+    #     for i in range(num_developers):
+    #         pd_i = self.ranked_by_people[i]
+    #         n = list(pd_i['author'])[0]
+    #         names.append(n)
+    #
+    #         pd_i.index = pd.to_datetime(pd_i['datetime'])
+    #         pd_i.index = pd.to_datetime(pd_i.index, utc=True)
+    #         quarter_checkin_i = pd_i.groupby(pd.Grouper(freq='Q')).sum()
+    #         quarter_checkin_i['locc'].plot(figsize=(20,8), grid=True, ax=ax, logy=True)
+    #
     #     ax.set_title("Contributors quarterly changes (" + self.project_name + ")")
     #     ax.legend(list(map(lambda x: x + 1, list(range(len(names))))))
     #     plt.show()
 
 
-    # def plot_user_add_delete(self, user_rank):
+    # def plot_developer_add_delete(self, developer_rank):
     #     fig, axis = plt.subplots(figsize=(20,8))
-    #     user_pd = self.ranked_by_people[user_rank] 
-    #     user_pd.index = pd.to_datetime(user_pd['datetime'])
-    #     user_pd.index = pd.to_datetime(user_pd.index, utc=True)
+    #     developer_pd = self.ranked_by_people[developer_rank]
+    #     developer_pd.index = pd.to_datetime(developer_pd['datetime'])
+    #     developer_pd.index = pd.to_datetime(developer_pd.index, utc=True)
     #     if self.month is None: 
-    #         quarter_checkin_i = user_pd.groupby(pd.Grouper(freq='M')).sum() 
+    #         quarter_checkin_i = developer_pd.groupby(pd.Grouper(freq='M')).sum()
     #     else: 
-    #         quarter_checkin_i = user_pd.groupby(pd.Grouper(freq='D')).sum() 
+    #         quarter_checkin_i = developer_pd.groupby(pd.Grouper(freq='D')).sum()
     #     quarter_checkin_i['locc+'] = np.log2(quarter_checkin_i['locc+']).fillna(0)
     #     quarter_checkin_i['locc-'] = -np.log2(quarter_checkin_i['locc-']).fillna(0)
     #     quarter_checkin_i['locc+'].plot(figsize=(15,8), grid=True, ax=axis, kind='bar', sharey=True, color='r')
     #     quarter_checkin_i['locc-'].plot(figsize=(15,8), grid=True, ax=axis, kind='bar', style='--', sharey=True, color='b')
-    #     axis.set_title(self.project_name + ' user (' + str(user_rank) +') add vs delete over time')
+    #     axis.set_title(self.project_name + ' developer (' + str(developer_rank) +') add
+    #     vs delete over time')
     #     handles, labels = axis.get_legend_handles_labels() 
     #     fig.legend(handles, labels, loc="lower center")
     #     plt.show()
 
-    # def changes_line_plot(self, user_rank): 
-    #     topi_pd = self.ranked_by_people[user_rank] 
-    #     p       = list(topi_pd['author'])[0] # using zero index for user with most commits. Can vary for different devs
+    # def changes_line_plot(self, developer_rank):
+    #     topi_pd = self.ranked_by_people[developer_rank]
+    #     p       = list(topi_pd['author'])[0] # using zero index for developer with most
+    #     commits. Can vary for different devs
     #     topi_pd.index = pd.to_datetime(topi_pd['datetime'])
     #     topi_pd.index = pd.to_datetime(topi_pd.index, utc=True)
     #     quarter_checkin_i = topi_pd.groupby(pd.Grouper(freq='M')).sum() 
@@ -94,7 +102,7 @@ class Visualizer(Patterns):
     #     plt.title(self.project_name + " Top Contributor Add vs Delete Per Month of " + str(self.year));
     #     plt.show()
 
-    def plot_overall_prjct_locc(self, time_range='year', axis=None): 
+    def plot_overall_project_locc(self, time_range='year', axis=None):
         fig, a = plt.subplots(figsize=(20,8))
         if axis is None: 
             axis = a
@@ -156,9 +164,9 @@ class Visualizer(Patterns):
     def plot_proj_y2y(self, year1, year2): 
         fig, (ax1, ax2) = plt.subplots(1,2) 
         self.reset(y=year1) 
-        self.plot_overall_prjct_locc(axis=ax1) 
+        self.plot_overall_project_locc(axis=ax1)
         self.reset(y=year2) 
-        self.plot_overall_prjct_locc(axis=ax2) 
+        self.plot_overall_project_locc(axis=ax2)
         handles, labels = ax1.get_legend_handles_labels() 
         fig.legend(handles, labels, loc="upper right")
         fig.set_visible(True)
