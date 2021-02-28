@@ -43,7 +43,9 @@ tokens = (
     'SEMICOLON',
     'COMMA',
     'PERIOD',
-    'QUESTION_MARK'
+    'QUESTION_MARK',
+    'SPACE',
+    'TAB'
 )
 
 t_OPEN_PARENS = r'\('
@@ -87,6 +89,8 @@ t_SEMICOLON = r'\;'
 t_COMMA = r'\,'
 t_PERIOD = r'\.'
 t_QUESTION_MARK = r'\?'
+t_SPACE = r'\ '
+t_TAB = r'\t'
 
 literals = list(string.printable)
 
@@ -97,7 +101,8 @@ def t_error(t):
 lexer = lex.lex()
 
 if __name__ == '__main__':
-    data = string.printable
+    data = '{(\w+)}'
+    data = '^author (.*)'
     lexer.input(data)
 
     while True:

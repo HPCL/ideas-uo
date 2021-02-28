@@ -106,3 +106,4 @@ venv.bak/
 # doc_generation ply
 machine_learning/doc_generation/parser/parser.out
 machine_learning/doc_generation/parser/parsetab.py
+machine_learning/doc_generation/parser/parselog.txt
