@@ -1,8 +1,9 @@
-pytest>=6.0
+pytest
 requests
 pandas
 seaborn
 plotly
+plotly-express
 networkx
 pydot
 graphviz

@@ -1,7 +1,9 @@
 import matplotlib.pyplot as plt 
 import plotly.express as px 
 import numpy as np
-import pandas as pd 
+import pandas as pd
+import seaborn as sns
+sns.set(font_scale=1.5)
 from patterns.patterns import Patterns
 
 
@@ -14,6 +16,8 @@ class Visualizer(Patterns):
         self.commit_data = None
         self.yearly_commits = None
         self.monthly_commits = None
+        # Change font size globally
+        plt.rcParams['font.size'] = '16'
 
     def get_data(self, db=None):
         self.fetch(db)  # loads up the self.commit_data
@@ -158,8 +162,15 @@ class Visualizer(Patterns):
 
         if time_range == None: 
             checkin = self.commit_data.groupby(pd.Grouper(freq='M')).sum() 
-        fig = px.line(checkin, x=checkin.index, y=checkin['change-size'])
-        fig.show()
+        #fig = sns.line(checkin, x=checkin.index, y=checkin['change-size'])
+        with sns.axes_style("whitegrid"):
+            g = sns.relplot(data=checkin, x="datetime", y="change-size",
+                            kind="line", height=6, aspect=1.5)
+            g.ax.set_xlabel('Date')
+            g.ax.set_ylabel('Total number of changed lines')
+            g.fig.autofmt_xdate()
+            g.fig.show()
+        return checkin
 
     def plot_proj_y2y(self, year1, year2): 
         fig, (ax1, ax2) = plt.subplots(1,2) 
@@ -238,11 +249,20 @@ class Visualizer(Patterns):
         topi_pd.index = pd.to_datetime(topi_pd.index)
         topi_pd.index = pd.to_datetime(topi_pd.index, utc=True)
         quarter_checkin_i = topi_pd.groupby(pd.Grouper(freq='M')).sum() 
-        quarter_checkin_i['locc+'] = np.log2(quarter_checkin_i['locc+'])
-        quarter_checkin_i['locc-'] = -np.log2(quarter_checkin_i['locc-'])
-        quarter_checkin_i['locc total'] = quarter_checkin_i['locc+'] + quarter_checkin_i['locc-']
+        quarter_checkin_i['log2_locc+'] = np.log2(quarter_checkin_i['locc+'])
+        quarter_checkin_i['log2_locc-'] = -np.log2(quarter_checkin_i['locc-'])
+        quarter_checkin_i['locc_log2_diff'] = quarter_checkin_i['locc+'] + \
+                                            quarter_checkin_i['locc-']
+        quarter_checkin_i['log2_locc_diff'] = np.log2(quarter_checkin_i[
+                                                  'locc+']-quarter_checkin_i['locc-'])
 
         # print(topi_pd)
-        fig = px.line(quarter_checkin_i, x=quarter_checkin_i.index, y=quarter_checkin_i['locc total'])
-        fig.show()
-
+        with sns.axes_style("whitegrid"):
+            g = sns.relplot(data=quarter_checkin_i, x="datetime", y="locc_log2_diff",
+                            height=6, aspect=1.5,
+                            kind="line")
+            g.ax.set_xlabel('Date')
+            g.ax.set_ylabel('log2(+lines) - log2(-lines)')
+            g.fig.autofmt_xdate()
+            g.fig.show()
+        return quarter_checkin_i
