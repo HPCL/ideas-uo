@@ -11,7 +11,7 @@ def preorder(root):
         node, level = stack.pop()
         print(' '*level + f'{node.type}({node.value})')
 
-        for child in node.children:
+        for child in node.children[::-1]:
             if child:
                 stack.append((child,level+1))
 
