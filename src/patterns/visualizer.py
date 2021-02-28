@@ -5,6 +5,7 @@ import pandas as pd
 import seaborn as sns
 sns.set(font_scale=1.5)
 from patterns.patterns import Patterns
+from gitutils.utils import *
 
 
 class Visualizer(Patterns): 
@@ -36,75 +37,7 @@ class Visualizer(Patterns):
 
     def refresh(self):
         self.extend_patterns()
- 
 
-    # def view_developer_contributions(self, num_developers=3):
-    #     fig, ax = plt.subplots()
-    #     names = []
-    #     for i in range(num_developers):
-    #         pd_i = self.ranked_by_people[i]
-    #         n = list(pd_i['author'])[0]
-    #         names.append(n)
-    #
-    #         pd_i.index = pd.to_datetime(pd_i['datetime'])
-    #         pd_i.index = pd.to_datetime(pd_i.index, utc=True)
-    #         quarter_checkin_i = pd_i.groupby(pd.Grouper(freq='Q')).sum()
-    #         quarter_checkin_i['locc'].plot(figsize=(20,8), grid=True, ax=ax, logy=True)
-    #
-    #     ax.set_title("Contributors quarterly changes (" + self.project_name + ")")
-    #     ax.legend(list(map(lambda x: x + 1, list(range(len(names))))))
-    #     plt.show()
-
-
-    # def plot_developer_add_delete(self, developer_rank):
-    #     fig, axis = plt.subplots(figsize=(20,8))
-    #     developer_pd = self.ranked_by_people[developer_rank]
-    #     developer_pd.index = pd.to_datetime(developer_pd['datetime'])
-    #     developer_pd.index = pd.to_datetime(developer_pd.index, utc=True)
-    #     if self.month is None: 
-    #         quarter_checkin_i = developer_pd.groupby(pd.Grouper(freq='M')).sum()
-    #     else: 
-    #         quarter_checkin_i = developer_pd.groupby(pd.Grouper(freq='D')).sum()
-    #     quarter_checkin_i['locc+'] = np.log2(quarter_checkin_i['locc+']).fillna(0)
-    #     quarter_checkin_i['locc-'] = -np.log2(quarter_checkin_i['locc-']).fillna(0)
-    #     quarter_checkin_i['locc+'].plot(figsize=(15,8), grid=True, ax=axis, kind='bar', sharey=True, color='r')
-    #     quarter_checkin_i['locc-'].plot(figsize=(15,8), grid=True, ax=axis, kind='bar', style='--', sharey=True, color='b')
-    #     axis.set_title(self.project_name + ' developer (' + str(developer_rank) +') add
-    #     vs delete over time')
-    #     handles, labels = axis.get_legend_handles_labels() 
-    #     fig.legend(handles, labels, loc="lower center")
-    #     plt.show()
-
-    # def changes_line_plot(self, developer_rank):
-    #     topi_pd = self.ranked_by_people[developer_rank]
-    #     p       = list(topi_pd['author'])[0] # using zero index for developer with most
-    #     commits. Can vary for different devs
-    #     topi_pd.index = pd.to_datetime(topi_pd['datetime'])
-    #     topi_pd.index = pd.to_datetime(topi_pd.index, utc=True)
-    #     quarter_checkin_i = topi_pd.groupby(pd.Grouper(freq='M')).sum() 
-    #     quarter_checkin_i['locc+'] = np.log2(quarter_checkin_i['locc+'])
-    #     quarter_checkin_i['locc-'] = -np.log2(quarter_checkin_i['locc-'])
-    #     y = quarter_checkin_i['locc+'] + quarter_checkin_i['locc-']
-    #     x = np.arange(len(y))
-    #     fig = plt.figure() 
-    #     fig.set_figwidth(20) 
-    #     fig.set_figheight(8) 
-        
-    #     plt.plot(x,y)
-    #     z1 = np.array(y)
-    #     z2 = np.array(0.0 * 10)
-    #     plt.fill_between(x, y, 0,
-    #                     where=(z1 >= z2),
-    #                     alpha=0.30, color='green', interpolate=True, label='Positive')
-    #     plt.fill_between(x, y, 0,
-    #                     where=(z1 < z2),
-    #                     alpha=0.30, color='red', interpolate=True, label='Negative')
-    #     plt.legend()
-    #     plt.xlabel('Month')
-    #     plt.xticks(x, quarter_checkin_i.index, rotation='vertical')
-    #     plt.ylabel("Net Difference in Lines of Code Changed")
-    #     plt.title(self.project_name + " Top Contributor Add vs Delete Per Month of " + str(self.year));
-    #     plt.show()
 
     def plot_overall_project_locc(self, time_range='year', axis=None):
         fig, a = plt.subplots(figsize=(20,8))
@@ -120,19 +53,27 @@ class Visualizer(Patterns):
         if time_range == None: 
             checkin = self.commit_data.groupby(pd.Grouper(freq='Q')).sum() 
 
-        checkin['locc+'] = np.log2(checkin['locc+']).fillna(0)
-        checkin['locc-'] = -np.log2(checkin['locc-']).fillna(0)
-        ax_ans = checkin['locc+'].plot(figsize=(15,8), grid=True, ax=axis, kind='bar', sharey=True, color='r')
-        ax_ans1 = checkin['locc-'].plot(figsize=(15,8), grid=True, ax=ax_ans, kind='bar', style='--', sharey=True, color='b') 
+        if not 'log_loc+' in checkin.columns:
+            checkin['log_locc+'] = np.log10(checkin['locc+']).fillna(0)
+            checkin['log_locc-'] = -np.log10(checkin['locc-']).fillna(0)
+        ax_ans = checkin['log_locc+'].plot(figsize=(15,8), grid=True, ax=axis, kind='bar', sharey=True, color='r')
+        ax_ans1 = checkin['log_locc-'].plot(figsize=(15,8), grid=True, ax=ax_ans, kind='bar', style='--', sharey=True,
+                                         color='b')
         if time_range == 'year': 
-            ax_ans1.set_title(self.project_name + ' add vs delete in '+ str(self.year))
+            ax_ans1.set_title(self.project_name + ' add vs delete in '+ str(self.year)
+                              + ' (log10 scale)')
         if time_range == 'month': 
-            ax_ans1.set_title(self.project_name + ' add vs delete in '+  self.months[self.month] + ' of' + str(self.year)) 
+            ax_ans1.set_title(self.project_name + ' add vs delete in '+  self.months[
+                self.month] + ' of' + str(self.year) + ' (log10 scale)')
         if time_range == None: 
-            ax_ans1.set_title(self.project_name + ' overall add vs delete ')
+            ax_ans1.set_title(self.project_name + ' overall add vs delete (log10 scale)')
         handles, labels = ax_ans.get_legend_handles_labels() 
-        fig.legend(handles, labels, loc="upper right")
-        plt.show() 
+        fig.legend(handles, labels, loc="center right")
+        ax_ans.set_xlabel('Date')
+        ax_ans.set_xticklabels([pandas_datetime.strftime("%Y-%m-%d") for pandas_datetime
+                             in checkin['locc+'].index])
+        plt.show()
+        return checkin
 
     def plot_proj_change_size(self, time_range='year', axis=None): 
         if time_range == 'year': 
@@ -143,21 +84,21 @@ class Visualizer(Patterns):
                                            & (self.commit_data['year'] == self.year)]
             checkin      = checkin_data.groupby(pd.Grouper(freq='D')).sum()
         if time_range == 'year-year': 
-            checkin_data = self.commit_data[(self.commit_data['year'] == self.year_tup[0]) 
-                                           | (self.commit_data['year'] == self.year_tup[1])]
+            checkin_data = self.commit_data[(self.commit_data['year'] >= self.year_tup[0])
+                                           & (self.commit_data['year'] <= self.year_tup[1])]
             checkin = checkin_data.groupby(pd.Grouper(freq='M')).sum()
         if time_range == 'month-month': 
             if self.year_tup is None: 
-                checkin_data = self.commit_data[((self.commit_data['month'] == self.month_tup[0])
+                checkin_data = self.commit_data[((self.commit_data['month'] >= self.month_tup[0])
                                             & (self.commit_data['year'] == self.year))
-                                            | ((self.commit_data['month'] == self.month_tup[1])
-                                            & (self.commit_data['year'] == self.year))]
+                                            & ((self.commit_data['month'] == self.month_tup[1])
+                                            & (self.commit_data['year'] <= self.year))]
                 checkin = checkin_data.groupby(pd.Grouper(freq='M')).sum()
             else: 
-                checkin_data = self.commit_data[((self.commit_data['year'] == self.year_tup[0])
-                                           & (self.commit_data['month'] == self.month_tup[0]))
-                                           | ((self.commit_data['year'] == self.year_tup[1])
-                                           & (self.commit_data['month'] == self.month_tup[1]))]
+                checkin_data = self.commit_data[((self.commit_data['year'] >= self.year_tup[0])
+                                           & (self.commit_data['month'] >= self.month_tup[0]))
+                                           & ((self.commit_data['year'] <= self.year_tup[1])
+                                           & (self.commit_data['month'] <= self.month_tup[1]))]
                 checkin = checkin_data.groupby(pd.Grouper(freq='M')).sum()
 
         if time_range == None: 
@@ -170,7 +111,7 @@ class Visualizer(Patterns):
             g.ax.set_ylabel('Total number of changed lines')
             g.fig.autofmt_xdate()
             g.fig.show()
-        return checkin
+        return checkin, g.ax
 
     def plot_proj_y2y(self, year1, year2): 
         fig, (ax1, ax2) = plt.subplots(1,2) 
@@ -248,21 +189,90 @@ class Visualizer(Patterns):
         topi_pd = self.commit_data
         topi_pd.index = pd.to_datetime(topi_pd.index)
         topi_pd.index = pd.to_datetime(topi_pd.index, utc=True)
-        quarter_checkin_i = topi_pd.groupby(pd.Grouper(freq='M')).sum() 
-        quarter_checkin_i['log2_locc+'] = np.log2(quarter_checkin_i['locc+'])
-        quarter_checkin_i['log2_locc-'] = -np.log2(quarter_checkin_i['locc-'])
-        quarter_checkin_i['locc_log2_diff'] = quarter_checkin_i['log2_locc+'] + \
-                                            quarter_checkin_i['log2_locc-']
-        quarter_checkin_i['log2_locc_diff'] = np.log2(quarter_checkin_i[
-                                                  'locc+']-quarter_checkin_i['locc-'])
+        quarter_checkin_i = topi_pd.groupby(pd.Grouper(freq='M')).sum()
+        if not 'log_locc+' in quarter_checkin_i.columns:
+            quarter_checkin_i['log_locc+'] = np.log10(quarter_checkin_i['locc+'])
+            quarter_checkin_i['log_locc-'] = -np.log10(quarter_checkin_i['locc-'])
+            quarter_checkin_i['locc_log_diff'] = quarter_checkin_i['log_locc+'] + \
+                                                quarter_checkin_i['log_locc-']
+            quarter_checkin_i['log_locc_diff'] = np.log10(quarter_checkin_i[
+                                                'locc+']-quarter_checkin_i['locc-'])
 
         # print(topi_pd)
         with sns.axes_style("whitegrid"):
-            g = sns.relplot(data=quarter_checkin_i, x="datetime", y="locc_log2_diff",
+            g = sns.relplot(data=quarter_checkin_i, x="datetime", y="locc_log_diff",
                             height=6, aspect=1.5,
                             kind="line")
             g.ax.set_xlabel('Date')
-            g.ax.set_ylabel('log2(+lines) - log2(-lines)')
+            g.ax.set_ylabel('log10(+lines) - log10(-lines)')
             g.fig.autofmt_xdate()
             g.fig.show()
         return quarter_checkin_i
+
+    def view_developer_file_map(self):
+        if not 'change-size' in self.commit_data.columns:
+            self.annotate_metrics()
+        fig, ax = plt.subplots(figsize=(12,8))
+        sns.set(font_scale=1.5)
+        sns.heatmap(self.developer_file_mat, annot=True, linewidths=.5, cmap='icefire')
+        if self.year is None:
+            plt.title('Overall developers vs files (' + str(self.project_name) + ')')
+        else:
+            plt.title(str(self.year) + ' : developers vs files (' + self.project_name +
+                      ')')
+        plt.show()
+
+
+    def plot_top_N_heatmap(self, n = 10, column='locc'):
+        """
+        In this function we take the file x developer matrix dataframe and reorder
+        it by sorting developer columns by total contributions and then extracting the
+        top N most-touched files for the top N most active developers.
+        """
+        if not 'change-size' in self.commit_data.columns:
+            self.annotate_metrics()
+
+        if column not in ['locc', 'locc-', 'locc+', 'change-size']:
+            err('plot_top_N_heatmap column parameter must be one of %s' % ','.join(['locc', 'locc-', 'locc+',
+                                                                                    'change-size']))
+
+        #heat_obj = self.make_file_developer_df()
+        # Create the files x developers matrix, using the column parameter as the values
+        d = pd.DataFrame(self.commit_data.groupby(['filepath', 'author'])[column].sum())
+        d.reset_index(level=d.index.names, inplace=True)
+        d = d[d[column] != 0]
+        heat_obj = d.pivot_table(index='filepath', columns='author', values=column, aggfunc=np.sum,
+                                fill_value=0).dropna()
+
+        # Get a df containing developers (1st column) and total contributions (2nd column)
+        sorted_developers = heat_obj.sum(axis='rows').sort_values(ascending=False)
+        top_developers = sorted_developers.head(n)
+        hot_developers = heat_obj[top_developers.index]  # top-N developers
+
+        # Similarly, get a list of top-N files, file path (column 1), changes (column 2)
+        top_files = heat_obj.sum(axis='columns').sort_values(ascending=False).head(n)
+
+        # Now, go back to the original matrix df and extract only the hot files
+        hot_files = heat_obj.iloc[heat_obj.index.isin(top_files.to_dict().keys())]
+        # drop 0 columns
+        hot_files = hot_files.loc[:, (hot_files != 0).any(axis=0)]
+
+        # Next, we need to clean up our top-developer list since some developers got
+        # removed in the previous step
+        sorted_full_dev_list = list(sorted_developers.to_dict().keys())
+        sorted_dev_list = []
+        for dev in sorted_full_dev_list:
+            if dev in hot_files.columns:
+                sorted_dev_list.append(dev)
+
+        # Create a new matrix that has only the top-n developer columns (sorted in
+        # descending order); this produces an n x n matrix dataframe, a subset of heat_obj
+        sorted_hot_files = hot_files[sorted_dev_list[:n]]
+
+        # make a lovely heatmap
+        fig, ax = plt.subplots(figsize=(n, n))  # Sample figsize in inches
+        sns.set(font_scale=1.5)
+        sns.heatmap(sorted_hot_files, annot=True, linewidths=.5, ax=ax, fmt='.3g', cmap='icefire')
+        fig.savefig('%s-top-%d-map.png' % (self.project_name,n), format='png', dpi=150)
+        self.top_N_map = sorted_hot_files
+        return sorted_hot_files

@@ -30,9 +30,9 @@ def get_cosine(vec1, vec2):
         return float(numerator) / denominator
 
 def is_doc(filepath): 
-    pat = r'doc/.*' 
+    pat = r'doc/.*'
     to_ret = False 
-    if re.match(pat, filepath): 
+    if re.match(pat, filepath):
         to_ret = True 
     return to_ret
 
@@ -141,6 +141,7 @@ class Patterns(Fetcher):
         self.month = mo 
 
     def make_file_developer_df(self, dims=None):
+        # Not used, see pivot code in visualizer.plot_top_N_heatmap()
         authors     = {} 
         files       = {} 
         seen_sha    = {} 
@@ -229,60 +230,6 @@ class Patterns(Fetcher):
         to_ret.index.name = 'File'
         self.developer_file_mat = to_ret
         return to_ret
-
-    def view_top_N_map(self, n = 10):
-        """
-        In this function we take the file x developer matrix dataframe and reorder
-        it by sorting developer columns by total contributions and then extracting the
-        top N most-touched files for the top N most active developers.
-        """
-        heat_obj = self.make_file_developer_df()
-
-        # Get a df containing developers (1st column) and total contributions (2nd column)
-        sorted_developers = heat_obj.sum(axis='rows').sort_values(ascending=False)
-        top_developers = sorted_developers.head(n)
-        hot_developers = heat_obj[top_developers.index]  # top-N developers
-
-        # Similarly, get a list of top-N files, file path (column 1), changes (column 2)
-        top_files = heat_obj.sum(axis='columns').sort_values(ascending=False).head(n)
-
-        # Now, go back to the original matrix df and extract only the hot files
-        hot_files = heat_obj.iloc[heat_obj.index.isin(top_files.to_dict().keys())]
-        # drop 0 columns
-        hot_files = hot_files.loc[:, (hot_files != 0).any(axis=0)]
-
-        # Next, we need to clean up our top-developer list since some developers got
-        # removed in the previous step
-        sorted_full_dev_list = list(sorted_developers.to_dict().keys())
-        sorted_dev_list = []
-        for dev in sorted_full_dev_list:
-            if dev in hot_files.columns:
-                sorted_dev_list.append(dev)
-
-        # Create a new matrix that has only the top-n developer columns (sorted in
-        # descending order); this produces an n x n matrix dataframe, a subset of heat_obj
-        sorted_hot_files = hot_files[sorted_dev_list[:n]]
-
-        # make a lovely heatmap
-        fig, ax = plt.subplots(figsize=(n, n))  # Sample figsize in inches
-        sns.set(font_scale=1.5)
-        sns.heatmap(sorted_hot_files, annot=True, linewidths=.5, ax=ax, fmt='g')
-        fig.savefig('%s-top-%d-map.png' % (self.project_name,n), format='png', dpi=150)
-        self.top_N_map = sorted_hot_files
-        return sorted_hot_files
-
-    def view_developer_file_map(self):
-        fig, ax = plt.subplots(figsize=(12,8))
-        sns.set(font_scale=1.5)
-        sns.heatmap(self.developer_file_mat, annot=True, linewidths=.5, cmap='icefire')
-        if self.year is None: 
-            plt.title('Overall developers vs files (' + str(self.project_name) + ')')
-        else: 
-            plt.title(str(self.year) + ' : developers vs files (' + self.project_name +
-                      ')')
-        plt.show()
-
-
 
 
 
