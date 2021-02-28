@@ -272,7 +272,7 @@ class Visualizer(Patterns):
         # make a lovely heatmap
         fig, ax = plt.subplots(figsize=(n, n))  # Sample figsize in inches
         sns.set(font_scale=1.5)
-        sns.heatmap(sorted_hot_files, annot=True, linewidths=.5, ax=ax, fmt='.3g', cmap='icefire')
+        sns.heatmap(sorted_hot_files, annot=True, linewidths=.5, ax=ax, fmt='g', cmap='icefire')
         fig.savefig('%s-top-%d-map.png' % (self.project_name,n), format='png', dpi=150)
         self.top_N_map = sorted_hot_files
         return sorted_hot_files
