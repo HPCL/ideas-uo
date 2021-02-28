@@ -251,8 +251,8 @@ class Visualizer(Patterns):
         quarter_checkin_i = topi_pd.groupby(pd.Grouper(freq='M')).sum() 
         quarter_checkin_i['log2_locc+'] = np.log2(quarter_checkin_i['locc+'])
         quarter_checkin_i['log2_locc-'] = -np.log2(quarter_checkin_i['locc-'])
-        quarter_checkin_i['locc_log2_diff'] = quarter_checkin_i['locc+'] + \
-                                            quarter_checkin_i['locc-']
+        quarter_checkin_i['locc_log2_diff'] = quarter_checkin_i['log2_locc+'] + \
+                                            quarter_checkin_i['log2_locc-']
         quarter_checkin_i['log2_locc_diff'] = np.log2(quarter_checkin_i[
                                                   'locc+']-quarter_checkin_i['locc-'])
 
