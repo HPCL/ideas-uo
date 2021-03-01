@@ -4,20 +4,26 @@ import datetime
 import calendar 
 from dateutil import parser
 from gitutils.utils import err
+import getpass
+import os
 
 class Fetcher:
-    def __init__(self, project_name, db_pwd):
+    def __init__(self, project_name):
         # Moved database code out of constructor (Google best practice on "doing work in constructor")
         # TODO: use project URL when possible since we will have multiple forks with the same project name, but different URLs
         self.project = project_name
         self.db = None
         self.cursor = None
         self.commit_data = None
-        self.db_pwd = db_pwd
 
-    def fetch(self, db=None):
+    def fetch(self, db=None, cache=True):
+
+        if cache and os.path.exists('.%s.pickle' % self.project):
+            self.commit_data = pd.read_pickle('.%s.pickle'%self.project)
+            return
+        db_pwd = getpass.getpass(prompt='Database password:')
         if not db:
-            self.db = MySQLdb.connect(host='sansa.cs.uoregon.edu', port=3331, user='ideas_user', passwd=self.db_pwd,
+            self.db = MySQLdb.connect(host='sansa.cs.uoregon.edu', port=3331, user='ideas_user', passwd=db_pwd,
                                       db='ideas_db', charset='utf8')
         else:
             self.db = db
@@ -52,6 +58,10 @@ class Fetcher:
             )
             , index = self.commit_data.index 
         )
+        if cache and not os.path.exists('.%s.pickle'%self.project):
+            self.commit_data.to_pickle('.%s.pickle'%self.project)
+        return
+
 
 
     def close_session(self):

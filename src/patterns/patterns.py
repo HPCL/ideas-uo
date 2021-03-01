@@ -109,8 +109,8 @@ class Patterns(Fetcher):
         diff_func = Diffutils.diff_algs[self.diff_alg].normalized_distance
         return [added_t + deleted_t, deleted_t, added_t, diff_func(rmvd_code_str, added_code_str)]
 
-    def __init__(self, project_name, db_pwd):
-        super().__init__(project_name, db_pwd)
+    def __init__(self, project_name):
+        super().__init__(project_name)
         # self.close_session()
         # to store store list of dataframes sorted in descending order by who made the most commits 
         self.ranked_by_people = None
@@ -178,6 +178,17 @@ class Patterns(Fetcher):
     def reset(self, y=None, mo=None):
         self.year = y
         self.month = mo
+
+    def get_monthly_totals(self, df, year=None):
+        if year:
+            df1 = df[(df['year'] == year)]
+        else:
+            df1 = df
+        df1 = df1.resample('M').sum()
+        df1['month_num'] = pd.DatetimeIndex(df1.index).month
+        df1 = df1.groupby(['month_num']).mean()
+        df1['month_num'] = df1.index
+        return df1
 
     def get_time_range_df(self, time_range='year'):
         if time_range == 'year':

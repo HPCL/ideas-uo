@@ -3,6 +3,7 @@ import plotly.express as px
 import numpy as np
 import pandas as pd
 import seaborn as sns
+import os
 
 sns.set(font_scale=1.5)
 from patterns.patterns import Patterns
@@ -10,26 +11,25 @@ from gitutils.utils import *
 
 
 class Visualizer(Patterns):
-    def __init__(self, project_name, db_pwd):
-        super().__init__(project_name, db_pwd)
+    def __init__(self, project_name):
+        super().__init__(project_name)
         self.dimensions = None
         self.months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August'
             , 'September', 'October', 'November', 'December']
         self.commit_data = None
         self.yearly_commits = None
         self.monthly_commits = None
-        self.db_pwd = db_pwd
         self.max_label_len = 1000
         # Change font size globally
         plt.rcParams['font.size'] = '16'
 
-    def get_data(self, db=None):
-        self.fetch(db)  # loads up the self.commit_data
+    def get_data(self, db=None, cache=True):
+        self.fetch(db, cache)  # loads up the self.commit_data
         self.close_session()
         self.commit_data.index = self.commit_data['datetime']
         self.commit_data = self.commit_data.drop(columns=['index', 'datetime'])
         self.annotate_metrics()
-        self.yearly_commits = self.commit_data.groupby('year').mean()
+        self.yearly_commits = self.commit_data.groupby('year').mean()    # this by default includes change-size-cos
         self.monthly_commits = self.commit_data.groupby(["year", "month"]).mean()
 
     def set_dimensions(self, height, width):
@@ -114,9 +114,9 @@ class Visualizer(Patterns):
         return checkin, g.ax
 
     def plot_proj_y2y(self, year1, year2):
-        fig, (ax1, ax2) = plt.subplots(1, 2)
+        fig, ax1 = plt.subplots(figsize=(12,6))
         self.reset(y=year1)
-        self.plot_overall_project_locc(axis=ax1)
+        self.monthly_commits.plot(x='month', )
         self.reset(y=year2)
         self.plot_overall_project_locc(axis=ax2)
         handles, labels = ax1.get_legend_handles_labels()
@@ -124,29 +124,33 @@ class Visualizer(Patterns):
         fig.set_visible(True)
 
     def plot_total_locc_avg(self):
-        self.yearly_commits['total_locc'] = self.yearly_commits['locc+'] - self.yearly_commits['locc-']
-        self.yearly_commits.plot(y='total_locc', linewidth=3, figsize=(12, 6))
+        #self.yearly_commits['locc+ - locc-'] = self.yearly_commits['locc+'] - self.yearly_commits['locc-']
+        fig, ax1 = plt.subplots(figsize=(12,6))
+        self.yearly_commits.plot(y='locc', linewidth=3, color='r', style='--', ax=ax1)
+        self.yearly_commits.plot(y='change-size-cos', linewidth=3, color='b', ax=ax1)
         plt.xticks(fontsize=14)
         plt.yticks(fontsize=14)
         plt.title('The annual average lines of code changed', fontsize=20)
         plt.xlabel('Year', fontsize=16)
-        plt.ylabel('Total locc', fontsize=16)
+        plt.ylabel('Total LOCC', fontsize=16)
+        fig.legend(loc='upper left', bbox_to_anchor=(0.05, 0.88), ncol=3)
+
 
     def plot_total_locc_moving_avgs(self):
         # colors for the line plot
         colors = ['green', 'red', 'purple', 'blue']
-
+        column = 'locc'
         # the simple moving average over a period of 3 years
-        self.yearly_commits['SMA_3'] = self.yearly_commits.total_locc.rolling(3, min_periods=1).mean()
+        self.yearly_commits['SMA_3'] = self.yearly_commits[column].rolling(3, min_periods=1).mean()
 
         # the simple moving average over a period of 5 year
-        self.yearly_commits['SMA_5'] = self.yearly_commits.total_locc.rolling(5, min_periods=1).mean()
+        self.yearly_commits['SMA_5'] = self.yearly_commits[column].rolling(5, min_periods=1).mean()
 
         # the simple moving average over a period of 10 year
-        self.yearly_commits['SMA_10'] = self.yearly_commits.total_locc.rolling(10, min_periods=1).mean()
+        self.yearly_commits['SMA_10'] = self.yearly_commits[column].rolling(10, min_periods=1).mean()
 
         # line plot 
-        self.yearly_commits.plot(y=['total_locc', 'SMA_3', 'SMA_5', 'SMA_10'], color=colors, linewidth=3,
+        self.yearly_commits.plot(y=['locc', 'SMA_3', 'SMA_5', 'SMA_10'], color=colors, linewidth=3,
                                  figsize=(12, 6))
 
         # modify ticks size
@@ -157,24 +161,24 @@ class Visualizer(Patterns):
         # title and labels
         plt.title('The annual average lines of code changed', fontsize=20)
         plt.xlabel('Year', fontsize=16)
-        plt.ylabel('Total locc', fontsize=16)
+        plt.ylabel('Total LOCC', fontsize=16)
 
     def plot_total_locc_moving_avgs_M(self):
-        self.monthly_commits['total_locc'] = self.monthly_commits['locc+'] - self.monthly_commits['locc-']
+        #self.monthly_commits['total_locc'] = self.monthly_commits['locc+'] - self.monthly_commits['locc-']
         self.monthly_commits = self.monthly_commits.drop(self.monthly_commits.index[0])
         # the simple moving average over a period of 3 years
-        self.monthly_commits['SMA_3'] = self.monthly_commits.total_locc.rolling(3, min_periods=1).mean()
+        self.monthly_commits['SMA_3'] = self.monthly_commits.locc.rolling(3, min_periods=1).mean()
 
         # the simple moving average over a period of 5 year
-        self.monthly_commits['SMA_6'] = self.monthly_commits.total_locc.rolling(5, min_periods=1).mean()
+        self.monthly_commits['SMA_6'] = self.monthly_commits.locc.rolling(5, min_periods=1).mean()
 
         # the simple moving average over a period of 10 year
-        self.monthly_commits['SMA_12'] = self.monthly_commits.total_locc.rolling(10, min_periods=1).mean()
+        self.monthly_commits['SMA_12'] = self.monthly_commits.locc.rolling(10, min_periods=1).mean()
         # colors for the line plot
         colors = ['red', 'green', 'purple', 'blue']
 
         # line plot 
-        self.monthly_commits.plot(y=['total_locc', 'SMA_3', 'SMA_6', 'SMA_12'], color=colors, linewidth=3,
+        self.monthly_commits.plot(y=['locc', 'SMA_3', 'SMA_6', 'SMA_12'], color=colors, linewidth=3,
                                   figsize=(12, 6))
 
         # modify ticks size
@@ -185,7 +189,7 @@ class Visualizer(Patterns):
         # title and labels
         plt.title('The monthly average lines of code changed', fontsize=20)
         plt.xlabel('Date', fontsize=16)
-        plt.ylabel('Total locc', fontsize=16)
+        plt.ylabel('Total LOCC', fontsize=16)
 
     def plot_project_locc_line(self, locc=True, log=False, diff_alg='cos'):
         topi_pd = self.commit_data
@@ -253,6 +257,49 @@ class Visualizer(Patterns):
         sns.set(font_scale=1.5)
         sns.heatmap(sorted_hot_files, annot=True, linewidths=.5, ax=ax, fmt=number_fmt, cmap='icefire',
                     cbar_kws={'label': 'Values: %s' % value_column})
-        fig.savefig('%s-top-%d-%s-map.png' % (self.project_name, top_N, value_column), format='png', dpi=150,
+        fig.savefig('figures/%s-top-%d-%s-map.png' % (self.project_name, top_N, value_column), format='png', dpi=150,
                     bbox_inches='tight')
         return sorted_hot_files
+
+    def how_was_2020(self, value_column):
+        fig, ax = plt.subplots(figsize=(12,8))
+
+        df1 = self.get_monthly_totals(self.commit_data, 2019)
+        df1.plot(x='month_num', y=value_column, color='blue',linewidth=3, linestyle='--', ax=ax, label='2019')
+
+        df2 = self.get_monthly_totals(self.commit_data, 2020)
+        df2.plot(x='month_num', y=value_column, color='brown',linewidth=3, linestyle='-', ax=ax, label='2020')
+
+        # Average
+        d = self.get_monthly_totals(self.commit_data)
+        d.plot(x='month_num', y=value_column, color='green',linewidth=3, linestyle=':', ax=ax, label='Average')
+
+        plt.xticks(fontsize=24)
+        plt.yticks(fontsize=24)
+        #plt.title('Monthly total changes', fontsize=20)
+        plt.xlabel('Month', fontsize=24)
+        plt.ylabel('Monthly total code change (%s)'%value_column, fontsize=24)
+        legend = ax.legend(fancybox=False, fontsize=24, ncol=3, loc='upper left')
+        legend.get_frame().set_facecolor('white')
+        legend.set_title(self.project_name.capitalize(), prop = {'size':'x-large'})
+
+        if True:
+            from matplotlib.cbook import get_sample_data
+            poo_img = plt.imread(get_sample_data(os.path.join(os.path.dirname(os.path.realpath("__file__")),'images', 'poo-mark.png')))
+            x = df2.index.to_list()
+            y = df2[value_column].to_list()
+            ax_width = ax.get_window_extent().width
+            fig_width = fig.get_window_extent().width
+            fig_height = fig.get_window_extent().height
+            poo_size = ax_width/(fig_width*len(x))
+            poo_axs = [None for i in range(len(x))]
+            for i in range(len(x)):
+                loc = ax.transData.transform((x[i], y[i]))
+                poo_axs[i] = fig.add_axes([loc[0]/fig_width-poo_size/2, loc[1]/fig_height-poo_size/2,
+                                       poo_size, poo_size], anchor='C')
+                poo_axs[i].imshow(poo_img)
+                poo_axs[i].axis("off")
+
+        fig.show()
+        fig.savefig('figures/%s-2020-%s-map.png' % (self.project_name, value_column), format='png',
+                    dpi=150, bbox_inches='tight')
