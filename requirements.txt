@@ -4,10 +4,11 @@ pandas
 seaborn
 plotly
 plotly-express
-textdistance
+textdistance>=4.2.1
 networkx
 pydot
 graphviz
 bs4
 arrow
 mysqlclient
+fuzzywuzzy

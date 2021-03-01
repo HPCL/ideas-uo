@@ -33,14 +33,15 @@ class Fetcher:
         # TODO: eventually add d.language, a.email, and project url (to identify forks) to select
         commit_query =\
         '''select c.id as commit_id, c.hash as sha, c.branch as branch, c.datetime as datetime, 
-            a.username as author, c.message as message, d.file_path, d.body 
+            a.username as author, a.email as email, c.message as message, d.file_path, d.body 
         from commit c join author a on(c.author_id = a.id) 
             join project p on(c.project_id = p.id) join diff d on(c.id = d.commit_id)
         where p.name = %s'''
         comm_ans                 = self.cursor.execute(commit_query,
                                                        (self.project, ))
         self.commit_data         = pd.DataFrame(self.cursor.fetchall()) 
-        self.commit_data.columns = ['index', 'sha', 'branch', 'datetime', 'author', 'message', 'filepath', 'diff']
+        self.commit_data.columns = ['index', 'sha', 'branch', 'datetime', 'author', 'email', 'message', 'filepath',
+                                    'diff']
         self.commit_data.drop(columns=['index'])
         temp_d = self.commit_data['datetime'].map(lambda x: x.date())
         self.commit_data[['year', 'month', 'day', 'doy', 'dow']] = pd.DataFrame(
