@@ -11,7 +11,15 @@ from gitutils.utils import *
 
 
 class Visualizer(Patterns):
-    def __init__(self, project_name):
+    metric_name = {'locc-basic' : 'LOCC (added and removed)',
+                   'locc': 'LOCC (edited, added, or removed)',
+                   'locc-': 'lines removed',
+                   'locc+': 'lines added',
+                   }
+    def __init__(self, project_name=None):
+        if not project_name:
+            self.project = ''
+            self.fetch(None, proj_list_only=True)
         super().__init__(project_name)
         self.dimensions = None
         self.months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August'
@@ -23,14 +31,16 @@ class Visualizer(Patterns):
         # Change font size globally
         plt.rcParams['font.size'] = '16'
 
-    def get_data(self, db=None, cache=True):
-        self.fetch(db, cache)  # loads up the self.commit_data
-        self.close_session()
+    def get_data(self, db=None, cache=True, code_only=True):
+        if not self.fetch(db, cache):  # loads up the self.commit_data
+            return
         self.commit_data.index = self.commit_data['datetime']
         self.commit_data = self.commit_data.drop(columns=['index', 'datetime'])
+        if code_only: self.remove_noncode()    # This makes it feasible to analyze diff
         self.annotate_metrics()
         self.yearly_commits = self.commit_data.groupby('year').mean()    # this by default includes change-size-cos
         self.monthly_commits = self.commit_data.groupby(["year", "month"]).mean()
+        print("INFO: Done computing averages.")
 
     def set_dimensions(self, height, width):
         self.dimensions = (height, width)
@@ -51,7 +61,7 @@ class Visualizer(Patterns):
 
     def plot_up_down_cols(self, df, up_col, down_col, diff_col=None, log=False, figsize=(16, 12)):
         # Construct a meaningful plot title:
-        title = self.project_name.capitalize() + ': Additions vs Deletions'
+        title = self.project_name.capitalize() + ': Code changes'
         if log: title += ' (log10 scale)'
 
         d = df
@@ -136,10 +146,9 @@ class Visualizer(Patterns):
         fig.legend(loc='upper left', bbox_to_anchor=(0.05, 0.88), ncol=3)
 
 
-    def plot_total_locc_moving_avgs(self):
+    def plot_total_locc_moving_avgs(self, column='locc'):
         # colors for the line plot
         colors = ['green', 'red', 'purple', 'blue']
-        column = 'locc'
         # the simple moving average over a period of 3 years
         self.yearly_commits['SMA_3'] = self.yearly_commits[column].rolling(3, min_periods=1).mean()
 
@@ -150,46 +159,45 @@ class Visualizer(Patterns):
         self.yearly_commits['SMA_10'] = self.yearly_commits[column].rolling(10, min_periods=1).mean()
 
         # line plot 
-        self.yearly_commits.plot(y=['locc', 'SMA_3', 'SMA_5', 'SMA_10'], color=colors, linewidth=3,
-                                 figsize=(12, 6))
+        self.yearly_commits.plot(y=[column, 'SMA_3', 'SMA_5', 'SMA_10'], color=colors, linewidth=3,
+                                 style=[':','-.','--','-'], figsize=(12, 6))
 
         # modify ticks size
         plt.xticks(fontsize=14)
         plt.yticks(fontsize=14)
-        plt.legend(labels=['Average locc', '3-year SMA', '5-year SMA', '10-year SMA'], fontsize=14)
+        plt.legend(labels=['Average LOCC', '3-year SMA', '5-year SMA', '10-year SMA'], fontsize=14)
 
         # title and labels
-        plt.title('The annual average lines of code changed', fontsize=20)
+        plt.title('Annual average code changes (%s)' % column, fontsize=20)
         plt.xlabel('Year', fontsize=16)
-        plt.ylabel('Total LOCC', fontsize=16)
+        plt.ylabel('Changes (%s)'% column, fontsize=16)
 
-    def plot_total_locc_moving_avgs_M(self):
-        #self.monthly_commits['total_locc'] = self.monthly_commits['locc+'] - self.monthly_commits['locc-']
+    def plot_total_locc_moving_avgs_M(self, column='locc'):
         self.monthly_commits = self.monthly_commits.drop(self.monthly_commits.index[0])
         # the simple moving average over a period of 3 years
-        self.monthly_commits['SMA_3'] = self.monthly_commits.locc.rolling(3, min_periods=1).mean()
+        self.monthly_commits['SMA_3'] = self.monthly_commits[column].rolling(3, min_periods=1).mean()
 
         # the simple moving average over a period of 5 year
-        self.monthly_commits['SMA_6'] = self.monthly_commits.locc.rolling(5, min_periods=1).mean()
+        self.monthly_commits['SMA_6'] = self.monthly_commits[column].rolling(5, min_periods=1).mean()
 
         # the simple moving average over a period of 10 year
-        self.monthly_commits['SMA_12'] = self.monthly_commits.locc.rolling(10, min_periods=1).mean()
+        self.monthly_commits['SMA_12'] = self.monthly_commits[column].rolling(10, min_periods=1).mean()
         # colors for the line plot
         colors = ['red', 'green', 'purple', 'blue']
 
         # line plot 
-        self.monthly_commits.plot(y=['locc', 'SMA_3', 'SMA_6', 'SMA_12'], color=colors, linewidth=3,
-                                  figsize=(12, 6))
+        self.monthly_commits.plot(y=[column, 'SMA_3', 'SMA_6', 'SMA_12'], color=colors, linewidth=3,
+                                  style=[':','-.','--','-'], figsize=(12, 6))
 
         # modify ticks size
         plt.xticks(fontsize=14, rotation='vertical')
         plt.yticks(fontsize=14)
-        plt.legend(labels=['Average locc', 'Quarterly SMA', '6-month SMA', '12-month SMA'], fontsize=14)
+        plt.legend(labels=['Average LOCC', 'Quarterly SMA', '6-month SMA', '12-month SMA'], fontsize=14)
 
         # title and labels
-        plt.title('The monthly average lines of code changed', fontsize=20)
+        plt.title('Monthly average lines of code changed (%s)' % column, fontsize=20)
         plt.xlabel('Date', fontsize=16)
-        plt.ylabel('Total LOCC', fontsize=16)
+        plt.ylabel('Changes (%s)'% column, fontsize=16)
 
     def plot_project_locc_line(self, locc=True, log=False, diff_alg='cos'):
         topi_pd = self.commit_data
@@ -197,17 +205,6 @@ class Visualizer(Patterns):
         # topi_pd.index = pd.to_datetime(topi_pd.index)
         topi_pd.index = pd.to_datetime(topi_pd.index, utc=True)
         quarter_checkin_i = topi_pd.groupby(pd.Grouper(freq='M')).sum()
-
-        # Don't really want log scale here
-        # quarter_checkin_i['log_locc+'] = np.log10(quarter_checkin_i['locc+'])
-        # quarter_checkin_i['log_locc-'] = -np.log10(quarter_checkin_i['locc-'])
-        # quarter_checkin_i['locc_log_diff'] = quarter_checkin_i['log_locc+'] + \
-        #                                    quarter_checkin_i['log_locc-']
-        # quarter_checkin_i['log_locc_diff'] = np.log10(quarter_checkin_i[
-        #                                    'locc+']-quarter_checkin_i['locc-'])
-        # quarter_checkin_i['log_locc_diff'] = np.log10(quarter_checkin_i[
-        #                                    'locc+'] + quarter_checkin_i['locc-'])
-        # quarter_checkin_i['log_diff_%s'%diff_alg] = np.log10(quarter_checkin_i['change-size-%s'%diff_alg])
 
         # print(topi_pd)
         if locc:
@@ -220,7 +217,7 @@ class Visualizer(Patterns):
             g = sns.relplot(data=quarter_checkin_i, x="datetime", y=y,
                             height=6, aspect=1.5, kind="line")
             g.ax.set_xlabel('Date')
-            g.ax.set_ylabel('lines added + lines removed [%s]' % tstr)
+            g.ax.set_ylabel('Lines edited, added, or removed [%s]' % tstr)
             g.fig.autofmt_xdate()
             g.fig.show()
         return quarter_checkin_i

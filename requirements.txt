@@ -4,7 +4,7 @@ pandas
 seaborn
 plotly
 plotly-express
-textdistance>=4.2.1
+textdistance
 networkx
 pydot
 graphviz

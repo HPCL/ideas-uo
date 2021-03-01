@@ -15,12 +15,14 @@ class Fetcher:
         self.db = None
         self.cursor = None
         self.commit_data = None
+        self.all_projects = None
 
-    def fetch(self, db=None, cache=True):
+    def fetch(self, db=None, cache=True, proj_list_only=False):
 
-        if cache and os.path.exists('.%s.pickle' % self.project):
-            self.commit_data = pd.read_pickle('.%s.pickle'%self.project)
-            return
+        if cache and os.path.exists('../.%s.pickle' % self.project):
+            self.commit_data = pd.read_pickle('../.%s.pickle'%self.project)
+            print("INFO: Loaded local cached copy of %s data." % self.project)
+            return True
         db_pwd = getpass.getpass(prompt='Database password:')
         if not db:
             self.db = MySQLdb.connect(host='sansa.cs.uoregon.edu', port=3331, user='ideas_user', passwd=db_pwd,
@@ -28,13 +30,15 @@ class Fetcher:
         else:
             self.db = db
         self.cursor = self.db.cursor()
-
+        print("INFO: Loading data from database. This can take a while...")
         # First, get a list of all projects
         comm_ans = self.cursor.execute('select name from project')
-        projects = [x[0] for x in self.cursor.fetchall()]  # list of pairs, project name is first item in each pair
-        if self.project not in projects:
+        self.all_projects = [x[0] for x in self.cursor.fetchall()]  # list of pairs, project name is first item in each
+        # pair
+        if self.project not in self.all_projects:
             self.close_session()
-            err("This project was not found in the database. Available projects are: %s" % str(projects))
+            err("This project was not found in the database. Available projects are: %s" % str(self.all_projects))
+        if proj_list_only: return self.all_projects
 
         # TODO: eventually add d.language, a.email, and project url (to identify forks) to select
         commit_query =\
@@ -58,9 +62,12 @@ class Fetcher:
             )
             , index = self.commit_data.index 
         )
-        if cache and not os.path.exists('.%s.pickle'%self.project):
-            self.commit_data.to_pickle('.%s.pickle'%self.project)
-        return
+
+        if not os.path.exists('../.%s.pickle'%self.project):
+            # Cache local copy
+            self.commit_data.to_pickle('../.%s.pickle'%self.project)
+        print("INFO: Loaded %s data from the database." % self.project)
+        return True
 
 
 

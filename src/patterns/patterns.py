@@ -35,6 +35,10 @@ class Diffutils:
 class Patterns(Fetcher):
     path_re = re.compile('^/?(.+/)*(.+)\.(.+)$') # not used yet
 
+    # edits_summary_re.findall('--++-+-+--++--++-+--') produces ['--++', '-+', '-+', '--++', '--++', '-+']
+    edits_summary_re = re.compile(r'(-+\++)')
+
+
     # TODO: create per-project configurations, the opposite of .gitignore
     doc_suffixes = ['rst', 'md', 'txt', 'rtf']
     code_suffixes = ['am', 'awk', 'bash', 'bashrc', 'bat', 'batch',
@@ -66,55 +70,12 @@ class Patterns(Fetcher):
                 return True
         return False
 
-    def set_diff_alg(self, diff_alg='cos'):
-        if diff_alg not in Diffutils.diff_algs.keys():
-            print("Warning: you specified an unknown text distance function, available options are %s (more "
-                  "information can be found at https://github.com/life4/textdistance" % str(Diffutils.diff_algs.keys()))
-            diff_alg = 'cos'
-
-        self.diff_alg = diff_alg # Diffutils.diff_algs[diff_alg].normalized_distance
-
-    def process_diff(self, diff_str):
-        """
-        Compute the difference between the original and new code versions in each git diff using the method
-        specified as the diff function argument (a function that takes two strings as input and returns a number
-        """
-        deleted_t = 0
-        added_t = 0
-        rmvd_code_str = ''
-        added_code_str = ''
-        diff_str_l = diff_str.splitlines()
-
-        for line in diff_str_l:
-            line = line.strip()
-            if line == '':
-                continue
-            if line[0] == '-':
-                if len(line) > 1:
-                    if line[1] == ' ':
-                        deleted_t += 1
-                        rmvd_code_str += line[1:].strip()
-            if line[0] == '+':
-                if len(line) > 1:
-                    if len(line) > 2:
-                        if line[1] == '+' and line[2] == '+':
-                            split_line = line.split(" ")
-                            if len(split_line) > 1:
-                                commf_name = split_line[1]
-                            else:
-                                commf_name = ''
-                    if line[1] == ' ':
-                        added_t += 1
-                        added_code_str += line[1:].strip()
-        diff_func = Diffutils.diff_algs[self.diff_alg].normalized_distance
-        return [added_t + deleted_t, deleted_t, added_t, diff_func(rmvd_code_str, added_code_str)]
-
     def __init__(self, project_name):
         super().__init__(project_name)
         # self.close_session()
-        # to store store list of dataframes sorted in descending order by who made the most commits 
+        # to store store list of dataframes sorted in descending order by who made the most commits
         self.ranked_by_people = None
-        # to store list (file_name, count) sorted by count 
+        # to store list (file_name, count) sorted by count
         self.ranked_files = None
         # 2d-matrix (dataframe) of developers and files they've touched
         self.developer_file_mat = None
@@ -127,20 +88,72 @@ class Patterns(Fetcher):
         self.top_developers = None
         self.top_N_map = None
 
-    def annotate_metrics(self, diff_alg = 'cos'):
-        if diff_alg != self.diff_alg: self.set_diff_alg(diff_alg)
-        self.commit_data[['locc', 'locc-', 'locc+', 'change-size-%s' % self.diff_alg]] = \
-                pd.DataFrame( list(
-                    self.commit_data['diff'].map(
-                        lambda x: self.process_diff(x)
+    def process_single_commit(self, lines_list):
+        # First, create a very brief summary of the changes, e.g., for one set of diffs, produce '--++-+-+--++--++-+--'
+        #print(lines_list)
+        summary, old, new = '', '', ''
+        for line in lines_list:
+            # We consider lines starting with a single '+' or '-' character
+            if len(line) > 2 and line[0] in ['-', '+'] and line[1] == ' ':
+                summary += line[0]
+                if line[0] == '-': old += line
+                if line[1] == '+': new += line
+
+        # Update "change" (vs. adding or removing lines), e.g.,  --++ means that two lines are modified, not that
+        # two lines are deleted and then two added (line count 2 vs 4).
+        # Example input summary: '++----++-+-+--++--++-+--'
+        # Example resulting values for removed, added, edited: 4 2 9
+        s = summary
+        removed, added, edited = 0, 0, 0
+        edits = Patterns.edits_summary_re.findall(summary)
+        for edit in edits:
+            index = s.find(edit)    # next "edit" candidate
+            rm, add = s[:index].count('-'), s[:index].count('+')  # non-edits
+            ed_rm, ed_add = edit.count('-'), edit.count('+')
+            ed = min(ed_rm, ed_add) # actual size of edit, basically counts of matching -+ strings
+            edited += ed
+            removed, added = removed + rm + ed_rm - ed, added + add + ed_add - ed
+            s = s[index + len(edit):]  # advance
+        # trailing changes
+        removed, added = removed + s.count('-'), added + s.count('+')
+
+        # Total LOCC that takes into acount "edits"
+        locc = removed + added + edited
+
+        # Finally, compute the default distance metric
+        diff = Diffutils.diff_algs[self.diff_alg].distance(old, new)
+        #print(summary, len(summary), locc, removed, added, diff)
+        return [summary, len(summary), locc, removed, added, diff]
+
+    def set_diff_alg(self, diff_alg='cos', compute=True, recompute=False):
+        if diff_alg not in Diffutils.diff_algs.keys():
+            print("Warning: you specified an unknown text distance function, available options are %s (more "
+                  "information can be found at https://github.com/life4/textdistance. Defaulting to cos distance." %
+                  str(Diffutils.diff_algs.keys()))
+            diff_alg = 'cos'
+
+        self.diff_alg = diff_alg # To apply: Diffutils.diff_algs[diff_alg].distance (str1, str2), also normalized_distance
+
+        # compute the new diff it not already available:
+        if not compute: return
+        colname = 'change-size-%s' % self.diff_alg
+        if colname not in self.commit_data.columns: compute = True
+        if compute or recompute:
+            self.commit_data[['diff_summary', 'locc-basic', 'locc', 'locc-', 'locc+', colname]] = \
+                pd.DataFrame(list(
+                    self.commit_data['diff'].str.split(pat="\n").map(lambda x: self.process_single_commit(x))
                     )
+                    , index=self.commit_data.index
                 )
-                , index=self.commit_data.index
-            )
+
+    def annotate_metrics(self, diff_alg = 'cos'):
+        # Add columns with commonly used metrics
+        # avoid recomputing the default metrics if they are already there
+        if 'locc' not in self.commit_data.columns or 'change-size-%s' % diff_alg not in self.commit_data.columns:
+            self.set_diff_alg(diff_alg, compute=True)
 
     def sort_data(self):
-        self.commit_data.sort_values(by=['datetime', 'sha', 'author']
-                                     , ascending=False)
+        self.commit_data.sort_values(by=['datetime', 'sha', 'author'], ascending=False)
 
     def remove_docs(self):
         """Remove all documentation-related files (in place mod) """
@@ -272,94 +285,3 @@ class Patterns(Fetcher):
         else: sorted_hot_files = hot_files[sorted_dev_list]
         self.top_N_map = sorted_hot_files
         return sorted_hot_files
-
-    def make_file_developer_df_old(self, dims=None):
-        # Not used, see pivot code in visualizer.plot_top_N_heatmap()
-        authors = {}
-        files = {}
-        seen_sha = {}
-        seen_author = {}
-        seen_files = {}
-        author_files = {}
-        for i in self.commit_data.index:
-            author = self.commit_data['author'][i]
-            filename = self.commit_data['filepath'][i]
-            sha = self.commit_data['sha'][i]
-            try:
-                b = seen_sha[sha]
-            except KeyError:
-                seen_sha[sha] = False
-            try:
-                a = seen_author[author]
-            except KeyError:
-                seen_author[author] = False
-            try:
-                f = seen_files[filename]
-            except KeyError:
-                seen_files[filename] = False
-            try:
-                af = author_files[author]
-            except KeyError:
-                author_files[author] = {}
-            try:
-                af2 = author_files[author][filename]
-            except KeyError:
-                author_files[author][filename] = 0
-            if not seen_sha[sha]:
-                if not seen_author[author]:
-                    authors[author] = 1
-                    seen_author[author] = True
-                else:
-                    authors[author] += 1
-                if not seen_files[filename]:
-                    files[filename] = 1
-                    if not seen_author[author]:
-                        author_files[author][filename] = 1
-                    else:
-                        author_files[author][filename] += 1
-                    seen_files[filename] = True
-                else:
-                    files[filename] += 1
-                    if not seen_author[author]:
-                        author_files[author][filename] = 1
-                    else:
-                        author_files[author][filename] += 1
-                seen_sha[sha] = True
-            else:
-                if not seen_files[filename]:
-                    files[filename] = 1
-                    if not seen_author[author]:
-                        author_files[author][filename] = 1
-                    else:
-                        author_files[author][filename] += 1
-                else:
-                    files[filename] += 1
-                    if not seen_author[author]:
-                        author_files[author][filename] = 1
-                    else:
-                        author_files[author][filename] += 1
-        # to_ret = pd.DataFrame.from_dict(author_files)
-        mat = [[0 for i in authors] for f in files]
-        authors_l = list(authors.items())
-        authors_l.sort(key=lambda x: x[1], reverse=True)
-        files_l = list(files.items())
-        files_l.sort(key=lambda x: x[1], reverse=True)
-        authors = {a[0]: i for a, i in zip(authors_l, range(len(authors_l)))}
-        files = {f[0]: i for f, i in zip(files_l, range(len(files_l)))}
-        for aa, fs in author_files.items():
-            aa_files = []
-            for f, v in fs.items():
-                if f in files and (aa in authors):
-                    mat[files[f]][authors[aa]] = v
-        index_labels = files.keys()
-        column_labels = authors.keys()
-        if not (dims is None):
-            rows = dims[0]
-            cols = dims[1]
-            index_labels = list(index_labels)[:rows]
-            column_labels = list(column_labels)[:cols]
-            mat = [r[:cols] for r in mat[:rows]]
-        to_ret = pd.DataFrame.from_records(mat, index=index_labels, columns=column_labels)
-        to_ret.index.name = 'File'
-        self.developer_file_mat = to_ret
-        return to_ret
