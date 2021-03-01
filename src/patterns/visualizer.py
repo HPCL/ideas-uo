@@ -9,14 +9,16 @@ from gitutils.utils import *
 
 
 class Visualizer(Patterns): 
-    def __init__(self, project_name: str): 
-        super().__init__(project_name)
+    def __init__(self, project_name, db_pwd):
+        super().__init__(project_name, db_pwd)
         self.dimensions = None 
         self.months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August'
                        , 'September', 'October', 'November', 'December']
         self.commit_data = None
         self.yearly_commits = None
         self.monthly_commits = None
+        self.db_pwd = db_pwd
+        self.max_label_len = 1000
         # Change font size globally
         plt.rcParams['font.size'] = '16'
 
@@ -32,80 +34,67 @@ class Visualizer(Patterns):
     def set_dimensions(self, height, width):
         self.dimensions = (height, width)
 
+    def set_max_label_length(self, len=1000):
+        self.max_label_len = len
+
     def extend_patterns(self):
-        self.set_developer_file_mat(self.dimensions)
+        self.make_file_developer_df()
 
     def refresh(self):
         self.extend_patterns()
 
+    def shorten_string(self, string):
+        if len(string) < self.max_label_len: return string
+        half = int(self.max_label_len / 2)
+        return string[:half] + '...' + string[len(string) - half:]
 
-    def plot_overall_project_locc(self, time_range='year', axis=None):
-        fig, a = plt.subplots(figsize=(20,8))
-        if axis is None: 
-            axis = a
-        if time_range == 'year': 
+    def plot_up_down_cols(self, df, up_col, down_col, diff_col = None, log=False):
+        # Construct a meaningful plot title:
+        title = self.project_name.capitalize() + ': additions vs deletions'
+        if log: title += ' (log10 scale)'
+
+        d = df
+        if log:
+            d[up_col] = np.log10(df[up_col]).fillna(0)
+            d[down_col] = -np.log10(df[down_col]).fillna(0)
+            d[diff_col] = np.log10(df[diff_col]).fillna(0)
+        else:
+            d[down_col] = (-df[down_col]).fillna(0)
+        d['date'] = d.index
+        d['date'] = d['date'].dt.date
+
+        sns.set_style('whitegrid', {'legend.frameon': True})
+        fig, ax1 = plt.subplots(figsize=(16, 12))
+        sns.barplot(data=d, x='date', y=up_col, alpha=0.5, ax=ax1, palette='crest', hatch='+', label=up_col)
+        sns.barplot(data=d, x='date', y=down_col, alpha=0.5, ax=ax1, palette='dark:salmon', hatch='-', label=down_col)
+        sns.barplot(data=d, x='date', y=diff_col, ax=ax1, palette='crest', hatch='o', label=diff_col)
+        fig.legend(loc='upper left',bbox_to_anchor=(0.05, 0.88), ncol=3)
+        ax1.set_title(title)
+        ax1.set_xlabel('Date')
+        ax1.set_ylabel('Changes')
+        fig.autofmt_xdate()
+        fig.show()
+
+    def plot_overall_project_locc(self, time_range='year', log=False):
+        if time_range == 'year':
             checkin_data = self.commit_data[self.commit_data['year'] == self.year]
             checkin = checkin_data.groupby(pd.Grouper(freq='M')).sum()
-        if time_range == 'month': 
+        elif time_range == 'month':
             checkin_data = self.commit_data[(self.commit_data['month'] == self.month)
                                            & (self.commit_data['year'] == self.year)]
-            checkin      = checkin_data.groupby(pd.Grouper(freq='D')).sum()
-        if time_range == None: 
-            checkin = self.commit_data.groupby(pd.Grouper(freq='Q')).sum() 
+            checkin = checkin_data.groupby(pd.Grouper(freq='D')).sum()
+        else:
+            checkin = self.commit_data.groupby(pd.Grouper(freq='Q')).sum()
 
-        if not 'log_loc+' in checkin.columns:
-            checkin['log_locc+'] = np.log10(checkin['locc+']).fillna(0)
-            checkin['log_locc-'] = -np.log10(checkin['locc-']).fillna(0)
-        ax_ans = checkin['log_locc+'].plot(figsize=(15,8), grid=True, ax=axis, kind='bar', sharey=True, color='r')
-        ax_ans1 = checkin['log_locc-'].plot(figsize=(15,8), grid=True, ax=ax_ans, kind='bar', style='--', sharey=True,
-                                         color='b')
-        if time_range == 'year': 
-            ax_ans1.set_title(self.project_name + ' add vs delete in '+ str(self.year)
-                              + ' (log10 scale)')
-        if time_range == 'month': 
-            ax_ans1.set_title(self.project_name + ' add vs delete in '+  self.months[
-                self.month] + ' of' + str(self.year) + ' (log10 scale)')
-        if time_range == None: 
-            ax_ans1.set_title(self.project_name + ' overall add vs delete (log10 scale)')
-        handles, labels = ax_ans.get_legend_handles_labels() 
-        fig.legend(handles, labels, loc="center right")
-        ax_ans.set_xlabel('Date')
-        ax_ans.set_xticklabels([pandas_datetime.strftime("%Y-%m-%d") for pandas_datetime
-                             in checkin['locc+'].index])
-        plt.show()
+        self.plot_up_down_cols(df=checkin, up_col='locc+', down_col='locc-',
+                               diff_col='change-size-%s' % self.diff_alg, log=log)
         return checkin
 
-    def plot_proj_change_size(self, time_range='year', axis=None): 
-        if time_range == 'year': 
-            checkin_data = self.commit_data[self.commit_data['year'] == self.year]
-            checkin = checkin_data.groupby(pd.Grouper(freq='M')).sum()
-        if time_range == 'month': 
-            checkin_data = self.commit_data[(self.commit_data['month'] == self.month)
-                                           & (self.commit_data['year'] == self.year)]
-            checkin      = checkin_data.groupby(pd.Grouper(freq='D')).sum()
-        if time_range == 'year-year': 
-            checkin_data = self.commit_data[(self.commit_data['year'] >= self.year_tup[0])
-                                           & (self.commit_data['year'] <= self.year_tup[1])]
-            checkin = checkin_data.groupby(pd.Grouper(freq='M')).sum()
-        if time_range == 'month-month': 
-            if self.year_tup is None: 
-                checkin_data = self.commit_data[((self.commit_data['month'] >= self.month_tup[0])
-                                            & (self.commit_data['year'] == self.year))
-                                            & ((self.commit_data['month'] == self.month_tup[1])
-                                            & (self.commit_data['year'] <= self.year))]
-                checkin = checkin_data.groupby(pd.Grouper(freq='M')).sum()
-            else: 
-                checkin_data = self.commit_data[((self.commit_data['year'] >= self.year_tup[0])
-                                           & (self.commit_data['month'] >= self.month_tup[0]))
-                                           & ((self.commit_data['year'] <= self.year_tup[1])
-                                           & (self.commit_data['month'] <= self.month_tup[1]))]
-                checkin = checkin_data.groupby(pd.Grouper(freq='M')).sum()
-
-        if time_range == None: 
-            checkin = self.commit_data.groupby(pd.Grouper(freq='M')).sum() 
-        #fig = sns.line(checkin, x=checkin.index, y=checkin['change-size'])
+    def plot_proj_change_size(self, time_range='year'):
+        self.annotate_metrics()
+        checkin = self.get_time_range_df(time_range)
         with sns.axes_style("whitegrid"):
-            g = sns.relplot(data=checkin, x="datetime", y="change-size",
+            g = sns.relplot(data=checkin, x="datetime", y="change-size-%s" % self.diff_alg,
                             kind="line", height=6, aspect=1.5)
             g.ax.set_xlabel('Date')
             g.ax.set_ylabel('Total number of changed lines')
@@ -120,10 +109,10 @@ class Visualizer(Patterns):
         self.reset(y=year2) 
         self.plot_overall_project_locc(axis=ax2)
         handles, labels = ax1.get_legend_handles_labels() 
-        fig.legend(handles, labels, loc="upper right")
+        fig.legend(handles, labels, loc="center left")
         fig.set_visible(True)
 
-    def plot_total_locc_avg(self): 
+    def plot_total_locc_avg(self):
         self.yearly_commits['total_locc'] = self.yearly_commits['locc+']-self.yearly_commits['locc-']
         self.yearly_commits.plot( y='total_locc',linewidth=3, figsize=(12,6))
         plt.xticks(fontsize=14)
@@ -185,33 +174,42 @@ class Visualizer(Patterns):
         plt.xlabel('Date', fontsize=16)
         plt.ylabel('Total locc', fontsize=16)
 
-    def plot_project_locc_line(self): 
+    def plot_project_locc_line(self, locc=True, log=False, diff_alg='cos'):
         topi_pd = self.commit_data
-        topi_pd.index = pd.to_datetime(topi_pd.index)
+        self.annotate_metrics(diff_alg=diff_alg)
+        #topi_pd.index = pd.to_datetime(topi_pd.index)
         topi_pd.index = pd.to_datetime(topi_pd.index, utc=True)
         quarter_checkin_i = topi_pd.groupby(pd.Grouper(freq='M')).sum()
-        if not 'log_locc+' in quarter_checkin_i.columns:
-            quarter_checkin_i['log_locc+'] = np.log10(quarter_checkin_i['locc+'])
-            quarter_checkin_i['log_locc-'] = -np.log10(quarter_checkin_i['locc-'])
-            quarter_checkin_i['locc_log_diff'] = quarter_checkin_i['log_locc+'] + \
-                                                quarter_checkin_i['log_locc-']
-            quarter_checkin_i['log_locc_diff'] = np.log10(quarter_checkin_i[
-                                                'locc+']-quarter_checkin_i['locc-'])
+
+        # Don't really want log scale here
+        #quarter_checkin_i['log_locc+'] = np.log10(quarter_checkin_i['locc+'])
+        #quarter_checkin_i['log_locc-'] = -np.log10(quarter_checkin_i['locc-'])
+        #quarter_checkin_i['locc_log_diff'] = quarter_checkin_i['log_locc+'] + \
+        #                                    quarter_checkin_i['log_locc-']
+        #quarter_checkin_i['log_locc_diff'] = np.log10(quarter_checkin_i[
+        #                                    'locc+']-quarter_checkin_i['locc-'])
+        #quarter_checkin_i['log_locc_diff'] = np.log10(quarter_checkin_i[
+        #                                    'locc+'] + quarter_checkin_i['locc-'])
+        #quarter_checkin_i['log_diff_%s'%diff_alg] = np.log10(quarter_checkin_i['change-size-%s'%diff_alg])
 
         # print(topi_pd)
+        if locc:
+            y = 'locc'
+            tstr = 'LOCC'
+        else:
+            y = 'change-size-%s'%diff_alg
+            tstr = '%s diff' % diff_alg
         with sns.axes_style("whitegrid"):
-            g = sns.relplot(data=quarter_checkin_i, x="datetime", y="locc_log_diff",
-                            height=6, aspect=1.5,
-                            kind="line")
+            g = sns.relplot(data=quarter_checkin_i, x="datetime", y=y,
+                            height=6, aspect=1.5, kind="line")
             g.ax.set_xlabel('Date')
-            g.ax.set_ylabel('log10(+lines) - log10(-lines)')
+            g.ax.set_ylabel('lines added + lines removed [%s]' % tstr)
             g.fig.autofmt_xdate()
             g.fig.show()
         return quarter_checkin_i
 
     def view_developer_file_map(self):
-        if not 'change-size' in self.commit_data.columns:
-            self.annotate_metrics()
+        self.annotate_metrics()
         fig, ax = plt.subplots(figsize=(12,8))
         sns.set(font_scale=1.5)
         sns.heatmap(self.developer_file_mat, annot=True, linewidths=.5, cmap='icefire')
@@ -223,56 +221,26 @@ class Visualizer(Patterns):
         plt.show()
 
 
-    def plot_top_N_heatmap(self, n = 10, column='locc'):
+    def plot_top_N_heatmap(self, top_N = 10, value_column='locc', my_df=None):
         """
         In this function we take the file x developer matrix dataframe and reorder
         it by sorting developer columns by total contributions and then extracting the
         top N most-touched files for the top N most active developers.
+        The my_df argument is assuming you know how to create and pass the files vs developers dataframe
         """
-        if not 'change-size' in self.commit_data.columns:
-            self.annotate_metrics()
 
-        if column not in ['locc', 'locc-', 'locc+', 'change-size']:
-            err('plot_top_N_heatmap column parameter must be one of %s' % ','.join(['locc', 'locc-', 'locc+',
-                                                                                    'change-size']))
-
-        #heat_obj = self.make_file_developer_df()
-        # Create the files x developers matrix, using the column parameter as the values
-        d = pd.DataFrame(self.commit_data.groupby(['filepath', 'author'])[column].sum())
-        d.reset_index(level=d.index.names, inplace=True)
-        d = d[d[column] != 0]
-        heat_obj = d.pivot_table(index='filepath', columns='author', values=column, aggfunc=np.sum,
-                                fill_value=0).dropna()
-
-        # Get a df containing developers (1st column) and total contributions (2nd column)
-        sorted_developers = heat_obj.sum(axis='rows').sort_values(ascending=False)
-        top_developers = sorted_developers.head(n)
-        hot_developers = heat_obj[top_developers.index]  # top-N developers
-
-        # Similarly, get a list of top-N files, file path (column 1), changes (column 2)
-        top_files = heat_obj.sum(axis='columns').sort_values(ascending=False).head(n)
-
-        # Now, go back to the original matrix df and extract only the hot files
-        hot_files = heat_obj.iloc[heat_obj.index.isin(top_files.to_dict().keys())]
-        # drop 0 columns
-        hot_files = hot_files.loc[:, (hot_files != 0).any(axis=0)]
-
-        # Next, we need to clean up our top-developer list since some developers got
-        # removed in the previous step
-        sorted_full_dev_list = list(sorted_developers.to_dict().keys())
-        sorted_dev_list = []
-        for dev in sorted_full_dev_list:
-            if dev in hot_files.columns:
-                sorted_dev_list.append(dev)
-
-        # Create a new matrix that has only the top-n developer columns (sorted in
-        # descending order); this produces an n x n matrix dataframe, a subset of heat_obj
-        sorted_hot_files = hot_files[sorted_dev_list[:n]]
+        sorted_hot_files = self.make_file_developer_df(top_N=top_N, value_column=value_column, my_df=my_df)
+        # Figure out number formatting (this is horribly inefficient, I'm sure there is a better way)
+        if (self.commit_data[value_column].astype(int) == self.commit_data[value_column]).all():
+            number_fmt = 'g'
+        else:
+            number_fmt = '.1f'
 
         # make a lovely heatmap
-        fig, ax = plt.subplots(figsize=(n, n))  # Sample figsize in inches
+        fig, ax = plt.subplots(figsize=(top_N+2, top_N))  # Sample figsize in inches
         sns.set(font_scale=1.5)
-        sns.heatmap(sorted_hot_files, annot=True, linewidths=.5, ax=ax, fmt='g', cmap='icefire')
-        fig.savefig('%s-top-%d-map.png' % (self.project_name,n), format='png', dpi=150)
-        self.top_N_map = sorted_hot_files
+        sns.heatmap(sorted_hot_files, annot=True, linewidths=.5, ax=ax, fmt=number_fmt, cmap='icefire',
+                    cbar_kws={'label': 'Values: %s'%value_column})
+        fig.savefig('%s-top-%d-%s-map.png' % (self.project_name,top_N,value_column), format='png', dpi=150,
+                    bbox_inches='tight')
         return sorted_hot_files
