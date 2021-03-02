@@ -276,7 +276,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     # Connection Arguments
-    parser.add_argument('--host', help='host for mysql connection', type=str, default='localhost')
+    parser.add_argument('--host', help='host for mysql connection', type=str, default='sansa.cs.uoregon.edu')
     parser.add_argument('--username', help='username for mysql connection', type=str, required=True)
     parser.add_argument('--password', help='password for mysql connection', type=str, required=True)
     parser.add_argument('--port', help='port for mysql connection', type=int, default=3331)
