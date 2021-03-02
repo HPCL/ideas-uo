@@ -23,7 +23,7 @@ class Fetcher:
             self.commit_data = pd.read_pickle('../.%s.pickle'%self.project)
             print("INFO: Loaded local cached copy of %s data." % self.project)
             return True
-        db_pwd = getpass.getpass(prompt='Database password:')
+        db_pwd = "cabbage" #getpass.getpass(prompt='Database password:')
         if not db:
             self.db = MySQLdb.connect(host='sansa.cs.uoregon.edu', port=3331, user='ideas_user', passwd=db_pwd,
                                       db='ideas_db', charset='utf8')

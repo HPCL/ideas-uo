@@ -11,6 +11,8 @@ import math
 # from sklearn.feature_extraction.text import TfidfVectorizer
 from patterns.fetcher import Fetcher
 import textdistance as td
+from fuzzywuzzy import process, fuzz
+
 from gitutils.utils import err
 
 WORD = re.compile(r"\w+")
@@ -87,6 +89,7 @@ class Patterns(Fetcher):
         self.diff_alg = 'cos'
         self.top_developers = None
         self.top_N_map = None
+        self.authors_data = None
 
     def process_single_commit(self, lines_list):
         # First, create a very brief summary of the changes, e.g., for one set of diffs, produce '--++-+-+--++--++-+--'
@@ -167,6 +170,37 @@ class Patterns(Fetcher):
             self.commit_data['filepath'].map( lambda x: Patterns.is_code(x) )
         ].reindex()
 
+    def set_unique_authors(self):
+        """" Use fuzzy matching to identify multiple different names that likely belong to the same developer """
+        df = pd.DataFrame(self.commit_data.groupby(['author'])['sha'].count())
+        df.reset_index(level=df.index.names, inplace=True)
+        df['commits'] = df['sha']
+        df['name_size'] = df['author'].map(lambda x: len(x))
+        df = df.sort_values(by=['name_size', 'author'], ascending=[False, True])
+        df = df[(df['author'] != '') & (df['sha'] != 0)]
+
+        results = {}
+        for name in df.author:
+            ratio = process.extract(str(name), df.author, limit=10)
+            results[name] = ratio
+        threshold = 90
+        real_names = {}
+        count = 0
+        done = []
+        for nm, val in results.items():
+            # print(nm, ":")
+            for entry in val:
+                name, score, v = entry
+                if score < threshold: break
+                if name not in done:
+                    real_names[count] = [name, nm]
+                    done.append(name)
+                count += 1
+        df2 = pd.DataFrame.from_dict(real_names, orient='index', columns=['author', 'unique_author'])
+        self.authors_data = df.merge(df2, how='inner', on='author')
+        self.authors_data.drop(columns=['name_size', 'sha'])
+        return self.authors_data
+
     def set_year(self, y):
         self.year = y
 
@@ -235,8 +269,12 @@ class Patterns(Fetcher):
 
     def make_file_developer_df(self, top_N=-1, value_column='locc', my_df=None):
 
+        print("INFO: Creating developer matrix, this can take a few minutes...")
         if (my_df is None):
             self.annotate_metrics()
+
+        if self.authors_data is None:
+            self.set_unique_authors()
 
         if my_df is None: work_df = self.commit_data
         else: work_df = my_df
@@ -247,11 +285,13 @@ class Patterns(Fetcher):
 
         #heat_obj = self.make_file_developer_df()
         # Create the files x developers matrix, using the value_column parameter as the values
-        d = pd.DataFrame(work_df.groupby(['filepath', 'author'])[value_column].sum())
+        work_df = work_df.merge(self.authors_data, how="inner", on="author", left_index=True)
+
+        d = pd.DataFrame(work_df.groupby(['filepath', 'unique_author'])[value_column].sum())
         d.reset_index(level=d.index.names, inplace=True)
         d = d[d[value_column] != 0]
         d['filepath'] = d['filepath'].transform(self.shorten_string)
-        heat_obj = d.pivot_table(index='filepath', columns='author', values=value_column, aggfunc=np.sum,
+        heat_obj = d.pivot_table(index='filepath', columns='unique_author', values=value_column, aggfunc=np.sum,
                                 fill_value=0).dropna()
 
         # Get a df containing developers (1st column) and total contributions (2nd column)

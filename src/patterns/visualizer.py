@@ -16,6 +16,7 @@ class Visualizer(Patterns):
                    'locc-': 'lines removed',
                    'locc+': 'lines added',
                    }
+
     def __init__(self, project_name=None):
         if not project_name:
             self.project = ''
@@ -34,13 +35,14 @@ class Visualizer(Patterns):
     def get_data(self, db=None, cache=True, code_only=True):
         if not self.fetch(db, cache):  # loads up the self.commit_data
             return
+        print("INFO: Cleaning up data and computing averages...")
         self.commit_data.index = self.commit_data['datetime']
         self.commit_data = self.commit_data.drop(columns=['index', 'datetime'])
         if code_only: self.remove_noncode()    # This makes it feasible to analyze diff
         self.annotate_metrics()
         self.yearly_commits = self.commit_data.groupby('year').mean()    # this by default includes change-size-cos
         self.monthly_commits = self.commit_data.groupby(["year", "month"]).mean()
-        print("INFO: Done computing averages.")
+        print("INFO: Done computing averages. %d commits (code only)" % self.commit_data.shape[0])
 
     def set_dimensions(self, height, width):
         self.dimensions = (height, width)
@@ -112,7 +114,6 @@ class Visualizer(Patterns):
         return checkin
 
     def plot_proj_change_size(self, time_range='year'):
-        self.annotate_metrics()
         checkin = self.get_time_range_df(time_range)
         with sns.axes_style("whitegrid"):
             g = sns.relplot(data=checkin, x="datetime", y="change-size-%s" % self.diff_alg,
@@ -121,7 +122,7 @@ class Visualizer(Patterns):
             g.ax.set_ylabel('Total number of changed lines')
             g.fig.autofmt_xdate()
             g.fig.show()
-        return checkin, g.ax
+        return checkin
 
     def plot_proj_y2y(self, year1, year2):
         fig, ax1 = plt.subplots(figsize=(12,6))
