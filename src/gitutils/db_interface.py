@@ -134,7 +134,7 @@ class DatabaseInterface:
                 tag_id = cursor.fetchone()[0]
                 tag_ids.append(tag_id)
 
-            query = 'insert into projcet_has_tag (project_id, tag_id) values (%s, %s)'
+            query = 'insert into project_has_tag (project_id, tag_id) values (%s, %s)'
             cursor.executemany(query, [(project_id, tag_id,) for tag_id in tag_ids])
             self.db.commit()
 

@@ -60,7 +60,8 @@ class GitCommand(object):
 
 
     #Get all commits in all the versions of a repo since data (default: utc epoch) and group by author
-    def getRepoCommitData(self, reponame, includebranches = False):
+    # TODO: default args for since and until
+    def getRepoCommitData(self, reponame, includebranches = False, since = None, until = None):
 
         prefix,versions = self.getRepoVersions(reponame)
 
@@ -75,7 +76,7 @@ class GitCommand(object):
 
         #git log -p # this will list all commits and the code additions in addition to dates and messages.
         # function-context for python just adds all the surrounding lines of code to the diff output
-        retcode, out, err = command.Command('git log -p --date=iso-strict-local --function-context').run()
+        retcode, out, err = command.Command(f'git log -p --date=iso-strict-local --function-context --since {since} --until {until}').run()
         lines = iter(out.splitlines())
 
         current_author = ''
