@@ -12,3 +12,4 @@ bs4
 arrow
 mysqlclient
 fuzzywuzzy
+ply

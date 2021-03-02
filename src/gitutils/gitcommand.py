@@ -1,7 +1,7 @@
 import os
 
-import gitutils.command as command
-from gitutils.utils import *
+import src.gitutils.command as command
+from src.gitutils.utils import *
 
 
 class GitCommand(object):
