@@ -40,9 +40,13 @@ class Visualizer(Patterns):
         print("INFO: Cleaning up data and computing averages...")
         if code_only: self.remove_noncode()    # This makes it feasible to analyze diff
         self.annotate_metrics()                # Compute locc, locc+, locc-, and change-size-cos code change metrics
+        self.update_data()
+        print("INFO: Done computing averages. %d commits (code only)" % self.commit_data.shape[0])
+
+    def update_data(self):
+        # Compute some averages
         self.yearly_commits = self.commit_data.groupby('year').mean()    # this by default includes change-size-cos
         self.monthly_commits = self.commit_data.groupby(["year", "month"]).mean()
-        print("INFO: Done computing averages. %d commits (code only)" % self.commit_data.shape[0])
 
     def set_dimensions(self, height, width):
         self.dimensions = (height, width)
@@ -55,8 +59,7 @@ class Visualizer(Patterns):
         half = int(self.max_label_len / 2)
         return string[:half] + '...' + string[len(string) - half:]
 
-    def plot_up_down_cols(self, df, up_col, down_col, diff_col='change-size-cos', log=False):
-        # Construct a meaningful plot title:
+    def plot_up_down_cols(self, df, up_col, down_col, diff_col='change-size-cos', time_range=None, log=False):
         d = df
         if log:
             d[up_col] = np.log10(df[up_col]).fillna(0)
@@ -72,6 +75,7 @@ class Visualizer(Patterns):
         sns.barplot(data=d, x='date', y=down_col, alpha=0.5, ax=ax1, palette='dark:salmon', hatch='-', label=down_col)
         sns.barplot(data=d, x='date', y=diff_col, ax=ax1, palette='crest', hatch='o', label=diff_col)
         fig.legend(loc='upper left', bbox_to_anchor=(0.05, 0.88), ncol=3)
+
         if not self.hide_names: ax1.set_title(self.project.capitalize())
         if len(ax1.get_xticklabels()) > 20:
             count = 0
@@ -88,29 +92,31 @@ class Visualizer(Patterns):
         fig.autofmt_xdate()
         if self.interactive: fig.show()
         if self.save_figures:
-            fig.savefig('figures/%s-trend-%s.png' % (self.project, diff_col), format='png', 
-                        dpi=self.plot_resolution, bbox_inches='tight')
+            fig.savefig('figures/%s-trend-%s-%s.png' % (self.project, diff_col, self.get_time_range_str(
+                time_range).replace(', ','_')), format='png', dpi=self.plot_resolution, bbox_inches='tight')
 
     def plot_overall_project_locc(self, time_range=None, log=False):
         if time_range == 'year':
             checkin_data = self.commit_data[self.commit_data['year'] == self.year]
-            checkin = checkin_data.groupby(pd.Grouper(freq='M')).sum().fillna(0)
+            checkin = checkin_data.groupby(pd.Grouper(freq='M')).sum()
         elif time_range == 'month':
             checkin_data = self.commit_data[(self.commit_data['month'] == self.month)
                                             & (self.commit_data['year'] == self.year)]
-            checkin = checkin_data.groupby(pd.Grouper(freq='D')).sum().fillna(0)
+            checkin = checkin_data.groupby(pd.Grouper(freq='D')).sum()
         else:
-            checkin = self.commit_data.groupby(pd.Grouper(freq='Q')).sum().fillna(0)
-
+            checkin = self.commit_data.groupby(pd.Grouper(freq='Q')).sum()
+        stats_df = checkin.describe().loc[['count', 'mean', 'std', 'min', 'max']]
         if not checkin.empty:
+            diff_col = 'change-size-%s' % self.diff_alg
+            print(stats_df[['locc+', 'locc-', diff_col]])
             self.plot_up_down_cols(df=checkin, up_col='locc+', down_col='locc-',
-                                   diff_col='change-size-%s' % self.diff_alg, log=log)
+                                   diff_col=diff_col, time_range=time_range, log=log)
         else:
             print("We found no data for this time period!")
         return checkin
 
     def plot_proj_change_line(self, time_range=None, locc_metric='change-size-cos', log=False):
-        checkin = self.get_time_range_df(time_range)
+        checkin, stats_df = self.get_time_range_df(time_range)
         if log: checkin[locc_metric] = np.log10(checkin[locc_metric])
 
         with sns.axes_style("whitegrid"):
@@ -121,18 +127,16 @@ class Visualizer(Patterns):
             if log: ylabel += '(log10 scale)'
             g.ax.set_ylabel(ylabel)
             g.fig.autofmt_xdate()
-            title = 'Code changes'
-            if not self.hide_names:
-                title = self.project.capitalize() + ': ' + title
-            g.ax.set_title(title)
+            g.ax.set_title(self.get_title_str(time_range, stats_df, locc_metric, log))
             if self.interactive: g.fig.show()
             if self.save_figures:
-                g.fig.savefig('figures/%s-timeline-%s-%s.png' % (self.project, self.diff_alg, time_range),
+                g.fig.savefig('figures/%s-timeline-%s-%s.png' % (self.project, self.diff_alg,
+                                                                 self.get_time_range_str(time_range).replace(', ','_')),
                               format='png', dpi=self.plot_resolution, bbox_inches='tight')
         return checkin
 
     def plot_proj_change_bubble(self, time_range='year', locc_metric="change-size-cos", log=False):
-        checkin = self.get_time_range_df(time_range)
+        checkin, stats_df = self.get_time_range_df(time_range)
         if log:
             checkin['locc'] = np.log10(checkin['locc']).fillna(0)
             checkin[locc_metric] = np.log10(checkin[locc_metric]).fillna(0)
@@ -143,15 +147,12 @@ class Visualizer(Patterns):
             ylabel = 'LOCC'
             if log: ylabel += ' (log10 scale)'
             g.ax.set_ylabel(ylabel)
-            title = 'Code changes'
-            if log: title += ' (log10 scale)'
-            if not self.hide_names:
-                title = self.project.capitalize() + ': ' + title
-            g.ax.set_title(title)
+            g.ax.set_title(self.get_title_str(time_range, stats_df, locc_metric, log))
             g.fig.autofmt_xdate()
             if self.interactive: g.fig.show()
             if self.save_figures:
-                g.fig.savefig('figures/%s-bubble-%s-%s.png' % (self.project, self.diff_alg, time_range),
+                g.fig.savefig('figures/%s-bubble-%s-%s.png' % (self.project,
+                              self.diff_alg, self.get_time_range_str(time_range).replace(', ','_')),
                               format='png', dpi=self.plot_resolution, bbox_inches='tight')
         return checkin
 
@@ -166,76 +167,52 @@ class Visualizer(Patterns):
         fig.autofmt_xdate()
         if self.interactive: fig.set_visible(True)
 
-    def plot_total_avg(self):
+    def plot_total_avg(self, log=False):
         #self.yearly_commits['locc+ - locc-'] = self.yearly_commits['locc+'] - self.yearly_commits['locc-']
         fig, ax1 = plt.subplots(figsize=self.figsize)
-        self.yearly_commits.plot(y='locc', linewidth=3, color='r', style='--', ax=ax1)
-        self.yearly_commits.plot(y='change-size-cos', linewidth=3, color='b', ax=ax1)
+        df = self.commit_data.groupby(pd.Grouper(freq='Q')).sum()
+        if log: df = np.log10(df)
+        df.plot(y='locc', linewidth=3, color='r', style='--', ax=ax1)
+        df.plot(y='change-size-cos', linewidth=3, color='b', ax=ax1)
         plt.xticks(fontsize=16)
         plt.yticks(fontsize=16)
         plt.title('Annual average change (LOCC and cos distance)', fontsize=20)
         plt.xlabel('Year', fontsize=18)
         plt.ylabel('Total LOCC', fontsize=18)
-        fig.legend(loc='upper left', bbox_to_anchor=(0.05, 0.88), ncol=3)
+        ax1.legend(loc='upper left', ncol=3)
         fig.autofmt_xdate()
 
 
-    def plot_total_moving_avgs(self, locc_metric='change-size-cos'):
+    def plot_total_moving_avgs(self, freq='quarter', locc_metric='change-size-cos'):
+        # frequency can be year, month, quarter, day
         # colors for the line plot
         colors = ['forestgreen', 'red', 'purple', 'mediumblue']
-        # the simple moving average over a period of 3 years
-        self.yearly_commits['SMA_3'] = self.yearly_commits[locc_metric].rolling(3, min_periods=1).mean()
+        df = self.commit_data.groupby(pd.Grouper(freq=freq[0].upper())).sum()
 
-        # the simple moving average over a period of 5 year
-        self.yearly_commits['SMA_5'] = self.yearly_commits[locc_metric].rolling(5, min_periods=1).mean()
+        # the simple moving average over a period of 3 freq. units
+        df['SMA_3'] = df[locc_metric].rolling(3, min_periods=1).mean()
 
-        # the simple moving average over a period of 10 year
-        self.yearly_commits['SMA_10'] = self.yearly_commits[locc_metric].rolling(10, min_periods=1).mean()
+        # the simple moving average over a period of 5 freq. units
+        df['SMA_5'] = df[locc_metric].rolling(5, min_periods=1).mean()
+
+        # the simple moving average over a period of 10 freq. units
+        df['SMA_10'] = df[locc_metric].rolling(10, min_periods=1).mean()
 
         # line plot
         fig, ax = plt.subplots(figsize=self.figsize)
-        ax = self.yearly_commits.plot(y=[locc_metric, 'SMA_3', 'SMA_5', 'SMA_10'], ax=ax, color=colors, linewidth=2,
-                                      style=[':','-.','--','-'], figsize=self.figsize, alpha=0.8)
+        df.plot(y=[locc_metric, 'SMA_3', 'SMA_5', 'SMA_10'], ax=ax, color=colors, linewidth=2,
+                style=[':','-.','--','-'], figsize=self.figsize, alpha=0.8)
 
         # modify ticks size
         plt.xticks(fontsize=16)
         plt.yticks(fontsize=16)
-        plt.legend(labels=['Average LOCC', '3-year SMA', '5-year SMA', '10-year SMA'], fontsize=16)
+        plt.legend(labels=['Average LOCC', '3-%s SMA' %freq, '5-%s SMA' %freq, '10-%s SMA' % freq],
+                   loc='upper left',fontsize=16)
 
         # title and labels
         plt.title('Annual average code changes (%s)' % locc_metric, fontsize=20)
         plt.xlabel('Year', fontsize=18)
         plt.ylabel('Changes (%s)' % locc_metric, fontsize=18)
-        fig.autofmt_xdate()
-
-    def plot_total_moving_avgs_M(self, locc_metric='change-size-cos'):
-        # Moving averages based on monthly averages
-        self.monthly_commits = self.monthly_commits.drop(self.monthly_commits.index[0])
-        # the simple moving average over a period of 3 years
-        self.monthly_commits['SMA_3'] = self.monthly_commits[locc_metric].rolling(3, min_periods=1).mean()
-
-        # the simple moving average over a period of 5 year
-        self.monthly_commits['SMA_6'] = self.monthly_commits[locc_metric].rolling(5, min_periods=1).mean()
-
-        # the simple moving average over a period of 10 year
-        self.monthly_commits['SMA_12'] = self.monthly_commits[locc_metric].rolling(10, min_periods=1).mean()
-        # colors for the line plot
-        colors = ['red', 'green', 'purple', 'blue']
-
-        # line plot
-        fig, ax = plt.subplots(figsize=self.figsize)
-        self.monthly_commits.plot(y=[locc_metric, 'SMA_3', 'SMA_6', 'SMA_12'], ax=ax, color=colors,
-                                  linewidth=2, style=[':','-.','--','-'],  alpha=0.8)
-
-        # modify ticks size
-        plt.xticks(fontsize=14, rotation='vertical')
-        plt.yticks(fontsize=14)
-        plt.legend(labels=['Average LOCC', 'Quarterly SMA', '6-month SMA', '12-month SMA'], fontsize=14)
-
-        # title and labels
-        plt.title('Monthly average lines of code changed (%s)' % locc_metric, fontsize=20)
-        plt.xlabel('Date', fontsize=16)
-        plt.ylabel('Changes (%s)' % locc_metric, fontsize=16)
         fig.autofmt_xdate()
 
     def plot_developer_file_map(self):
@@ -272,24 +249,39 @@ class Visualizer(Patterns):
         g = sns.heatmap(sorted_hot_files, annot=True, linewidths=.5, ax=ax, fmt=number_fmt, cmap='icefire',
                         cbar_kws={'label': 'Values: %s' % locc_metric})
         if self.hide_names: g.set(xticklabels=[])
-        stats_str = '[' + ', '.join(["%s: %g" % (k,v) for k,v in stats_df[locc_metric].to_dict().items()]) + ']'
-        time_range_str = self.get_time_range_string(time_range)
-        title = "Time period: " + time_range_str + ' ' +  stats_str
-        plt.title(title)
+        time_range_str = self.get_time_range_str(time_range)
+        plt.title(self.get_title_str(time_range, stats_df, locc_metric, False))
         fig.savefig('figures/%s-top-%d-%s-map-%s.png' % (self.project, top_N, locc_metric,
-                    time_range_str.replace(' ','_')), format='png', dpi=self.plot_resolution,
+                    time_range_str.replace(', ','_')), format='png', dpi=self.plot_resolution,
                     bbox_inches='tight')
         return sorted_hot_files
 
-    def get_time_range_string(self, time_range):
+    def get_title_str(self, time_range, stats_df, column, log, prefix=''):
+        title = ''
+        if prefix: title = prefix
+        if not self.hide_names:
+            title = self.project.capitalize() + ': ' + title
+        title += self.get_time_range_str(time_range)
+        if log: title += ' (log10 scale)'
+        title += ' ' + self.get_stats_string(stats_df, column)
+        return title
+
+    def get_stats_string(self, stats_df, column):
+        return '[' + ', '.join(["%s: %g" % (k,v) for k,v in stats_df[column].to_dict().items()]) + ']'
+
+    def get_time_range_str(self, time_range):
         if time_range == "year":
             return str(self.year)
         if time_range == "month":
-            return str(self.month) + ' ' + str(self.year)
+            return str(self.month) + ', ' + str(self.year)
         if time_range == "year-year":
             return str(self.year_tup)
         if time_range == "month-month":
-            return "%d-%d %d" % (self.month_tup[0], self.month_tup[1], self.year)
+            s = "%d-%d, " % (self.month_tup[0], self.month_tup[1])
+            if self.year_tup:
+                s += "%d-%d" % (self.year_tup[0], self.year_tup[1])
+            else:
+                s +=self.year
         return "Entire project"
 
     def how_was_2020(self, locc_metric='change-size-cos'):

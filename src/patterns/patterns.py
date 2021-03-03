@@ -33,6 +33,9 @@ class Diffutils:
         words = WORD.findall(text)
         return Counter(words)
 
+class Names:
+    aliases = {'tau2': {'amorris':'Alan Morris', 'khuck':'Kevin A. Huck', 'Sameer Shende':'Sameer Suresh Shende',
+                        'scottb':'Scott Biersdorff', 'wspear':'Wyatt Joel Spear'}}
 
 class Patterns(Fetcher):
     path_re = re.compile('^/?(.+/)*(.+)\.(.+)$') # not used yet
@@ -147,12 +150,17 @@ class Patterns(Fetcher):
                     )
                     , index=self.commit_data.index
                 )
+        self.update_data()
 
     def annotate_metrics(self, diff_alg = 'cos'):
         # Add columns with commonly used metrics
         # avoid recomputing the default metrics if they are already there
         if 'locc' not in self.commit_data.columns or 'change-size-%s' % diff_alg not in self.commit_data.columns:
             self.set_diff_alg(diff_alg, compute=True)
+        self.update_data()
+
+    def update_data(self):
+        return
 
     def sort_data(self):
         self.commit_data.sort_values(by=['datetime', 'sha', 'author'], ascending=False)
@@ -187,15 +195,25 @@ class Patterns(Fetcher):
         real_names = {}
         count = 0
         done = []
+        if self.project in Names.aliases.keys():
+            aliases = Names.aliases[self.project]
         for nm, val in results.items():
             # print(nm, ":")
             for entry in val:
                 name, score, v = entry
-                if score < threshold: break
+                if name in aliases.keys():
+                    real_names[count] = [name, aliases[name]]
+                    done.append(name)
+                    count += 1
+                    continue
+                if score < threshold:
+                    break
                 if name not in done:
                     real_names[count] = [name, nm]
                     done.append(name)
                 count += 1
+        # Apply manual fixes (when available)
+
         df2 = pd.DataFrame.from_dict(real_names, orient='index', columns=['author', 'unique_author'])
         self.authors_data = df.merge(df2, how='inner', on='author')
         self.authors_data.drop(columns=['name_size', 'sha'])
@@ -236,7 +254,9 @@ class Patterns(Fetcher):
             df1 = df[(df['year'] == year)]
         else:
             df1 = df
-        df1 = df1.resample('M').sum()
+        #df1 = df1.resample('M').sum()
+        df1 = df1.groupby(pd.Grouper(freq='M')).sum()
+
         df1['month_num'] = pd.DatetimeIndex(df1.index).month
         df1 = df1.groupby(['month_num']).mean()
         df1['month_num'] = df1.index
@@ -273,8 +293,12 @@ class Patterns(Fetcher):
             checkin_data = self.commit_data
             if sum: checkin = self.commit_data.groupby(pd.Grouper(freq='M')).sum()
 
-        if not checkin.empty: return checkin      # aggregated
-        else: return checkin_data  # not aggregated
+        if not checkin.empty:
+            stats_df = checkin.describe().loc[['count', 'mean', 'std', 'min', 'max']]
+            return checkin, stats_df      # aggregated
+        else:
+            stats_df = checkin_data.describe().loc[['count', 'mean', 'std', 'min', 'max']]
+            return checkin_data, stats_df # not aggregated
 
     def make_file_developer_df(self, top_N=-1, locc_metric='change-size-cos', time_range=None, my_df=pd.DataFrame()):
 
@@ -285,7 +309,7 @@ class Patterns(Fetcher):
             self.set_unique_authors()
 
         if my_df.empty:
-            work_df = self.get_time_range_df(time_range, sum=False)
+            work_df, stats = self.get_time_range_df(time_range, sum=False)
         else:
             # TODO -- enable time ranges with user-provided dataframe my_df
             if locc_metric not in my_df.columns:
