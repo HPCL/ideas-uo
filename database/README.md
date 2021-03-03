@@ -14,12 +14,12 @@ Command line script for updating and adding new projects to the database. This s
 
 #### Updating existing projects:
 ```bash
-python3 -m code.gitutils.db_interface --host HOST --username USERNAME --password PASSWORD --port PORT --database DATABASE --update
+python3 -m src.gitutils.db_interface --host HOST --username USERNAME --password PASSWORD --port PORT --database DATABASE --update
 ```
 
 #### Adding new projects:
 ```bash
-python3 -m code.gitutils.db_interface --host HOST --username USERNAME --password PASSWORD --port PORT --database DATABASE --add_project PROJECT [PROJECT ...]
+python3 -m src.gitutils.db_interface --host HOST --username USERNAME --password PASSWORD --port PORT --database DATABASE --add_project PROJECT
 ```
 
 #### Debugging and special flags:
@@ -27,7 +27,10 @@ python3 -m code.gitutils.db_interface --host HOST --username USERNAME --password
 * To check for commits from the beginning (or `--start` flag if specified) and not since the last update use the `--force_epoch` flag.
 * To keep repo folders on disk after the script use `--keep_repos`.
 * To not fetch branch info (DO THIS FOR DEBUGGING) use `--no_branches`.
-* To change the interval of uploads use the `--start` and `--unti` flags. Both take in ISO8601 datetime strings.
+* To change the interval of uploads use the `--start` and `--until` flags. Both take in ISO8601 datetime strings.
+* To add tags to a project use the `--tags TAG [TAG ...]` flag.
+* To indicate that a project is a fork of another project use `--fork_of URL` where `URL` is the Git url of the existing project. 
+* To indicate that a project is a child of antoher project use `--child_of URL`. See above.
 
 ## Django/MySQL Notable Changes
 

@@ -11,7 +11,7 @@ from urllib.parse import urlparse
 import arrow
 import MySQLdb
 
-from code.gitutils.gitcommand import GitCommand
+from src.gitutils.gitcommand import GitCommand
 
 # Setup Logger
 logger = logging.getLogger()
@@ -48,8 +48,8 @@ class DatabaseInterface:
                 self.add_project(project[0], since=self.args.since, until=self.args.until)
         else:
             logger.debug('Adding new project(s) to database...')
-            for project in self.args.add_project:
-                self.add_project(project, since=self.args.since, until=self.args.until)
+            project = self.args.add_project
+            self.add_project(project, since=self.args.since, until=self.args.until, fork_of=self.args.fork_of, child_of=self.args.child_of, tags=self.args.tags)
 
     def terminate(self):
         self.db.close()
@@ -61,7 +61,7 @@ class DatabaseInterface:
             name = name[:name.index('.')]
             return name
 
-    def add_project(self, url, name=None, since=datetime.datetime.utcfromtimestamp(0).isoformat(), until=datetime.datetime.today().isoformat(), fork_of=None):
+    def add_project(self, url, name=None, since=datetime.datetime.utcfromtimestamp(0).isoformat(), until=datetime.datetime.today().isoformat(), fork_of=None, child_of=None, tags=None):
         '''
             url: url to git file
             name: descriptive name of project, defaults to .git file name
@@ -98,11 +98,48 @@ class DatabaseInterface:
                 cursor.execute(query, (fork_of,))
                 fork_of = cursor.fetchone()[0]
 
+            # If child, find parent project_id
+            if child_of:
+                #TODO: See above in fork_of if-clause
+                query = 'select id from project where source_url=%s'
+                cursor.execute(query, (child_if,))
+                child_of = cursor.fetchone()[0]
+
             # Insert new project
-            query = 'insert into project (name, source_url, last_updated, fork_of_id) values (%s, %s, utc_timestamp(), %s)'
-            cursor.execute(query, (name, url, fork_of,))
+            query = 'insert into project (name, source_url, last_updated, fork_of_id, child_of_id) values (%s, %s, utc_timestamp(), %s, %s)'
+            cursor.execute(query, (name, url, fork_of, child_of))
 
         self.db.commit()
+
+        # If tags specified add them
+        if tags:
+            query = 'select id from project where source_url=%s'
+            cursor.execute(query, (url,))
+            project_id = cursor.fetchone()[0]
+
+            # Add tags
+            query = 'insert into tag (tag) values (%s)'
+            cursor.executemany(query, [(tag,) for tag in tags])
+            self.db.commit()
+
+            for tag in tags:
+                logger.debug(f'Inserted tag {tag}')
+
+            # Add to bridge table
+            query = 'select id from tag where tag=%s'
+            tag_ids = []
+
+            for tag in tags:
+                cursor.execute(query, (tag,))
+                tag_id = cursor.fetchone()[0]
+                tag_ids.append(tag_id)
+
+            query = 'insert into project_has_tag (project_id, tag_id) values (%s, %s)'
+            cursor.executemany(query, [(project_id, tag_id,) for tag_id in tag_ids])
+            self.db.commit()
+
+            for tag_id in tag_ids:
+                logger.debug(f'Inserted tag {tag_id} for project {project_id}')
 
         if self.args.force_epoch:
             logger.debug('FORCE_EPOCH set to True.')
@@ -239,7 +276,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     # Connection Arguments
-    parser.add_argument('--host', help='host for mysql connection', type=str, default='localhost')
+    parser.add_argument('--host', help='host for mysql connection', type=str, default='sansa.cs.uoregon.edu')
     parser.add_argument('--username', help='username for mysql connection', type=str, required=True)
     parser.add_argument('--password', help='password for mysql connection', type=str, required=True)
     parser.add_argument('--port', help='port for mysql connection', type=int, default=3331)
@@ -248,7 +285,7 @@ if __name__ == '__main__':
     # Update Arguments
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('--update', help='update existing projects on database', action='store_true')
-    group.add_argument('--add_project', help='add git url(s) to database', type=str, nargs='+')
+    group.add_argument('--add_project', help='add git url to database', type=str)
 
     # Misc Arguments
     parser.add_argument('--force_epoch', help='force update from utc epoch', action='store_true')
@@ -256,6 +293,9 @@ if __name__ == '__main__':
     parser.add_argument('--no_branches', help='does not fetch branch names for each commit', action='store_true')
     parser.add_argument('--since', help='fetch commits from this date (ISO8601)', type=str, default=datetime.datetime.utcfromtimestamp(0).isoformat())
     parser.add_argument('--until', help='fetch commits to this date (ISO8601)', type=str, default=datetime.datetime.today().isoformat())
+    parser.add_argument('--tags', help='tags to add to project', nargs='+', type=str)
+    parser.add_argument('--fork_of', help='fork of another project', type=str)
+    parser.add_argument('--child_of', help='child of another project', type=str)
 
     args = parser.parse_args()
     DatabaseInterface(args)
