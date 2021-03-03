@@ -72,8 +72,8 @@ class Patterns(Fetcher):
                 return True
         return False
 
-    def __init__(self, project_name):
-        super().__init__(project_name)
+    def __init__(self, project_name=None, project_url=None, exclude_forks=False, forks_only=False):
+        super().__init__(project_name, project_url, exclude_forks, forks_only)
         # self.close_session()
         # to store store list of dataframes sorted in descending order by who made the most commits
         self.ranked_by_people = None
@@ -85,11 +85,10 @@ class Patterns(Fetcher):
         self.month = None
         self.year_tup = None
         self.month_tup = None
-        self.project_name = project_name
         self.diff_alg = 'cos'
         self.top_developers = None
-        self.top_N_map = None
-        self.authors_data = None
+        self.top_N_map = pd.DataFrame()
+        self.authors_data = pd.DataFrame()
 
     def process_single_commit(self, lines_list):
         # First, create a very brief summary of the changes, e.g., for one set of diffs, produce '--++-+-+--++--++-+--'
@@ -172,6 +171,7 @@ class Patterns(Fetcher):
 
     def set_unique_authors(self):
         """" Use fuzzy matching to identify multiple different names that likely belong to the same developer """
+        print("INFO: Analyzing author names, this can take a few minutes...")
         df = pd.DataFrame(self.commit_data.groupby(['author'])['sha'].count())
         df.reset_index(level=df.index.names, inplace=True)
         df['commits'] = df['sha']
@@ -199,6 +199,11 @@ class Patterns(Fetcher):
         df2 = pd.DataFrame.from_dict(real_names, orient='index', columns=['author', 'unique_author'])
         self.authors_data = df.merge(df2, how='inner', on='author')
         self.authors_data.drop(columns=['name_size', 'sha'])
+        # Also update the global dataframe
+        self.commit_data = self.commit_data.merge(self.authors_data[['author','unique_author']],
+                                                  how='inner', on='author')
+        self.commit_data.index = self.commit_data['datetime']    # DO NOT REMOVE
+        self.update_cache()     # To avoid this very expensive computation in future!
         return self.authors_data
 
     def set_year(self, y):
@@ -237,62 +242,70 @@ class Patterns(Fetcher):
         df1['month_num'] = df1.index
         return df1
 
-    def get_time_range_df(self, time_range='year'):
+    def get_time_range_df(self, time_range=None, sum=True):
+        checkin = pd.DataFrame()
         if time_range == 'year':
             checkin_data = self.commit_data[self.commit_data['year'] == self.year]
-            checkin = checkin_data.groupby(pd.Grouper(freq='M')).sum()
+            if sum: checkin = checkin_data.groupby(pd.Grouper(freq='M')).sum()
         if time_range == 'month':
             checkin_data = self.commit_data[(self.commit_data['month'] == self.month)
                                            & (self.commit_data['year'] == self.year)]
-            checkin      = checkin_data.groupby(pd.Grouper(freq='D')).sum()
+            if sum: checkin = checkin_data.groupby(pd.Grouper(freq='D')).sum()
         if time_range == 'year-year':
             checkin_data = self.commit_data[(self.commit_data['year'] >= self.year_tup[0])
                                            & (self.commit_data['year'] <= self.year_tup[1])]
-            checkin = checkin_data.groupby(pd.Grouper(freq='M')).sum()
+            if sum: checkin = checkin_data.groupby(pd.Grouper(freq='M')).sum()
         if time_range == 'month-month':
             if self.year_tup is None:
                 checkin_data = self.commit_data[((self.commit_data['month'] >= self.month_tup[0])
                                             & (self.commit_data['year'] == self.year))
                                             & ((self.commit_data['month'] == self.month_tup[1])
                                             & (self.commit_data['year'] <= self.year))]
-                checkin = checkin_data.groupby(pd.Grouper(freq='M')).sum()
+                if sum: checkin = checkin_data.groupby(pd.Grouper(freq='M')).sum()
             else:
                 checkin_data = self.commit_data[((self.commit_data['year'] >= self.year_tup[0])
                                            & (self.commit_data['month'] >= self.month_tup[0]))
                                            & ((self.commit_data['year'] <= self.year_tup[1])
                                            & (self.commit_data['month'] <= self.month_tup[1]))]
-                checkin = checkin_data.groupby(pd.Grouper(freq='M')).sum()
+                if sum: checkin = checkin_data.groupby(pd.Grouper(freq='M')).sum()
 
-        if time_range == None:
-            checkin = self.commit_data.groupby(pd.Grouper(freq='M')).sum()
-        return checkin
+        if time_range is None:
+            checkin_data = self.commit_data
+            if sum: checkin = self.commit_data.groupby(pd.Grouper(freq='M')).sum()
 
-    def make_file_developer_df(self, top_N=-1, value_column='locc', my_df=None):
+        if not checkin.empty: return checkin      # aggregated
+        else: return checkin_data  # not aggregated
 
-        print("INFO: Creating developer matrix, this can take a few minutes...")
-        if (my_df is None):
-            self.annotate_metrics()
+    def make_file_developer_df(self, top_N=-1, locc_metric='change-size-cos', time_range=None, my_df=pd.DataFrame()):
 
-        if self.authors_data is None:
+        print("INFO: Creating developer matrix...")
+
+        # Create the files x developers matrix, using the value_column parameter as the values
+        if 'unique_author' not in self.commit_data.columns:   #self.authors_data = df.merge(df2, how='inner', on='author')
             self.set_unique_authors()
 
-        if my_df is None: work_df = self.commit_data
-        else: work_df = my_df
+        if my_df.empty:
+            work_df = self.get_time_range_df(time_range, sum=False)
+        else:
+            # TODO -- enable time ranges with user-provided dataframe my_df
+            if locc_metric not in my_df.columns:
+                err('The dataframe you provided to make_file_developer_df() does '
+                    'not contain the required "%s" column"' % locc_metric)
+            work_df = my_df
 
-        if value_column not in work_df.select_dtypes(include=['float64','int']):
+        if locc_metric not in work_df.select_dtypes(include=['float64', 'int']):
             err('plot_top_N_heatmap column parameter must be one of %s' % ','.join(work_df.select_dtypes(
                 include=['float64','int']).columns))
 
-        #heat_obj = self.make_file_developer_df()
-        # Create the files x developers matrix, using the value_column parameter as the values
-        work_df = work_df.merge(self.authors_data, how="inner", on="author", left_index=True)
-
-        d = pd.DataFrame(work_df.groupby(['filepath', 'unique_author'])[value_column].sum())
+        d = pd.DataFrame(work_df.groupby(['filepath', 'unique_author'])[locc_metric].sum())
         d.reset_index(level=d.index.names, inplace=True)
-        d = d[d[value_column] != 0]
-        d['filepath'] = d['filepath'].transform(self.shorten_string)
-        heat_obj = d.pivot_table(index='filepath', columns='unique_author', values=value_column, aggfunc=np.sum,
-                                fill_value=0).dropna()
+        #d = d[d[locc_metric] != 0]
+
+        # Compute the stats
+        stats_df = d.describe().loc[['count','mean', 'std', 'min', 'max']]
+
+        heat_obj = d.pivot_table(index='filepath', columns='unique_author', values=locc_metric, aggfunc=np.sum,
+                                 fill_value=0).dropna()
 
         # Get a df containing developers (1st column) and total contributions (2nd column)
         sorted_developers = heat_obj.sum(axis='rows').sort_values(ascending=False)
@@ -324,4 +337,4 @@ class Patterns(Fetcher):
         if top_N > 0: sorted_hot_files = hot_files[sorted_dev_list[:top_N]]
         else: sorted_hot_files = hot_files[sorted_dev_list]
         self.top_N_map = sorted_hot_files
-        return sorted_hot_files
+        return sorted_hot_files, stats_df
