@@ -223,7 +223,7 @@ class Visualizer(Patterns):
         df, stats_df = self.get_time_range_df(time_range)
         fig, ax = plt.subplots(figsize=vis.figsize)
 
-    def plot_zone_heatmap(self, time_range=None, locc_metric='change-size-cos', agg="mean", fig_ax_pair=(None,None)):
+    def plot_zone_heatmap(self, time_range=None, locc_metric='change-size-cos', agg="sum", fig_ax_pair=(None,None)):
         df, stats_df = self.get_time_range_df(time_range,sum=False)
         df['hour'] = df['datetime'].dt.hour
         wh = pd.DataFrame()
