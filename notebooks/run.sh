@@ -2,8 +2,8 @@
 
 source /Users/norris/python_environments/ideas-uo/bin/activate
 # After saving the
-projects="spack lammps petsc Nek5000 E3SM qmcpack qdpxx LATTE namd fast-export enzo-dev tau2 xpress-apex nwchem"
-#projects="spack lammps petsc Nek5000 E3SM qmcpack qdpxx LATTE namd fast-export enzo-dev tau2 xpress-apex"
+#projects="spack lammps petsc Nek5000 E3SM qmcpack qdpxx LATTE namd fast-export enzo-dev tau2 xpress-apex nwchem"
+projects="spack lammps petsc Nek5000 E3SM qmcpack qdpxx LATTE namd fast-export enzo-dev tau2 xpress-apex"
 
 if [ ! -d tmp ]; then mkdir tmp; fi
 sed -ie "s|project_name=[\"'].*[\"']|project_name=sys.argv[1]|" PatternsTest.py

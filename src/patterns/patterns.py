@@ -33,11 +33,16 @@ class Diffutils:
         words = WORD.findall(text)
         return Counter(words)
 
-class Names:
+class ProjectConfig:
+    """Some project-specific settings can be hardcoded here."""
     aliases = {'tau2': {'amorris':'Alan Morris', 'khuck':'Kevin A. Huck', 'Sameer Shende':'Sameer Suresh Shende',
                         'scottb':'Scott Biersdorff', 'wspear':'Wyatt Joel Spear'}}
+    exclude_subpaths = {'tau2': [],}
 
 class Patterns(Fetcher):
+    weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    weekday_type = pd.CategoricalDtype(categories=weekdays, ordered=True)
+
     path_re = re.compile('^/?(.+/)*(.+)\.(.+)$') # not used yet
 
     # edits_summary_re.findall('--++-+-+--++--++-+--') produces ['--++', '-+', '-+', '--++', '--++', '-+']
@@ -56,6 +61,9 @@ class Patterns(Fetcher):
          'f90_sedov', 'f90_temp', 'f90_unused', 'f90_work',
          'ff', 'h', 'h-32', 'h-64', 'hh', 'hpp', 'hxx', 'java', 'ksh', 'lf95', 'm',
          'pbs', 'pl', 'py', 'r', 'script', 'sed', 'sidl',  'src', 'src90', 'th', 'tcl', 'tk', 'yaml', 'yml']
+
+    # These are global, and generally applicable, unless a project-specific list is provided
+    excluded_subpaths = ['contrib/','extern/','external/']
 
     @staticmethod
     def is_code(path_str):
@@ -127,8 +135,15 @@ class Patterns(Fetcher):
 
         # Finally, compute the default distance metric
         diff = Diffutils.diff_algs[self.diff_alg].distance(old, new)
-        #print(summary, len(summary), locc, removed, added, diff)
         return [summary, len(summary), locc, removed, added, diff]
+
+    def is_external(self, path_str, excluded_paths):
+        for path_pattern in excluded_paths:
+            if path_str.find(path_pattern) > 0:
+                #print('pattern: %s, path: %s' % (path_pattern,path_str))
+                return True
+        return False
+
 
     def set_diff_alg(self, diff_alg='cos', compute=True, recompute=False):
         if diff_alg not in Diffutils.diff_algs.keys():
@@ -177,6 +192,23 @@ class Patterns(Fetcher):
             self.commit_data['filepath'].map( lambda x: Patterns.is_code(x) )
         ].reindex()
 
+    def remove_external(self):
+        """Attempt to automatically identify external sources and exclude them from analysis"""
+        before = self.commit_data.shape[0]
+        df = self.commit_data
+        if self.project in ProjectConfig.exclude_subpaths.keys():
+            ex_paths = ProjectConfig.exclude_subpaths[self.project]
+        else:
+            ex_paths = Patterns.excluded_subpaths
+        self.commit_data = self.commit_data[
+            self.commit_data['filepath'].map(lambda x: not self.is_external(x, ex_paths))
+        ].reindex()
+        after = self.commit_data.shape[0]
+        if before > after:
+            print("INFO: Removed %d external file changes. New total size: %d changes" % (before-after,after))
+        else:
+            print("INFO: No external files found. Total size: %d changes" % after)
+
     def set_unique_authors(self):
         """" Use fuzzy matching to identify multiple different names that likely belong to the same developer """
         print("INFO: Analyzing author names, this can take a few minutes...")
@@ -195,8 +227,9 @@ class Patterns(Fetcher):
         real_names = {}
         count = 0
         done = []
-        if self.project in Names.aliases.keys():
-            aliases = Names.aliases[self.project]
+        aliases = {}
+        if self.project in ProjectConfig.aliases.keys():
+            aliases = ProjectConfig.aliases[self.project]
         for nm, val in results.items():
             # print(nm, ":")
             for entry in val:
@@ -249,17 +282,20 @@ class Patterns(Fetcher):
         self.year = y
         self.month = mo
 
-    def get_monthly_totals(self, df, year=None):
+    def get_monthly_totals_yr(self, df, locc_metric, year=None):
         if year:
             df1 = df[(df['year'] == year)]
         else:
             df1 = df
         #df1 = df1.resample('M').sum()
-        df1 = df1.groupby(pd.Grouper(freq='M')).sum()
+        df1 = df1.groupby(["month"])
+        # For each group, calculate the average of only the metric column
+        df1 = df1.aggregate({locc_metric: np.sum})  # monthly averages
 
-        df1['month_num'] = pd.DatetimeIndex(df1.index).month
-        df1 = df1.groupby(['month_num']).mean()
-        df1['month_num'] = df1.index
+        if year is None:
+            num_years = df.groupby(["year"]).count()[locc_metric].shape[0]
+            df1 = df1 / num_years
+        df1["Month"] = df1.index
         return df1
 
     def get_time_range_df(self, time_range=None, sum=True):
@@ -299,6 +335,22 @@ class Patterns(Fetcher):
         else:
             stats_df = checkin_data.describe().loc[['count', 'mean', 'std', 'min', 'max']]
             return checkin_data, stats_df # not aggregated
+
+    def get_dow_averages(self, time_range=None):
+        df = self.get_time_range_df(time_range, sum=False)
+        return df.groupby(df['dow']).mean()
+
+    def get_dow_totals(self, time_range=None):
+        df = self.get_time_range_df(time_range, sum=False)
+        return df.groupby(df['dow']).sum()
+
+    def get_monthly_averages(self, time_range=None):
+        df = self.get_time_range_df(time_range, sum=False)
+        return df.groupby(df['month']).mean()
+
+    def get_monthly_totals(self, time_range=None):
+        df = self.get_time_range_df(time_range, sum=False)
+        return df.groupby(df['month']).sum()
 
     def make_file_developer_df(self, top_N=-1, locc_metric='change-size-cos', time_range=None, my_df=pd.DataFrame()):
 

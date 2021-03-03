@@ -16,6 +16,7 @@ class Visualizer(Patterns):
                    'locc-': 'lines removed',
                    'locc+': 'lines added',
                    }
+    cmap='YlGnBu'  # seaborn color map  (low is yellow, high is dark blue)
 
     def __init__(self, project_name=None, project_url=None, exclude_forks=False, forks_only=False):
         super().__init__(project_name, project_url, exclude_forks, forks_only)
@@ -41,10 +42,11 @@ class Visualizer(Patterns):
         if code_only: self.remove_noncode()    # This makes it feasible to analyze diff
         self.annotate_metrics()                # Compute locc, locc+, locc-, and change-size-cos code change metrics
         self.update_data()
-        print("INFO: Done computing averages. %d commits (code only)" % self.commit_data.shape[0])
+        print("INFO: Done computing averages. %d file changes (code only)" % self.commit_data.shape[0])
 
     def update_data(self):
-        # Compute some averages
+        # Compute some averages, set types
+        self.commit_data['dow'] = self.commit_data['dow'].astype(Patterns.weekday_type)
         self.yearly_commits = self.commit_data.groupby('year').mean()    # this by default includes change-size-cos
         self.monthly_commits = self.commit_data.groupby(["year", "month"]).mean()
 
@@ -176,7 +178,7 @@ class Visualizer(Patterns):
         df.plot(y='change-size-cos', linewidth=3, color='b', ax=ax1)
         plt.xticks(fontsize=16)
         plt.yticks(fontsize=16)
-        plt.title('Annual average change (LOCC and cos distance)', fontsize=20)
+        ax1.set_title('Annual average change (LOCC and cos distance)', fontsize=20)
         plt.xlabel('Year', fontsize=18)
         plt.ylabel('Total LOCC', fontsize=18)
         ax1.legend(loc='upper left', ncol=3)
@@ -210,19 +212,53 @@ class Visualizer(Patterns):
                    loc='upper left',fontsize=16)
 
         # title and labels
-        plt.title('Annual average code changes (%s)' % locc_metric, fontsize=20)
+        ax.set_title('Annual average code changes (%s)' % locc_metric, fontsize=20)
         plt.xlabel('Year', fontsize=18)
         plt.ylabel('Changes (%s)' % locc_metric, fontsize=18)
         fig.autofmt_xdate()
+        fig.savefig('figures/%s-avg-%s.png' % (self.project, locc_metric), format='png',
+                    dpi=self.plot_resolution, box_inches='tight')
+
+    def plot_weekday_totals(self, time_range = None, locc_metric='change-size-cos'):
+        df, stats_df = self.get_time_range_df(time_range)
+        fig, ax = plt.subplots(figsize=vis.figsize)
+
+    def plot_zone_heatmap(self, time_range=None, locc_metric='change-size-cos', agg="mean", fig_ax_pair=(None,None)):
+        df, stats_df = self.get_time_range_df(time_range,sum=False)
+        df['hour'] = df['datetime'].dt.hour
+        wh = pd.DataFrame()
+        if agg == "sum":
+            wh = df.groupby(["dow", "hour"]).sum()     # .reindex(labels=weekdays)
+        elif agg == "mean":
+            wh = df.groupby(["dow", "hour"]).mean()     # .reindex(labels=weekdays)
+        else:
+            err("Unknown aggregation agg=%s specified, only 'sum' and 'mean' are available." % agg)
+        wh.reset_index(level=wh.index.names, inplace=True)
+        #df['dow'] = df['dow'].astype(Visualizer.weekday_type)
+        heat_wh = wh.pivot(index="dow", columns="hour", values=locc_metric)
+
+        if fig_ax_pair == (None,None): fig, ax = plt.subplots(figsize=(14,7))
+        else: fig, ax = fig_ax_pair
+        if df.empty:
+            print("We found no data for this time period!")
+            return df
+        sns.heatmap(heat_wh, linewidths=.5, ax=ax, cbar_kws={'label': 'Values: %s (%s)' % (locc_metric,agg)},
+                    cmap=Visualizer.cmap)
+        ax.set_title(self.get_title_str(time_range, stats_df, locc_metric, False, prefix="In the zone: "))
+        time_range_str = self.get_time_range_str(time_range)
+        fig.tight_layout()
+        fig.savefig('figures/%s-zone-%s-map-%s-%s.png' % (self.project, locc_metric,
+                    time_range_str.replace(', ','_'), agg), format='png', dpi=self.plot_resolution,
+                    bbox_inches='tight')
 
     def plot_developer_file_map(self):
         fig, ax = plt.subplots(figsize=self.figsize)
-        sns.heatmap(self.developer_file_mat, annot=True, linewidths=.5, cmap='icefire')
+        sns.heatmap(self.developer_file_mat, annot=True, linewidths=.5, cmap=Visualizer.cmap)
         if self.hide_names: ax.tick_params(left=True, bottom=False)
         title='Developers vs files'
         if self.year is not None: title = str(self.year) + ': ' + title
         if not self.hide_names: title += '(' + str(self.project) + ')'
-        plt.title(title)
+        ax.set_title(title)
         if self.interactive: plt.show()
 
     def plot_top_N_heatmap(self, top_N=10, locc_metric='change-size-cos', time_range=None, my_df=pd.DataFrame()):
@@ -246,11 +282,13 @@ class Visualizer(Patterns):
         if sorted_hot_files.empty:
             print("We found no data for this time period!")
             return sorted_hot_files
-        g = sns.heatmap(sorted_hot_files, annot=True, linewidths=.5, ax=ax, fmt=number_fmt, cmap='icefire',
+        g = sns.heatmap(sorted_hot_files, annot=True, linewidths=.5, ax=ax, fmt=number_fmt, cmap=Visualizer.cmap,
                         cbar_kws={'label': 'Values: %s' % locc_metric})
-        if self.hide_names: g.set(xticklabels=[])
+        if self.hide_names:
+            g.set(xticklabels=[])
+            ax.get_xaxis().set_visible(False)
         time_range_str = self.get_time_range_str(time_range)
-        plt.title(self.get_title_str(time_range, stats_df, locc_metric, False))
+        ax.set_title(self.get_title_str(time_range, stats_df, locc_metric, False))
         fig.savefig('figures/%s-top-%d-%s-map-%s.png' % (self.project, top_N, locc_metric,
                     time_range_str.replace(', ','_')), format='png', dpi=self.plot_resolution,
                     bbox_inches='tight')
@@ -287,23 +325,21 @@ class Visualizer(Patterns):
     def how_was_2020(self, locc_metric='change-size-cos'):
         fig, ax = plt.subplots(figsize=self.figsize)
 
-        df1 = self.get_monthly_totals(self.commit_data, 2019)
-        df1.plot(x='month_num', y=locc_metric, color='blue',linewidth=3, linestyle='--', ax=ax, label='2019')
+        df1 = self.get_monthly_totals_yr(self.commit_data, locc_metric, 2019)
+        df1.plot(x='Month', y=locc_metric, color='blue',linewidth=3, linestyle='--', ax=ax, label='2019')
 
-        df2 = self.get_monthly_totals(self.commit_data, 2020)
-        df2.plot(x='month_num', y=locc_metric, color='brown',linewidth=3, linestyle='-', ax=ax, label='2020')
+        df2 = self.get_monthly_totals_yr(self.commit_data, locc_metric, 2020)
+        df2.plot(x='Month', y=locc_metric, color='brown',linewidth=3, linestyle='-', ax=ax, label='2020')
 
         # Average
-        d = self.get_monthly_totals(self.commit_data)
-        d.plot(x='month_num', y=locc_metric, color='green',linewidth=3, linestyle=':', ax=ax, label='Average')
+        d = self.get_monthly_totals_yr(self.commit_data, locc_metric,  None)
+        d.plot(x='Month', y=locc_metric, color='green',linewidth=3, linestyle=':', ax=ax, label='Average')
 
-        if self.hide_names:
-            ax.get_xaxis().set_visible(False)
         plt.xticks(fontsize=16)
         plt.yticks(fontsize=16)
-        #plt.title('Monthly total changes', fontsize=20)
+        #ax.set_title('Monthly total changes', fontsize=20)
         plt.xlabel('Month', fontsize=18)
-        plt.ylabel('Monthly total code change (%s)'%locc_metric, fontsize=20)
+        plt.ylabel('Monthly average code change (%s)'%locc_metric, fontsize=20)
         legend = ax.legend(fancybox=False, fontsize=18, ncol=3, loc='upper left')
         legend.get_frame().set_facecolor('white')
         if not self.hide_names:
