@@ -3,6 +3,9 @@ name: library
 on:
   push:
     branches: [ master ]
+    paths:
+      - 'src/**'
+      - '!src/notebooks/**'
   pull_request:
     branches: [ master ]
 
