@@ -26,6 +26,5 @@ for project in $projects ; do
   sed -e "s|project_name='.*'|project_name='$project'|" -e "s|get_data(.*)|get_data(dbpwd='$pwd')|" PatternsTest.ipynb > $project-PatternsTest.ipynb
   ####python ./PatternsTest.py $project
   jupyter nbconvert --to html --execute $project-PatternsTest.ipynb
-  mv $project-PatternsTest.ipynb tmp/
-  mv $project-PatternsTest.html html/
+  mv $project-PatternsTest.* tmp/
 done
