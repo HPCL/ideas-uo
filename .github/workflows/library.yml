@@ -29,7 +29,7 @@ jobs:
         run: |
           python3.9 -m pip install --upgrade pip
           python3.9 -m pip install pipenv
-          pipenv install --deploy --dev
+          touch Pipfile & pipenv install --deploy --dev
           if [ -f requirements.txt ]; then pipenv install -r requirements.txt; fi
 
       - name: Test with pytest
