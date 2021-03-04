@@ -2,7 +2,8 @@
 # To provide a list of project names, run with ./run.sh -p "proj1 proj2 ..."
 # To provide the database password: ./run.sh -pwd passwordstring
 
-projects="spack lammps petsc Nek5000 E3SM qmcpack qdpxx LATTE namd fast-export enzo-dev tau2 xpress-apex nwchem"
+# nwchem works, but takes a long time, so we don't include it in the regular refresh
+projects="spack lammps petsc Nek5000 E3SM qmcpack qdpxx LATTE namd fast-export enzo-dev tau2 xpress-apex" # nwchem"
 pwd=""
 while true; do
   case "$1" in

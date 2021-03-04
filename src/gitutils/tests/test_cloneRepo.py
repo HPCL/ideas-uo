@@ -13,7 +13,7 @@ def test_instantiateGitCommand(capsys, caplog):
 
 def test_cloneRepo(capsys, caplog):
     gitcmd = getGitCommandInstance()
-    if os.path.exists('tmprepo'):
-        os.rmdir('tmprepo')
-    ret_code = gitcmd.cloneRepo('https://github.com/HPCL/tmprepo.git')
+    if os.path.exists('testrepo'):
+        os.rmdir('testrepo')
+    ret_code = gitcmd.cloneRepo('https://github.com/HPCL/testrepo.git')
     assert ret_code is True

@@ -7,8 +7,8 @@ from pathlib import Path
 cache_dir = os.path.dirname(Path(__file__))
 
 def test_readCachedProject(capsys, caplog):
-    fetcher = Fetcher(project_name='ideas-uo')
-    fetcher.update_cache_info(cache_dir=cache_dir,cache_file='.ideas-uo.pickle')
+    fetcher = Fetcher(project_name='testrepo')
+    fetcher.update_cache_info(cache_dir=cache_dir,cache_file='.testrepo.pickle')
     print(fetcher.cache)
     try:
         success = fetcher.fetch()
