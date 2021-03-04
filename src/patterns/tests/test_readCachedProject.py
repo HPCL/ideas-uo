@@ -3,9 +3,13 @@ from gitutils.tests.testutils import *
 from gitutils.utils import *
 
 from patterns.fetcher import Fetcher
+from pathlib import Path
+cache_dir = os.path.dirname(Path(__file__))
 
 def test_readCachedProject(capsys, caplog):
     fetcher = Fetcher(project_name='ideas-uo')
+    fetcher.update_cache_info(cache_dir=cache_dir,cache_file='.ideas-uo.pickle')
+    print(fetcher.cache)
     try:
         success = fetcher.fetch()
     except Exception as e:

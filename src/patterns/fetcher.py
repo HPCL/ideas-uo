@@ -20,7 +20,7 @@ class Fetcher:
         self.project_url = project_url  # Mainly used to indicate specific forks
         self.exclude_forks = exclude_forks # Only work with non-forks of the repo
         self.forks_only = forks_only  # when True, only analyze forked repos
-        self.cache_info = {'dir': '.db-cache', 'filename': '.%s.pickle' % self.project}
+        self.cache_info = {'dir': '../.db-cache', 'filename': '.%s.pickle' % self.project}
         self.cache = os.path.join(self.cache_info['dir'], self.cache_info['filename'])
         try:
             if 'google.colab' in str(get_ipython()):
