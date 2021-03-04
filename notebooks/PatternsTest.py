@@ -232,9 +232,29 @@ top_N.head()
 df = vis.plot_zone_heatmap(agg='mean')
 
 
-# We can also zoom down to month level, here we show year by year heatmaps of activity.
-
 # In[26]:
+
+
+df = vis.plot_zone_heatmap(agg='sum')
+
+
+# ## Did anything unusual happen in 2020?
+# This specific function looks at how 2020 contributions compare with the average (and the previous year).
+# 
+# We use the day-time heatmap again, zooming to specific years, in this case, 2019 and 2020. With `sum`, we see when most of the changes were made, while `mean` reveals when people are most productive.
+
+# In[36]:
+
+
+import matplotlib.pyplot as plt
+fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(20,8))
+vis.set_year(2019)
+df_2019 = vis.plot_zone_heatmap(time_range='year',fig_ax_pair = (fig,axes[0]),agg='mean')
+vis.set_year(2020)
+df_2020 = vis.plot_zone_heatmap(time_range='year',fig_ax_pair = (fig,axes[1]),agg='mean')
+
+
+# In[37]:
 
 
 import matplotlib.pyplot as plt
@@ -245,16 +265,19 @@ vis.set_year(2020)
 df_2020 = vis.plot_zone_heatmap(time_range='year',fig_ax_pair = (fig,axes[1]),agg='sum')
 
 
-# ## Did anything unusual happen in 2020?
-# This specific function looks at how 2020 contributions compare with the average (and the previous year).
-
-# In[27]:
+# In[38]:
 
 
 vis.how_was_2020('change-size-cos')
 
 
-# In[28]:
+# In[ ]:
+
+
+vis.how_was_2020('locc')
+
+
+# In[39]:
 
 
 vis.how_was_2020('locc')
