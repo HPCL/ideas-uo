@@ -43,8 +43,6 @@ class Patterns(Fetcher):
     weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     weekday_type = pd.CategoricalDtype(categories=weekdays, ordered=True)
 
-    path_re = re.compile('^/?(.+/)*(.+)\.(.+)$') # not used yet
-
     # edits_summary_re.findall('--++-+-+--++--++-+--') produces ['--++', '-+', '-+', '--++', '--++', '-+']
     edits_summary_re = re.compile(r'(-+\++)')
 
