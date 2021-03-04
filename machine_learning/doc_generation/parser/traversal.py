@@ -25,6 +25,6 @@ def viewtree(pattern):
     preorder(root)
     print('-'*80)
 
-viewtree('{(\w+)}')
-viewtree('^author (.*)')
-viewtree('.*\.(a|so|dylib)$')
+#viewtree('{(\w+)}')
+#viewtree('^author (.*)')
+#viewtree('.*\.(a|so|dylib)$')
