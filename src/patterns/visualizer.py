@@ -11,29 +11,28 @@ sns.set(font_scale=1.25)
 sns.set_style('whitegrid', {'legend.frameon': True})
 
 class Visualizer(Patterns):
-    metric_name = {'locc-basic' : 'LOCC (added and removed)',
-                   'locc': 'LOCC (edited, added, or removed)',
-                   'locc-': 'lines removed',
-                   'locc+': 'lines added',
-                   }
-    cmap='YlGnBu'  # seaborn color map  (low is yellow, high is dark blue)
+
 
     def __init__(self, project_name=None, project_url=None, exclude_forks=False, forks_only=False):
         super().__init__(project_name, project_url, exclude_forks, forks_only)
-        self.dimensions = None
+        self.hide_names = True
         self.months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August'
             , 'September', 'October', 'November', 'December']
         self.commit_data = None
         self.yearly_commits = None
         self.monthly_commits = None
-        self.max_label_len = 1000
-        self.save_figures = True
-        self.interactive = True
-        self.plot_resolution = 75
-        self.hide_names = True
+
+        self.config = {'max_ylabel_len' : 1000, # the maxium number of characters for  y-axis labels
+                           'interactive' : True,    
+                           'save_figures' : True,
+                           'plot_dpi': 75,    # dpi for both displayed and saved figures
+                           'figsize': (10,6), # default figure size 
+                           'cmap_hm': 'YlGnBu'  # seaborn color map for heatmaps(low is yellow, high is dark blue)
+        }  
+           
         # Change font size globally
         plt.rcParams['font.size'] = '16'
-        self.figsize=(10,6)
+        plt.rcParams['figure.dpi'] = self.config['plot_dpi']
 
     def get_data(self, db=None, cache=True, code_only=True, dbpwd=None):
         # Do not save the database password in publicly visible files, e.g, scripts, notebooks, etc!
@@ -55,12 +54,12 @@ class Visualizer(Patterns):
     def set_dimensions(self, height, width):
         self.dimensions = (height, width)
 
-    def set_max_label_length(self, len=1000):
-        self.max_label_len = len
+    def set_max_ylabel_length(self, len=1000):
+        self.config['max_ylabel_length'] = len
 
     def shorten_string(self, string):
-        if len(string) < self.max_label_len: return string
-        half = int(self.max_label_len / 2)
+        if len(string) < self.config['max_ylabel_len']: return string
+        half = int(self.config['max_ylabel_len'] / 2)
         return string[:half] + '...' + string[len(string) - half:]
 
     def plot_up_down_cols(self, df, up_col, down_col, diff_col='change-size-cos', time_range=None, log=False):
@@ -74,7 +73,7 @@ class Visualizer(Patterns):
         d['date'] = d.index
         d['date'] = d['date'].dt.date
 
-        fig, ax1 = plt.subplots(figsize=self.figsize)
+        fig, ax1 = plt.subplots(figsize=self.config['figsize'])
         sns.barplot(data=d, x='date', y=up_col, alpha=0.5, ax=ax1, palette='crest', hatch='+', label=up_col)
         sns.barplot(data=d, x='date', y=down_col, alpha=0.5, ax=ax1, palette='dark:salmon', hatch='-', label=down_col)
         sns.barplot(data=d, x='date', y=diff_col, ax=ax1, palette='crest', hatch='o', label=diff_col)
@@ -94,10 +93,10 @@ class Visualizer(Patterns):
         if log: ylabel += ' (log10 scale)'
         ax1.set_ylabel(ylabel)
         fig.autofmt_xdate()
-        if self.interactive: fig.show()
-        if self.save_figures:
+        if self.config['interactive']: fig.show()
+        if self.config['save_figures']:
             fig.savefig('figures/%s-trend-%s-%s.png' % (self.project, diff_col, self.get_time_range_str(
-                time_range).replace(', ','_').replace(' ','_')), format='png', dpi=self.plot_resolution, bbox_inches='tight')
+                time_range).replace(', ','_').replace(' ','_')), format='png', dpi=self.config['plot_dpi'], bbox_inches='tight')
 
     def plot_overall_project_locc(self, time_range=None, log=False):
         if time_range == 'year':
@@ -132,11 +131,11 @@ class Visualizer(Patterns):
             g.ax.set_ylabel(ylabel)
             g.fig.autofmt_xdate()
             g.ax.set_title(self.get_title_str(time_range, stats_df, locc_metric, log))
-            if self.interactive: g.fig.show()
-            if self.save_figures:
+            if self.config['interactive']: g.fig.show()
+            if self.config['save_figures']:
                 g.fig.savefig('figures/%s-timeline-%s-%s.png' % (self.project, self.diff_alg,
                             self.get_time_range_str(time_range).replace(', ','_').replace(' ','_')),
-                              format='png', dpi=self.plot_resolution, bbox_inches='tight')
+                              format='png', dpi=self.config['plot_dpi'], bbox_inches='tight')
         return checkin
 
     def plot_proj_change_bubble(self, time_range='year', locc_metric="change-size-cos", log=False):
@@ -153,15 +152,15 @@ class Visualizer(Patterns):
             g.ax.set_ylabel(ylabel)
             g.ax.set_title(self.get_title_str(time_range, stats_df, locc_metric, log))
             g.fig.autofmt_xdate()
-            if self.interactive: g.fig.show()
-            if self.save_figures:
+            if self.config['interactive']: g.fig.show()
+            if self.config['save_figures']:
                 g.fig.savefig('figures/%s-bubble-%s-%s.png' % (self.project,
                               self.diff_alg, self.get_time_range_str(time_range).replace(', ','_').replace(' ','_')),
-                              format='png', dpi=self.plot_resolution, bbox_inches='tight')
+                              format='png', dpi=self.config['plot_dpi'], bbox_inches='tight')
         return checkin
 
     def plot_proj_y2y(self, year1, year2):
-        fig, ax1 = plt.subplots(figsize=self.figsize)
+        fig, ax1 = plt.subplots(figsize=self.config['figsize'])
         self.reset(y=year1)
         self.monthly_commits.plot(x='month', )
         self.reset(y=year2)
@@ -169,11 +168,11 @@ class Visualizer(Patterns):
         handles, labels = ax1.get_legend_handles_labels()
         fig.legend(handles, labels, loc="center left")
         fig.autofmt_xdate()
-        if self.interactive: fig.set_visible(True)
+        if self.config['interactive']: fig.set_visible(True)
 
     def plot_total_avg(self, log=False):
         #self.yearly_commits['locc+ - locc-'] = self.yearly_commits['locc+'] - self.yearly_commits['locc-']
-        fig, ax1 = plt.subplots(figsize=self.figsize)
+        fig, ax1 = plt.subplots(figsize=self.config['figsize'])
         df = self.commit_data.groupby(pd.Grouper(freq='Q')).sum()
         if log: df = np.log10(df)
         df.plot(y='locc', linewidth=3, color='r', style='--', ax=ax1)
@@ -203,9 +202,9 @@ class Visualizer(Patterns):
         df['SMA_10'] = df[locc_metric].rolling(10, min_periods=1).mean()
 
         # line plot
-        fig, ax = plt.subplots(figsize=self.figsize)
+        fig, ax = plt.subplots(figsize=self.config['figsize'])
         df.plot(y=[locc_metric, 'SMA_3', 'SMA_5', 'SMA_10'], ax=ax, color=colors, linewidth=2,
-                style=[':','-.','--','-'], figsize=self.figsize, alpha=0.8)
+                style=[':','-.','--','-'], figsize=self.config['figsize'], alpha=0.8)
 
         # modify ticks size
         plt.xticks(fontsize=16)
@@ -219,7 +218,7 @@ class Visualizer(Patterns):
         plt.ylabel('Changes (%s)' % locc_metric, fontsize=18)
         fig.autofmt_xdate()
         fig.savefig('figures/%s-avg-%s.png' % (self.project, locc_metric), format='png',
-                    dpi=self.plot_resolution, box_inches='tight')
+                    dpi=self.config['plot_dpi'], box_inches='tight')
 
     def plot_weekday_totals(self, time_range = None, locc_metric='change-size-cos'):
         df, stats_df = self.get_time_range_df(time_range)
@@ -245,23 +244,23 @@ class Visualizer(Patterns):
             print("We found no data for this time period!")
             return df
         sns.heatmap(heat_wh, linewidths=.5, ax=ax, cbar_kws={'label': 'Values: %s (%s)' % (locc_metric,agg)},
-                    cmap=Visualizer.cmap)
+                    cmap=self.config['cmap_hm'])
         ax.set_title(self.get_title_str(time_range, stats_df, locc_metric, False, prefix="In the zone: "))
         time_range_str = self.get_time_range_str(time_range)
         fig.tight_layout()
         fig.savefig('figures/%s-zone-%s-map-%s-%s.png' % (self.project, locc_metric,
-                    time_range_str.replace(', ','_').replace(' ','_'), agg), format='png', dpi=self.plot_resolution,
+                    time_range_str.replace(', ','_').replace(' ','_'), agg), format='png', dpi=self.config['plot_dpi'],
                     bbox_inches='tight')
 
     def plot_developer_file_map(self):
-        fig, ax = plt.subplots(figsize=self.figsize)
-        sns.heatmap(self.developer_file_mat, annot=True, linewidths=.5, cmap=Visualizer.cmap)
+        fig, ax = plt.subplots(figsize=self.config['figsize'])
+        sns.heatmap(self.developer_file_mat, annot=True, linewidths=.5, cmap=self.config['cmap_hm'])
         if self.hide_names: ax.tick_params(left=True, bottom=False)
         title='Developers vs files'
         if self.year is not None: title = str(self.year) + ': ' + title
         if not self.hide_names: title += '(' + str(self.project) + ')'
         ax.set_title(title)
-        if self.interactive: plt.show()
+        if self.config['interactive']: plt.show()
 
     def plot_top_N_heatmap(self, top_N=10, locc_metric='change-size-cos', time_range=None, my_df=pd.DataFrame()):
         """
@@ -284,7 +283,7 @@ class Visualizer(Patterns):
         if sorted_hot_files.empty:
             print("We found no data for this time period!")
             return sorted_hot_files
-        g = sns.heatmap(sorted_hot_files, annot=True, linewidths=.5, ax=ax, fmt=number_fmt, cmap=Visualizer.cmap,
+        g = sns.heatmap(sorted_hot_files, annot=True, linewidths=.5, ax=ax, fmt=number_fmt, cmap=self.config['cmap_hm'],
                         cbar_kws={'label': 'Values: %s' % locc_metric})
         if self.hide_names:
             g.set(xticklabels=[])
@@ -292,7 +291,7 @@ class Visualizer(Patterns):
         time_range_str = self.get_time_range_str(time_range)
         ax.set_title(self.get_title_str(time_range, stats_df, locc_metric, False))
         fig.savefig('figures/%s-top-%d-%s-map-%s.png' % (self.project, top_N, locc_metric,
-                    time_range_str.replace(', ','_').replace(' ','_')), format='png', dpi=self.plot_resolution,
+                    time_range_str.replace(', ','_').replace(' ','_')), format='png', dpi=self.config['plot_dpi'],
                     bbox_inches='tight')
         return sorted_hot_files
 
@@ -325,7 +324,7 @@ class Visualizer(Patterns):
         return "Entire project"
 
     def how_was_2020(self, locc_metric='change-size-cos'):
-        fig, ax = plt.subplots(figsize=self.figsize)
+        fig, ax = plt.subplots(figsize=self.config['figsize'])
 
         df1 = self.get_monthly_totals_yr(self.commit_data, locc_metric, 2019)
         df1.plot(x='Month', y=locc_metric, color='blue',linewidth=3, linestyle='--', ax=ax, label='2019')
@@ -364,6 +363,6 @@ class Visualizer(Patterns):
                 poo_axs[i].imshow(poo_img)
                 poo_axs[i].axis("off")
 
-        if self.interactive: fig.show()
+        if self.config['interactive']: fig.show()
         fig.savefig('figures/%s-2020-%s.png' % (self.project, locc_metric), format='png',
-                    dpi=self.plot_resolution, bbox_inches='tight')
+                    dpi=self.config['plot_dpi'], bbox_inches='tight')
