@@ -35,14 +35,16 @@ class Visualizer(Patterns):
         plt.rcParams['font.size'] = '16'
         self.figsize=(10,6)
 
-    def get_data(self, db=None, cache=True, code_only=True):
-        if not self.fetch(db, cache):  # loads up the self.commit_data
+    def get_data(self, db=None, cache=True, code_only=True, dbpwd=None):
+        # Do not save the database password in publicly visible files, e.g, scripts, notebooks, etc!
+        if not self.fetch(db, cache, dbpwd):  # loads up the self.commit_data
             return
         print("INFO: Cleaning up data and computing averages...")
         if code_only: self.remove_noncode()    # This makes it feasible to analyze diff
         self.annotate_metrics()                # Compute locc, locc+, locc-, and change-size-cos code change metrics
         self.update_data()
         print("INFO: Done computing averages. %d file changes (code only)" % self.commit_data.shape[0])
+        if not os.path.exists('figures'): os.mkdir('figures')
 
     def update_data(self):
         # Compute some averages, set types
@@ -95,7 +97,7 @@ class Visualizer(Patterns):
         if self.interactive: fig.show()
         if self.save_figures:
             fig.savefig('figures/%s-trend-%s-%s.png' % (self.project, diff_col, self.get_time_range_str(
-                time_range).replace(', ','_')), format='png', dpi=self.plot_resolution, bbox_inches='tight')
+                time_range).replace(', ','_').replace(' ','_')), format='png', dpi=self.plot_resolution, bbox_inches='tight')
 
     def plot_overall_project_locc(self, time_range=None, log=False):
         if time_range == 'year':
@@ -133,7 +135,7 @@ class Visualizer(Patterns):
             if self.interactive: g.fig.show()
             if self.save_figures:
                 g.fig.savefig('figures/%s-timeline-%s-%s.png' % (self.project, self.diff_alg,
-                                                                 self.get_time_range_str(time_range).replace(', ','_')),
+                            self.get_time_range_str(time_range).replace(', ','_').replace(' ','_')),
                               format='png', dpi=self.plot_resolution, bbox_inches='tight')
         return checkin
 
@@ -154,7 +156,7 @@ class Visualizer(Patterns):
             if self.interactive: g.fig.show()
             if self.save_figures:
                 g.fig.savefig('figures/%s-bubble-%s-%s.png' % (self.project,
-                              self.diff_alg, self.get_time_range_str(time_range).replace(', ','_')),
+                              self.diff_alg, self.get_time_range_str(time_range).replace(', ','_').replace(' ','_')),
                               format='png', dpi=self.plot_resolution, bbox_inches='tight')
         return checkin
 
@@ -248,7 +250,7 @@ class Visualizer(Patterns):
         time_range_str = self.get_time_range_str(time_range)
         fig.tight_layout()
         fig.savefig('figures/%s-zone-%s-map-%s-%s.png' % (self.project, locc_metric,
-                    time_range_str.replace(', ','_'), agg), format='png', dpi=self.plot_resolution,
+                    time_range_str.replace(', ','_').replace(' ','_'), agg), format='png', dpi=self.plot_resolution,
                     bbox_inches='tight')
 
     def plot_developer_file_map(self):
@@ -290,7 +292,7 @@ class Visualizer(Patterns):
         time_range_str = self.get_time_range_str(time_range)
         ax.set_title(self.get_title_str(time_range, stats_df, locc_metric, False))
         fig.savefig('figures/%s-top-%d-%s-map-%s.png' % (self.project, top_N, locc_metric,
-                    time_range_str.replace(', ','_')), format='png', dpi=self.plot_resolution,
+                    time_range_str.replace(', ','_').replace(' ','_')), format='png', dpi=self.plot_resolution,
                     bbox_inches='tight')
         return sorted_hot_files
 

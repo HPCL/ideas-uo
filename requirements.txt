@@ -1,10 +1,12 @@
 pytest
 requests
 pandas
+matplotlib
 seaborn
 plotly
 plotly-express
 textdistance
+python-Levenshtein
 networkx
 pydot
 graphviz

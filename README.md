@@ -14,22 +14,28 @@ by Plurasight on "20 patterns to watch for in your engineering team".
 
 ## Getting started
 Note that this set of tools is still under very active development, so at any point 
-some of the functionality may not work as expected. The basic requirements are Python 3
-.6 or newer and the `pip` package manager.
+some functionality may not work as expected. The basic requirements are Python 3
+.9 or newer and the `pip` package manager.
 
 It is best to set up a new python3 environment first; complete instructions can be 
 found [here](https://docs.python.org/3/library/venv.html). 
 Once you have created and activated the environment, you can install prerequisites with 
 `pip install -r requirements.txt`.
 
-To check your environment, run the tests as described in the _Testing_ section below.
-
-If you wish to install the code portions of the repository, you can use the `pip install
- -e .` command in the top-level project directory.
+If you wish to run the notebooks locally, you need to have jupyter (`pip install jupyter`) 
+or jupyter-lab (`pip install jupyterlab`), 
+and you also must install the ideas-uo python packages first 
+(or, instead of installing, you can simply add the full path to `ideas-uo/src` to your `PYTHONPATH` environment variable). 
+To install the package
+locally, use the `pip install -e .` command in the top-level project directory. 
+Then you can run `jupyter-lab` or `jupyter`
+in the `ideas-uo` directory. You can also open a specific notebook, 
+e.g., `jupyter-lab notebooks/PatternsTest.ipynb`
  
 In order to access the database containing project information, you also need to have 
-a MySQL client library installed on your system, as well as the `mysqlclient` python
- module.
+a MySQL client library installed on your system before installing the requirements with `pip`. 
+This requires that you install the mysql client library on your system first. On
+Ubuntu 20.04, for example, you can accomplish this with `sudo apt install python3.9-dev libmysqlclient-dev`.
 
 ## Testing
 
