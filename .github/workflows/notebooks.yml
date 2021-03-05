@@ -1,14 +1,19 @@
-name: Library
+name: Notebooks
 
 on:
   push:
     branches: [ master ]
     paths:
-      - 'src/**'
+      - 'notebooks/**'
   pull_request:
     branches: [ master ]
     paths:
-      - 'src/**'
+      - 'notebooks/**'
+  workflow_run:
+    workflows: [ "Library" ]
+    branches: [ master ]
+    types:
+      - completed
 
   workflow_dispatch:
 
@@ -38,5 +43,5 @@ jobs:
 
       - name: Test with pytest
         run: |
-          pipenv run pytest -v
+          PYTHONPATH=`pwd`/src pipenv run pytest -v notebooks
           echo Done!

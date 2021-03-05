@@ -1,14 +1,17 @@
 #!/bin/bash
 # To provide a list of project names, run with ./run.sh -p "proj1 proj2 ..."
 # To provide the database password: ./run.sh -pwd passwordstring
+# Or with multiple options: ./run.sh -p "proj1 proj2 ..."  -pwd passwordstring
 
 # nwchem works, but takes a long time, so we don't include it in the regular refresh
 projects="spack lammps petsc Nek5000 E3SM qmcpack qdpxx LATTE namd fast-export enzo-dev tau2 xpress-apex" # nwchem"
 pwd=""
+html=false
 while true; do
   case "$1" in
     -p | --projects) projects="$2"; shift 2 ;;
     -pwd ) pwd="$2"; shift 2 ;;
+    -hmtl ) html=true; shift 1;;
     -- ) shift; break ;;
     * ) break ;;
   esac
@@ -25,7 +28,14 @@ for project in $projects ; do
   echo ">>>>>>> PatternsTest $project"
   sed -e "s|project_name='.*'|project_name='$project'|" -e "s|get_data(.*)|get_data(dbpwd='$pwd')|" PatternsTest.ipynb > $project-PatternsTest.ipynb
   ####python ./PatternsTest.py $project
-  jupyter nbconvert --to html --execute $project-PatternsTest.ipynb
-  mv $project-PatternsTest.ipynb tmp/
-  mv $project-PatternsTest.html html/
+  if [ "$html" = true ]; then
+    jupyter nbconvert --to html --execute $project-PatternsTest.ipynb
+  fi 
+  mv $project-PatternsTest.* tmp/
 done
+
+if [ "$html" = true ]; then
+  if [ "$USER" = norris ]; then
+    rsync -avz tmp/*.html ix:public_html/ideas-uo/notebooks/html/
+  fi
+fi

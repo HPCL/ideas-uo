@@ -23,7 +23,7 @@ class Fetcher:
         self.cache_info = {'dir': '../.db-cache', 'filename': '.%s.pickle' % self.project}
         self.cache = os.path.join(self.cache_info['dir'], self.cache_info['filename'])
         try:
-            if 'google.colab' in str(get_ipython()):
+            if 'google.colab' in str(get_ipython()) or os.environ.get('PYTEST_RUNNING', '') == 'true':
                 self.cache_info['dir'] = '.'
         except: pass
 
