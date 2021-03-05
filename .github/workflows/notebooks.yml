@@ -5,10 +5,12 @@ on:
     branches: [ master ]
     paths:
       - 'notebooks/**'
+      - '!notebooks/README.md'
   pull_request:
     branches: [ master ]
     paths:
       - 'notebooks/**'
+      - '!notebooks/README.md'
   workflow_run:
     workflows: [ "Library" ]
     branches: [ master ]
