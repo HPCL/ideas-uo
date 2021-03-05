@@ -7,8 +7,6 @@ import os
 from patterns.patterns import Patterns
 from gitutils.utils import err
 
-sns.set(font_scale=1.25)
-sns.set_style('whitegrid', {'legend.frameon': True})
 
 class Visualizer(Patterns):
 
@@ -16,24 +14,26 @@ class Visualizer(Patterns):
     def __init__(self, project_name=None, project_url=None, exclude_forks=False, forks_only=False):
         super().__init__(project_name, project_url, exclude_forks, forks_only)
         self.hide_names = True
-        self.months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August'
-            , 'September', 'October', 'November', 'December']
+        self.months = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
+                       'August', 'September', 'October', 'November', 'December']
         self.commit_data = None
         self.yearly_commits = None
         self.monthly_commits = None
 
         self.config = {'max_ylabel_len' : 1000, # the maxium number of characters for  y-axis labels
-                           'interactive' : True,    
-                           'save_figures' : True,
-                           'display_dpi': 75,   # dpi for displayed plots
-                           'output_dpi': 150,   # dpi for saved figures (PNG images)
-                           'figsize': (10,6),   # default figure size 
-                           'cmap_hm': 'YlGnBu'  # seaborn color map for heatmaps(low is yellow, high is dark blue)
+                        'interactive' : True,
+                        'save_figures' : True,
+                        'display_dpi': 75,   # dpi for displayed plots
+                        'output_dpi': 150,   # dpi for saved figures (PNG images)
+                        'figsize': (10,6),   # default figure size
+                        'cmap_hm': 'YlGnBu',  # seaborn color map for heatmaps(low is yellow, high is dark blue)
         }  
            
         # Change font size globally
         plt.rcParams['font.size'] = '16'
         plt.rcParams['figure.dpi'] = self.config['display_dpi']
+        sns.set(font_scale=1.25)
+        sns.set_style('whitegrid', {'legend.frameon': True})
 
     def get_data(self, db=None, cache=True, code_only=True, dbpwd=None):
         # Do not save the database password in publicly visible files, e.g, scripts, notebooks, etc!
