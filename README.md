@@ -13,6 +13,9 @@ short [book](https://www.pluralsight.com/content/dam/pluralsight2/landing-pages/
 by Plurasight on "20 patterns to watch for in your engineering team".
 
 ## Getting started
+You can take a look at the [notebooks](notebooks) to try out and learn what you can do with this tool. 
+Some of them have been made available through Google Colab, so you don't have to install anything to try them out.
+
 Note that this set of tools is still under very active development, so at any point 
 some functionality may not work as expected. The basic requirements are Python 3
 .9 or newer and the `pip` package manager.
@@ -36,6 +39,7 @@ In order to access the database containing project information, you also need to
 a MySQL client library installed on your system before installing the requirements with `pip`. 
 This requires that you install the mysql client library on your system first. On
 Ubuntu 20.04, for example, you can accomplish this with `sudo apt install python3.9-dev libmysqlclient-dev`.
+
 
 ## Testing
 
