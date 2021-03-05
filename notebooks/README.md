@@ -4,7 +4,7 @@ This directory contains a (growing) set of notebooks that illustrate different t
 
 ## How to run the notebooks
 ### Option 1 (preferred): Using Google Colab (You will need to login to your Google account)
-1. Click on the [![Open In Collab](https://colab.research.google.com/assets/colab-badge.svg)]() button for the session.
+1. Click on the [![Open In Collab](https://colab.research.google.com/assets/colab-badge.svg)]() button for the notebook you wish to run in the table bellow.
 2. You can _edit_ and run the notebooks in Google Colab by selecting `File` -> `Playground Mode` after you open the notebook. The database password is a round vegetable that is sometimes pickled and whose name rhymes with "Babbage" (all lowercase). Make sure to run the *"Setup"* cell at the very top (code is hidden) before running any other cells. You can save notebooks or full sessions in your own Google Drive.
 
 | Notebook      | Description | Colab Version |
