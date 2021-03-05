@@ -19,7 +19,7 @@ from patterns.visualizer import Visualizer
 # In[ ]:
 
 
-vis = Visualizer(project_name=sys.argv[1])
+vis = Visualizer(project_name='spack')
 vis.get_data()
 
 

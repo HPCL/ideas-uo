@@ -6,6 +6,8 @@ from patterns.fetcher import Fetcher
 from pathlib import Path
 cache_dir = os.path.dirname(Path(__file__))
 
+os.environ['PYTEST_RUNNING'] = 'true'
+
 def test_readCachedProject(capsys, caplog):
     fetcher = Fetcher(project_name='testrepo')
     fetcher.update_cache_info(cache_dir=cache_dir,cache_file='.testrepo.pickle')

@@ -25,14 +25,15 @@ class Visualizer(Patterns):
         self.config = {'max_ylabel_len' : 1000, # the maxium number of characters for  y-axis labels
                            'interactive' : True,    
                            'save_figures' : True,
-                           'plot_dpi': 75,    # dpi for both displayed and saved figures
-                           'figsize': (10,6), # default figure size 
+                           'display_dpi': 75,   # dpi for displayed plots
+                           'output_dpi': 150,   # dpi for saved figures (PNG images)
+                           'figsize': (10,6),   # default figure size 
                            'cmap_hm': 'YlGnBu'  # seaborn color map for heatmaps(low is yellow, high is dark blue)
         }  
            
         # Change font size globally
         plt.rcParams['font.size'] = '16'
-        plt.rcParams['figure.dpi'] = self.config['plot_dpi']
+        plt.rcParams['figure.dpi'] = self.config['display_dpi']
 
     def get_data(self, db=None, cache=True, code_only=True, dbpwd=None):
         # Do not save the database password in publicly visible files, e.g, scripts, notebooks, etc!
@@ -96,7 +97,7 @@ class Visualizer(Patterns):
         if self.config['interactive']: fig.show()
         if self.config['save_figures']:
             fig.savefig('figures/%s-trend-%s-%s.png' % (self.project, diff_col, self.get_time_range_str(
-                time_range).replace(', ','_').replace(' ','_')), format='png', dpi=self.config['plot_dpi'], bbox_inches='tight')
+                time_range).replace(', ','_').replace(' ','_')), format='png', dpi=self.config['output_dpi'], bbox_inches='tight')
 
     def plot_overall_project_locc(self, time_range=None, log=False):
         if time_range == 'year':
@@ -135,7 +136,7 @@ class Visualizer(Patterns):
             if self.config['save_figures']:
                 g.fig.savefig('figures/%s-timeline-%s-%s.png' % (self.project, self.diff_alg,
                             self.get_time_range_str(time_range).replace(', ','_').replace(' ','_')),
-                              format='png', dpi=self.config['plot_dpi'], bbox_inches='tight')
+                              format='png', dpi=self.config['output_dpi'], bbox_inches='tight')
         return checkin
 
     def plot_proj_change_bubble(self, time_range='year', locc_metric="change-size-cos", log=False):
@@ -156,7 +157,7 @@ class Visualizer(Patterns):
             if self.config['save_figures']:
                 g.fig.savefig('figures/%s-bubble-%s-%s.png' % (self.project,
                               self.diff_alg, self.get_time_range_str(time_range).replace(', ','_').replace(' ','_')),
-                              format='png', dpi=self.config['plot_dpi'], bbox_inches='tight')
+                              format='png', dpi=self.config['output_dpi'], bbox_inches='tight')
         return checkin
 
     def plot_proj_y2y(self, year1, year2):
@@ -218,7 +219,7 @@ class Visualizer(Patterns):
         plt.ylabel('Changes (%s)' % locc_metric, fontsize=18)
         fig.autofmt_xdate()
         fig.savefig('figures/%s-avg-%s.png' % (self.project, locc_metric), format='png',
-                    dpi=self.config['plot_dpi'], box_inches='tight')
+                    dpi=self.config['output_dpi'], box_inches='tight')
 
     def plot_weekday_totals(self, time_range = None, locc_metric='change-size-cos'):
         df, stats_df = self.get_time_range_df(time_range)
@@ -249,7 +250,7 @@ class Visualizer(Patterns):
         time_range_str = self.get_time_range_str(time_range)
         fig.tight_layout()
         fig.savefig('figures/%s-zone-%s-map-%s-%s.png' % (self.project, locc_metric,
-                    time_range_str.replace(', ','_').replace(' ','_'), agg), format='png', dpi=self.config['plot_dpi'],
+                    time_range_str.replace(', ','_').replace(' ','_'), agg), format='png', dpi=self.config['output_dpi'],
                     bbox_inches='tight')
 
     def plot_developer_file_map(self):
@@ -291,7 +292,7 @@ class Visualizer(Patterns):
         time_range_str = self.get_time_range_str(time_range)
         ax.set_title(self.get_title_str(time_range, stats_df, locc_metric, False))
         fig.savefig('figures/%s-top-%d-%s-map-%s.png' % (self.project, top_N, locc_metric,
-                    time_range_str.replace(', ','_').replace(' ','_')), format='png', dpi=self.config['plot_dpi'],
+                    time_range_str.replace(', ','_').replace(' ','_')), format='png', dpi=self.config['output_dpi'],
                     bbox_inches='tight')
         return sorted_hot_files
 
@@ -347,22 +348,25 @@ class Visualizer(Patterns):
             legend.set_title(self.project.capitalize(), prop = {'size':'x-large'})
 
         if True:
-            from matplotlib.cbook import get_sample_data
-            poo_img = plt.imread(get_sample_data(os.path.join(os.path.dirname(os.path.realpath("__file__")),'images', 'poo-mark.png')))
-            x = df2.index.to_list()
-            y = df2[locc_metric].to_list()
-            ax_width = ax.get_window_extent().width
-            fig_width = fig.get_window_extent().width
-            fig_height = fig.get_window_extent().height
-            poo_size = ax_width/(fig_width*len(x))
-            poo_axs = [None for i in range(len(x))]
-            for i in range(len(x)):
-                loc = ax.transData.transform((x[i], y[i]))
-                poo_axs[i] = fig.add_axes([loc[0]/fig_width-poo_size/2, loc[1]/fig_height-poo_size/2,
-                                       poo_size, poo_size], anchor='C')
-                poo_axs[i].imshow(poo_img)
-                poo_axs[i].axis("off")
+            try:
+                from matplotlib.cbook import get_sample_data
+                poo_img = plt.imread(get_sample_data(os.path.join(os.path.dirname(os.path.realpath("__file__")),'images', 'poo-mark.png')))
+                x = df2.index.to_list()
+                y = df2[locc_metric].to_list()
+                ax_width = ax.get_window_extent().width
+                fig_width = fig.get_window_extent().width
+                fig_height = fig.get_window_extent().height
+                poo_size = ax_width/(fig_width*len(x))
+                poo_axs = [None for i in range(len(x))]
+                for i in range(len(x)):
+                    loc = ax.transData.transform((x[i], y[i]))
+                    poo_axs[i] = fig.add_axes([loc[0]/fig_width-poo_size/2, loc[1]/fig_height-poo_size/2,
+                                           poo_size, poo_size], anchor='C')
+                    poo_axs[i].imshow(poo_img)
+                    poo_axs[i].axis("off")
+            except:
+                pass    # for pytest, where this is not really essential
 
         if self.config['interactive']: fig.show()
         fig.savefig('figures/%s-2020-%s.png' % (self.project, locc_metric), format='png',
-                    dpi=self.config['plot_dpi'], bbox_inches='tight')
+                    dpi=self.config['output_dpi'], bbox_inches='tight')
