@@ -1,4 +1,4 @@
-from gitutils.utils import execute
+from src.gitutils.utils import execute
 import os
 os.environ['PYTEST_RUNNING'] = 'true'
 exit_status = 0
