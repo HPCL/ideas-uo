@@ -110,8 +110,9 @@ class Fetcher:
         return True
 
     def update_cache(self):
-        cache_file = os.path.join(self.top_dir,'.db-cache','.%s.pickle' % self.project)
-        self.commit_data.to_pickle(cache_file)
+        cache_dir = os.path.join(self.top_dir,'.db-cache')
+        if not os.path.exists(cache_dir): os.mkdir(cache_dir)
+        self.commit_data.to_pickle(os.path.join(cache_dir, '.%s.pickle' % self.project))
 
     def close_session(self):
         if self.cursor:
