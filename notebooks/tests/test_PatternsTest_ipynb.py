@@ -5,6 +5,7 @@ exit_status = 0
 
 from os.path import abspath, dirname, join
 package_path = abspath(dirname(dirname(__file__)))
+print(f"PatternsTest: I am running in {os.getcwd()} and package path is {package_path}!")
 
 def test_convertTestPatternsNotebook(capsys,caplog):
     inputfile = abspath(join(package_path, 'PatternsTest.ipynb'))
