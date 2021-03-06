@@ -10,7 +10,7 @@ os.system(f'ls -r {package_path}')
 
 def test_convertTestPatternsNotebook(capsys,caplog):
     inputfile = abspath(join(package_path, 'PatternsTest.ipynb'))
-    command = f'jupyter nbconvert --to script --output-dir={package_path} {inputfile}'.split()
+    command = f'jupyter nbconvert --to script --output-dir={package_path}/tests {inputfile}'.split()
     print(command)
     status = execute(command)
     assert exit_status == status,\
