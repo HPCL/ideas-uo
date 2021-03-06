@@ -1,4 +1,5 @@
 pytest
+jupyter
 requests
 pandas
 matplotlib
