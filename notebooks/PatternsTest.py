@@ -23,11 +23,15 @@ vis = Visualizer(project_name='spack')
 vis.get_data()
 
 
+# By default, the names of projects and developers are not shown in the figures. If you wish to include project names, set `vis.hide_names` to `False`.
+
 # In[ ]:
 
 
-removed = vis.remove_external()
+vis.hide_names = False
 
+
+# Let's start with some global views -- this plot shows the entire project's git history (including imports from other RCS). The three different metrics shown represent different ways of quantifying the magnitude of the change based on the differences produced by `git log`. The `locc+` and `locc-` lines are lines added and removed, respectively. The `change-size-cos` is one of many text difference metrics, which computes the "distance" between the old and new code snippets in each commit. We discuss distance metrics in more detail later.
 
 # In[ ]:
 

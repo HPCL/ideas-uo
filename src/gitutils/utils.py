@@ -13,7 +13,7 @@ https://github.com/recipy/recipy
 Licence: Apache License Version 2.0, January 2004 http://www.apache.org/licenses/
 """
 # Copyright (c) 2016 University of Edinburgh. (indicated in each function)
-def execute(command, stdout=None, stderr=None):
+def execute(command, stdout=None, stderr=None) -> int:
     # Copyright (c) 2016 University of Edinburgh. (this method)
     """
     Run a command via the operating system.

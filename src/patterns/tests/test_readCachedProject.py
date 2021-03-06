@@ -1,12 +1,14 @@
-import os
 from gitutils.tests.testutils import *
 from gitutils.utils import *
+os.environ['PYTEST_RUNNING'] = 'true'
 
 from patterns.fetcher import Fetcher
-from pathlib import Path
-cache_dir = os.path.dirname(Path(__file__))
+from os.path import abspath, dirname
+cache_dir = abspath(dirname(__file__))
 
-os.environ['PYTEST_RUNNING'] = 'true'
+#from pathlib import Path
+#cache_dir = os.path.dirname(Path(__file__))
+
 
 def test_readCachedProject(capsys, caplog):
     fetcher = Fetcher(project_name='testrepo')
