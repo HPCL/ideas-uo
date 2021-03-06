@@ -42,6 +42,7 @@ jobs:
           python3.9 -m pip install pipenv
           touch Pipfile & pipenv install --deploy --dev
           if [ -f requirements.txt ]; then pipenv install -r requirements.txt; fi
+          pipenv install jupyter
 
       - name: Test with pytest
         run: |
