@@ -6,7 +6,7 @@ exit_status = 0
 def test_convertTestPatternsNotebook(capsys,caplog):
     command = f'jupyter nbconvert --to script --output-dir=notebooks/tests ' \
               f'notebooks/PatternsTest.ipynb'.split()
-    print(command)
+    print(f"cwd: {os.getcwd()}, cmd: {command}")
     status = execute(command)
     assert exit_status == status,\
         ("Unexpected exit code " + str(status))
