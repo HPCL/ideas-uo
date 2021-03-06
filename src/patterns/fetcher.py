@@ -6,6 +6,8 @@ from dateutil import parser
 from gitutils.utils import err
 import getpass
 import os
+from os.path import abspath, dirname 
+import glob
 
 class Fetcher:
 
@@ -20,21 +22,23 @@ class Fetcher:
         self.project_url = project_url  # Mainly used to indicate specific forks
         self.exclude_forks = exclude_forks # Only work with non-forks of the repo
         self.forks_only = forks_only  # when True, only analyze forked repos
-        self.cache_info = {'dir': '../.db-cache', 'filename': '.%s.pickle' % self.project}
-        self.cache = os.path.join(self.cache_info['dir'], self.cache_info['filename'])
-        try:
-            if 'google.colab' in str(get_ipython()) or os.environ.get('PYTEST_RUNNING', '') == 'true':
-                self.cache_info['dir'] = '.'
-        except: pass
+        self.top_dir = abspath(dirname(dirname(dirname(__file__))))
 
+    def find_cache(self):
+        for root, dirnames, filenames in os.walk(self.top_dir):
+            filenames = [f for f in filenames if f == '.%s.pickle' % self.project]
+            for filename in filenames:
+                return os.path.join(root, filename)
+        return None
 
     def fetch(self, db=None, cache=True, dbpwd=None):
-
-        if cache and os.path.exists(self.cache):
-            self.commit_data = pd.read_pickle(self.cache)
-            self.commit_data.index = self.commit_data['datetime']  # DO NOT TOUCH THIS LINE!!
-            print("INFO: Loaded local cached copy of %s data." % self.project)
-            return True
+        if cache:
+            the_cache = self.find_cache()
+            if the_cache:
+                self.commit_data = pd.read_pickle(the_cache)
+                self.commit_data.index = self.commit_data['datetime']  # DO NOT TOUCH THIS LINE!!
+                print("INFO: Loaded local cached copy of %s data." % self.project)
+                return True
 
         # Do not save the database password in publicly visible files, e.g, scripts, notebooks, etc!
         if dbpwd: db_pwd = dbpwd
@@ -55,7 +59,6 @@ class Fetcher:
             else:
                 _ = self.cursor.execute('select name from project where source_url = "%s"' % self.project_url)
                 self.project = self.cursor.fetchall()[0][0]
-                self.update_cache_info(self.cache_info['dir'], filename='.%s.pickle' % self.project)
 
         if not self.project_url:
             # First a list of all projects
@@ -95,10 +98,10 @@ class Fetcher:
         )
         self.commit_data = self.commit_data.drop(columns=['index'])   # datetime, too?
 
-        if not os.path.exists(self.cache):
-            if not os.path.exists(self.cache_info['dir']): os.mkdir(self.cache_info['dir'])
+        cache_file = os.path.join(self.top_dir,'.db-cache', '.%s.pickle' % self.project)
+        if not os.path.exists(cache_file):
             # Cache local copy
-            self.commit_data.to_pickle(self.cache)
+            self.commit_data.to_pickle(cache_file)
         info_msg = "INFO: Loaded %s data from the database (" % self.project
         if self.project_url:
             info_msg += 'url: ' + self.project_url + ', '
@@ -106,14 +109,9 @@ class Fetcher:
         print(info_msg)
         return True
 
-    def update_cache_info(self, cache_dir='..', cache_file='None'):
-        self.cache_info['dir'] = cache_dir
-        if self.cache_info['filename'] == 'None' and cache_file != 'None':
-            self.cache_info['filename'] = cache_file
-        self.cache = os.path.join(cache_dir, cache_file)
-
     def update_cache(self):
-        self.commit_data.to_pickle(self.cache)
+        cache_file = os.path.join(self.top_dir,'.db-cache','.%s.pickle' % self.project)
+        self.commit_data.to_pickle(cache_file)
 
     def close_session(self):
         if self.cursor:
