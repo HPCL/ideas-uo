@@ -1,0 +1,169 @@
+structure : SOL structure
+                  | SOL CARET structure
+                  | SOL anything structure
+                  | BACK_SLASH PERIOD structure DOLLAR_SIGN EOL
+                  | expression structure
+                  | expression
+                  | EOL
+
+expression : string expression
+                   | anything expression
+                   | group expression
+                   | closure expression
+                   | word expression
+                   | alternation expression
+                   | character_class expression
+                   | string
+                   | anything
+                   | group
+                   | closure
+                   | word
+                   | alternation
+                   | character_class
+
+character_expression : escape_character character_expression
+                             | letter character_expression
+                             | digit character_expression
+                             | character_range character_expression
+                             | punctuation character_expression
+                             | escape_character
+                             | letter
+                             | digit
+                             | character_range
+                             | punctuation
+
+escape_character : BACK_SLASH letter
+
+quantifier : OPEN_CURLYBRACE integer CLOSE_CURLYBRACE
+                   | OPEN_CURLYBRACE integer COMMA CLOSE_CURLYBRACE
+                   | OPEN_CURLYBRACE integer COMMA integer CLOSE_CURLYBRACE
+                   | PLUS_SIGN
+                   | ASTERISK
+                   | QUESTION_MARK
+
+integer : integer digit
+                | digit
+
+alternation : alternation PIPE string
+                    | string
+
+word : BACK_SLASH LOWERCASE_W PLUS_SIGN
+             | BACK_SLASH LOWERCASE_W ASTERISK
+
+closure : OPEN_CURLYBRACE group CLOSE_CURLYBRACE
+                | OPEN_ANGLE group CLOSE_ANGLE
+                | BACK_SLASH OPEN_BRACKET group BACK_SLASH CLOSE_BRACKET
+                | BACK_SLASH OPEN_PAREN group BACK_SLASH CLOSE_PAREN
+
+group : OPEN_PAREN expression CLOSE_PAREN
+              | group quantifier
+
+anything : PERIOD ASTERISK
+                 | PERIOD PLUS_SIGN
+
+string : letter string
+               | digit string
+               | punctuation string
+               | letter
+               | digit
+               | punctuation
+
+punctuation : BACK_SLASH EXCLAMATION_MARK
+                    | DOUBLE_QUOTE
+                    | HASHTAG
+                    | BACK_SLASH DOLLAR_SIGN
+                    | PERCENT_SIGN
+                    | AMPERSAND
+                    | SINGLE_QUOTE
+                    | BACK_SLASH OPEN_PAREN
+                    | BACK_SLASH CLOSE_PAREN
+                    | BACK_SLASH ASTERISK
+                    | BACK_SLASH PLUS_SIGN
+                    | COMMA
+                    | HYPHEN
+                    | BACK_SLASH PERIOD
+                    | FORWARD_SLASH
+                    | COLON
+                    | SEMICOLON
+                    | OPEN_ANGLE
+                    | CLOSE_ANGLE
+                    | EQUAL_SIGN
+                    | BACK_SLASH QUESTION_MARK
+                    | AT_SIGN
+                    | BACK_SLASH OPEN_BRACKET
+                    | BACK_SLASH BACK_SLASH
+                    | BACK_SLASH CLOSE_BRACKET
+                    | BACK_SLASH CARET
+                    | UNDERSCORE
+                    | BACKTICK
+                    | OPEN_CURLYBRACE
+                    | BACK_SLASH PIPE
+                    | CLOSE_CURLYBRACE
+                    | TILDE
+                    | SPACE
+
+letter : LOWERCASE_A
+               | LOWERCASE_B
+               | LOWERCASE_C
+               | LOWERCASE_D
+               | LOWERCASE_E
+               | LOWERCASE_F
+               | LOWERCASE_G
+               | LOWERCASE_H
+               | LOWERCASE_I
+               | LOWERCASE_J
+               | LOWERCASE_K
+               | LOWERCASE_L
+               | LOWERCASE_M
+               | LOWERCASE_N
+               | LOWERCASE_O
+               | LOWERCASE_P
+               | LOWERCASE_Q
+               | LOWERCASE_R
+               | LOWERCASE_S
+               | LOWERCASE_T
+               | LOWERCASE_U
+               | LOWERCASE_V
+               | LOWERCASE_W
+               | LOWERCASE_X
+               | LOWERCASE_Y
+               | LOWERCASE_Z
+               | UPPERCASE_A
+               | UPPERCASE_B
+               | UPPERCASE_C
+               | UPPERCASE_D
+               | UPPERCASE_E
+               | UPPERCASE_F
+               | UPPERCASE_G
+               | UPPERCASE_H
+               | UPPERCASE_I
+               | UPPERCASE_J
+               | UPPERCASE_K
+               | UPPERCASE_L
+               | UPPERCASE_M
+               | UPPERCASE_N
+               | UPPERCASE_O
+               | UPPERCASE_P
+               | UPPERCASE_Q
+               | UPPERCASE_R
+               | UPPERCASE_S
+               | UPPERCASE_T
+               | UPPERCASE_U
+               | UPPERCASE_V
+               | UPPERCASE_W
+               | UPPERCASE_X
+               | UPPERCASE_Y
+               | UPPERCASE_Z
+
+digit : DIGIT_0
+              | DIGIT_1
+              | DIGIT_2
+              | DIGIT_3
+              | DIGIT_4
+              | DIGIT_5
+              | DIGIT_6
+              | DIGIT_7
+              | DIGIT_8
+              | DIGIT_9
+
+empty :

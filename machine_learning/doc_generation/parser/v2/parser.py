@@ -43,24 +43,77 @@ def p_structure(p):
         p[0] = Node('Structure', children=[p[3]], value='suffix')
 
 def p_expression(p):
-    '''expression : expression string
-                  | expression anything
-                  | expression group
-                  | expression closure
-                  | expression word
-                  | expression alternation
+    '''expression : string expression
+                  | anything expression
+                  | group expression
+                  | closure expression
+                  | word expression
+                  | alternation expression
+                  | character_class expression
                   | string
                   | anything
                   | group
                   | closure
                   | word
                   | alternation
+                  | character_class
     '''
 
     if len(p) == 2:
         p[0] = Node('Expression', children=[p[1]])
     elif len(p) == 3:
         p[0] = Node('Expression', children=[p[1], p[2]])
+
+def p_character_class(p):
+    '''character_class : OPEN_BRACKET character_expression CLOSE_BRACKET
+                       | OPEN_BRACKET CARET character_expression CLOSE_BRACKET
+                       | OPEN_BRACKET character_expression CLOSE_BRACKET quantifier
+                       | OPEN_BRACKET CARET character_expression CLOSE_BRACKET quantifier
+    '''
+
+    if len(p) == 4:
+        p[0] = Node('CharacterClass', children=[p[2]])
+    elif len(p) == 5:
+        if p[2] == '^':
+            p[0] = Node('CharacterClass', children=[p[3]], value='negated set')
+        else:
+            p[0] = Node('CharacterClass', children=[p[2], p[4]], value='quantified set')
+    elif len(p) == 6:
+        p[0] = Node('CharacterClass', children=[p[3], p[5]], value='quantified negated set')
+
+def p_character_expression(p):
+    '''character_expression : escape_character character_expression
+                            | letter character_expression
+                            | digit character_expression
+                            | character_range character_expression
+                            | punctuation character_expression
+                            | escape_character
+                            | letter
+                            | digit
+                            | character_range
+                            | punctuation
+    '''
+
+    if len(p) == 2:
+        p[0] = Node('CharacterExpression', children=[p[1]])
+    elif len(p) == 3:
+        p[0] = Node('CharacterExpression', children=[p[1], p[2]])
+
+def p_character_range(p):
+    '''character_range : letter HYPHEN letter
+                       | digit HYPHEN digit
+    '''
+
+    if p[1].type == 'Letter':
+        p[0] = Node('CharacterRange', children=[p[1], p[3]], value='letters from {} to {}')
+    else:
+        p[0] = Node('CharacterRange', children=[p[1], p[3]], value='numbers from {} to {}')
+
+def p_escape_character(p):
+    '''escape_character : BACK_SLASH letter
+    '''
+
+    p[0] = Node('EscapeCharacter', children=[p[2]])
 
 def p_quantifier(p):
     '''quantifier : OPEN_CURLYBRACE integer CLOSE_CURLYBRACE
@@ -148,9 +201,9 @@ def p_anything(p):
     p[0] = Node('Anything', value='anything')
 
 def p_string(p):
-    '''string : string letter
-              | string digit
-              | string punctuation
+    '''string : letter string
+              | digit string
+              | punctuation string
               | letter
               | digit
               | punctuation
@@ -298,12 +351,12 @@ log = logging.getLogger()
 parser = yacc.yacc(debug=True, debuglog=log)
 
 if __name__ == '__main__':
-    s = 'Content-Type:[^\r\n]+'
-    s = '^author (.*)'
-    s = '.*\.(a|so|dylib)$'
-    s = '{(\w+)}'
-    s = 'm(0){2,}'
-
+    s = r'Content-Type:[^\r\n]+'
+    #s = '^author (.*)'
+    #s = '.*\.(a|so|dylib)$'
+    #s = '{(\w+)}'
+    #s = 'm(0){2,}'
+    s = r'\[-(.)\]'
     print(s)
     result = parser.parse(s, debug=log, lexer=lexer)
     print(result)
