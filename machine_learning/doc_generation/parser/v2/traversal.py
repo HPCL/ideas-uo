@@ -129,7 +129,7 @@ def phrase(paths):
             term = ''
             
             if 'negated' in path[1][1]:
-                term += 'not one of the following '
+                term += 'any character except the following '
             else:
                 term += 'one of the following '
 
