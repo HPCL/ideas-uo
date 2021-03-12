@@ -128,9 +128,9 @@ def p_quantifier(p):
         if p[1] == '+':
             p[0] = Node('Quantifier', value='at least once')
         elif p[1] == '*':
-            p[0] = Node('Quantiifer', value='0 or more times')
+            p[0] = Node('Quantifier', value='0 or more times')
         elif p[1] == '?':
-            p[0] = Node('Quantiifer', value='fewest possible occurences')
+            p[0] = Node('Quantifier', value='fewest possible occurences')
     elif len(p) == 4:
         p[0] = Node('Quantifier', children=[p[2]], value='exactly {} time(s)')
     elif len(p) == 5:
