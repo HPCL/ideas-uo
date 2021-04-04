@@ -1,7 +1,7 @@
 # Git repository mining and analysis software
 
 The collection of packages in this repository are developed as part of the 
-DOE [IDEAS](https://ideas-productivity.org/) project on high-performance software 
+DOE [IDEAS-ECP](https://ideas-productivity.org/) project on high-performance software 
 development productivity. 
 
 The `code` subdirectory includes various utilities for git repository data acquisition 
