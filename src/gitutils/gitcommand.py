@@ -25,7 +25,8 @@ class GitCommand(object):
         except Exception as e:
             return err("Could not change to directory %s: %s" % (self.tmpdir, str(e)))
 
-        local_repo_path = url[url.rfind('/')+1:url.rfind('.')]
+        #local_repo_path = url[url.rfind('/')+1:url.rfind('.')]
+        local_repo_path = removeSuffix(os.path.split(url)[-1], '.git')
         if not local_repo_path: local_repo_path=url.split('/')[-1]
         if not os.path.exists(local_repo_path):
             try:
@@ -358,6 +359,13 @@ class GitCommand(object):
 
 
 #Helper Functions
+
+def removeSuffix(s: str, suffix: str, /) -> str:
+    # suffix='' should not call s[:-0].
+    if suffix and s.endswith(suffix):
+        return s[:-len(suffix)]
+    else:
+        return s[:]
 
 def getYears(repodir):
     os.chdir(repodir)

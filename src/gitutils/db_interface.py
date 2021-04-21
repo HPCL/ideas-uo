@@ -56,10 +56,15 @@ class DatabaseInterface:
         logger.debug('Closed MySQL connection.')
 
     def get_git_name(self, url):
+        if url.find('.')>0:
             name = urlparse(url)
             name = os.path.basename(name.path)
             name = name[:name.index('.')]
-            return name
+            name
+        else:
+            # Local path
+            name = os.path.split(url)[-1]
+        return name
 
     def add_project(self, url, name=None, since=datetime.datetime.utcfromtimestamp(0).isoformat(), until=datetime.datetime.today().isoformat(), fork_of=None, child_of=None, tags=None):
         '''
