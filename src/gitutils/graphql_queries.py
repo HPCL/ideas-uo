@@ -141,10 +141,11 @@ GITHUB_PULLREQUEST = '''
 GITLAB_ISSUE = '''
     query($cursor: String) {
         project(fullPath: "%s/%s") {
-            issues(first: 100000000, after: $cursor) {
+            issues(first: 100, after: $cursor) {
                 count
                 nodes {
                     description
+                    state
                     title
                     updatedAt
                     closedAt
@@ -202,7 +203,7 @@ GITLAB_ISSUE = '''
 GITLAB_PULLREQUEST = '''
     query($cursor: String) {
         project(fullPath: "%s/%s") {
-            mergeRequests(first: 100000000, after: $cursor) {
+            mergeRequests(first: 10, after: $cursor) {
                 count
                 nodes {
                     commitsWithoutMergeCommits {
@@ -218,6 +219,7 @@ GITLAB_PULLREQUEST = '''
                     webUrl
                     description
                     iid
+                    state
                     assignees {
                         nodes {
                             name
