@@ -1,7 +1,7 @@
 import os
 
-import gitutils.command as command
-from gitutils.utils import *
+import src.gitutils.command as command
+from src.gitutils.utils import *
 
 
 class GitCommand(object):
@@ -360,7 +360,7 @@ class GitCommand(object):
 
 #Helper Functions
 
-def removeSuffix(s: str, suffix: str, /) -> str:
+def removeSuffix(s: str, suffix: str) -> str:
     # suffix='' should not call s[:-0].
     if suffix and s.endswith(suffix):
         return s[:-len(suffix)]

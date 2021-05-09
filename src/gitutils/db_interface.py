@@ -12,9 +12,10 @@ import arrow
 import MySQLdb
 
 from src.gitutils.gitcommand import GitCommand
+from src.gitutils.graphql_interface import fetch_prs, fetch_issues, Source
 
 # Setup Logger
-logger = logging.getLogger()
+logger = logging.getLogger('db_interface')
 logger.setLevel(logging.DEBUG)
 ch = logging.StreamHandler()
 ch.setLevel(level=logging.DEBUG)
@@ -46,10 +47,19 @@ class DatabaseInterface:
 
             for project in projects:
                 self.add_project(project[0], since=self.args.since, until=self.args.until)
-        else:
+
+        elif self.args.add_project:
             logger.debug('Adding new project(s) to database...')
             project = self.args.add_project
             self.add_project(project, since=self.args.since, until=self.args.until, fork_of=self.args.fork_of, child_of=self.args.child_of, tags=self.args.tags)
+
+        elif self.args.add_issues:
+            logger.debug('Adding Github/Gitlab issues & comments to database...')
+            project = self.args.add_issues
+            self.add_issues(project, since=self.args.since, until=self.args.until)
+
+        else:
+            raise Exception('Unknown argument mode.')
 
     def terminate(self):
         self.db.close()
@@ -65,6 +75,214 @@ class DatabaseInterface:
             # Local path
             name = os.path.split(url)[-1]
         return name
+
+    def add_issues(self, url, since=datetime.datetime.utcfromtimestamp(0).isoformat(), until=datetime.datetime.today().isoformat()):
+
+        parse_url = urlparse(url)
+        owner, repo = parse_url.path[1:-4].split('/')
+        root = parse_url.netloc[:-4]
+
+        cursor = self.db.cursor()
+
+        query = 'select id from project where source_url=%s'
+        cursor.execute(query, (url,))
+        project_id = cursor.fetchone()[0]
+
+
+        if root.lower() == 'github':
+            logger.debug('Source is GitHub.')
+            source = Source.GITHUB
+        elif root.lower() == 'gitlab':
+            logger.debug('Source is GitLab.')
+            source = Source.GITLAB
+        else:
+            logger.critical(f'Unknown source: {root}')
+            raise Exception(f'Unknown source: {root}')
+
+        # This may take a while
+        logger.debug('Fetching issues. This may take a while...')
+
+        issues = fetch_issues(owner, repo, source)
+        logger.debug(f'Got {len(issues)} issues.')
+
+        for issue in issues:
+            username = issue['author']['username']
+            email = issue['author']['email']
+            name = issue['author']['name']
+            aurl = issue['author']['url']
+
+            # TODO: existence check not working.....
+            query = 'select count(*) from author where username=%s and url=%s'
+            cursor.execute(query, (username, aurl,))
+            exists = cursor.fetchone()[0] == 1
+
+            if not exists:
+                query = 'insert into author (username, email, name, url) values (%s, %s, %s, %s)'
+                cursor.execute(query, (username, email, name, aurl,))
+                self.db.commit()
+
+                logger.debug(f'Inserted new author {username}.')
+
+            # Get author id
+            query = 'select id from author where username=%s and url=%s'
+            cursor.execute(query, (username, aurl,))
+            author_id = cursor.fetchone()[0]
+
+            query = 'select count(*) from issue where url=%s'
+            cursor.execute(query, (url,))
+            exists = cursor.fetchone()[0] == 1
+
+            title = issue['title']
+            description = issue['description']
+            updated_at = issue['updatedAt']
+            locked = issue['locked']
+            iurl = issue['url']
+            number = issue['number']
+            closed_at = issue['closedAt']
+            state = issue['state']
+            labels = issue['labels']
+            assignees = issue['assignees']
+            milestone = issue['milestone']
+            comments = issue['comments']
+
+            updated_at = arrow.get(updated_at).datetime.strftime('%Y-%m-%d %H:%M:%S')
+            closed_at = arrow.get(closed_at).datetime.strftime('%Y-%m-%d %H:%M:%S')
+
+            # Insert issue
+
+            if exists:
+                logger.debug('Found existing issue.')
+                query = 'update issue set title = %s, set description = %s, set updated_at = %s, set closed_at = %s, set locked = %s, set state = %s where url = %s and project_id = %s'
+                cursor.execute(query, (title, description, updated_at, closed_at, locked, state, iurl, project_id))
+            else:
+                logger.debug('Inserting new issue.')
+                query = 'insert into issue (title, description, updated_at, closed_at, locked, number, state, url, author_id, project_id) values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
+                cursor.execute(query, (title, description, updated_at, closed_at, locked, number, state, iurl, author_id, project_id))
+
+            self.db.commit()
+
+            # Get issue id
+            query = 'select id from issue where url = %s and author_id = %s and number = %s'
+            cursor.execute(query, (iurl, author_id, number))
+            issue_id = cursor.fetchone()[0]
+
+            # Insert milestone
+            if issue['milestone']:
+                title = issue['milestone']['title']
+                description = issue['milestone']['description']
+                updated_at = issue['milestone']['updatedAt']
+                created_at = issue['milestone']['createdAt']
+                state = issue['milestone']['state']
+                due_on = issue['milestone']['dueOn']
+
+                updated_at = arrow.get(updated_at).datetime.strftime('%Y-%m-%d %H:%M:%S')
+                created_at = arrow.get(created_at).datetime.strftime('%Y-%m-%d %H:%M:%S')
+                due_on = arrow.get(due_on).datetime.strftime('%Y-%m-%d %H:%M:%S')
+
+                query = 'select count(*) from milestone where issue_id = %s'
+                cursor.execute(query, (issue_id,))
+                exists = cursor.fetchone()[0] == 1
+
+                if exists:
+                    logger.debug('Found existing milestone.')
+                    query = 'update milestone set state = %s, description = %s, title = %s, due_on = %s, created_at = %s, updated_at = %s where issue_id = %s'
+                    cursor.execute(query, (state, description, title, due_on, created_at, updated_at, issue_id,))
+                else:
+                    logger.debug('Inserting new milestone.')
+                    query = 'insert into milestone (state, description, title, due_on, created_at, updated_at, issue_id) values (%s, %s, %s, %s, %s, %s, %s)'
+                    cursor.execute(query, (state, description, title, due_on, created_at, updated_at, issue_id,))
+
+                self.db.commit()
+
+            # Insert labels
+            for label in labels:
+                query = 'select count(*) from label where name = %s'
+                cursor.execute(query, (label['name'],))
+                exists = cursor.fetchone()[0] == 1
+
+                if not exists:
+                    logger.debug('Inserting new label.')
+                    query = 'insert into label (name) values (%s)'
+                    cursor.execute(query, (label['name'],))
+                    self.db.commit()
+
+                query = 'select id from label where name = %s'
+                cursor.execute(query, (label['name'],))
+                label_id = cursor.fetchone()[0]
+
+                query = 'select count(*) from issue_has_label where issue_id = %s and label_id = %s'
+                cursor.execute(query, (issue_id, label_id,))
+                exists = cursor.fetchone()[0] == 1
+
+                if not exists:
+                    query = 'insert into issue_has_label (issue_id, label_id) values (%s, %s)'
+                    cursor.execute(query, (issue_id, label_id,))
+                    self.db.commit()
+
+            # Insert assignees
+            for assignee in assignees:
+                query = 'select count(*) from author where username = %s and url = %s'
+                cursor.execute(query, (assignee['username'], assignee['url'],))
+                exists = cursor.fetchone()[0] == 1
+
+                if not exists:
+                    query = 'insert into author (username, email, name, url) values (%s, %s, %s, %s)'
+                    cursor.execute(query, (assignee['username'], assignee['email'], assignee['name'], assignee['url'],))
+                    self.db.commit()
+
+                query = 'select id from author where username = %s and url = %s'
+                cursor.execute(query, (assignee['username'], assignee['url'],))
+                assignee_id = cursor.fetchone()[0]
+
+                query = 'select count(*) from issue_has_assignee where issue_id = %s and assignee_id = %s'
+                cursor.execute(query, (issue_id, assignee_id,))
+                exists = cursor.fetchone()[0] == 1
+
+                if not exists:
+                    query = 'insert into issue_has_assignee (issue_id, assignee_id) values (%s, %s)'
+                    cursor.execute(query, (issue_id, assignee_id,))
+                    self.db.commit()
+
+            # Insert comments
+            for comment in comments:
+                query = 'select count(*) from author where username = %s and url = %s'
+                cursor.execute(query, (comment['author']['username'], comment['author']['url'],))
+                exists = cursor.fetchone()[0] == 1
+
+                if not exists:
+                    query = 'insert into author (username, url) values (%s, %s)'
+                    cursor.execute(query, (comment['author']['username'], comment['author']['url'],))
+                    self.db.commit()
+
+                query = 'select id from author where username = %s and url = %s'
+                cursor.execute(query, (comment['author']['username'], comment['author']['url'],))
+                author_id = cursor.fetchone()[0]
+
+                query = 'insert into comment (author_id, created_at, updated_at, body) values (%s, %s, %s, %s)'
+
+                created_at = comment['createdAt']
+                updated_at = comment['updatedAt']
+
+                updated_at = arrow.get(updated_at).datetime.strftime('%Y-%m-%d %H:%M:%S')
+                created_at = arrow.get(created_at).datetime.strftime('%Y-%m-%d %H:%M:%S')
+
+                cursor.execute(query, (author_id, created_at, updated_at, comment['body']))
+                self.db.commit()
+
+                query = 'select id from comment where author_id = %s and updated_at = %s'
+
+                cursor.execute(query, (author_id, updated_at))
+                comment_id = cursor.fetchone()[0]
+
+                query = 'select count(*) from issue_has_comment where issue_id = %s and comment_id = %s'
+                cursor.execute(query, (issue_id, comment_id,))
+                exists = cursor.fetchone()[0] == 1
+
+                if not exists:
+                    query = 'insert into issue_has_comment (issue_id, comment_id) values (%s, %s)'
+                    cursor.execute(query, (issue_id, comment_id,))
+                    self.db.commit()
+        cursor.close()
 
     def add_project(self, url, name=None, since=datetime.datetime.utcfromtimestamp(0).isoformat(), until=datetime.datetime.today().isoformat(), fork_of=None, child_of=None, tags=None):
         '''
@@ -291,6 +509,8 @@ if __name__ == '__main__':
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('--update', help='update existing projects on database', action='store_true')
     group.add_argument('--add_project', help='add git url to database', type=str)
+    group.add_argument('--add_issues', help='add GitHub/Gitlab issues', type=str)
+    group.add_argument('--add_prs', help='add GitHub/Gitlab pull requests', type=str)
 
     # Misc Arguments
     parser.add_argument('--force_epoch', help='force update from utc epoch', action='store_true')

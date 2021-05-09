@@ -6,7 +6,7 @@ import time
 
 from src.gitutils.graphql_queries import *
 
-logger = logging.getLogger()
+logger = logging.getLogger('graphql_interface')
 logger.setLevel(logging.INFO)
 ch = logging.StreamHandler()
 ch.setLevel(level=logging.DEBUG)
@@ -52,7 +52,9 @@ def collect_comment(node, source):
     return {
         'author': {
             'username': username,
-            'url': url},
+            'url': url,
+            'name': None,
+            'email': None},
 
         'createdAt': node['createdAt'],
         'updatedAt': node['updatedAt'],
@@ -209,7 +211,9 @@ def fetch_issues(owner, repo, source):
 
             issue['author'] = {
                 'username': username,
-                'url': url
+                'url': url,
+                'email': None,
+                'name': None
             }
 
             issue['labels'] = [collect_label(label, source) for label in node['labels']['nodes']]
