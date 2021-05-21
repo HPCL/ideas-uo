@@ -121,7 +121,9 @@ def fetch_prs(owner, repo, source):
 
             pr['author'] = {
                 'username': username,
-                'url': url}
+                'url': url,
+                'email': None,
+                'name': None}
 
             pr['labels'] = [collect_label(label, source) for label in node['labels']['nodes']]
 
