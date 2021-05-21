@@ -168,7 +168,7 @@ class DatabaseInterface:
 
             # Get pr id
             query = 'select id from pr where url = %s and author_id = %s and number = %s'
-            cursor.execute(query, (iurl, author_id, number))
+            cursor.execute(query, (purl, author_id, number))
             pr_id = cursor.fetchone()[0]
 
             # Insert milestone
