@@ -111,10 +111,9 @@ class DatabaseInterface:
             name = issue['author']['name']
             aurl = issue['author']['url']
 
-            # TODO: existence check not working.....
             query = 'select count(*) from author where username=%s and url=%s'
             cursor.execute(query, (username, aurl,))
-            exists = cursor.fetchone()[0] == 1
+            exists = cursor.fetchone()[0] != 0
 
             if not exists:
                 query = 'insert into author (username, email, name, url) values (%s, %s, %s, %s)'
@@ -130,7 +129,7 @@ class DatabaseInterface:
 
             query = 'select count(*) from issue where url=%s'
             cursor.execute(query, (url,))
-            exists = cursor.fetchone()[0] == 1
+            exists = cursor.fetchone()[0] != 0
 
             title = issue['title']
             description = issue['description']
@@ -181,7 +180,7 @@ class DatabaseInterface:
 
                 query = 'select count(*) from milestone where issue_id = %s'
                 cursor.execute(query, (issue_id,))
-                exists = cursor.fetchone()[0] == 1
+                exists = cursor.fetchone()[0] != 0
 
                 if exists:
                     logger.debug('Found existing milestone.')
@@ -198,7 +197,7 @@ class DatabaseInterface:
             for label in labels:
                 query = 'select count(*) from label where name = %s'
                 cursor.execute(query, (label['name'],))
-                exists = cursor.fetchone()[0] == 1
+                exists = cursor.fetchone()[0] != 0
 
                 if not exists:
                     logger.debug('Inserting new label.')
@@ -212,7 +211,7 @@ class DatabaseInterface:
 
                 query = 'select count(*) from issue_has_label where issue_id = %s and label_id = %s'
                 cursor.execute(query, (issue_id, label_id,))
-                exists = cursor.fetchone()[0] == 1
+                exists = cursor.fetchone()[0] != 0
 
                 if not exists:
                     query = 'insert into issue_has_label (issue_id, label_id) values (%s, %s)'
@@ -223,7 +222,7 @@ class DatabaseInterface:
             for assignee in assignees:
                 query = 'select count(*) from author where username = %s and url = %s'
                 cursor.execute(query, (assignee['username'], assignee['url'],))
-                exists = cursor.fetchone()[0] == 1
+                exists = cursor.fetchone()[0] != 0
 
                 if not exists:
                     query = 'insert into author (username, email, name, url) values (%s, %s, %s, %s)'
@@ -236,7 +235,7 @@ class DatabaseInterface:
 
                 query = 'select count(*) from issue_has_assignee where issue_id = %s and assignee_id = %s'
                 cursor.execute(query, (issue_id, assignee_id,))
-                exists = cursor.fetchone()[0] == 1
+                exists = cursor.fetchone()[0] != 0
 
                 if not exists:
                     query = 'insert into issue_has_assignee (issue_id, assignee_id) values (%s, %s)'
@@ -247,7 +246,7 @@ class DatabaseInterface:
             for comment in comments:
                 query = 'select count(*) from author where username = %s and url = %s'
                 cursor.execute(query, (comment['author']['username'], comment['author']['url'],))
-                exists = cursor.fetchone()[0] == 1
+                exists = cursor.fetchone()[0] != 0
 
                 if not exists:
                     query = 'insert into author (username, url) values (%s, %s)'
@@ -258,30 +257,22 @@ class DatabaseInterface:
                 cursor.execute(query, (comment['author']['username'], comment['author']['url'],))
                 author_id = cursor.fetchone()[0]
 
-                query = 'insert into comment (author_id, created_at, updated_at, body) values (%s, %s, %s, %s)'
-
                 created_at = comment['createdAt']
                 updated_at = comment['updatedAt']
 
                 updated_at = arrow.get(updated_at).datetime.strftime('%Y-%m-%d %H:%M:%S')
                 created_at = arrow.get(created_at).datetime.strftime('%Y-%m-%d %H:%M:%S')
 
-                cursor.execute(query, (author_id, created_at, updated_at, comment['body']))
-                self.db.commit()
-
-                query = 'select id from comment where author_id = %s and updated_at = %s'
-
-                cursor.execute(query, (author_id, updated_at))
-                comment_id = cursor.fetchone()[0]
-
-                query = 'select count(*) from issue_has_comment where issue_id = %s and comment_id = %s'
-                cursor.execute(query, (issue_id, comment_id,))
-                exists = cursor.fetchone()[0] == 1
+                query = 'select count(*) from comment where issue_id = %s and author_id = %s and created_at = %s and updated_at = %s'
+                cursor.execute(query, (issue_id, author_id, created_at, updated_at))
+                exists = cursor.fetchone()[0] != 0
 
                 if not exists:
-                    query = 'insert into issue_has_comment (issue_id, comment_id) values (%s, %s)'
-                    cursor.execute(query, (issue_id, comment_id,))
+                    logger.debug(f'Inserting new comment for issue {issue_id} from author {author_id}')
+                    query = 'insert into comment (issue_id, author_id, created_at, updated_at, body) values (%s, %s, %s, %s, %s)'
+                    cursor.execute(query, (author_id, created_at, updated_at, comment['body']))
                     self.db.commit()
+
         cursor.close()
 
     def add_project(self, url, name=None, since=datetime.datetime.utcfromtimestamp(0).isoformat(), until=datetime.datetime.today().isoformat(), fork_of=None, child_of=None, tags=None):
@@ -298,7 +289,7 @@ class DatabaseInterface:
         cursor = self.db.cursor()
         query = 'select count(*) from project where source_url=%s'
         cursor.execute(query, (url,))
-        exists = cursor.fetchone()[0] == 1
+        exists = cursor.fetchone()[0] != 0
 
         if exists:
             logger.debug('Found existing git project.')
@@ -418,7 +409,7 @@ class DatabaseInterface:
 
             query = 'select count(*) from author where username=%s and email=%s'
             cursor.execute(query, (username, email,))
-            exists = cursor.fetchone()[0] == 1
+            exists = cursor.fetchone()[0] != 0
             if not exists:
                 query = 'insert into author (username, email) values (%s, %s)'
                 cursor.execute(query, (username, email,))
@@ -434,7 +425,7 @@ class DatabaseInterface:
             # Update bridge table
             query = 'select count(*) from project_has_author where author_id=%s and project_id=%s'
             cursor.execute(query, (author_id, project_id,))
-            exists = cursor.fetchone()[0] == 1
+            exists = cursor.fetchone()[0] != 0
             if not exists:
                 query = 'insert into project_has_author (author_id, project_id) values (%s, %s)'
                 cursor.execute(query, (author_id, project_id,))
@@ -448,7 +439,7 @@ class DatabaseInterface:
 
                 query = 'select count(*) from commit where hash=%s'
                 cursor.execute(query, (hash,))
-                exists = cursor.fetchone()[0] == 1
+                exists = cursor.fetchone()[0] != 0
                 # Skip existing commits
                 if exists:
                     logger.debug(f'Commit {hash} already exists.')
