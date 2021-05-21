@@ -270,7 +270,7 @@ class DatabaseInterface:
                 if not exists:
                     logger.debug(f'Inserting new comment for issue {issue_id} from author {author_id}')
                     query = 'insert into comment (issue_id, author_id, created_at, updated_at, body) values (%s, %s, %s, %s, %s)'
-                    cursor.execute(query, (author_id, created_at, updated_at, comment['body']))
+                    cursor.execute(query, (issue_id, author_id, created_at, updated_at, comment['body']))
                     self.db.commit()
 
         cursor.close()
