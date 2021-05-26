@@ -147,6 +147,7 @@ GITLAB_ISSUE = '''
                     description
                     state
                     title
+                    createdAt
                     updatedAt
                     closedAt
                     discussionLocked
@@ -213,6 +214,7 @@ GITLAB_PULLREQUEST = '''
                     }
                     diffHeadSha
                     title
+                    createdAt
                     updatedAt
                     mergedAt
                     discussionLocked

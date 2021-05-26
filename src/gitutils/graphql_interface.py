@@ -141,6 +141,7 @@ def fetch_prs(owner, repo, source):
             centry = 'notes' if source == Source.GITLAB else 'comments'
             pr['comments'] = [collect_comment(comment, source) for comment in node[centry]['nodes'] if comment]
             pr['mergedAt'] = node['mergedAt']
+            pr['createdAt'] = node['createdAt']
             pr['head_sha'] = node['diffHeadSha'] if source == Source.GITLAB else node['headRefOid']
             cmentry = 'commitsWithoutMergeCommits' if source == Source.GITLAB else 'commits'
             pr['commits'] = [collect_commit(commit, source) for commit in node[cmentry]['nodes']]
@@ -196,6 +197,7 @@ def fetch_issues(owner, repo, source):
             issue['description'] = node['description'] if source == Source.GITLAB else node['body']
             issue['updatedAt'] = node['updatedAt']
             issue['closedAt'] = node['closedAt']
+            issue['createdAt'] = node['createdAt']
             issue['locked'] = node['discussionLocked'] if source == Source.GITLAB else node['locked']
             issue['url'] = node['webUrl'] if source == Source.GITLAB else node['url']
             issue['number'] = node['iid'] if source == Source.GITLAB else node['number']
@@ -248,7 +250,7 @@ def fetch_issues(owner, repo, source):
     return issues
 
 if __name__ == '__main__':
-    fetch_prs('petsc', 'petsc', Source.GITLAB)
+    fetch_prs('gitlab-org', 'gitlab-development-kit', Source.GITLAB)
     fetch_prs('google', 'gvisor', Source.GITHUB)
-    fetch_issues('petsc', 'petsc', Source.GITLAB)
+    fetch_issues('gitlab-org', 'gitlab-development-kit', Source.GITLAB)
     fetch_issues('google', 'gvisor', Source.GITHUB)
