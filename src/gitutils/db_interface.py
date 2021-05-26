@@ -147,21 +147,23 @@ class DatabaseInterface:
             milestone = pr['milestone']
             comments = pr['comments']
             merged_at = pr['mergedAt']
+            created_at = pr['createdAt']
             head_sha = pr['head_sha']
             commits = pr['commits']
 
             updated_at = arrow.get(updated_at).datetime.strftime('%Y-%m-%d %H:%M:%S')
             merged_at = arrow.get(merged_at).datetime.strftime('%Y-%m-%d %H:%M:%S')
+            created_at = arrow.get(created_at).datetime.strftime('%Y-%m-%d %H:%M:%S')
 
             # Insert pr
 
             if exists:
                 logger.debug('Found existing pr.')
-                query = 'update pr set title = %s, set description = %s, set updated_at = %s, set merged_at = %s, set locked = %s, set state = %s where url = %s and project_id = %s and head_sha = %s'
-                cursor.execute(query, (title, description, updated_at, merged_at, locked, state, purl, project_id, head_sha))
+                query = 'update pr set title = %s, set description = %s, set updated_at = %s, set merged_at = %s, set locked = %s, set state = %s where url = %s and project_id = %s and head_sha = %s and created_at = %s'
+                cursor.execute(query, (title, description, updated_at, merged_at, locked, state, purl, project_id, head_sha, created_at))
             else:
                 logger.debug('Inserting new pr.')
-                query = 'insert into pr (title, description, updated_at, merged_at, locked, number, state, url, author_id, project_id, head_sha) values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
+                query = 'insert into pr (title, description, updated_at, merged_at, locked, number, state, url, author_id, project_id, head_sha, created_at) values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
                 cursor.execute(query, (title, description, updated_at, merged_at, locked, number, state, purl, author_id, project_id, head_sha))
 
             self.db.commit()
@@ -369,6 +371,7 @@ class DatabaseInterface:
             iurl = issue['url']
             number = issue['number']
             closed_at = issue['closedAt']
+            created_at = issue['createdAt']
             state = issue['state']
             labels = issue['labels']
             assignees = issue['assignees']
@@ -377,17 +380,18 @@ class DatabaseInterface:
 
             updated_at = arrow.get(updated_at).datetime.strftime('%Y-%m-%d %H:%M:%S')
             closed_at = arrow.get(closed_at).datetime.strftime('%Y-%m-%d %H:%M:%S')
+            created_at = arrow.get(created_at).datetime.strftime('%Y-%m-%d %H:%M:%S')
 
             # Insert issue
 
             if exists:
                 logger.debug('Found existing issue.')
-                query = 'update issue set title = %s, set description = %s, set updated_at = %s, set closed_at = %s, set locked = %s, set state = %s where url = %s and project_id = %s'
-                cursor.execute(query, (title, description, updated_at, closed_at, locked, state, iurl, project_id))
+                query = 'update issue set title = %s, set description = %s, set updated_at = %s, set closed_at = %s, set locked = %s, set state = %s where url = %s and project_id = %s and created_at = %s'
+                cursor.execute(query, (title, description, updated_at, closed_at, locked, state, iurl, project_id, created_at))
             else:
                 logger.debug('Inserting new issue.')
-                query = 'insert into issue (title, description, updated_at, closed_at, locked, number, state, url, author_id, project_id) values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
-                cursor.execute(query, (title, description, updated_at, closed_at, locked, number, state, iurl, author_id, project_id))
+                query = 'insert into issue (title, description, updated_at, closed_at, locked, number, state, url, author_id, project_id, created_at) values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
+                cursor.execute(query, (title, description, updated_at, closed_at, locked, number, state, iurl, author_id, project_id, created_at))
 
             self.db.commit()
 
