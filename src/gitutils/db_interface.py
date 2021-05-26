@@ -164,7 +164,7 @@ class DatabaseInterface:
             else:
                 logger.debug('Inserting new pr.')
                 query = 'insert into pr (title, description, updated_at, merged_at, locked, number, state, url, author_id, project_id, head_sha, created_at) values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
-                cursor.execute(query, (title, description, updated_at, merged_at, locked, number, state, purl, author_id, project_id, head_sha))
+                cursor.execute(query, (title, description, updated_at, merged_at, locked, number, state, purl, author_id, project_id, head_sha, created_at))
 
             self.db.commit()
 
