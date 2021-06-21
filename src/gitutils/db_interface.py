@@ -18,7 +18,7 @@ from src.gitutils.graphql_interface import fetch_prs, fetch_issues, Source
 # Setup Logger
 logger = logging.getLogger('db_interface')
 logger.setLevel(logging.DEBUG)
-ch = logging.FileHandler()
+ch = logging.StreamHandler()
 ch.setLevel(level=logging.DEBUG)
 formatter = logging.Formatter(fmt="[%(levelname)s]: %(asctime)s - %(message)s")
 ch.setFormatter(fmt=formatter)
