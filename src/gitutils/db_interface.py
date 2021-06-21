@@ -4,6 +4,7 @@ import argparse
 import atexit
 import datetime
 import logging
+import multiprocessing
 import os
 import shutil
 from urllib.parse import urlparse
@@ -17,7 +18,7 @@ from src.gitutils.graphql_interface import fetch_prs, fetch_issues, Source
 # Setup Logger
 logger = logging.getLogger('db_interface')
 logger.setLevel(logging.DEBUG)
-ch = logging.StreamHandler()
+ch = logging.FileHandler()
 ch.setLevel(level=logging.DEBUG)
 formatter = logging.Formatter(fmt="[%(levelname)s]: %(asctime)s - %(message)s")
 ch.setFormatter(fmt=formatter)
@@ -40,13 +41,13 @@ class DatabaseInterface:
         if self.args.update:
             logger.debug('Updating existing projects on database...')
             cursor = self.db.cursor()
-            query = 'select source_url from project'
+            query = 'select name, source_url from project'
             cursor.execute(query)
             projects = cursor.fetchall()
             cursor.close()
 
-            for project in projects:
-                self.add_project(project[0], since=self.args.since, until=self.args.until)
+            with multiprocessing.Pool() as pool:
+                pool.map(self.update_worker, projects)
 
         elif self.args.add_project:
             logger.debug('Adding new project(s) to database...')
@@ -64,6 +65,16 @@ class DatabaseInterface:
             self.add_prs(project, since=self.args.since, until=self.args.until)
         else:
             raise Exception('Unknown argument mode.')
+
+    def update_worker(self, project_info):
+        name, source_url = project_info
+        logger = logging.getLogger('db_interface_update_worker')
+        logger.basicConfig(format='[%(levelname)s]: %(asctime)s - %(message)s',
+                   level=logging.DEBUG,
+                   handlers=[
+                       logging.FileHandler(f'./{name}.log')
+                   ])
+        self.add_project(source_url, since=self.args.since, until=self.args.until)
 
     def terminate(self):
         self.db.close()
