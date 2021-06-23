@@ -504,7 +504,7 @@ class DatabaseInterface:
 
         cursor.close()
 
-    def add_project(self, url, name=None, since=datetime.datetime.utcfromtimestamp(0).isoformat(), until=datetime.datetime.today().isoformat(), fork_of=None, child_of=None, tags=None):
+    def add_project(self, url, name=None, since=None, until=datetime.datetime.today().isoformat(), fork_of=None, child_of=None, tags=None):
         '''
             url: url to git file
             name: descriptive name of project, defaults to .git file name
@@ -592,10 +592,11 @@ class DatabaseInterface:
             since = self.args.since
             logger.debug(f'New project, grabbing all commit data since {since} until {until}.')
         else:
-            # Find last time updated
-            query = 'select last_updated from project where source_url=%s'
-            cursor.execute(query, (url,))
-            since = cursor.fetchone()[0]
+            if not since:
+                # Find last time updated
+                query = 'select last_updated from project where source_url=%s'
+                cursor.execute(query, (url,))
+                since = cursor.fetchone()[0]
 
             # Shift last update by 30 hours (server timeout) earlier to account for potential commits missed during last update
             dt = arrow.get(since).datetime - datetime.timedelta(hours=30)
@@ -620,6 +621,7 @@ class DatabaseInterface:
         project = GitCommand('.')
         project.cloneRepo(url)
         branches = not self.args.no_branches
+        since = arrow.get(since).datetime.isoformat()
         data = project.getRepoCommitData('.', since=since, until=until, includebranches=branches)
         logger.debug(f'Cloned repository "{name}".')
 

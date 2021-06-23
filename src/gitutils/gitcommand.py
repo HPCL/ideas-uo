@@ -63,7 +63,6 @@ class GitCommand(object):
     #Get all commits in all the versions of a repo since data (default: utc epoch) and group by author
     # TODO: default args for since and until
     def getRepoCommitData(self, reponame, includebranches = False, since = None, until = None):
-
         prefix,versions = self.getRepoVersions(reponame)
 
         commits = {}
