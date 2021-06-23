@@ -4,7 +4,6 @@ import argparse
 import atexit
 import datetime
 import logging
-import multiprocessing
 import os
 import shutil
 from urllib.parse import urlparse
@@ -40,14 +39,8 @@ class DatabaseInterface:
 
         if self.args.update:
             logger.debug('Updating existing projects on database...')
-            cursor = self.db.cursor()
-            query = 'select name, source_url from project'
-            cursor.execute(query)
-            projects = cursor.fetchall()
-            cursor.close()
-
-            with multiprocessing.Pool() as pool:
-                pool.map(self.update_worker, projects)
+            project = self.args.update
+            self.add_project(project, since=self.args.since, until=self.args.until)
 
         elif self.args.add_project:
             logger.debug('Adding new project(s) to database...')
@@ -65,16 +58,6 @@ class DatabaseInterface:
             self.add_prs(project, since=self.args.since, until=self.args.until)
         else:
             raise Exception('Unknown argument mode.')
-
-    def update_worker(self, project_info):
-        name, source_url = project_info
-        logger = logging.getLogger('db_interface_update_worker')
-        logger.basicConfig(format='[%(levelname)s]: %(asctime)s - %(message)s',
-                   level=logging.DEBUG,
-                   handlers=[
-                       logging.FileHandler(f'./{name}.log')
-                   ])
-        self.add_project(source_url, since=self.args.since, until=self.args.until)
 
     def terminate(self):
         self.db.close()
@@ -744,7 +727,7 @@ if __name__ == '__main__':
 
     # Update Arguments
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument('--update', help='update existing projects on database', action='store_true')
+    group.add_argument('--update', help='update an existing project', type=str)
     group.add_argument('--add_project', help='add git url to database', type=str)
     group.add_argument('--add_issues', help='add GitHub/Gitlab issues', type=str)
     group.add_argument('--add_prs', help='add GitHub/Gitlab pull requests', type=str)
