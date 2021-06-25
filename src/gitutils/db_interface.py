@@ -153,7 +153,7 @@ class DatabaseInterface:
 
             if exists:
                 logger.debug('Found existing pr.')
-                query = 'update pr set title = %s, set description = %s, set updated_at = %s, set merged_at = %s, set locked = %s, set state = %s where url = %s and project_id = %s and head_sha = %s and created_at = %s'
+                query = 'update pr set title = %s, description = %s, updated_at = %s, merged_at = %s, locked = %s, state = %s where url = %s and project_id = %s and head_sha = %s and created_at = %s'
                 cursor.execute(query, (title, description, updated_at, merged_at, locked, state, purl, project_id, head_sha, created_at))
             else:
                 logger.debug('Inserting new pr.')
@@ -379,7 +379,7 @@ class DatabaseInterface:
 
             if exists:
                 logger.debug('Found existing issue.')
-                query = 'update issue set title = %s, set description = %s, set updated_at = %s, set closed_at = %s, set locked = %s, set state = %s where url = %s and project_id = %s and created_at = %s'
+                query = 'update issue set title = %s, description = %s, updated_at = %s, closed_at = %s, locked = %s, state = %s where url = %s and project_id = %s and created_at = %s'
                 cursor.execute(query, (title, description, updated_at, closed_at, locked, state, iurl, project_id, created_at))
             else:
                 logger.debug('Inserting new issue.')
