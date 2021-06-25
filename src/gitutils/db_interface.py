@@ -125,10 +125,6 @@ class DatabaseInterface:
             cursor.execute(query, (username, aurl,))
             author_id = cursor.fetchone()[0]
 
-            query = 'select count(*) from pr where url=%s'
-            cursor.execute(query, (url,))
-            exists = cursor.fetchone()[0] != 0
-
             title = pr['title']
             description = pr['description']
             updated_at = pr['updatedAt']
@@ -148,6 +144,10 @@ class DatabaseInterface:
             updated_at = arrow.get(updated_at).datetime.strftime('%Y-%m-%d %H:%M:%S')
             merged_at = arrow.get(merged_at).datetime.strftime('%Y-%m-%d %H:%M:%S')
             created_at = arrow.get(created_at).datetime.strftime('%Y-%m-%d %H:%M:%S')
+
+            query = 'select count(*) from pr where url=%s'
+            cursor.execute(query, (purl,))
+            exists = cursor.fetchone()[0] != 0
 
             # Insert pr
 
