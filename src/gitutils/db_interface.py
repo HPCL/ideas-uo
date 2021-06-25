@@ -354,10 +354,6 @@ class DatabaseInterface:
             cursor.execute(query, (username, aurl,))
             author_id = cursor.fetchone()[0]
 
-            query = 'select count(*) from issue where url=%s'
-            cursor.execute(query, (url,))
-            exists = cursor.fetchone()[0] != 0
-
             title = issue['title']
             description = issue['description']
             updated_at = issue['updatedAt']
@@ -376,6 +372,9 @@ class DatabaseInterface:
             closed_at = arrow.get(closed_at).datetime.strftime('%Y-%m-%d %H:%M:%S')
             created_at = arrow.get(created_at).datetime.strftime('%Y-%m-%d %H:%M:%S')
 
+            query = 'select count(*) from issue where url=%s'
+            cursor.execute(query, (iurl,))
+            exists = cursor.fetchone()[0] != 0
             # Insert issue
 
             if exists:
@@ -549,7 +548,8 @@ class DatabaseInterface:
                 child_of = cursor.fetchone()[0]
 
             # Insert new project
-            query = 'insert into project (name, source_url, last_updated, fork_of_id, child_of_id) values (%s, %s, utc_timestamp(), %s, %s)'
+            # TODO: update has_github and has_gitlab
+            query = 'insert into project (name, source_url, last_updated, fork_of_id, child_of_id, has_github, has_gitlab, github_last_updated, gitlab_last_updated) values (%s, %s, utc_timestamp(), %s, %s, 0, 0, utc_timestamp(), utc_timestamp())'
             cursor.execute(query, (name, url, fork_of, child_of))
 
         self.db.commit()
@@ -606,6 +606,7 @@ class DatabaseInterface:
 
         cursor.close()
 
+        # TODO: fix since (gets from Unix Epoch only right now (default arg))
         self.process_project(url, since=since, until=until)
 
         if exists:
