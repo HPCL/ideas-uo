@@ -25,13 +25,21 @@ def update():
     project_info = cursor.fetchall()
     db.close()
 
-    #os.makedirs(LOG_DIR, exist_ok=True)
+    os.makedirs(LOG_DIR, exist_ok=True)
 
     for name, source_url in project_info:
-        log_path = os.path.join(LOG_DIR, f'{name}.log')
-        command = f'nohup python3 -m src.gitutils.db_interface --username {USERNAME} --password {PASSWORD} --update {source_url} > {log_path} 2>&1 &'
-
-        os.system(command)
+        # Add git info
+        git_log_path = os.path.join(LOG_DIR, f'{name}_git.log')
+        git_command = f'nohup python3 -m src.gitutils.db_interface --username {USERNAME} --password {PASSWORD} --add_project {source_url} > {git_log_path} 2>&1 &'
+        os.system(git_command)
+        # Add prs
+        pr_log_path = os.path.join(LOG_DIR, f'{name}_pr.log')
+        pr_command = f'nohup python3 -m src.gitutils.db_interface --username {USERNAME} --password {PASSWORD} --add_prs {source_url} > {pr_log_path} 2>&1 &'
+        os.system(pr_command)
+        # Add issues
+        issue_log_path = os.path.join(LOG_DIR, f'{name}_issue.log')
+        issue_command = f'nohup python3 -m src.gitutils.db_interface --username {USERNAME} --password {PASSWORD} --add_issues {source_url} > {issue_log_path} 2>&1 &'
+        os.system(issue_command)
 
 if __name__ == '__main__':
     update()

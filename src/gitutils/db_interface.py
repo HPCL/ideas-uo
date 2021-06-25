@@ -37,12 +37,7 @@ class DatabaseInterface:
         atexit.register(self.terminate)
         logger.debug('Established MySQL connection.')
 
-        if self.args.update:
-            logger.debug('Updating existing projects on database...')
-            project = self.args.update
-            self.add_project(project, since=self.args.since, until=self.args.until)
-
-        elif self.args.add_project:
+        if self.args.add_project:
             logger.debug('Adding new project(s) to database...')
             project = self.args.add_project
             self.add_project(project, since=self.args.since, until=self.args.until, fork_of=self.args.fork_of, child_of=self.args.child_of, tags=self.args.tags)
@@ -524,6 +519,7 @@ class DatabaseInterface:
             new_project = False
 
             # Update existing project
+            # TODO: move update to end of procedure so fetching git info comes from last_update
             query = 'select id from project where source_url=%s'
             cursor.execute(query, (url,))
             project_id = cursor.fetchone()[0]
@@ -592,7 +588,7 @@ class DatabaseInterface:
             since = self.args.since
             logger.debug(f'New project, grabbing all commit data since {since} until {until}.')
         else:
-            if not since:
+            if since == 'null':
                 # Find last time updated
                 query = 'select last_updated from project where source_url=%s'
                 cursor.execute(query, (url,))
@@ -730,8 +726,8 @@ if __name__ == '__main__':
 
     # Update Arguments
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument('--update', help='update an existing project', type=str)
     group.add_argument('--add_project', help='add git url to database', type=str)
+    # TODO: update graphql queries to use --since and --until
     group.add_argument('--add_issues', help='add GitHub/Gitlab issues', type=str)
     group.add_argument('--add_prs', help='add GitHub/Gitlab pull requests', type=str)
 
@@ -739,7 +735,7 @@ if __name__ == '__main__':
     parser.add_argument('--force_epoch', help='force update from utc epoch', action='store_true')
     parser.add_argument('--keep_repos', help='keep repos on disk after update', action='store_true')
     parser.add_argument('--no_branches', help='does not fetch branch names for each commit', action='store_true')
-    parser.add_argument('--since', help='fetch commits from this date (ISO8601)', type=str, default=datetime.datetime.utcfromtimestamp(0).isoformat())
+    parser.add_argument('--since', help='fetch commits from this date (ISO8601)', type=str, default='null')
     parser.add_argument('--until', help='fetch commits to this date (ISO8601)', type=str, default=datetime.datetime.today().isoformat())
     parser.add_argument('--tags', help='tags to add to project', nargs='+', type=str)
     parser.add_argument('--fork_of', help='fork of another project', type=str)
