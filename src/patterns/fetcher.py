@@ -98,6 +98,8 @@ class Fetcher:
         )
         self.commit_data = self.commit_data.drop(columns=['index'])   # datetime, too?
 
+        cache_dir = os.path.join(self.top_dir,'.db-cache')
+        if not os.path.exists(cache_dir): os.mkdir(cache_dir)
         cache_file = os.path.join(self.top_dir,'.db-cache', '.%s.pickle' % self.project)
         if not os.path.exists(cache_file):
             # Cache local copy

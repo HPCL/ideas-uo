@@ -96,6 +96,7 @@ class Visualizer(Patterns):
         fig.autofmt_xdate()
         if self.config['interactive']: fig.show()
         if self.config['save_figures']:
+            if not os.path.exists('figures'): os.mkdir('figures')
             fig.savefig('figures/%s-trend-%s-%s.png' % (self.project, diff_col, self.get_time_range_str(
                 time_range).replace(', ','_').replace(' ','_')), format='png', dpi=self.config['output_dpi'], bbox_inches='tight')
 
@@ -134,6 +135,7 @@ class Visualizer(Patterns):
             g.ax.set_title(self.get_title_str(time_range, stats_df, locc_metric, log))
             if self.config['interactive']: g.fig.show()
             if self.config['save_figures']:
+                if not os.path.exists('figures'): os.mkdir('figures')
                 g.fig.savefig('figures/%s-timeline-%s-%s.png' % (self.project, self.diff_alg,
                             self.get_time_range_str(time_range).replace(', ','_').replace(' ','_')),
                               format='png', dpi=self.config['output_dpi'], bbox_inches='tight')
@@ -155,6 +157,7 @@ class Visualizer(Patterns):
             g.fig.autofmt_xdate()
             if self.config['interactive']: g.fig.show()
             if self.config['save_figures']:
+                if not os.path.exists('figures'): os.mkdir('figures')
                 g.fig.savefig('figures/%s-bubble-%s-%s.png' % (self.project,
                               self.diff_alg, self.get_time_range_str(time_range).replace(', ','_').replace(' ','_')),
                               format='png', dpi=self.config['output_dpi'], bbox_inches='tight')
@@ -218,6 +221,7 @@ class Visualizer(Patterns):
         plt.xlabel('Year', fontsize=18)
         plt.ylabel('Changes (%s)' % locc_metric, fontsize=18)
         fig.autofmt_xdate()
+        if not os.path.exists('figures'): os.mkdir('figures')
         fig.savefig('figures/%s-avg-%s.png' % (self.project, locc_metric), format='png',
                     dpi=self.config['output_dpi'], box_inches='tight')
 
@@ -249,6 +253,7 @@ class Visualizer(Patterns):
         ax.set_title(self.get_title_str(time_range, stats_df, locc_metric, False, prefix="In the zone: "))
         time_range_str = self.get_time_range_str(time_range)
         fig.tight_layout()
+        if not os.path.exists('figures'): os.mkdir('figures')
         fig.savefig('figures/%s-zone-%s-map-%s-%s.png' % (self.project, locc_metric,
                     time_range_str.replace(', ','_').replace(' ','_'), agg), format='png', dpi=self.config['output_dpi'],
                     bbox_inches='tight')
@@ -291,6 +296,7 @@ class Visualizer(Patterns):
             ax.get_xaxis().set_visible(False)
         time_range_str = self.get_time_range_str(time_range)
         ax.set_title(self.get_title_str(time_range, stats_df, locc_metric, False))
+        if not os.path.exists('figures'): os.mkdir('figures')
         fig.savefig('figures/%s-top-%d-%s-map-%s.png' % (self.project, top_N, locc_metric,
                     time_range_str.replace(', ','_').replace(' ','_')), format='png', dpi=self.config['output_dpi'],
                     bbox_inches='tight')
@@ -368,5 +374,6 @@ class Visualizer(Patterns):
                 pass    # for pytest, where this is not really essential
 
         if self.config['interactive']: fig.show()
+        if not os.path.exists('figures'): os.mkdir('figures')
         fig.savefig('figures/%s-2020-%s.png' % (self.project, locc_metric), format='png',
                     dpi=self.config['output_dpi'], bbox_inches='tight')
