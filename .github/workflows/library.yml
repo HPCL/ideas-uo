@@ -36,7 +36,11 @@ jobs:
           touch Pipfile & pipenv install --deploy --dev
           if [ -f requirements.txt ]; then pipenv install -r requirements.txt; fi
 
+      - name: Install locally
+        run: |
+          pipenv run pip install -e .
+
       - name: Test with pytest
         run: |
-          pipenv run pytest -s --verbosity=3
+          pipenv run python -m pytest -s --verbosity=3
           echo Done!

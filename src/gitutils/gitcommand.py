@@ -1,7 +1,11 @@
 import os
 
-import src.gitutils.command as command
-from src.gitutils.utils import *
+try:
+  import src.gitutils.command as command
+  from src.gitutils.utils import *
+except: 
+  import gitutils.command as command
+  from gitutils.utils import *
 
 
 class GitCommand(object):
