@@ -23,13 +23,13 @@ class Fetcher:
         self.exclude_forks = exclude_forks # Only work with non-forks of the repo
         self.forks_only = forks_only  # when True, only analyze forked repos
         self.top_dir = abspath(dirname(dirname(dirname(__file__))))
+        self.create_cache()
 
     def find_cache(self):
         for root, dirnames, filenames in os.walk(self.top_dir):
             filenames = [f for f in filenames if f == '.%s.pickle' % self.project]
             for filename in filenames:
                 return os.path.join(root, filename)
-        return None
 
     def fetch(self, db=None, cache=True, dbpwd=None):
         if cache:
@@ -111,10 +111,15 @@ class Fetcher:
         print(info_msg)
         return True
 
+    def create_cache(self):
+        if not os.path.exists(self.cache_dir): os.mkdir(self.cache_dir)
+
+    @property
+    def cache_dir(self):
+        return os.path.join(self.top_dir,'.db-cache')
+
     def update_cache(self):
-        cache_dir = os.path.join(self.top_dir,'.db-cache')
-        if not os.path.exists(cache_dir): os.mkdir(cache_dir)
-        self.commit_data.to_pickle(os.path.join(cache_dir, '.%s.pickle' % self.project))
+        self.commit_data.to_pickle(os.path.join(self.cache_dir, '.%s.pickle' % self.project))
 
     def close_session(self):
         if self.cursor:
