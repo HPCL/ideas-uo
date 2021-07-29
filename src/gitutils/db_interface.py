@@ -670,6 +670,7 @@ class DatabaseInterface:
                 exists = cursor.fetchone()[0] != 0
                 # Skip existing commits
                 if exists:
+                    #TODO: Update commit with branches
                     logger.debug(f'Commit {hash} already exists.')
                     continue
 
