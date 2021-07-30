@@ -135,6 +135,7 @@ class DatabaseInterface:
             created_at = pr['createdAt']
             head_sha = pr['head_sha']
             commits = pr['commits']
+            linked_issues = pr['linked_issues']
 
             updated_at = arrow.get(updated_at).datetime.strftime('%Y-%m-%d %H:%M:%S')
             merged_at = arrow.get(merged_at).datetime.strftime('%Y-%m-%d %H:%M:%S')
@@ -161,6 +162,31 @@ class DatabaseInterface:
             query = 'select id from pr where url = %s and author_id = %s and number = %s'
             cursor.execute(query, (purl, author_id, number))
             pr_id = cursor.fetchone()[0]
+
+            # Insert linked issues
+            if pr['linked_issues']:
+                for issue_url in linked_issues:
+                    query = 'select count(*) from issue_tag where url = %s'
+                    cursor.execute(query, (issue_url,))
+                    exists = cursor.fetchone()[0] != 0
+
+                    if not exists:
+                        query = 'insert into issue_tag (url) values (%s)'
+                        cursor.execute(query, (issue_url,))
+                        self.db.commit()
+
+                    query = 'select id from issue_tag where url = %s'
+                    cursor.execute(query, (issue_url,))
+                    issue_id = cursor.fetchone()[0]
+
+                    query = 'select count(*) from pr_has_issue where pr_id = %s and issue_id = %s'
+                    cursor.execute(query, (pr_id, issue_id))
+                    exists = cursor.fetchone()[0] != 0
+                    if not exists:
+                        logger.debug(f'Inserting issue tag {issue_id} for pr {pr_id}')
+                        query = 'insert into pr_has_issue (pr_id, issue_id) values (%s, %s)'
+                        cursor.execute(query, (pr_id, issue_id))
+                        self.db.commit()
 
             # Insert milestone
             if pr['milestone']:
@@ -670,6 +696,7 @@ class DatabaseInterface:
                 exists = cursor.fetchone()[0] != 0
                 # Skip existing commits
                 if exists:
+                    #TODO: Update commit with branches
                     logger.debug(f'Commit {hash} already exists.')
                     continue
 

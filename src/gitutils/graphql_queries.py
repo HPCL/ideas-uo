@@ -191,6 +191,11 @@ GITLAB_ISSUE = '''
                             id
                         }
                     }
+                    closingIssuesReferences(first: 100) {
+                        nodes {
+                            url
+                        }
+                    }
                 }
                 pageInfo {
                     hasNextPage

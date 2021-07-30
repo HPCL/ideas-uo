@@ -80,7 +80,7 @@ class GitCommand(object):
 
         #git log -p # this will list all commits and the code additions in addition to dates and messages.
         # function-context for python just adds all the surrounding lines of code to the diff output
-        retcode, out, err = command.Command(f'git log -p --date=iso-strict-local --function-context --since {since} --until {until}').run()
+        retcode, out, err = command.Command(f'git log -p --all --date=iso-strict-local --function-context --since {since} --until {until}').run()
         lines = iter(out.splitlines())
 
         current_author = ''
