@@ -109,6 +109,13 @@ def fetch_prs(owner, repo, source):
             pr['url'] = node['webUrl'] if source == Source.GITLAB else node['url']
             pr['number'] = node['iid'] if source == Source.GITLAB else node['number']
             pr['state'] = node['state']
+
+            try:
+                # TODO: Only for GitHub
+                pr['linked_issues'] = [url for url in node['closingIssuesReferences']['nodes']]
+            except:
+                pr['linked_issues'] = None
+
             try:
                 username = node['author']['username'] if source == Source.GITLAB else node['author']['login']
             except:
