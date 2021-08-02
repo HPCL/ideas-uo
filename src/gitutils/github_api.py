@@ -9,11 +9,11 @@ class GitHubAPIClient:
     """An interface for accessing the GitHub API Client.
 
     Utilizes the GitHub REST API to retrieve resources. More details can be seen
-    here: https://docs.github.com/en/free-pro-team@latest/rest. 
+    here: https://docs.github.com/en/free-pro-team@latest/rest.
 
     Attributes:
       username: GitHub username of account with Private Access Token (PAT)
-      token: GitHub PAT that has sufficient privileges for API resources 
+      token: GitHub PAT that has sufficient privileges for API resources
     """
     # Credentials
     username = None
@@ -27,7 +27,7 @@ class GitHubAPIClient:
         """Verifies the GitHub credentials for accessing the GitHub REST API.
 
         Returns:
-          A boolean representing if the currently supplied credentials are valid. 
+          A boolean representing if the currently supplied credentials are valid.
           Credentials should be set via `GitHubAPIClient.set_credentials`.
 
         Raises:
@@ -49,7 +49,7 @@ class GitHubAPIClient:
 
     @classmethod
     def set_credentials(cls, username, token):
-        """Sets GitHub credentials for accessing the GitHub REST API. 
+        """Sets GitHub credentials for accessing the GitHub REST API.
 
         The specified user account should have a Private Access Token (PAT) that has
         repo access privileges. This is necessary due to rate limiting for
@@ -57,7 +57,7 @@ class GitHubAPIClient:
 
         Args:
           username: GitHub username tied with the PAT for leveraging the REST API
-          token: GitHub PAT (not password!)     
+          token: GitHub PAT (not password!)
         """
 
         cls.username = username
@@ -99,13 +99,13 @@ class GitHubAPIClient:
 
         Utilizes pagination to traverse API resources with more than a 100 entries.
         From the `start_page` argument, traverses each API resource page until there
-        are no more resources to fetch. 
+        are no more resources to fetch.
 
         Args:
           owner: GitHub username or organization that owns the target repository
           repository: GitHub repository name
           resource: resource specified on GitHubAPI REST API
-          params: dict of keywords for resource ("page" keyword specified by 
+          params: dict of keywords for resource ("page" keyword specified by
                   start_page argument)
           headers: dict of headers to send to API server
           start_page: int (> 0) of which page to start pagination from (default: 1)
@@ -167,6 +167,21 @@ class GitHubAPIClient:
         return cls.fetch_resource(owner=owner,
                                   repository=repository,
                                   resource="issues/comments",
+                                  params=params,
+                                  headers=headers,
+                                  cond=cond)
+
+    @classmethod
+    def fetch_events(cls, owner, repository, cond=lambda response: False):
+        """Wrapper for fetching events from the repository.
+        """
+
+        params = {"per_page": 100}
+        headers = {"accept": "application/vnd.github.v3+json"}
+
+        return cls.fetch_resource(owner=owner,
+                                  repository=repository,
+                                  resource="events",
                                   params=params,
                                   headers=headers,
                                   cond=cond)
