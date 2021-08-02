@@ -81,6 +81,8 @@ class DatabaseInterface:
         cursor.execute(query, (url,))
         project_id = cursor.fetchone()[0]
 
+        if 'ECP-ASTRO' in url:
+            project_id = 26
 
         if root.lower() == 'github':
             logger.debug('Source is GitHub.')
@@ -165,7 +167,8 @@ class DatabaseInterface:
 
             # Insert linked issues
             if pr['linked_issues']:
-                for issue_url in linked_issues:
+                for ref_link in linked_issues:
+                    issue_url = ref_link['url']
                     query = 'select count(*) from issue_tag where url = %s'
                     cursor.execute(query, (issue_url,))
                     exists = cursor.fetchone()[0] != 0
@@ -335,7 +338,9 @@ class DatabaseInterface:
         query = 'select id from project where source_url=%s'
         cursor.execute(query, (url,))
         project_id = cursor.fetchone()[0]
-
+        
+        if 'ECP-ASTRO' in url:
+            project_id = 26
 
         if root.lower() == 'github':
             logger.debug('Source is GitHub.')
@@ -655,6 +660,9 @@ class DatabaseInterface:
         cursor.execute(query, (url,))
         project_id = cursor.fetchone()[0]
 
+        if 'ECP-ASTRO' in url:
+            project_id = 26
+
         # Insert authors
         for author in data.keys():
             entry = author.decode('utf-8')
@@ -698,6 +706,7 @@ class DatabaseInterface:
                 if exists:
                     #TODO: Update commit with branches
                     logger.debug(f'Commit {hash} already exists.')
+                    logger.debug(commit['branches'])
                     continue
 
                 date = commit['date'].decode('utf-8')

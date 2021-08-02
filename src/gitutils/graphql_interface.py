@@ -257,7 +257,9 @@ def fetch_issues(owner, repo, source):
     return issues
 
 if __name__ == '__main__':
-    fetch_prs('gitlab-org', 'gitlab-development-kit', Source.GITLAB)
-    fetch_prs('google', 'gvisor', Source.GITHUB)
-    fetch_issues('gitlab-org', 'gitlab-development-kit', Source.GITLAB)
-    fetch_issues('google', 'gvisor', Source.GITHUB)
+    #fetch_prs('gitlab-org', 'gitlab-development-kit', Source.GITLAB)
+    d = fetch_prs('google', 'gvisor', Source.GITHUB)
+    for i in d:
+        print(i['linked_issues'])
+    #fetch_issues('gitlab-org', 'gitlab-development-kit', Source.GITLAB)
+    #fetch_issues('google', 'gvisor', Source.GITHUB)

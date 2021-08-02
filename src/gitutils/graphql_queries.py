@@ -128,6 +128,11 @@ GITHUB_PULLREQUEST = '''
                             id
                         }
                     }
+                    closingIssuesReferences(first: 100) {
+                        nodes {
+                            url
+                        }
+                    }
                 }
                 pageInfo {
                     endCursor
@@ -189,11 +194,6 @@ GITLAB_ISSUE = '''
                             updatedAt
                             url
                             id
-                        }
-                    }
-                    closingIssuesReferences(first: 100) {
-                        nodes {
-                            url
                         }
                     }
                 }
