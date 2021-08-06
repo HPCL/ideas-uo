@@ -643,16 +643,22 @@ class DatabaseInterface:
 
     def process_project(self, url, since, until):
         name = self.get_git_name(url)
-
-        # Cloned repo
-        logger.debug(f'Cloning repository "{name}". This may take a while...')
-        project = GitCommand('.')
-        project.cloneRepo(url)
         branches = not self.args.no_branches
         since = arrow.get(since).datetime.isoformat()
-        data = project.getRepoCommitData('.', since=since, until=until, includebranches=branches)
-        logger.debug(f'Cloned repository "{name}".')
+        logger.debug(f'Mining repository "{name}". This may take a while...')
 
+        if url[0] == '/':
+            logger.debug('Working on local repository.')
+            repo_dir = os.path.join(os.getcwd(), 'repos')
+            project = GitCommand(repo_dir)
+            data = project.getRepoCommitData(name, since=since, until=until, includebranches=branches)
+        else:
+            logger.debug('Working on remote repository.')
+            project = GitCommand('.')
+            project.cloneRepo(url)
+            data = project.getRepoCommitData('.', since=since, until=until, includebranches=branches)
+
+        logger.debug(f'Mined repository "{name}".')
         cursor = self.db.cursor()
 
         # Get project id
@@ -742,12 +748,6 @@ class DatabaseInterface:
 
                     logger.debug(f'Inserted diff in file {filename} for commit {hash}')
 
-        # Remove cloned repo
-        if not self.args.keep_repos:
-            os.chdir('..')
-            shutil.rmtree(f'./{name}/')
-            logger.debug(f'Removed repository {name}')
-
         cursor.close()
 
 if __name__ == '__main__':
@@ -769,7 +769,6 @@ if __name__ == '__main__':
 
     # Misc Arguments
     parser.add_argument('--force_epoch', help='force update from utc epoch', action='store_true')
-    parser.add_argument('--keep_repos', help='keep repos on disk after update', action='store_true')
     parser.add_argument('--no_branches', help='does not fetch branch names for each commit', action='store_true')
     parser.add_argument('--since', help='fetch commits from this date (ISO8601)', type=str, default='null')
     parser.add_argument('--until', help='fetch commits to this date (ISO8601)', type=str, default=datetime.datetime.today().isoformat())
