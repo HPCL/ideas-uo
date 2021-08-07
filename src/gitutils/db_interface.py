@@ -338,7 +338,7 @@ class DatabaseInterface:
         query = 'select id from project where source_url=%s'
         cursor.execute(query, (url,))
         project_id = cursor.fetchone()[0]
-        
+
         if 'ECP-ASTRO' in url:
             project_id = 26
 
@@ -704,23 +704,22 @@ class DatabaseInterface:
             # Insert commits
             for commit in data[author]['commits']:
                 hash = commit['id']
-
-                query = 'select count(*) from commit where hash=%s'
-                cursor.execute(query, (hash,))
-                exists = cursor.fetchone()[0] != 0
-                # Skip existing commits
-                if exists:
-                    #TODO: Update commit with branches
-                    logger.debug(f'Commit {hash} already exists.')
-                    logger.debug(commit['branches'])
-                    continue
-
                 date = commit['date'].decode('utf-8')
-
                 dt = arrow.get(date).datetime.strftime('%Y-%m-%d %H:%M:%S')
                 #dt = datetime.datetime.strptime(date, '%Y-%m-%dT%H:%M:%S%z').strftime('%Y-%m-%d %H:%M:%S')
                 message = commit['message'].strip()
                 branches = commit['branches']
+                query = 'select count(*) from commit where hash=%s'
+                cursor.execute(query, (hash,))
+                exists = cursor.fetchone()[0] != 0
+
+                # Skip existing commits
+                if exists:
+                    logger.debug(f'Commit {hash} already exists.')
+                    query = 'update commit set branch=%s where hash=%s'
+                    cursor.execute(query, (branches, hash,))
+                    continue
+
                 query = f'insert into commit (hash, datetime, author_id, project_id, message, branch) values (%s, %s, %s, %s, %s, %s)'
 
                 cursor.execute(query, (hash, dt, author_id, project_id, message, branches,))
