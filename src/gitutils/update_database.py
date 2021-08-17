@@ -23,6 +23,7 @@ def update():
     query = 'select name, source_url from project'
     cursor.execute(query)
     project_info = cursor.fetchall()
+    cursor.close()
     db.close()
 
     os.makedirs(LOG_DIR, exist_ok=True)
@@ -40,6 +41,9 @@ def update():
         issue_log_path = os.path.join(LOG_DIR, f'{name}_issue.log')
         issue_command = f'nohup python3 -m src.gitutils.db_interface --username {USERNAME} --password {PASSWORD} --add_issues {source_url} > {issue_log_path} 2>&1 &'
         os.system(issue_command)
+        # Add events
+        event_log_path = os.path.join(LOG_DIR, f'{name}_event.log')
+        event_command = f'nohup python3 -m src.gitutils.db_interface --username {USERNAME} --password {PASSWORD} --add_events {source_url} > {event_log_path} 2>&1 &'
 
 if __name__ == '__main__':
     update()
