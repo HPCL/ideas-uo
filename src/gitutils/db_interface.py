@@ -786,6 +786,19 @@ class DatabaseInterface:
         data = GitHubAPIClient.fetch_events(owner=owner, repository=repo)
 
         for event in data:
+            # Check if new event
+            api_id = event['id']
+            type = event['type']
+            public = event['public']
+            created_at = event['created_at']
+            created_at = arrow.get(created_at).datetime.strftime('%Y-%m-%d %H:%M:%S')
+            query = f'select count(*) from event where api_id=%s and created_at=%s and project_id=%s'
+            cursor.execute(query, (api_id, created_at, project_id))
+            exists = cursor.fetchone()[0] != 0
+            if exists:
+                logger.debug('Found existing event. Skipping...')
+                continue
+
             # Insert Event Actor
             actor_id = event['actor']['id']
             login = event['actor']['login']
@@ -899,11 +912,10 @@ class DatabaseInterface:
                     cursor.execute(query, (name, url,))
                     exists = cursor.fetchone()[0] != 0
 
-                    if not exists:
-                        logger.debug(f'Inserted new event page {name}')
-                        query = 'insert into event_page (name, title, action, sha, url) values (%s, %s, %s, %s, %s)'
-                        cursor.execute(query, (name, title, action, sha, url,))
-                        self.db.commit()
+                    logger.debug(f'Inserted new event page {name}')
+                    query = 'insert into event_page (name, title, action, sha, url) values (%s, %s, %s, %s, %s)'
+                    cursor.execute(query, (name, title, action, sha, url,))
+                    self.db.commit()
 
                     query = 'select id from event_org where name=%s and url=%s'
                     cursor.execute(query, (name, url,))
@@ -922,18 +934,10 @@ class DatabaseInterface:
                         self.db.commit()
 
             # Insert Event
-            api_id = event['id']
-            type = event['type']
-            public = event['public']
-            created_at = event['created_at']
-            created_at = arrow.get(created_at).datetime.strftime('%Y-%m-%d %H:%M:%S')
-            query = f'select count(*) from event where api_id=%s and created_at=%s'
-            cursor.execute(query, (api_id, created_at))
-            exists = cursor.fetchone()[0] != 0
-            if not exists:
+            if not event_exists:
                 logger.debug(f'Inserted new event {type}')
-                query = 'insert into event (api_id, type, public, created_at, payload_id, repo_id, actor_id, org_id) values (%s, %s, %s, %s, %s, %s, %s, %s)'
-                cursor.execute(query, (api_id, type, public, created_at, event_payload_id, event_repo_id, event_actor_id, event_org_id))
+                query = 'insert into event (project_id, api_id, type, public, created_at, payload_id, repo_id, actor_id, org_id) values (%s, %s, %s, %s, %s, %s, %s, %s, %s)'
+                cursor.execute(query, (project_id, api_id, type, public, created_at, event_payload_id, event_repo_id, event_actor_id, event_org_id))
                 self.db.commit()
 
         cursor.close()
