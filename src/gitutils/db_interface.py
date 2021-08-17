@@ -875,10 +875,12 @@ class DatabaseInterface:
             distinct_size = get_payload('distinct_size')
             head = get_payload('head')
             before = get_payload('before')
+            release_url = get_payload('release', 'html_url')
+            effective_date = get_payload('effective_date')
 
             logger.debug('Inserted new event payload')
             query = 'insert into event_payload (action, ref, ref_type, master_branch, description, forkee_url, issue_url, comment_url, member_login, pr_number, pr_url, pr_review_url, push_id, size, distinct_size, head, before, release_url, effective_date) values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
-            cursor.execute(query, (action, ref, ref_type, master_branch, description, forkee_url, issue_url, comment_url, member_login, pr_number, pr_url, pr_review_url, push_id, size, distinct_size, head, before,))
+            cursor.execute(query, (action, ref, ref_type, master_branch, description, forkee_url, issue_url, comment_url, member_login, pr_number, pr_url, pr_review_url, push_id, size, distinct_size, head, before, release_url, effective_date))
             self.db.commit()
 
             query = 'select count(*) from event_payload'
