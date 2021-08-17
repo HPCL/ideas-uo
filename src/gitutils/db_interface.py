@@ -766,6 +766,7 @@ class DatabaseInterface:
 
     def add_events(self, url):
         cursor = self.db.cursor()
+
         if url == '/shared/repos/FLASH5':
             project_id = 26
             owner, repo = 'ECP-Astro', 'FLASH5'
@@ -783,6 +784,159 @@ class DatabaseInterface:
 
         logger.debug('Grabbing GitHub events from API...')
         data = GitHubAPIClient.fetch_events(owner=owner, repository=repo)
+
+        for event in data:
+            # Insert Event Actor
+            actor_id = event['actor']['id']
+            login = event['actor']['login']
+            url = event['actor']['url']
+            avatar_url = event['actor']['avatar_url']
+            gravatar_id = event['actor']['gravatar_id']
+
+            query = 'select count(*) from event_actor where login=%s and url=%s and actor_id=%s'
+            cursor.execute(query, (login, url, actor_id,))
+            exists = cursor.fetchone()[0] != 0
+
+            if not exists:
+                logger.debug(f'Inserted new event actor {login}')
+                query = 'insert into event_actor (author_id, login, url, avatar_url, gravatar_id) values (%s, %s, %s, %s, %s)'
+                cursor.execute(query, (actor_id, login, url, avatar_url, gravatar_id))
+                self.db.commit()
+
+            query = 'select id from event_actor where login=%s and url=%s and actor_id=%s'
+            cursor.execute(query, (login, url, actor_id,))
+            event_actor_id = cursor.fetchone()[0]
+
+            # Insert Event Repo
+            repo_id = event['repo']['id']
+            name = event['repo']['name']
+            url = event['repo']['url']
+
+            query = 'select count(*) from event_repo where repo_id=%s and name=%s and url=%s'
+            cursor.execute(query, (repo_id, name, url,))
+            exists = cursor.fetchone()[0] != 0
+
+            if not exists:
+                logger.debug(f'Inserted new event repo {name}')
+                query = 'insert into event_repo (repo_id, name, url) values (%s, %s, %s)'
+                cursor.execute(query, (repo_id, name, url,))
+                self.db.commit()
+
+            query = 'select id from event_repo where repo_id=%s and name=%s and url=%s'
+            cursor.execute(query, (repo_id, name, url,))
+            event_repo_id = cursor.fetchone()[0]
+
+            # Insert Event Org
+            org_id = event['org']['id']
+            login = event['org']['login']
+            url = event['org']['url']
+            avatar_url = event['org']['avatar_url']
+            gravatar_id = event['org']['gravatar_id']
+
+            query = 'select count(*) from event_org where login=%s and url=%s and org_id=%s'
+            cursor.execute(query, (login, url, org_id,))
+            exists = cursor.fetchone()[0] != 0
+
+            if not exists:
+                logger.debug(f'Inserted new event org {login}')
+                query = 'insert into event_org (org_id, login, url, avatar_url, gravatar_id) values (%s, %s, %s, %s, %s)'
+                cursor.execute(query, (org_id, login, url, avatar_url, gravatar_id))
+                self.db.commit()
+
+            query = 'select id from event_org where login=%s and url=%s and org_id=%s'
+            cursor.execute(query, (login, url, org_id,))
+            event_org_id = cursor.fetchone()[0]
+
+            # Insert Event Payload
+
+            def get_payload(attribute, key=None):
+                try:
+                    result = event['payload'][attribute]
+                    if key:
+                        result = result[key]
+                except KeyError:
+                    result = None
+                return result
+
+            action = get_payload('action')
+            ref = get_payload('ref')
+            ref_type = get_payload('ref_type')
+            master_branch = get_payload('master_branch')
+            description = get_payload('description')
+            forkee_url = get_payload('forkee', 'html_url')
+            issue_url = get_payload('issue', 'html_url')
+            comment_url = get_payload('comment', 'html_url')
+            member_login = get_payload('member_login')
+            pr_number = get_payload('number')
+            pr_url = get_payload('pull_request', 'html_url')
+            pr_review_url = get_payload('review', 'html_url')
+            push_id = get_payload('push_id')
+            size = get_payload('size')
+            distinct_size = get_payload('distinct_size')
+            head = get_payload('head')
+            before = get_payload('before')
+
+            logger.debug('Inserted new event payload')
+            query = 'insert into event_payload (action, ref, ref_type, master_branch, description, forkee_url, issue_url, comment_url, member_login, pr_number, pr_url, pr_review_url, push_id, size, distinct_size, head, before, release_url, effective_date) values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
+            cursor.execute(query, (action, ref, ref_type, master_branch, description, forkee_url, issue_url, comment_url, member_login, pr_number, pr_url, pr_review_url, push_id, size, distinct_size, head, before,))
+            self.db.commit()
+
+            query = 'select count(*) from event_payload'
+            cursor.execute(query)
+            event_payload_id = cursor.lastrowid # may want to use this for other cases...
+
+            # Insert Event Pages (GollumEvent (i.e. Wiki changes))
+            if get_payload('pages'):
+                page_ids = []
+                for page in get_payload('pages'):
+                    name = page['name']
+                    title = page['title']
+                    action = page['action']
+                    sha = page['sha']
+                    url = page['html_url']
+
+                    query = 'select count(*) from event_page where name=%s and url=%s'
+                    cursor.execute(query, (name, url,))
+                    exists = cursor.fetchone()[0] != 0
+
+                    if not exists:
+                        logger.debug(f'Inserted new event page {name}')
+                        query = 'insert into event_page (name, title, action, sha, url) values (%s, %s, %s, %s, %s)'
+                        cursor.execute(query, (name, title, action, sha, url,))
+                        self.db.commit()
+
+                    query = 'select id from event_org where name=%s and url=%s'
+                    cursor.execute(query, (name, url,))
+                    event_page_id = cursor.fetchone()[0]
+                    page_ids.append(event_page_id)
+
+                for page_id in page_ids:
+                    query = f'select count(*) from event_page where id=%s'
+                    cursor.execute(query, (page_id,))
+                    exists = cursor.fetchone()[0] != 0
+
+                    if not exists:
+                        logger.debug('Inserted new event has event page')
+                        query = 'insert into event_has_page (payload, page) values (%s, %s)'
+                        cursor.execute(query, (event_payload_id, page_id))
+                        self.db.commit()
+
+                # Insert Event
+                api_id = event['id']
+                type = event['type']
+                public = event['public']
+                created_at = event['created_at']
+
+                query = f'select count(*) from event where api_id=%s and created_at=%s'
+                cursor.execute(query, (api_id, created_at))
+                exists = cursor.fetchone()[0] != 0
+
+                if not exists:
+                    logger.debug(f'Inserted new event {type}')
+                    query = 'insert into event (api_id, type, public, created_at, payload, repo, actor, org) values (%s, %s, %s, %s, %s, %s, %s, %s)'
+                    cursor.execute(query, (api_id, type, public, created_at, event_payload_id, event_repo_id, event_actor_id, event_org_id))
+                    self.db.commit()
+
         cursor.close()
 
 if __name__ == '__main__':
