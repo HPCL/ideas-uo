@@ -799,7 +799,7 @@ class DatabaseInterface:
 
             if not exists:
                 logger.debug(f'Inserted new event actor {login}')
-                query = 'insert into event_actor (author_id, login, url, avatar_url, gravatar_id) values (%s, %s, %s, %s, %s)'
+                query = 'insert into event_actor (actor_id, login, url, avatar_url, gravatar_id) values (%s, %s, %s, %s, %s)'
                 cursor.execute(query, (actor_id, login, url, avatar_url, gravatar_id))
                 self.db.commit()
 
