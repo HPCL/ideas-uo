@@ -765,21 +765,23 @@ class DatabaseInterface:
 
 
     def add_events(self, url):
-        parse_url = urlparse(url)
-        owner, repo = parse_url.path[1:-4].split('/')
-        root = parse_url.netloc[:-4]
-
         cursor = self.db.cursor()
+        if 'ECP-Astro' in url:
+            project_id = 26
+            owner, repo = 'ECP-Astro', 'FLASH5'
+        else:
+            parse_url = urlparse(url)
+            owner, repo = parse_url.path[1:-4].split('/')
+            root = parse_url.netloc[:-4]
 
-        query = 'select id from project where source_url=%s'
-        cursor.execute(query, (url,))
-        project_id = cursor.fetchone()[0]
+            query = 'select id from project where source_url=%s'
+            cursor.execute(query, (url,))
+            project_id = cursor.fetchone()[0]
 
         GitHubAPIClient.set_credentials(username=GITHUB_LOGIN, token=GITHUB_TOKEN)
         GitHubAPIClient.check_credentials()
 
         logger.debug('Grabbing GitHub events from API...')
-        owner, repo = url.split('https://www.github.com')[1].split('/')
         data = GitHubAPIClient.fetch_events(owner=owner, repository=repo)
         cursor.close()
 
