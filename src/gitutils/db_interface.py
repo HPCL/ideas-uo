@@ -2,6 +2,7 @@
 
 import argparse
 import atexit
+import configparser
 import datetime
 import logging
 import os
@@ -13,6 +14,7 @@ import MySQLdb
 
 from src.gitutils.gitcommand import GitCommand
 from src.gitutils.graphql_interface import fetch_prs, fetch_issues, Source
+from src.gitutils.github_api import GitHubAPIClient
 
 # Setup Logger
 logger = logging.getLogger('db_interface')
@@ -22,6 +24,12 @@ ch.setLevel(level=logging.DEBUG)
 formatter = logging.Formatter(fmt="[%(levelname)s]: %(asctime)s - %(message)s")
 ch.setFormatter(fmt=formatter)
 logger.addHandler(hdlr=ch)
+
+# Read API credentials
+config = configparser.ConfigParser()
+config.read('credentials.ini')
+GITHUB_LOGIN = config.get('github', 'login')
+GITHUB_TOKEN = config.get('github', 'token')
 
 class DatabaseInterface:
 
@@ -51,6 +59,12 @@ class DatabaseInterface:
             logger.debug('Adding GitHub/GitLab prs & comments to database...')
             project = self.args.add_prs
             self.add_prs(project, since=self.args.since, until=self.args.until)
+
+        elif self.args.add_events:
+            logger.debug('Adding GitHub events to database...')
+            project = self.args.add_events
+            self.add_events(project)
+
         else:
             raise Exception('Unknown argument mode.')
 
@@ -749,6 +763,26 @@ class DatabaseInterface:
 
         cursor.close()
 
+
+    def add_events(self, url):
+        parse_url = urlparse(url)
+        owner, repo = parse_url.path[1:-4].split('/')
+        root = parse_url.netloc[:-4]
+
+        cursor = self.db.cursor()
+
+        query = 'select id from project where source_url=%s'
+        cursor.execute(query, (url,))
+        project_id = cursor.fetchone()[0]
+
+        GitHubAPIClient.set_credentials(username=GITHUB_LOGIN, token=GITHUB_TOKEN)
+        GitHubAPIClient.check_credentials()
+
+        logger.debug('Grabbing GitHub events from API...')
+        owner, repo = url.split('https://www.github.com')[1].split('/')
+        data = GitHubAPIClient.fetch_events(owner=owner, repository=repo)
+        cursor.close()
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
@@ -765,6 +799,7 @@ if __name__ == '__main__':
     # TODO: update graphql queries to use --since and --until
     group.add_argument('--add_issues', help='add GitHub/Gitlab issues', type=str)
     group.add_argument('--add_prs', help='add GitHub/Gitlab pull requests', type=str)
+    group.add_argument('--add_events', help='add GitHub events', type=str)
 
     # Misc Arguments
     parser.add_argument('--force_epoch', help='force update from utc epoch', action='store_true')
