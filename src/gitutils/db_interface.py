@@ -873,18 +873,16 @@ class DatabaseInterface:
             push_id = get_payload('push_id')
             size = get_payload('size')
             distinct_size = get_payload('distinct_size')
-            head = get_payload('head')
-            before = get_payload('before')
+            head_sha = get_payload('head')
+            before_sha = get_payload('before')
             release_url = get_payload('release', 'html_url')
             effective_date = get_payload('effective_date')
 
             logger.debug('Inserted new event payload')
-            query = 'insert into event_payload (action, ref, ref_type, master_branch, description, forkee_url, issue_url, comment_url, member_login, pr_number, pr_url, pr_review_url, push_id, size, distinct_size, head, before, release_url, effective_date) values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
-            cursor.execute(query, (action, ref, ref_type, master_branch, description, forkee_url, issue_url, comment_url, member_login, pr_number, pr_url, pr_review_url, push_id, size, distinct_size, head, before, release_url, effective_date))
+            query = '''insert into event_payload (action, ref, ref_type, master_branch, description, forkee_url, issue_url, comment_url, member_login, pr_number, pr_url, pr_review_url, push_id, size, distinct_size, head_sha, before_sha, release_url, effective_date) values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
+            cursor.execute(query, (action, ref, ref_type, master_branch, description, forkee_url, issue_url, comment_url, member_login, pr_number, pr_url, pr_review_url, push_id, size, distinct_size, head_sha, before_sha, release_url, effective_date))
             self.db.commit()
 
-            query = 'select count(*) from event_payload'
-            cursor.execute(query)
             event_payload_id = cursor.lastrowid # may want to use this for other cases...
 
             # Insert Event Pages (GollumEvent (i.e. Wiki changes))
@@ -923,21 +921,20 @@ class DatabaseInterface:
                         cursor.execute(query, (event_payload_id, page_id))
                         self.db.commit()
 
-                # Insert Event
-                api_id = event['id']
-                type = event['type']
-                public = event['public']
-                created_at = event['created_at']
-
-                query = f'select count(*) from event where api_id=%s and created_at=%s'
-                cursor.execute(query, (api_id, created_at))
-                exists = cursor.fetchone()[0] != 0
-
-                if not exists:
-                    logger.debug(f'Inserted new event {type}')
-                    query = 'insert into event (api_id, type, public, created_at, payload, repo, actor, org) values (%s, %s, %s, %s, %s, %s, %s, %s)'
-                    cursor.execute(query, (api_id, type, public, created_at, event_payload_id, event_repo_id, event_actor_id, event_org_id))
-                    self.db.commit()
+            # Insert Event
+            api_id = event['id']
+            type = event['type']
+            public = event['public']
+            created_at = event['created_at']
+            created_at = arrow.get(created_at).datetime.strftime('%Y-%m-%d %H:%M:%S')
+            query = f'select count(*) from event where api_id=%s and created_at=%s'
+            cursor.execute(query, (api_id, created_at))
+            exists = cursor.fetchone()[0] != 0
+            if not exists:
+                logger.debug(f'Inserted new event {type}')
+                query = 'insert into event (api_id, type, public, created_at, payload_id, repo_id, actor_id, org_id) values (%s, %s, %s, %s, %s, %s, %s, %s)'
+                cursor.execute(query, (api_id, type, public, created_at, event_payload_id, event_repo_id, event_actor_id, event_org_id))
+                self.db.commit()
 
         cursor.close()
 
