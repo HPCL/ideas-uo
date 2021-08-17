@@ -766,7 +766,7 @@ class DatabaseInterface:
 
     def add_events(self, url):
         cursor = self.db.cursor()
-        if 'ECP-Astro' in url:
+        if url == '/shared/repos/FLASH5':
             project_id = 26
             owner, repo = 'ECP-Astro', 'FLASH5'
         else:
