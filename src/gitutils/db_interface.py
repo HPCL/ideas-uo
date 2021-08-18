@@ -934,11 +934,10 @@ class DatabaseInterface:
                         self.db.commit()
 
             # Insert Event
-            if not event_exists:
-                logger.debug(f'Inserted new event {type}')
-                query = 'insert into event (project_id, api_id, type, public, created_at, payload_id, repo_id, actor_id, org_id) values (%s, %s, %s, %s, %s, %s, %s, %s, %s)'
-                cursor.execute(query, (project_id, api_id, type, public, created_at, event_payload_id, event_repo_id, event_actor_id, event_org_id))
-                self.db.commit()
+            logger.debug(f'Inserted new event {type}')
+            query = 'insert into event (project_id, api_id, type, public, created_at, payload_id, repo_id, actor_id, org_id) values (%s, %s, %s, %s, %s, %s, %s, %s, %s)'
+            cursor.execute(query, (project_id, api_id, type, public, created_at, event_payload_id, event_repo_id, event_actor_id, event_org_id))
+            self.db.commit()
 
         cursor.close()
 
