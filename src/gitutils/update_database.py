@@ -44,6 +44,7 @@ def update():
         # Add events
         event_log_path = os.path.join(LOG_DIR, f'{name}_event.log')
         event_command = f'nohup python3 -m src.gitutils.db_interface --username {USERNAME} --password {PASSWORD} --add_events {source_url} > {event_log_path} 2>&1 &'
-
+        os.system(event_command)
+        
 if __name__ == '__main__':
     update()
