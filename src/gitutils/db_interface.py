@@ -83,7 +83,7 @@ class DatabaseInterface:
             name = os.path.split(url)[-1]
         return name
 
-    def add_prs(self, url, since=datetime.datetime.utcfromtimestamp(0).isoformat(), until=datetime.datetime.today().isoformat()):
+    def add_prs(self, url, since, until):
 
         parse_url = urlparse(url)
         owner, repo = parse_url.path[1:-4].split('/')
@@ -341,7 +341,7 @@ class DatabaseInterface:
 
         cursor.close()
 
-    def add_issues(self, url, since=datetime.datetime.utcfromtimestamp(0).isoformat(), until=datetime.datetime.today().isoformat()):
+    def add_issues(self, url, since, until):
 
         parse_url = urlparse(url)
         owner, repo = parse_url.path[1:-4].split('/')
@@ -564,12 +564,9 @@ class DatabaseInterface:
             new_project = False
 
             # Update existing project
-            # TODO: move update to end of procedure so fetching git info comes from last_update
             query = 'select id from project where source_url=%s'
             cursor.execute(query, (url,))
             project_id = cursor.fetchone()[0]
-            query = 'update project set last_updated=utc_timestamp() where id=%s'
-            cursor.execute(query, (project_id,))
         else:
             logger.debug('Unknown git project.')
             new_project = True
@@ -654,6 +651,9 @@ class DatabaseInterface:
             logger.debug(f'Project from {url} updated.')
         else:
             logger.debug(f'New project from {url} inserted.')
+
+        query = 'update project set last_updated=utc_timestamp() where id=%s'
+        cursor.execute(query, (project_id,))
 
     def process_project(self, url, since, until):
         name = self.get_git_name(url)
@@ -934,11 +934,10 @@ class DatabaseInterface:
                         self.db.commit()
 
             # Insert Event
-            if not event_exists:
-                logger.debug(f'Inserted new event {type}')
-                query = 'insert into event (project_id, api_id, type, public, created_at, payload_id, repo_id, actor_id, org_id) values (%s, %s, %s, %s, %s, %s, %s, %s, %s)'
-                cursor.execute(query, (project_id, api_id, type, public, created_at, event_payload_id, event_repo_id, event_actor_id, event_org_id))
-                self.db.commit()
+            logger.debug(f'Inserted new event {type}')
+            query = 'insert into event (project_id, api_id, type, public, created_at, payload_id, repo_id, actor_id, org_id) values (%s, %s, %s, %s, %s, %s, %s, %s, %s)'
+            cursor.execute(query, (project_id, api_id, type, public, created_at, event_payload_id, event_repo_id, event_actor_id, event_org_id))
+            self.db.commit()
 
         cursor.close()
 
