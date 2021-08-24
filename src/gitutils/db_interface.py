@@ -95,7 +95,7 @@ class DatabaseInterface:
         cursor.execute(query, (url,))
         project_id = cursor.fetchone()[0]
 
-        if 'ECP-ASTRO' in url:
+        if 'ECP-Astro' in url:
             project_id = 26
 
         if root.lower() == 'github':
@@ -353,7 +353,7 @@ class DatabaseInterface:
         cursor.execute(query, (url,))
         project_id = cursor.fetchone()[0]
 
-        if 'ECP-ASTRO' in url:
+        if 'ECP-Astro' in url:
             project_id = 26
 
         if root.lower() == 'github':
@@ -680,7 +680,7 @@ class DatabaseInterface:
         cursor.execute(query, (url,))
         project_id = cursor.fetchone()[0]
 
-        if 'ECP-ASTRO' in url:
+        if 'ECP-Astro' in url:
             project_id = 26
 
         # Insert authors
