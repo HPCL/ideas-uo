@@ -12,7 +12,7 @@
 3) Misc Information
     * The Misc Information table family is for tables that do not belong to other families. Currently, these tables store project tags, simple strings that we can add to any project, and person information. The person information tables arefor collating authors, whom may have multiple logins, emails, etc. to a singular entity.
 4) GitHub/GitLab Issues and Pull Requests
-    * The tables in this family contain information associated with pull requests, issues, comments, milestones, etc. from GitHub and GitLab. These are fetched using the [GitHub GraphQL API](https://docs.github.com/en/graphql) and the [GitLab GraphQL API](https://docs.gitlab.com/ee/api/graphql/)
+    * The tables in this family contain information associated with pull requests, issues, comments, milestones, etc. from GitHub and GitLab. These are fetched using the [GitHub GraphQL API](https://docs.github.com/en/graphql) and the [GitLab GraphQL API](https://docs.gitlab.com/ee/api/graphql/) which out perform their REST API counterparts. The queries can be seen in `src/gitutils/graphql_queries.py`.
 
 *For further information, see the `models.py` file in the `database/` directory on the `sansa` django path.*
 
