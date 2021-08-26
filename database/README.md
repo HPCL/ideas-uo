@@ -27,6 +27,32 @@
 
 Command line script for updating and adding new projects to the database. This script should be used by just the admins and users should look at the `examples/` on how to access the data. Must be run in the `ideas-uo/` (top level) directory. By default the `--host`, `--port`, and `--database` flags are set to the `sansa` MySQL IDEAS database.
 
+#### API Usage
+To use the GitHub and GitLab APIs, there needs to be a `credentials.ini` file in the `ideas-io/` directory in the following format:
+
+```ini
+[gitlab]
+token = my_gitlab_token
+
+[github]
+login = my_github_login
+token = my_github_token
+```
+See [GitHub Personal Access Token](https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token) for creating a GitHub token. Make sure that the token generated uses the following [scopes](https://docs.github.com/en/graphql/guides/forming-calls-with-graphql):
+
+```
+user
+public_repo
+repo
+repo_deployment
+repo:status
+read:repo_hook
+read:org
+read:public_key
+read:gpg_key
+```
+See [GitLab Personal Access Token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html) for creating a GitLab token. 
+
 #### Adding/updating a Git project:
 ```bash
 python3 -m src.gitutils.db_interface --username USERNAME --password PASSWORD --add_project PROJECT_URL
