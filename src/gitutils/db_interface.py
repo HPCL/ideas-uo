@@ -654,6 +654,7 @@ class DatabaseInterface:
 
         query = 'update project set last_updated=utc_timestamp() where id=%s'
         cursor.execute(query, (project_id,))
+        self.db.commit()
 
     def process_project(self, url, since, until):
         name = self.get_git_name(url)
