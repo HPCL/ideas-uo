@@ -28,7 +28,7 @@
 Command line script for updating and adding new projects to the database. This script should be used by just the admins and users should look at the `examples/` on how to access the data. Must be run in the `ideas-uo/` (top level) directory. By default the `--host`, `--port`, and `--database` flags are set to the `sansa` MySQL IDEAS database.
 
 #### API Usage
-To use the GitHub and GitLab APIs, there needs to be a `credentials.ini` file in the `ideas-io/` directory in the following format:
+To use the GitHub and GitLab APIs, there needs to be a `credentials.ini` file in the `ideas-uo/` directory in the following format:
 
 ```ini
 [gitlab]
@@ -82,6 +82,14 @@ python3 -m src.gitutils.db_interface --username USERNAME --password PASSWORD --a
 * To add tags to a project use the `--tags TAG [TAG ...]` flag when using the `--add_project` command.
 * To indicate that a project is a fork of another project use `--fork_of URL` where `URL` is the Git url of the existing project. 
 * To indicate that a project is a child of antoher project use `--child_of URL`. See above.
+
+## Updating Database Schema via Django
+
+On `sansa` navigate to `/shared/soft/ideas_db/ideas_django` and open up `database/models.py`. See the [Django model field reference](https://docs.djangoproject.com/en/3.2/ref/models/fields/) for more details (check version of Django on `sanasa` as all fields may not be supported).
+
+After making changes to `database/models.py` do the following:
+1. Run `python3 manage.py makemigrations`. If that passes proceed to the next step.
+2. Run `python3 manage.py migrate`. Then the database will be updated.
 
 ## Django/MySQL Notable Changes
 
