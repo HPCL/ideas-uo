@@ -1,0 +1,555 @@
+<html>
+	
+	{% load static %}
+
+	<head>
+		
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">	
+	
+		<script src="{% static "admin/js/vendor/jquery/jquery.min.js" %}"></script>
+
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
+
+		<style>
+		/*
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+		*/
+
+
+			/* The sidebar menu */
+			.sidenav {
+			  height: 100%; /* Full-height: remove this if you want "auto" height */
+			  width: 200px; /* Set the width of the sidebar */
+			  position: fixed; /* Fixed Sidebar (stay in place on scroll) */
+			  z-index: 1; /* Stay on top */
+			  top: 0; /* Stay at the top */
+			  left: 0;
+			  background-color: #111; /* Black */
+			  overflow-x: hidden; /* Disable horizontal scroll */
+			  padding-top: 20px;
+			}
+
+			/* The navigation menu links */
+			.sidenav a {
+			  padding: 6px 8px 6px 16px;
+			  text-decoration: none;
+			  font-size: 22px;
+			  color: #818181;
+			  display: block;
+			}
+
+			/* When you mouse over the navigation links, change their color */
+			.sidenav a:hover {
+			  color: #f1f1f1;
+			}
+
+			/* Style page content */
+			.main {
+			  margin-left: 200px; /* Same as the width of the sidebar */
+			  padding: 0px 10px;
+			}
+
+			/* On smaller screens, where height is less than 450px, change the style of the sidebar (less padding and a smaller font size) */
+			@media screen and (max-height: 450px) {
+			  .sidenav {padding-top: 15px;}
+			  .sidenav a {font-size: 18px;}
+			}
+
+			.all_links {
+				stroke: #999;
+				stroke-opacity: 0.7;
+			}
+			.all_nodes {
+				stroke: #fff;
+				stroke-width: 1.5px;
+			}
+			.domain {
+				fill: none;
+				stroke: #000;
+				stroke-opacity: .3;
+				stroke-width: 10px;
+				stroke-linecap: round;
+			}
+			.halo {
+				fill: none;
+				stroke: #ddd;
+				stroke-width: 8px;
+				stroke-linecap: round;
+			}
+			.tick {
+				font-size: 12px;
+			}
+			.selecting circle {
+				fill-opacity: .2;
+			}
+			.selecting circle.selected {
+				stroke: #f00;
+			}
+			.handle {
+				fill: #fff;
+				stroke: #000;
+				stroke-opacity: .5;
+				stroke-width: 1.25px;
+				cursor: pointer;
+			}
+
+
+			#cy {
+		        width: 85%;
+		        height: 80%;
+		        /*position: absolute;
+		        top: 0px;
+		        left: 0px;*/
+		    }
+
+		</style>
+
+	</head>
+
+
+	<body>
+		<div class="sidenav">
+		  <a id="" href="#" onclick="" style="color:white; pointer-events: none; cursor: default;">IDEAS</a>
+
+		  <br/>
+
+		  <a id="" href="." onclick="">Home</a>
+		  <a id="" href="#" onclick="">Branches</a>
+		  <a id="" href="." onclick="">About</a>
+
+		  <br/>
+
+		  <div class="dashboard_hiding_for_now" style="display:none;">
+			  <a id="button1" href="#">Grid On</a>
+			  <a id="button2" href="#">Grid Off</a>
+			  <a id="button3" href="#">Display LOCCs</a>
+			  <a id="button4" href="#">Display Commits</a>
+		  </div>
+		</div>
+
+		<div id="home" class="main" style="padding:50px 50px 0px 50px;">
+
+			<h2>Pull Request Helper</h2><br/>
+
+			<b>Pull Request:</b><br/>
+			<div style="margin-top:6px;"><u>Title</u>: {{pr.title}}</div>
+			<div style="margin-top:6px;"><u>Date</u>: {{pr.created_at}}</div>
+			<div style="margin-top:6px;"><u>Description</u>: {{pr.description}}</div>
+			<div style="margin-top:6px; margin-bottom:8px;"><u>URL</u>: <a target="_blank" href="{{pr.url}}">{{pr.url}}</a></div>
+
+			<button id="showcommitsbutton" class="btn btn-sm btn-primary" onclick="$('#showcommitsbutton').hide(); $('#hidecommitsbutton').show(); $('#commitsdiv').show();">Show Commits</button><button id="hidecommitsbutton" class="btn btn-sm btn-primary" onclick="$('#hidecommitsbutton').hide(); $('#showcommitsbutton').show(); $('#commitsdiv').hide();" style="display:none;">Hide Commits</button> 
+			
+			<button class="btn btn-sm btn-primary">Discussion</button> 
+			
+			<button id="showissuesbutton" class="btn btn-sm btn-primary" onclick="$('#showissuesbutton').hide(); $('#hideissuesbutton').show(); $('#issuesdiv').show();">Show Issues</button><button id="hideissuesbutton" class="btn btn-sm btn-primary" onclick="$('#hideissuesbutton').hide(); $('#showissuesbutton').show(); $('#issuesdiv').hide();" style="display:none;">Hide Issues</button> 
+
+			<br/>
+			<div id="commitsdiv" style="display:none; border:1px solid grey; margin:10px; padding:10px;">
+				<b>Commits:</b>
+				<table class="table">
+					{% for commit in commits %}
+					<tr>
+						<td>{{commit.id}}</td>
+						<td>{{commit.hash}}</td>
+						<td>{{commit.message}}</td>
+					</tr>
+					{% endfor %}
+				</table>
+			</div>
+			<div id="issuesdiv" style="display:none; border:1px solid grey; margin:10px; padding:10px;">
+				<b>Issues:</b>
+				<table class="table">
+					{% for issue in issues %}
+					<tr>
+						<td>{{issue.title}}</td>
+						<td>{{issue.description}}</td>
+						<td>{{issue.url}}</td>
+					</tr>
+					{% endfor %}
+				</table>
+			</div>
+			<br/>
+
+			<b>Potential follow on:</b> <span></span>
+			<br/>
+			<div>
+		      <div class="accordion" id="accordionExample">
+		        <div class="accordion-item">
+		          <h2 class="accordion-header" id="headingOne">
+		            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+		              <strong>Documentation</strong>
+		            </button>
+		          </h2>
+		          <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+		            <div class="accordion-body">
+   					
+   					  <b>Does this PR affect user documentation?</b><br/>
+   					  <div class="btn-group btn-group-sm" role="group">
+   					  	<button type="button" class="btn btn-primary">Yes</button> <button type="button" class="btn btn-secondary">No</button>
+   					  </div>
+   					  <div style="margin-left:30px;">
+	   					  <i>Please identify the chapter:</i><br/>
+	   					  <div>
+		   					  &emsp;<input type="checkbox"/> Chapter 1 - Introduction<br/>
+		   					  <b>Part I Getting Started</b><br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 2 - Quick Start<br/>
+		   					  <b>Part II The Flash-X Software System</b><br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 3 - Overview of Flash-X architecture<br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 4 - The Flash-X configuration script (setup)<br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 5 - The Flash.h file<br/>
+							  <b>Part III Driver Unit</b><br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 6 - Driver Unit<br/>
+		   					  <b>Part IV Infrastructure Units</b><br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 7 - Grid Unit<br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 8 - IO Unit<br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 9 - Runtime Parameters Unit<br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 10 - Multispecies Unit<br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 11 - Physical Constants Unit<br/>
+		   					  <b>Part V Physics Units</b><br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 12 - Hydrodynamics Units<br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 13 - Incompressible Navier-Stokes Unit<br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 14 - Equation of State Unit<br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 15 - Local Source Terms<br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 16 - Gravity Unit<br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 17 - Particles Unit<br/>
+		   					  <b>Part VI Monitor Units</b><br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 18 - Logfile Unit<br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 19 - Timer and Profiler Units<br/>
+		   					  <b>Part VII Tools</b><br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 20 - VisIt<br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 21 - Serial Flash-X Output Comparison Utility (sfocu)<br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 22 - Drift<br/>
+		   				  </div>
+					  </div>
+					  <br/>
+
+   					  <b>Analysis</b><br/>
+   					  <div style="margin-left:30px;">
+	   					  Here are some things you should mention in the PR:
+	   					  <ul>
+	   					  	<li>TODO</li>
+	   					  	<li>TODO</li>
+	   					  	<li>TODO</li>
+	   					  </ul>
+	   				  </div>
+		              
+		              <!--h6 style="margin-left:20px;">Infrastructure or physics</h6>
+		                <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+		              <h6 style="margin-left:20px;margin-top:12px;">New functionality or alternative implementation</h6>
+		                <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+		              <h6 style="margin-left:20px;margin-top:12px;">Description -- including design decisions what and why</h6>
+		                <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+		              <h6 style="margin-left:20px;margin-top:12px;">How tested</h6>
+		                <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+		              <h6 style="margin-left:20px;margin-top:12px;">Time spent</h6>
+		                <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+		              <h6 style="margin-left:20px;margin-top:12px;">References if applicable</h6>
+		                <textArea rows="2" style="margin-left:40px; width:400px;"></textArea-->
+		            </div>
+		          </div>
+		        </div>
+		      </div>
+
+		      <br/>
+
+		      <div class="accordion" id="accordionExample6">
+		        <div class="accordion-item">
+		          <h2 class="accordion-header" id="headingTwo">
+		            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+		              <strong>Testing</strong>
+		            </button>
+		          </h2>
+		          <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+		            <div class="accordion-body">
+		              
+   					  <b>Does this PR require new or modified test cases?</b><br/>
+   					  <div class="btn-group btn-group-sm" role="group">
+   					  	<button type="button" class="btn btn-primary">Yes</button> <button type="button" class="btn btn-secondary">No</button>
+   					  </div>
+   					  <div style="margin-left:30px;">
+	   					  Please identify code packages<br/>
+	   					  <div>
+		   					  <input type="checkbox"/> Package 1<br/>
+		   					  <input type="checkbox"/> Package 2<br/>
+		   					  <input type="checkbox"/> Package 3<br/>
+		   				  </div>
+					  </div>
+					  <br/>
+
+   					  <b>Analysis</b><br/>
+   					  <div style="margin-left:30px;">
+	   					  Here are some things you should mention in the PR:
+	   					  <ul>
+	   					  	<li>Something</li>
+	   					  	<li>Someone</li>
+	   					  	<li>Things and dodads</li>
+	   					  </ul>
+	   				  </div>
+
+		              <!--h6 style="margin-left:20px;">Infrastructure or physics</h6>
+		                <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+
+		              <h6 style="margin-left:20px; margin-top:12px;">How tested</h6>
+		                <textArea rows="2" style="margin-left:40px; width:400px;"></textArea-->
+
+		            </div>
+		          </div>
+		        </div>
+		      </div>
+
+		      <br/>
+
+		      <div class="accordion" id="accordionExample7">
+		        <div class="accordion-item">
+		          <h2 class="accordion-header" id="headingThree">
+		            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+		              <strong>Patterns</strong>
+		            </button>
+		          </h2>
+		          <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
+		            <div class="accordion-body">
+
+		              <div>
+		           		<img id="patterngraph1" src="" style="display:none; width:600px;"/>
+		           		<span id="patternlabel1">Loading...<br/></span>
+		           		<br/>
+		           	  </div>
+
+					  <b>Does this PR meet any of these patterns?</b><br/>
+					  <div style="margin-left:30px;">
+	   					  <div>
+		   					  <input type="checkbox"/> Code Churn - description<br/>
+		   					  <input type="checkbox"/> Pattern 2 - description<br/>
+		   					  <input type="checkbox"/> Pattern 3 - description<br/>
+		   				  </div>
+					  </div>
+					  <br/>
+
+					  <b>Analysis</b><br/>
+   					  <div style="margin-left:30px;">
+	   					  Here are some things you should mention in the PR:
+	   					  <ul>
+	   					  	<li>Something</li>
+	   					  	<li>Someone</li>
+	   					  	<li>Things and dodads</li>
+	   					  </ul>
+	   				  </div>
+
+		            </div>
+		          </div>
+		        </div>
+		      </div>
+
+		    </div>
+
+		    <br/>
+			<!--b>Manual TOC:</b> <span></span>
+			<br/>
+			<br/>
+			
+			<b>Analysis Results:</b> <span ></span>
+			<br/>
+			<br/-->
+			
+			<!--b>Template:</b> <span></span>
+			<br/>
+			<br/>
+			<div>
+		      <div class="accordion" id="accordionExample">
+		        <div class="accordion-item">
+		          <h2 class="accordion-header" id="headingOne">
+		            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+		              <strong>New capability</strong>
+		            </button>
+		          </h2>
+		          <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+		            <div class="accordion-body">
+		              <h6 style="margin-left:20px;">Infrastructure or physics</h6>
+		                <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+		              <h6 style="margin-left:20px;margin-top:12px;">New functionality or alternative implementation</h6>
+		                <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+		              <h6 style="margin-left:20px;margin-top:12px;">Description -- including design decisions what and why</h6>
+		                <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+		              <h6 style="margin-left:20px;margin-top:12px;">How tested</h6>
+		                <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+		              <h6 style="margin-left:20px;margin-top:12px;">Time spent</h6>
+		                <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+		              <h6 style="margin-left:20px;margin-top:12px;">References if applicable</h6>
+		                <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+		            </div>
+		          </div>
+		        </div>
+		      </div>
+
+		      <div class="accordion" id="accordionExample6">
+		        <div class="accordion-item">
+		          <h2 class="accordion-header" id="headingTwo">
+		            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+		              <strong>Enhancement</strong>
+		            </button>
+		          </h2>
+		          <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+		            <div class="accordion-body">
+		              <h6 style="margin-left:20px;">Infrastructure or physics</h6>
+		                <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+
+		              <div class="accordion" id="accordionExample2">
+		                <div class="accordion-item">
+		                  <h2 class="accordion-header" id="headingOne2">
+		                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne2" aria-expanded="true" aria-controls="collapseOne2">
+		                      <strong>Major</strong>
+		                    </button>
+		                  </h2>
+		                  <div id="collapseOne2" class="accordion-collapse collapse" aria-labelledby="headingOne2" data-bs-parent="#accordionExample2">
+		                    <div class="accordion-body">
+		                      <h6 style="margin-left:20px;">Description of design choices, what and why</h6>
+		                        <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+		                      <h6 style="margin-left:20px; margin-top:12px;">Time spent</h6>
+		                        <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+		                    </div>
+		                  </div>
+		                </div>
+		              </div>
+
+		              <div class="accordion" id="accordionExample3">
+		                <div class="accordion-item">
+		                  <h2 class="accordion-header" id="headingOne3">
+		                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne3" aria-expanded="true" aria-controls="collapseOne3">
+		                      <strong>Minor</strong>
+		                    </button>
+		                  </h2>
+		                  <div id="collapseOne3" class="accordion-collapse collapse" aria-labelledby="headingOne3" data-bs-parent="#accordionExample3">
+		                    <div class="accordion-body">
+		                      <h6 style="margin-left:20px;">Generic content</h6>
+		                        <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+		                    </div>
+		                  </div>
+		                </div>
+		              </div>
+
+		              <h6 style="margin-left:20px; margin-top:12px;">How tested</h6>
+		                <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+
+		            </div>
+		          </div>
+		        </div>
+		      </div>
+
+		      <div class="accordion" id="accordionExample7">
+		        <div class="accordion-item">
+		          <h2 class="accordion-header" id="headingThree">
+		            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+		              <strong>Bug-fix</strong>
+		            </button>
+		          </h2>
+		          <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
+		            <div class="accordion-body">
+
+		              <div class="accordion" id="accordionExample4">
+		                <div class="accordion-item">
+		                  <h2 class="accordion-header" id="headingOne4">
+		                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne4" aria-expanded="true" aria-controls="collapseOne4">
+		                      <strong>Major</strong>
+		                    </button>
+		                  </h2>
+		                  <div id="collapseOne4" class="accordion-collapse collapse" aria-labelledby="headingOne4" data-bs-parent="#accordionExample4">
+		                    <div class="accordion-body">
+		                      <h6 style="margin-left:20px;">Description of the bug</h6>
+		                        <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+		                      <h6 style="margin-left:20px; margin-top:12px;">Approach for fixing</h6>
+		                        <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+		                      <h6 style="margin-left:20px; margin-top:12px;">How tested</h6>
+		                        <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+		                      <h6 style="margin-left:20px; margin-top:12px;">Time spent</h6>
+		                        <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+		                    </div>
+		                  </div>
+		                </div>
+		              </div>
+
+		              <div class="accordion" id="accordionExample5">
+		                <div class="accordion-item">
+		                  <h2 class="accordion-header" id="headingOne5">
+		                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne5" aria-expanded="true" aria-controls="collapseOne3">
+		                      <strong>Minor</strong>
+		                    </button>
+		                  </h2>
+		                  <div id="collapseOne5" class="accordion-collapse collapse" aria-labelledby="headingOne5" data-bs-parent="#accordionExample5">
+		                    <div class="accordion-body">
+		                      <h6 style="margin-left:20px;">Description and fix</h6>
+		                        <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+		                    </div>
+		                  </div>
+		                </div>
+		              </div>
+
+		              <h6 style="margin-left:20px; margin-top:12px;">Other comments</h6>
+		                <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+
+		            </div>
+		          </div>
+		        </div>
+		      </div>
+			</div-->
+
+
+			<br/>
+
+
+			<br/>
+			<table id='branches_table' class="table" style="display:none;">
+				<tbody>
+					<tr><th>Name</th><th>Author</th><th>Created</th><th>Deleted</th></tr>
+				</tbody>
+			</table>
+
+		</div>
+
+	</body>
+
+	<script>
+
+		console.log("javascript is working...");
+
+
+
+		$.ajax({url:'/dashboard/patterngraph1', data:{'test':'test'}, success:function(result){
+			console.log("success pattern");
+			console.log(result);
+
+			$('#patterngraph1').attr('src', '/media/figures/'+result['filename']);
+			$('#patternlabel1').hide();
+			$('#patterngraph1').show();
+
+
+		}});
+
+
+		$.ajax({url:'/dashboard/branchdata', data:{'test':'test'}, success:function(result){
+			console.log("success");
+			console.log(result);
+
+			$('#open_branches').html(result['open_branches'].join(' '));
+			$('#feature_branches').html(result['feature_branches'].join(' '));
+			$('#created_branches').html(result['created_branches'].join(' '));
+			$('#deleted_branches').html(result['deleted_branches'].join(' '));
+
+
+			var table = $('#branches_table > tbody:last-child');
+
+			for(var i=0; i<result['name_column'].length; i++){
+				console.log(result['name_column'][i]);
+				table.append('<tr><td>'+result['name_column'][i]+'</td><td>'+result['author_column'][i]+'</td><td>'+result['created_column'][i]+'</td><td>'+result['deleted_column'][i]+'</td></tr>');
+			}
+
+
+		}});
+
+
+
+	</script>
+
+</html>
