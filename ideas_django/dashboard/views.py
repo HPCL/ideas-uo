@@ -79,7 +79,7 @@ def branches(request):
 def branchData(request):
     print("BRANCHES DATA")
 
-    GitHubAPIClient.set_credentials(username='fickas', token='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')
+    GitHubAPIClient.set_credentials(username='fickas', token='')
 
     GitHubAPIClient.check_credentials()
 
