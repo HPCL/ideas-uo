@@ -443,7 +443,6 @@ class DatabaseInterface:
 
                 if updated_at: updated_at = arrow.get(updated_at).datetime.strftime('%Y-%m-%d %H:%M:%S')
                 if closed_at: closed_at = arrow.get(closed_at).datetime.strftime('%Y-%m-%d %H:%M:%S')
-                else: closed_at = 'null'
                 if created_at: created_at = arrow.get(created_at).datetime.strftime('%Y-%m-%d %H:%M:%S')
 
                 query = 'select count(*) from issue where url=%s'
@@ -463,6 +462,8 @@ class DatabaseInterface:
                     cursor.execute(query, params)
                 else:
                     logger.debug('Inserting new issue.')
+                    if not closed_at: closed_at = arrow.get('9999-01-01 00:00:00').datetime.strftime('%Y-%m-%d %H:%M:%S')
+
                     query = 'insert into issue (title, description, updated_at, closed_at, locked, number, state, url, author_id, project_id, created_at) values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
                     cursor.execute(query, (title, description, updated_at, closed_at, locked, number, state, iurl, author_id, project_id, created_at))
 
@@ -482,9 +483,9 @@ class DatabaseInterface:
                     state = issue['milestone']['state']
                     due_on = issue['milestone']['dueOn']
 
-                    updated_at = arrow.get(updated_at).datetime.strftime('%Y-%m-%d %H:%M:%S')
-                    created_at = arrow.get(created_at).datetime.strftime('%Y-%m-%d %H:%M:%S')
-                    due_on = arrow.get(due_on).datetime.strftime('%Y-%m-%d %H:%M:%S')
+                    if updated_at: updated_at = arrow.get(updated_at).datetime.strftime('%Y-%m-%d %H:%M:%S')
+                    if created_at: created_at = arrow.get(created_at).datetime.strftime('%Y-%m-%d %H:%M:%S')
+                    if due_on: due_on = arrow.get(due_on).datetime.strftime('%Y-%m-%d %H:%M:%S')
 
                     query = 'select count(*) from milestone where issue_id = %s'
                     cursor.execute(query, (issue_id,))
@@ -496,6 +497,8 @@ class DatabaseInterface:
                         cursor.execute(query, (state, description, title, due_on, created_at, updated_at, issue_id,))
                     else:
                         logger.debug('Inserting new milestone.')
+                        if not due_on: due_on = arrow.get('9999-01-01 00:00:00').datetime.strftime('%Y-%m-%d %H:%M:%S')
+                        if not description: description = ''
                         query = 'insert into milestone (state, description, title, due_on, created_at, updated_at, issue_id) values (%s, %s, %s, %s, %s, %s, %s)'
                         cursor.execute(query, (state, description, title, due_on, created_at, updated_at, issue_id,))
 

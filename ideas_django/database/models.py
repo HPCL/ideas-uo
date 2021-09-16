@@ -149,7 +149,7 @@ class Label(models.Model):
 
 class Issue(models.Model):
     title = models.CharField(max_length=256)
-    description = models.TextField()
+    description = models.TextField(blank=True, null=True)
     updated_at = models.DateTimeField()
     closed_at = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(null=True)
@@ -213,7 +213,7 @@ class Milestone(models.Model):
     state = models.CharField(max_length=64)
     description = models.TextField()
     title = models.CharField(max_length=256)
-    due_on = models.DateTimeField()
+    due_on = models.DateTimeField(blank=True,null=True)
     created_at = models.DateTimeField()
     updated_at = models.DateTimeField()
     issue = models.ForeignKey(Issue, on_delete=models.CASCADE, null=True)
