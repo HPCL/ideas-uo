@@ -25,8 +25,8 @@ class Project(models.Model):
     has_gitlab = models.BooleanField(default=False)
     github_last_updated = models.DateTimeField(auto_now=True, null=True)
     gitlab_last_updated = models.DateTimeField(auto_now=True, null=True)
-    fork_of = models.ForeignKey('self', on_delete=models.CASCADE, null=True, related_name='project_fork_of')
-    child_of = models.ForeignKey('self', on_delete=models.CASCADE, null=True, related_name='project_child_of')
+    fork_of = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True, related_name='project_fork_of')
+    child_of = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True, related_name='project_child_of')
 
     class Meta:
         db_table = 'project'
@@ -151,7 +151,7 @@ class Issue(models.Model):
     title = models.CharField(max_length=256)
     description = models.TextField()
     updated_at = models.DateTimeField()
-    closed_at = models.DateTimeField()
+    closed_at = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(null=True)
     locked = models.BooleanField()
     url = models.CharField(max_length=256)
