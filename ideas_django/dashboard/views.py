@@ -1,6 +1,8 @@
 import datetime
 import json
 
+import configparser
+
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.template import loader
@@ -44,6 +46,7 @@ def index(request):
 def patternGraph1(request):
     print("PATTERN DATA")
 
+
     Visualizer()
     vis = Visualizer(project_name='spack')
     vis.get_data()
@@ -79,7 +82,10 @@ def branches(request):
 def branchData(request):
     print("BRANCHES DATA")
 
-    GitHubAPIClient.set_credentials(username='fickas', token='')
+    config = configparser.ConfigParser()
+    config.read('../ideas-uo/credentials.ini')
+
+    GitHubAPIClient.set_credentials(username=config['github']['login'], token=config['github']['token'])
 
     GitHubAPIClient.check_credentials()
 
