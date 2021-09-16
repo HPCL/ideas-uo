@@ -82,8 +82,19 @@ def fetch_prs(owner, repo, source):
     while True:
         payload['json'] = {'query': query % (owner, repo),
                        'variables': {'cursor': cursor}}
-        r = requests.post(**payload)
-        j = r.json()
+        j = {}
+        while not 'data' in j.keys():
+            logger.info("Fetching data with graphql: %s" % str(payload['json']))
+            r = requests.post(**payload)
+            j = r.json()
+
+            # When the API rate limit is exceeded, j is a dictionary that looks like this:
+            # {'errors': [{'type': 'RATE_LIMITED', 'message': 'API rate limit exceeded for user ID 3604514.'}]}
+            if 'errors' in j.keys():
+                if j['errors'].get('type') == 'RATE_LIMITED':
+                    logger.warn('GraphQL API rate limit exceeded (5000 points per hour), going to sleep for an hour')
+                    time.sleep(3600)    
+
 
         try:
             if attempt:
@@ -92,9 +103,9 @@ def fetch_prs(owner, repo, source):
             if not entry: # sometimes returns None
                 raise Exception
             attempt = 0 # clear attempts if successful
-        except:
+        except Exception as err:
             attempt += 1
-            logger.critical('Connection error with GraphQL. Retrying...')
+            logger.critical(f'Connection error with GraphQL: {err}. Retrying...')
             continue
 
         pagination = entry['pageInfo']
