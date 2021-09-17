@@ -84,7 +84,7 @@ def fetch_prs(owner, repo, source):
                        'variables': {'cursor': cursor}}
         j = {}
         while not 'data' in j.keys():
-            logger.info("Fetching data with graphql: %s" % str(payload['json']))
+            logger.info(f'{repo}: Fetching data with graphql: %s' % str(payload['json']))
             r = requests.post(**payload)
             j = r.json()
 
@@ -92,7 +92,7 @@ def fetch_prs(owner, repo, source):
             # {'errors': [{'type': 'RATE_LIMITED', 'message': 'API rate limit exceeded for user ID 3604514.'}]}
             if 'errors' in j.keys():
                 if j['errors'].get('type') == 'RATE_LIMITED':
-                    logger.warn('GraphQL API rate limit exceeded (5000 points per hour), going to sleep for an hour')
+                    logger.warn(f'{repo}: GraphQL API rate limit exceeded (5000 points per hour), going to sleep for an hour')
                     time.sleep(3600)    
 
 
@@ -191,7 +191,7 @@ def fetch_issues(owner, repo, source):
     start = time.time()
     attempt = 0
 
-    while True:
+    while attempt<100:
         payload['json'] = {'query': query % (owner, repo),
                        'variables': {'cursor': cursor}}
         r = requests.post(**payload)

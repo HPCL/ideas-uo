@@ -253,6 +253,7 @@ class DatabaseInterface:
                     if updated_at: updated_at = arrow.get(updated_at).datetime.strftime('%Y-%m-%d %H:%M:%S')
                     if created_at: created_at = arrow.get(created_at).datetime.strftime('%Y-%m-%d %H:%M:%S')
                     if due_on: due_on = arrow.get(due_on).datetime.strftime('%Y-%m-%d %H:%M:%S')
+                    else: due_on = arrow.get('9999-01-01 00:00:00').datetime.strftime('%Y-%m-%d %H:%M:%S')
 
                     query = 'select count(*) from milestone where pr_id = %s'
                     cursor.execute(query, (pr_id,))
@@ -562,6 +563,7 @@ class DatabaseInterface:
 
                     if not exists:
                         query = 'insert into author (username, url) values (%s, %s)'
+                        if not comment['author']['username']: comment['author']['username'] = ''
                         cursor.execute(query, (comment['author']['username'], comment['author']['url'],))
                         self.db.commit()
 
@@ -705,12 +707,12 @@ class DatabaseInterface:
         logger.debug(f'{name}: Mining repository. This may take a while...')
 
         if url[0] == '/':
-            logger.debug('{name}: Working on local repository.')
+            logger.debug(f'{name}: Working on local repository.')
             repo_dir = os.path.join(os.getcwd(), 'repos')
             project = GitCommand(repo_dir)
             data = project.getRepoCommitData(name, since=since, until=until, includebranches=branches)
         else:
-            logger.debug('{name}: Working on remote repository.')
+            logger.debug(f'{name}: Working on remote repository.')
             project = GitCommand('.')
             project.cloneRepo(url)
             data = project.getRepoCommitData('.', since=since, until=until, includebranches=branches)

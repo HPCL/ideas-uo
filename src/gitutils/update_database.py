@@ -40,13 +40,19 @@ def update():
 
     os.makedirs(LOG_DIR, exist_ok=True)
 
+    all_commands = ''
+    count = 0
     for name, source_url in project_info:
         # Python -- 3.9 preferred
         # Add git info
-        # This can take a long time, but is not subject to any API limits, so all projects can be updated simultaneously
+        # This can take a long time, but is not subject to any API limits, so several projects can be updated simultaneously
         git_log_path = os.path.join(LOG_DIR, f'{name}_git.log')
-        git_command = f'nohup python -m src.gitutils.db_interface --username {USERNAME} --password {PASSWORD} --add_project {source_url} 2>&1 | tee {git_log_path} &'
-        run(git_command, dry_run=False)
+        git_command = f'nohup python -m src.gitutils.db_interface --username {USERNAME} --password {PASSWORD} --add_project {source_url} 2>&1 | tee {git_log_path} '
+        count += 1
+        all_commands += git_command
+        if count % 5 == 0: all_commands += '& \n'
+        else: all_commands += '; \n'
+    run(all_commands, dry_run=False)
 
     all_commands = ''
     for name, source_url in project_info:
