@@ -1,4 +1,5 @@
 import os
+import sys
 
 try:
   import src.gitutils.command as command
@@ -369,6 +370,10 @@ def removeSuffix(s: str, suffix: str) -> str:
         return s[:-len(suffix)]
     else:
         return s[:]
+
+def repoError(repodir,err):
+    sys.stderr.write("***ERROR [gitutils.gitcommand]: %s %s" % (repodir,err))
+     
 
 def getYears(repodir):
     os.chdir(repodir)
