@@ -67,14 +67,14 @@ def collect_commit(node, source):
 
 def fetch_prs(owner, repo, source):
     if not isinstance(source, Source):
-        raise Exception(f'Unknown source: {source}')
+        raise Exception(f'{repo}: Unknown source: {source}')
 
     payload = source.value
     query = GITHUB_PULLREQUEST if source == Source.GITHUB else GITLAB_PULLREQUEST
     stage = 'repository' if source == Source.GITHUB else 'project'
 
     cursor = None
-    logger.info(f'Fetching pull requests from {source.name}...')
+    logger.info(f'{repo}: Fetching pull requests from {source.name}...')
     prs = []
     start = time.time()
     attempt = 0
@@ -98,14 +98,14 @@ def fetch_prs(owner, repo, source):
 
         try:
             if attempt:
-                logger.warning(f'Attempt {attempt}...')
+                logger.warning(f'{repo}: Attempt {attempt}...')
             entry = j['data'][stage]['pullRequests'] if source == Source.GITHUB else j['data'][stage]['mergeRequests']
             if not entry: # sometimes returns None
                 raise Exception
             attempt = 0 # clear attempts if successful
         except Exception as err:
             attempt += 1
-            logger.critical(f'Connection error with GraphQL: {err}. Retrying...')
+            logger.critical(f'{repo}: Connection error with GraphQL: {err}. Retrying...')
             continue
 
         pagination = entry['pageInfo']
@@ -165,28 +165,28 @@ def fetch_prs(owner, repo, source):
             pr['commits'] = [collect_commit(commit, source) for commit in node[cmentry]['nodes']]
             prs.append(pr)
 
-        logger.info(f'Collected {len(entry["nodes"])} pull requests.')
+        logger.info(f'{repo}: Collected {len(entry["nodes"])} pull requests.')
 
         cursor = pagination['endCursor']
         if not pagination['hasNextPage']:
             break
 
     end = time.time()
-    logger.info(f'Done in {end - start:.2f}s.')
-    logger.info(f'Got {len(prs)} pull requests.')
+    logger.info(f'{repo}: Done in {end - start:.2f}s.')
+    logger.info(f'{repo}: Got {len(prs)} pull requests.')
     return prs
 
 
 def fetch_issues(owner, repo, source):
     if not isinstance(source, Source):
-        raise exception(f'Unknown source: {source}')
+        raise exception(f'{repo}: Unknown source: {source}')
 
     payload = source.value
     query = GITHUB_ISSUE if source == Source.GITHUB else GITLAB_ISSUE
     stage = 'repository' if source == Source.GITHUB else 'project'
 
     cursor = None
-    logger.info(f'Fetching issues from {source.name}...')
+    logger.info(f'{repo}: Fetching issues from {source.name}...')
     issues = []
     start = time.time()
     attempt = 0
@@ -198,7 +198,7 @@ def fetch_issues(owner, repo, source):
         j = r.json()
         try:
             if attempt:
-                logger.warning(f'Attempt {attempt}...')
+                logger.warning(f'{repo}: Attempt {attempt}...')
             entry = j['data'][stage]['issues']
             if not entry: # sometimes returns None
                 raise Exception
@@ -256,15 +256,15 @@ def fetch_issues(owner, repo, source):
 
             issues.append(issue)
 
-        logger.info(f'Collected {len(entry["nodes"])} issues.')
+        logger.info(f'{repo}: Collected {len(entry["nodes"])} issues.')
 
         cursor = pagination['endCursor']
         if not pagination['hasNextPage']:
             break
 
     end = time.time()
-    logger.info(f'Done in {end - start:.2f}s.')
-    logger.info(f'Got {len(issues)} issues.')
+    logger.info(f'{repo}: Done in {end - start:.2f}s.')
+    logger.info(f'{repo}: Got {len(issues)} issues.')
     return issues
 
 if __name__ == '__main__':

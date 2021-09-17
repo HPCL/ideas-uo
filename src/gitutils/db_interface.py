@@ -53,23 +53,27 @@ class DatabaseInterface:
         logger.debug('Established MySQL connection.')
 
         if self.args.add_project:
-            logger.debug('Adding new project(s) to database...')
             project = self.args.add_project
+            repo = self.get_git_name(project)
+            logger.debug(f'{repo}: Adding new project(s) to database...')
             self.add_project(project, since=self.args.since, until=self.args.until, fork_of=self.args.fork_of, child_of=self.args.child_of, tags=self.args.tags)
 
         elif self.args.add_issues:
-            logger.debug('Adding GitHub/GitLab issues & comments to database...')
             project = self.args.add_issues
+            repo = self.get_git_name(project)
+            logger.debug(f'{repo}: Adding GitHub/GitLab issues & comments to database...')
             self.add_issues(project, since=self.args.since, until=self.args.until)
 
         elif self.args.add_prs:
-            logger.debug('Adding GitHub/GitLab prs & comments to database...')
             project = self.args.add_prs
+            repo = self.get_git_name(project)
+            logger.debug(f'{repo}: Adding GitHub/GitLab prs & comments to database...')
             self.add_prs(project, since=self.args.since, until=self.args.until)
 
         elif self.args.add_events:
-            logger.debug('Adding GitHub events to database...')
             project = self.args.add_events
+            repo = self.get_git_name(project)
+            logger.debug(f'{repo}: Adding GitHub events to database...')
             self.add_events(project)
 
         else:
@@ -130,24 +134,21 @@ class DatabaseInterface:
             cursor.execute(query, (url,))
             project_id = cursor.fetchone()[0]
 
-            if 'ECP-Astro' in url:
-                project_id = 26
-
             if root.lower() == 'github':
-                logger.debug('Source is GitHub.')
+                logger.debug(f'{repo}: Source is GitHub.')
                 source = Source.GITHUB
             elif root.lower() == 'gitlab':
-                logger.debug('Source is GitLab.')
+                logger.debug(f'{repo}: Source is GitLab.')
                 source = Source.GITLAB
             else:
-                logger.critical(f'Unknown source: {root}')
-                raise Exception(f'Unknown source: {root}')
+                logger.critical(f'{repo}: Unknown source: {root}')
+                raise Exception(f'{repo}: Unknown source: {root}')
 
             # This may take a while
-            logger.debug('Fetching prs. This may take a while...')
+            logger.debug(f'{repo}: PRs. This may take a while...')
 
             prs = fetch_prs(owner, repo, source)
-            logger.debug(f'Got {len(prs)} prs.')
+            logger.debug(f'{repo}: Got {len(prs)} prs.')
 
             for pr in prs:
                 username = pr['author']['username']
@@ -164,7 +165,7 @@ class DatabaseInterface:
                     cursor.execute(query, (username, email, name, aurl,))
                     self.db.commit()
 
-                    logger.debug(f'Inserted new author {username}.')
+                    logger.debug(f'{repo}: Inserted new author {username}.')
 
                 # Get author id
                 query = 'select id from author where username=%s and url=%s'
@@ -199,11 +200,11 @@ class DatabaseInterface:
                 # Insert pr
 
                 if exists:
-                    logger.debug('Found existing pr.')
+                    logger.debug(f'{repo}: Found existing PR.')
                     query = 'update pr set title = %s, description = %s, updated_at = %s, merged_at = %s, locked = %s, state = %s where url = %s and project_id = %s and head_sha = %s and created_at = %s'
                     cursor.execute(query, (title, description, updated_at, merged_at, locked, state, purl, project_id, head_sha, created_at))
                 else:
-                    logger.debug('Inserting new pr.')
+                    logger.debug(f'{repo}: Inserting new PR.')
                     query = 'insert into pr (title, description, updated_at, merged_at, locked, number, state, url, author_id, project_id, head_sha, created_at) values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
                     cursor.execute(query, (title, description, updated_at, merged_at, locked, number, state, purl, author_id, project_id, head_sha, created_at))
 
@@ -235,7 +236,7 @@ class DatabaseInterface:
                         cursor.execute(query, (pr_id, issue_id))
                         exists = cursor.fetchone()[0] != 0
                         if not exists:
-                            logger.debug(f'Inserting issue tag {issue_id} for pr {pr_id}')
+                            logger.debug(f'{repo}: Inserting issue tag {issue_id} for pr {pr_id}')
                             query = 'insert into pr_has_issue (pr_id, issue_id) values (%s, %s)'
                             cursor.execute(query, (pr_id, issue_id))
                             self.db.commit()
@@ -258,11 +259,11 @@ class DatabaseInterface:
                     exists = cursor.fetchone()[0] != 0
 
                     if exists:
-                        logger.debug('Found existing milestone.')
+                        logger.debug(f'{repo}: Found existing milestone.')
                         query = 'update milestone set state = %s, description = %s, title = %s, due_on = %s, created_at = %s, updated_at = %s where pr_id = %s'
                         cursor.execute(query, (state, description, title, due_on, created_at, updated_at, pr_id,))
                     else:
-                        logger.debug('Inserting new milestone.')
+                        logger.debug(f'{repo}: Inserting new milestone.')
                         query = 'insert into milestone (state, description, title, due_on, created_at, updated_at, pr_id) values (%s, %s, %s, %s, %s, %s, %s)'
                         cursor.execute(query, (state, description, title, due_on, created_at, updated_at, pr_id,))
 
@@ -275,7 +276,7 @@ class DatabaseInterface:
                     exists = cursor.fetchone()[0] != 0
 
                     if not exists:
-                        logger.debug('Inserting new label.')
+                        logger.debug(f'{repo}: Inserting new label.')
                         query = 'insert into label (name) values (%s)'
                         cursor.execute(query, (label['name'],))
                         self.db.commit()
@@ -337,7 +338,7 @@ class DatabaseInterface:
                     cursor.execute(query, (pr_id, commit_id))
                     exists = cursor.fetchone()[0] != 0
                     if not exists:
-                        logger.debug(f'Inserting commit tag {commit_id} for pr {pr_id}')
+                        logger.debug(f'{repo}: Inserting commit tag {commit_id} for pr {pr_id}')
                         query = 'insert into pr_has_commit (pr_id, commit_id) values (%s, %s)'
                         cursor.execute(query, (pr_id, commit_id))
                         self.db.commit()
@@ -369,7 +370,7 @@ class DatabaseInterface:
                     exists = cursor.fetchone()[0] != 0
 
                     if not exists:
-                        logger.debug(f'Inserting new comment for pr {pr_id} from author {author_id}')
+                        logger.debug(f'{repo}: Inserting new comment for pr {pr_id} from author {author_id}')
                         query = 'insert into comment (pr_id, author_id, created_at, updated_at, body) values (%s, %s, %s, %s, %s)'
                         cursor.execute(query, (pr_id, author_id, created_at, updated_at, comment['body']))
                         self.db.commit()
@@ -390,20 +391,20 @@ class DatabaseInterface:
                 project_id = 26
 
             if root.lower() == 'github':
-                logger.debug('Source is GitHub.')
+                logger.debug(f'{repo}: Source is GitHub.')
                 source = Source.GITHUB
             elif root.lower() == 'gitlab':
-                logger.debug('Source is GitLab.')
+                logger.debug(f'{repo}: Source is GitLab.')
                 source = Source.GITLAB
             else:
-                logger.critical(f'Unknown source: {root}')
-                raise Exception(f'Unknown source: {root}')
+                logger.critical(f'{repo}: Unknown source: {root}')
+                raise Exception(f'{repo}: Unknown source: {root}')
 
             # This may take a while
-            logger.debug('Fetching issues. This may take a while...')
+            logger.debug(f'{repo}: Fetching issues. This may take a while...')
 
             issues = fetch_issues(owner, repo, source)
-            logger.debug(f'Got {len(issues)} issues.')
+            logger.debug(f'{repo}: Got {len(issues)} issues.')
 
             for issue in issues:
                 username = issue['author']['username']
@@ -420,7 +421,7 @@ class DatabaseInterface:
                     cursor.execute(query, (username, email, name, aurl,))
                     self.db.commit()
 
-                    logger.debug(f'Inserted new author {username}.')
+                    logger.debug(f'{repo}: Inserted new author {username}.')
 
                 # Get author id
                 query = 'select id from author where username=%s and url=%s'
@@ -457,11 +458,11 @@ class DatabaseInterface:
                     else:
                        query = 'title = %s, description = %s, updated_at = %s, locked = %s, state = %s where url = %s and project_id = %s and created_at = %s'
                        params = (title, description, updated_at, locked, state, iurl, project_id, created_at)
-                    logger.debug('Found existing issue.')
+                    logger.debug(f'{repo}: Found existing issue.')
                     query = 'update issue set ' + query 
                     cursor.execute(query, params)
                 else:
-                    logger.debug('Inserting new issue.')
+                    logger.debug(f'{repo}: Inserting new issue.')
                     if not closed_at: closed_at = arrow.get('9999-01-01 00:00:00').datetime.strftime('%Y-%m-%d %H:%M:%S')
 
                     query = 'insert into issue (title, description, updated_at, closed_at, locked, number, state, url, author_id, project_id, created_at) values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
@@ -486,19 +487,19 @@ class DatabaseInterface:
                     if updated_at: updated_at = arrow.get(updated_at).datetime.strftime('%Y-%m-%d %H:%M:%S')
                     if created_at: created_at = arrow.get(created_at).datetime.strftime('%Y-%m-%d %H:%M:%S')
                     if due_on: due_on = arrow.get(due_on).datetime.strftime('%Y-%m-%d %H:%M:%S')
+                    else: due_on = arrow.get('9999-01-01 00:00:00').datetime.strftime('%Y-%m-%d %H:%M:%S')
+                    if not description: description = ''
 
                     query = 'select count(*) from milestone where issue_id = %s'
                     cursor.execute(query, (issue_id,))
                     exists = cursor.fetchone()[0] != 0
 
                     if exists:
-                        logger.debug('Found existing milestone.')
+                        logger.debug(f'{repo}: Found existing milestone.')
                         query = 'update milestone set state = %s, description = %s, title = %s, due_on = %s, created_at = %s, updated_at = %s where issue_id = %s'
                         cursor.execute(query, (state, description, title, due_on, created_at, updated_at, issue_id,))
                     else:
-                        logger.debug('Inserting new milestone.')
-                        if not due_on: due_on = arrow.get('9999-01-01 00:00:00').datetime.strftime('%Y-%m-%d %H:%M:%S')
-                        if not description: description = ''
+                        logger.debug(f'{repo}: Inserting new milestone.')
                         query = 'insert into milestone (state, description, title, due_on, created_at, updated_at, issue_id) values (%s, %s, %s, %s, %s, %s, %s)'
                         cursor.execute(query, (state, description, title, due_on, created_at, updated_at, issue_id,))
 
@@ -511,7 +512,7 @@ class DatabaseInterface:
                     exists = cursor.fetchone()[0] != 0
 
                     if not exists:
-                        logger.debug('Inserting new label.')
+                        logger.debug(f'{repo}: Inserting new label.')
                         query = 'insert into label (name) values (%s)'
                         cursor.execute(query, (label['name'],))
                         self.db.commit()
@@ -579,7 +580,7 @@ class DatabaseInterface:
                     exists = cursor.fetchone()[0] != 0
 
                     if not exists:
-                        logger.debug(f'Inserting new comment for issue {issue_id} from author {author_id}')
+                        logger.debug(f'{repo}: Inserting new comment for issue {issue_id} from author {author_id}')
                         query = 'insert into comment (issue_id, author_id, created_at, updated_at, body) values (%s, %s, %s, %s, %s)'
                         cursor.execute(query, (issue_id, author_id, created_at, updated_at, comment['body']))
                         self.db.commit()
@@ -603,7 +604,7 @@ class DatabaseInterface:
             exists = cursor.fetchone()[0] != 0
 
             if exists:
-                logger.debug('Found existing git project.')
+                logger.debug(f'{name}:Found existing git project.')
                 new_project = False
 
                 # Update existing project
@@ -611,7 +612,7 @@ class DatabaseInterface:
                 cursor.execute(query, (url,))
                 project_id = cursor.fetchone()[0]
             else:
-                logger.debug('Unknown git project.')
+                logger.debug(f'{name}:Unknown git project.')
                 new_project = True
 
                 # If fork, find parent project_id
@@ -647,7 +648,7 @@ class DatabaseInterface:
                 self.db.commit()
 
                 for tag in tags:
-                    logger.debug(f'Inserted tag {tag}')
+                    logger.debug(f'{name}: Inserted tag {tag}')
 
                 # Add to bridge table
                 query = 'select id from tag where tag=%s'
@@ -663,15 +664,15 @@ class DatabaseInterface:
                 self.db.commit()
 
                 for tag_id in tag_ids:
-                    logger.debug(f'Inserted tag {tag_id} for project {project_id}')
+                    logger.debug(f'{name}: Inserted tag {tag_id} for project {project_id}')
 
             if self.args.force_epoch:
-                logger.debug('FORCE_EPOCH set to True.')
+                logger.debug(f'{name}: FORCE_EPOCH set to True.')
 
             # If new project grab everything, otherwise grab utc epoch
             if new_project or self.args.force_epoch:
                 since = self.args.since
-                logger.debug(f'New project, grabbing all commit data since {since} until {until}.')
+                logger.debug(f'{name}: New project, grabbing all commit data since {since} until {until}.')
             else:
                 if since == 'null':
                     # Find last time updated
@@ -683,15 +684,15 @@ class DatabaseInterface:
                 dt = arrow.get(since).datetime - datetime.timedelta(hours=30)
                 since = dt.strftime('%Y-%m-%d %H:%M:%S')
 
-                logger.debug(f'Existing project, grabbing all commit data since {since} until {until}.')
+                logger.debug(f'{name}: Existing project, grabbing all commit data since {since} until {until}.')
 
             # TODO: fix since (gets from Unix Epoch only right now (default arg))
             self.process_project(url, since=since, until=until)
 
             if exists:
-                logger.debug(f'Project from {url} updated.')
+                logger.debug(f'{name}: Project from {url} updated.')
             else:
-                logger.debug(f'New project from {url} inserted.')
+                logger.debug(f'{name}: New project from {url} inserted.')
 
             query = 'update project set last_updated=utc_timestamp() where id=%s'
             cursor.execute(query, (project_id,))
@@ -701,20 +702,20 @@ class DatabaseInterface:
         name = self.get_git_name(url)
         branches = not self.args.no_branches
         since = arrow.get(since).datetime.isoformat()
-        logger.debug(f'Mining repository "{name}". This may take a while...')
+        logger.debug(f'{name}: Mining repository. This may take a while...')
 
         if url[0] == '/':
-            logger.debug('Working on local repository.')
+            logger.debug('{name}: Working on local repository.')
             repo_dir = os.path.join(os.getcwd(), 'repos')
             project = GitCommand(repo_dir)
             data = project.getRepoCommitData(name, since=since, until=until, includebranches=branches)
         else:
-            logger.debug('Working on remote repository.')
+            logger.debug('{name}: Working on remote repository.')
             project = GitCommand('.')
             project.cloneRepo(url)
             data = project.getRepoCommitData('.', since=since, until=until, includebranches=branches)
 
-        logger.debug(f'Mined repository "{name}".')
+        logger.debug(f'{name}: Finished mining repository.')
 
         with closing(self.db.cursor()) as cursor:
 
@@ -740,7 +741,7 @@ class DatabaseInterface:
                     cursor.execute(query, (username, email,))
                     self.db.commit()
 
-                    logger.debug(f'Inserted new author {username}.')
+                    logger.debug(f'{name}: Inserted new author {username}.')
 
                 # Get author id
                 query = 'select id from author where username=%s and email=%s'
@@ -756,7 +757,7 @@ class DatabaseInterface:
                     cursor.execute(query, (author_id, project_id,))
                     self.db.commit()
 
-                    logger.debug(f'Inserted author {author_id} works on project {project_id}')
+                    logger.debug(f'{name}: Inserted author {author_id} works on project {project_id}')
 
                 # Insert commits
                 for commit in data[author]['commits']:
@@ -772,7 +773,7 @@ class DatabaseInterface:
 
                     # Skip existing commits
                     if exists:
-                        logger.debug(f'Commit {hash} already exists.')
+                        logger.debug(f'{name}: Commit {hash} already exists.')
                         query = 'update commit set branch=%s where hash=%s'
                         cursor.execute(query, (branches, hash,))
                         continue
@@ -782,7 +783,7 @@ class DatabaseInterface:
                     cursor.execute(query, (hash, dt, author_id, project_id, message, branches,))
                     self.db.commit()
 
-                    logger.debug(f'Inserted new commit {hash}.')
+                    logger.debug(f'{name}: Inserted new commit {hash}.')
 
                     # Get commit id
                     query = 'select id from commit where hash=%s'
@@ -802,7 +803,7 @@ class DatabaseInterface:
                         cursor.execute(query, (filename, language, commit_id, body,))
                         self.db.commit()
 
-                        logger.debug(f'Inserted diff in file {filename} for commit {hash}')
+                        logger.debug(f'{name}: Inserted diff in file {filename} for commit {hash}')
 
 
     def add_events(self, url):
@@ -819,7 +820,7 @@ class DatabaseInterface:
             GitHubAPIClient.set_credentials(username=GITHUB_LOGIN, token=GITHUB_TOKEN)
             GitHubAPIClient.check_credentials()
 
-            logger.debug('Grabbing GitHub events from API...')
+            logger.debug(f'{repo}: Grabbing GitHub events from API...')
             data = GitHubAPIClient.fetch_events(owner=owner, repository=repo)
 
             for event in data:
@@ -833,7 +834,7 @@ class DatabaseInterface:
                 cursor.execute(query, (api_id, created_at, project_id))
                 exists = cursor.fetchone()[0] != 0
                 if exists:
-                    logger.debug('Found existing event. Skipping...')
+                    logger.debug(f'{repo}: Found existing event. Skipping...')
                     continue
 
                 # Insert Event Actor
@@ -848,7 +849,7 @@ class DatabaseInterface:
                 exists = cursor.fetchone()[0] != 0
 
                 if not exists:
-                    logger.debug(f'Inserted new event actor {login}')
+                    logger.debug(f'{repo}: Inserted new event actor {login}')
                     query = 'insert into event_actor (actor_id, login, url, avatar_url, gravatar_id) values (%s, %s, %s, %s, %s)'
                     cursor.execute(query, (actor_id, login, url, avatar_url, gravatar_id))
                     self.db.commit()
@@ -867,7 +868,7 @@ class DatabaseInterface:
                 exists = cursor.fetchone()[0] != 0
 
                 if not exists:
-                    logger.debug(f'Inserted new event repo {name}')
+                    logger.debug(f'{repo}: Inserted new event repo {name}')
                     query = 'insert into event_repo (repo_id, name, url) values (%s, %s, %s)'
                     cursor.execute(query, (repo_id, name, url,))
                     self.db.commit()
@@ -888,7 +889,7 @@ class DatabaseInterface:
                 exists = cursor.fetchone()[0] != 0
 
                 if not exists:
-                    logger.debug(f'Inserted new event org {login}')
+                    logger.debug(f'{repo}: Inserted new event org {login}')
                     query = 'insert into event_org (org_id, login, url, avatar_url, gravatar_id) values (%s, %s, %s, %s, %s)'
                     cursor.execute(query, (org_id, login, url, avatar_url, gravatar_id))
                     self.db.commit()
@@ -928,7 +929,7 @@ class DatabaseInterface:
                 release_url = get_payload('release', 'html_url')
                 effective_date = get_payload('effective_date')
 
-                logger.debug('Inserted new event payload')
+                logger.debug(f'{repo}: Inserted new event payload')
                 query = '''insert into event_payload (action, ref, ref_type, master_branch, description, forkee_url, issue_url, comment_url, member_login, pr_number, pr_url, pr_review_url, push_id, size, distinct_size, head_sha, before_sha, release_url, effective_date) values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
                 cursor.execute(query, (action, ref, ref_type, master_branch, description, forkee_url, issue_url, comment_url, member_login, pr_number, pr_url, pr_review_url, push_id, size, distinct_size, head_sha, before_sha, release_url, effective_date))
                 self.db.commit()
@@ -949,7 +950,7 @@ class DatabaseInterface:
                         cursor.execute(query, (name, url,))
                         exists = cursor.fetchone()[0] != 0
 
-                        logger.debug(f'Inserted new event page {name}')
+                        logger.debug(f'{repo}: Inserted new event page {name}')
                         query = 'insert into event_page (name, title, action, sha, url) values (%s, %s, %s, %s, %s)'
                         cursor.execute(query, (name, title, action, sha, url,))
                         self.db.commit()
@@ -965,13 +966,13 @@ class DatabaseInterface:
                         exists = cursor.fetchone()[0] != 0
 
                         if not exists:
-                            logger.debug('Inserted new event has event page')
+                            logger.debug(f'{repo}: Inserted new event has event page')
                             query = 'insert into event_has_page (payload, page) values (%s, %s)'
                             cursor.execute(query, (event_payload_id, page_id))
                             self.db.commit()
 
                 # Insert Event
-                logger.debug(f'Inserted new event {type}')
+                logger.debug(f'{repo}: Inserted new event {type}')
                 query = 'insert into event (project_id, api_id, type, public, created_at, payload_id, repo_id, actor_id, org_id) values (%s, %s, %s, %s, %s, %s, %s, %s, %s)'
                 cursor.execute(query, (project_id, api_id, type, public, created_at, event_payload_id, event_repo_id, event_actor_id, event_org_id))
                 self.db.commit()
