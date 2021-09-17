@@ -33,11 +33,19 @@ def index(request):
 
     commits = list(Commit.objects.all().filter(hash__in=[committag.sha for committag in pr.commits.all()]).all())
 
-    issues = list(Issue.objects.all().filter(url__in=[pri.issue.url for pri in PullRequestIssue.objects.all()]).all()) #.filter(pr=pr).all()
+    issues = list(Issue.objects.all().filter(url__in=[pri.issue.url for pri in PullRequestIssue.objects.all().filter(pr=pr).all()]).all())
+
+    diffs = list(Diff.objects.all().filter(commit__in=[c for c in commits]).all())
+
+    filenames = [d.file_path for d in diffs]
+
+    #get just unique filenames
+    filenames_set = set(filenames)
+    filenames = list(filenames_set)
 
     #Shoud be able list diffs and issues similar to how I get commits
 
-    context = {'pr':pr, 'commits':commits, 'issues':issues}
+    context = {'pr':pr, 'commits':commits, 'issues':issues, 'filenames':filenames}
 
     return HttpResponse(template.render(context, request))
 
