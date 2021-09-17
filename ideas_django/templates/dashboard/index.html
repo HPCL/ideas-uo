@@ -320,7 +320,7 @@
 
 		           	  <br/>
 
-					<div id="filenamesdiv" style="border:1px solid grey; margin:10px; padding:10px;">
+					  <div id="filenamesdiv" style="border:1px solid grey; margin:10px; padding:10px;">
 						<b>Files:</b>
 						<table class="table">
 							{% for file in filenames %}
@@ -329,7 +329,22 @@
 							</tr>
 							{% endfor %}
 						</table>
-					</div>
+					  </div>
+
+					  <br/>
+
+					  <div id="eventsdiv" style="border:1px solid grey; margin:10px; padding:10px;">
+						<b>Events:</b>
+						<table class="table">
+							{% for event in events %}
+							<tr>
+								<td>{{event.action}}</td>
+								<td>{{event.master_branch}}</td>
+								<td>{{event.description}}</td>
+							</tr>
+							{% endfor %}
+						</table>
+					  </div>
 
 		           	  <br/>
 

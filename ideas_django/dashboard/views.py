@@ -13,7 +13,7 @@ import sys
 sys.path.insert(1, '/shared/soft/ideas_db/ideas-uo/src/gitutils')
 from github_api import GitHubAPIClient
 
-from database.models import Author, Project, ProjectAuthor, Commit, Diff, Issue, PullRequest, PullRequestIssue, IssueTag, Comment
+from database.models import Author, Project, ProjectAuthor, Commit, Diff, Issue, PullRequest, PullRequestIssue, IssueTag, Comment, EventPayload
 
 import os, getpass, warnings
 warnings.filterwarnings('ignore')
@@ -36,16 +36,26 @@ def index(request):
     issues = list(Issue.objects.all().filter(url__in=[pri.issue.url for pri in PullRequestIssue.objects.all().filter(pr=pr).all()]).all())
 
     diffs = list(Diff.objects.all().filter(commit__in=[c for c in commits]).all())
-
     filenames = [d.file_path for d in diffs]
-
     #get just unique filenames
     filenames_set = set(filenames)
     filenames = list(filenames_set)
 
-    #Shoud be able list diffs and issues similar to how I get commits
+    events = list(EventPayload.objects.all().filter(pr_number=pr.number).all())
 
-    context = {'pr':pr, 'commits':commits, 'issues':issues, 'filenames':filenames}
+    
+    
+
+    #Get all the commits for each file (still times out)
+    date = datetime.datetime.now() - datetime.timedelta(days=28)
+    diffcommits = {}
+    for filename in filenames:
+        diffcommits[filename] = [] #[d.commit.hash for d in Diff.objects.all().filter(file_path=filename).filter(commit__datetime__gte=date).all()]
+
+
+
+
+    context = {'pr':pr, 'commits':commits, 'issues':issues, 'filenames':filenames, 'events':events, 'diffcommits':diffcommits}
 
     return HttpResponse(template.render(context, request))
 
@@ -54,6 +64,7 @@ def index(request):
 def patternGraph1(request):
     print("PATTERN DATA")
 
+    print( request.GET.get('test') )
 
     Visualizer()
     vis = Visualizer(project_name='spack')
@@ -65,7 +76,6 @@ def patternGraph1(request):
 
     df = vis.plot_zone_heatmap(agg='mean')
     #print(df)
-
 
     resultdata = {
         'filename': 'spack-zone-change-size-cos-map-Entire_project-mean.png',
