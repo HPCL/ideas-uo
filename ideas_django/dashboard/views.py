@@ -31,28 +31,30 @@ def index(request):
 
     pr = list(PullRequest.objects.all().filter(id=prid).all())[0]
 
-    commits = list(Commit.objects.all().filter(hash__in=[committag.sha for committag in pr.commits.all()]).all())
+    commits = list(Commit.objects.all().filter(hash__in=[committag.sha for committag in pr.commits.all()]))
 
-    issues = list(Issue.objects.all().filter(url__in=[pri.issue.url for pri in PullRequestIssue.objects.all().filter(pr=pr).all()]).all())
+    issues = list(Issue.objects.all().filter(url__in=[pri.issue.url for pri in PullRequestIssue.objects.all().filter(pr=pr).all()]))
 
-    diffs = list(Diff.objects.all().filter(commit__in=[c for c in commits]).all())
+    diffs = list(Diff.objects.all().filter(commit__in=[c for c in commits]))
     filenames = [d.file_path for d in diffs]
     #get just unique filenames
     filenames_set = set(filenames)
     filenames = list(filenames_set)
 
-    events = list(EventPayload.objects.all().filter(pr_number=pr.number).all())
+    events = list(EventPayload.objects.all().filter(pr_number=pr.number))
 
     
     
 
-    #Get all the commits for each file (still times out)
-    date = datetime.datetime.now() - datetime.timedelta(days=28)
+    #Get all the commits for each file
+    #Moved this to a seperate json call because it is slow
+    date = datetime.datetime.now() - datetime.timedelta(days=60)
     diffcommits = {}
-    for filename in filenames:
-        diffcommits[filename] = [] #[d.commit.hash for d in Diff.objects.all().filter(file_path=filename).filter(commit__datetime__gte=date).all()]
+    #filtereddiffs = Diff.objects.all().filter(commit__project=pr.project, commit__datetime__gte=date)
+    #for filename in filenames:
+    #    diffcommits[filename] = [d.commit.hash for d in filtereddiffs.filter(file_path=filename)]
 
-
+    
 
 
     context = {'pr':pr, 'commits':commits, 'issues':issues, 'filenames':filenames, 'events':events, 'diffcommits':diffcommits}
@@ -61,10 +63,56 @@ def index(request):
 
 
 
+def diffCommitData(request):
+    print("Diff Commit DATA")
+
+    prid = 2250
+    if request.GET.get('pr'):
+        prid = int(request.GET.get('pr'))
+
+    pr = list(PullRequest.objects.all().filter(id=prid).all())[0]
+
+    commits = list(Commit.objects.all().filter(hash__in=[committag.sha for committag in pr.commits.all()]))
+    diffs = list(Diff.objects.all().filter(commit__in=[c for c in commits]))
+    filenames = [d.file_path for d in diffs]
+    #get just unique filenames
+    filenames_set = set(filenames)
+    filenames = list(filenames_set)
+
+    date = datetime.datetime.now() - datetime.timedelta(days=60)
+    diffcommits = []
+    filtereddiffs = Diff.objects.all().filter(commit__project=pr.project, commit__datetime__gte=date)
+    for filename in filenames:
+        diffcommits.append( {'filename': filename, 'commits':[d.commit.hash for d in filtereddiffs.filter(file_path=filename)]} )
+
+    
+    
+    resultdata = {
+        'diffcommits':diffcommits
+    }
+
+    return HttpResponse(
+        json.dumps(resultdata),
+        content_type='application/json'
+    )
+
+
+
 def patternGraph1(request):
     print("PATTERN DATA")
 
-    print( request.GET.get('test') )
+    print( request.GET.get('start') )
+
+    startdate = request.GET.get('start')
+    enddate = request.GET.get('end')
+
+    if startdate: 
+        startdate = datetime.datetime.strptime(startdate, '%Y-%m-%d')
+    if enddate: 
+        enddate = datetime.datetime.strptime(enddate, '%Y-%m-%d')
+
+    #vis.select_month_range()
+    #vis.select_year_range()
 
     Visualizer()
     vis = Visualizer(project_name='spack')

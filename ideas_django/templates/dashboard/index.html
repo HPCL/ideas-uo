@@ -117,7 +117,8 @@
 		  <br/>
 
 		  <a id="" href="." onclick="">Home</a>
-		  <a id="" href="#" onclick="">Branches</a>
+		  <a id="" href="." onclick="">Branches</a>
+		  <a id="" href="." onclick="">PR Assistant</a>
 		  <a id="" href="." onclick="">About</a>
 
 		  <br/>
@@ -132,12 +133,13 @@
 
 		<div id="home" class="main" style="padding:50px 50px 0px 50px;">
 
-			<h2>Pull Request Helper</h2><br/>
+			<h2>Pull Request Assistant</h2><br/>
 
 			<b>Pull Request:</b><br/>
 			<div style="margin-top:6px;"><u>Title</u>: {{pr.title}}</div>
 			<div style="margin-top:6px;"><u>Date</u>: {{pr.created_at}}</div>
 			<div style="margin-top:6px;"><u>Description</u>: {{pr.description}}</div>
+			<div style="margin-top:6px;"><u>Branch</u>: {{commits.0.branch}}</div>
 			<div style="margin-top:6px; margin-bottom:8px;"><u>URL</u>: <a target="_blank" href="{{pr.url}}">{{pr.url}}</a></div>
 
 			<button id="showcommitsbutton" class="btn btn-sm btn-primary" onclick="$('#showcommitsbutton').hide(); $('#hidecommitsbutton').show(); $('#commitsdiv').show();">Show Commits</button><button id="hidecommitsbutton" class="btn btn-sm btn-primary" onclick="$('#hidecommitsbutton').hide(); $('#showcommitsbutton').show(); $('#commitsdiv').hide();" style="display:none;">Hide Commits</button> 
@@ -152,8 +154,8 @@
 				<table class="table">
 					{% for commit in commits %}
 					<tr>
-						<td>{{commit.id}}</td>
-						<td>{{commit.hash}}</td>
+						<td><a href="{{pr.project.source_url|slice:"0:-4"}}/commit/{{commit.hash}}">{{commit.hash|slice:"0:7"}}</a></td>
+						<td>{{commit.datetime|date:'Y-m-d'}}</td>
 						<td>{{commit.message}}</td>
 					</tr>
 					{% endfor %}
@@ -313,6 +315,17 @@
 		            <div class="accordion-body">
 
 		              <div>
+		              	<div class="row">
+		              		<div class="col-sm-2" style="text-align:right; padding-top:5px;">Start Date:</div>
+		              		<div class="col-sm-3" style="text-align:left;"><input class="form-control" type=date id="startdate"></div>
+
+		              		<div class="col-sm-2" style="text-align:right; padding-top:5px;">End Date:</div>
+		              		<div class="col-sm-3" style="text-align:left;"><input class="form-control" type=date id="enddate"></div>
+
+		              		<div class="col-sm-2" style="text-align:left; padding-top:2px;"> 
+		              			<button class="btn btn-sm btn-primary" onclick="loadPatternGraph();">Rerun graph</button> 
+		              		</div>
+		              	</div>
 		           		<img id="patterngraph1" src="" style="display:none; width:600px;"/>
 		           		<span id="patternlabel1">Loading...<br/></span>
 		           		<br/>
@@ -321,13 +334,33 @@
 		           	  <br/>
 
 					  <div id="filenamesdiv" style="border:1px solid grey; margin:10px; padding:10px;">
-						<b>Files:</b>
-						<table class="table">
-							{% for file in filenames %}
-							<tr>
-								<td>{{file}}</td>
-							</tr>
-							{% endfor %}
+						<b>Files modified in this PR:</b>
+						<table class="table" id="diffcommittable">
+							<thead>
+								<tr>
+									<th>File</th>
+									<th>Commits (last 8 weeks)</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr><td colspan="2">Loading...</td></tr>
+								<!--{% for file in filenames %}
+								<tr>
+									<td>{{file}}</td>
+								</tr>
+								{% endfor %}-->
+
+								<!--{% for key,value in diffcommits.items %}
+								<tr>
+									<td>{{key}}</td>
+									<td>
+										{% for commit in value %}
+											{{commit}}
+										{% endfor %}
+									</td>
+								</tr>
+								{% endfor %}-->
+							</tbody>
 						</table>
 					  </div>
 
@@ -545,8 +578,64 @@
 		console.log("javascript is working...");
 
 
+		var startdate = $("#startdate");
+		var date = new Date(new Date().getTime() - (1000*60*60*24*30));
+		startdate.val(date.toISOString().substr(0,10));
 
-		$.ajax({url:'/dashboard/patterngraph1', data:{'test':'test'}, success:function(result){
+		var enddate = $("#enddate");
+		date = new Date();
+		enddate.val(date.toISOString().substr(0,10));
+
+
+		var queryString = window.location.search;
+		var urlParams = new URLSearchParams(queryString);
+		var pr = urlParams.get('pr')
+		console.log(pr);
+
+		function loadPatternGraph(){
+			console.log("Rerunning pattern graph...");
+
+			$('#patterngraph1').hide();
+			$('#patternlabel1').show();
+
+			$.ajax({url:'/dashboard/patterngraph1', data:{'pr':pr, 'start':$("#startdate").val(), 'end':$("#enddate").val()}, success:function(result){
+				console.log("success pattern");
+				console.log(result);
+
+				$('#patterngraph1').attr('src', '/media/figures/'+result['filename']);
+				$('#patternlabel1').hide();
+				$('#patterngraph1').show();
+
+
+			}});
+		}
+
+
+		$.ajax({url:'/dashboard/diffcommitdata', data:{'pr':pr}, success:function(result){
+			console.log("success diff commits");
+			console.log(result);
+
+			var table = $("#diffcommittable > tbody");
+			table.empty();
+
+			for(var i=0; i<result['diffcommits'].length; i++){
+				var commits = "";
+				for(var j=0; j<result['diffcommits'][i]['commits'].length; j++){			
+					commits += "<a href='{{pr.project.source_url|slice:"0:-4"}}/commit/"+result['diffcommits'][i]['commits'][j]+"'>"+result['diffcommits'][i]['commits'][j].substring(0,7)+"</a><br/>"
+				}	
+
+				table.append("<tr><td>"+
+					result['diffcommits'][i]['filename']+
+					"</td><td>"+
+					commits+
+					//result['diffcommits'][i]['commits'].join("<br/>")+
+					"</td></tr>");
+			}
+
+		}});
+
+
+		$.ajax({url:'/dashboard/patterngraph1', data:{'pr':pr}, success:function(result){
 			console.log("success pattern");
 			console.log(result);
 

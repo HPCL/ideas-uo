@@ -8,5 +8,6 @@ urlpatterns = [
     url(r'^branches/$', views.branches, name='branches'),
     url(r'^branchdata/$', views.branchData, name='branchdata'),
     url(r'^patterngraph1/$', views.patternGraph1, name='patterngraph1'),
+    url(r'^diffcommitdata/$', views.diffCommitData, name='diffcommitdata'),
 ]
 
