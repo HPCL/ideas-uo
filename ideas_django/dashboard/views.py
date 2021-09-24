@@ -43,21 +43,12 @@ def index(request):
 
     events = list(EventPayload.objects.all().filter(pr_number=pr.number))
 
-    
-    
-
-    #Get all the commits for each file
-    #Moved this to a seperate json call because it is slow
-    date = datetime.datetime.now() - datetime.timedelta(days=60)
-    diffcommits = {}
-    #filtereddiffs = Diff.objects.all().filter(commit__project=pr.project, commit__datetime__gte=date)
-    #for filename in filenames:
-    #    diffcommits[filename] = [d.commit.hash for d in filtereddiffs.filter(file_path=filename)]
+    comments = list(Comment.objects.all().filter(pr=pr))
 
     
 
 
-    context = {'pr':pr, 'commits':commits, 'issues':issues, 'filenames':filenames, 'events':events, 'diffcommits':diffcommits}
+    context = {'pr':pr, 'commits':commits, 'issues':issues, 'filenames':filenames, 'events':events, 'comments':comments}
 
     return HttpResponse(template.render(context, request))
 
@@ -108,25 +99,40 @@ def patternGraph1(request):
 
     if startdate: 
         startdate = datetime.datetime.strptime(startdate, '%Y-%m-%d')
+    else:
+        startdate = datetime.datetime.fromtimestamp(0)
+
     if enddate: 
         enddate = datetime.datetime.strptime(enddate, '%Y-%m-%d')
+    else:
+        enddate = datetime.datetime.today()
 
+    
     #vis.select_month_range()
-    #vis.select_year_range()
+    
 
     Visualizer()
-    vis = Visualizer(project_name='spack')
+    vis = Visualizer(project_name='FLASH5')
     vis.get_data()
 
     removed = vis.remove_external()
 
     vis.hide_names = False
 
-    df = vis.plot_zone_heatmap(agg='mean')
-    #print(df)
+    #Setting year or range seems to break some graphs
+    #if startdate.year == enddate.year:
+    vis.set_year(enddate.year)
+    #else:    
+    #    vis.select_year_range(startdate.year,enddate.year)
+
+    #df = vis.plot_zone_heatmap(agg='mean')
+    #df = vis.plot_top_N_heatmap(10, locc_metric='locc')
+    df = vis.plot_top_N_heatmap(10, time_range='year', locc_metric='change-size-cos')
 
     resultdata = {
-        'filename': 'spack-zone-change-size-cos-map-Entire_project-mean.png',
+        #'filename': 'spack-zone-change-size-cos-map-Entire_project-mean.png',
+        #'filename': 'FLASH5-top-10-locc-map-Entire_project.png',
+        'filename': 'FLASH5-top-10-change-size-cos-map-'+str(enddate.year)+'.png',
     }
 
     return HttpResponse(

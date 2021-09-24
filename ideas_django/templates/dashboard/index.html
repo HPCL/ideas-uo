@@ -142,11 +142,11 @@
 			<div style="margin-top:6px;"><u>Branch</u>: {{commits.0.branch}}</div>
 			<div style="margin-top:6px; margin-bottom:8px;"><u>URL</u>: <a target="_blank" href="{{pr.url}}">{{pr.url}}</a></div>
 
-			<button id="showcommitsbutton" class="btn btn-sm btn-primary" onclick="$('#showcommitsbutton').hide(); $('#hidecommitsbutton').show(); $('#commitsdiv').show();">Show Commits</button><button id="hidecommitsbutton" class="btn btn-sm btn-primary" onclick="$('#hidecommitsbutton').hide(); $('#showcommitsbutton').show(); $('#commitsdiv').hide();" style="display:none;">Hide Commits</button> 
+			<button id="showcommitsbutton" class="btn btn-sm btn-secondary" onclick="$('#hidediscussionbutton').hide(); $('#showdiscussionbutton').show(); $('#hideissuesbutton').hide(); $('#showissuesbutton').show(); $('#showcommitsbutton').hide(); $('#hidecommitsbutton').show(); $('#discussiondiv').hide(); $('#issuesdiv').hide(); $('#commitsdiv').show();">Show Commits</button><button id="hidecommitsbutton" class="btn btn-sm btn-primary" onclick="$('#hidecommitsbutton').hide(); $('#showcommitsbutton').show(); $('#commitsdiv').hide();" style="display:none;">Hide Commits</button> 
 			
-			<button class="btn btn-sm btn-primary">Discussion</button> 
-			
-			<button id="showissuesbutton" class="btn btn-sm btn-primary" onclick="$('#showissuesbutton').hide(); $('#hideissuesbutton').show(); $('#issuesdiv').show();">Show Issues</button><button id="hideissuesbutton" class="btn btn-sm btn-primary" onclick="$('#hideissuesbutton').hide(); $('#showissuesbutton').show(); $('#issuesdiv').hide();" style="display:none;">Hide Issues</button> 
+			<button id="showdiscussionbutton" class="btn btn-sm btn-secondary" onclick="$('#hidecommitsbutton').hide(); $('#showcommitsbutton').show(); $('#hideissuesbutton').hide(); $('#showissuesbutton').show(); $('#showdiscussionbutton').hide(); $('#hidediscussionbutton').show(); $('#commitsdiv').hide(); $('#issuesdiv').hide(); $('#discussiondiv').show();">Show Discussion</button><button id="hidediscussionbutton" class="btn btn-sm btn-primary" onclick="$('#hidediscussionbutton').hide(); $('#showdiscussionbutton').show(); $('#discussiondiv').hide();" style="display:none;">Hide Discussion</button> 
+
+			<button id="showissuesbutton" class="btn btn-sm btn-secondary" onclick="$('#hidediscussionbutton').hide(); $('#showdiscussionbutton').show(); $('#hidecommitsbutton').hide(); $('#showcommitsbutton').show(); $('#showissuesbutton').hide(); $('#hideissuesbutton').show(); $('#discussiondiv').hide(); $('#commitsdiv').hide(); $('#issuesdiv').show();">Show Issues</button><button id="hideissuesbutton" class="btn btn-sm btn-primary" onclick="$('#hideissuesbutton').hide(); $('#showissuesbutton').show(); $('#issuesdiv').hide();" style="display:none;">Hide Issues</button> 
 
 			<br/>
 			<div id="commitsdiv" style="display:none; border:1px solid grey; margin:10px; padding:10px;">
@@ -161,9 +161,31 @@
 					{% endfor %}
 				</table>
 			</div>
+
+			<div id="discussiondiv" style="display:none; border:1px solid grey; margin:10px; padding:10px;">
+				<b>Discussion (Comments):</b>
+				<table class="table">
+					{% if comments|length < 1 %}	
+						<tr><td>None</td></tr>
+					{% endif %}
+
+					{% for comment in comments %}
+					<tr>
+						<td style="min-width:110px;">{{comment.created_at|date:'Y-m-d'}}</td>
+						<td>{{comment.author.username}}</td>
+						<td>{{comment.body}}</td>
+					</tr>
+					{% endfor %}
+				</table>
+			</div>
+
 			<div id="issuesdiv" style="display:none; border:1px solid grey; margin:10px; padding:10px;">
 				<b>Issues:</b>
 				<table class="table">
+					{% if issues|length < 1 %}	
+						<tr><td>None</td></tr>
+					{% endif %}
+
 					{% for issue in issues %}
 					<tr>
 						<td>{{issue.title}}</td>
@@ -326,7 +348,7 @@
 		              			<button class="btn btn-sm btn-primary" onclick="loadPatternGraph();">Rerun graph</button> 
 		              		</div>
 		              	</div>
-		           		<img id="patterngraph1" src="" style="display:none; width:600px;"/>
+		           		<img id="patterngraph1" src="" style="display:none; width:720px;"/>
 		           		<span id="patternlabel1">Loading...<br/></span>
 		           		<br/>
 		           	  </div>
