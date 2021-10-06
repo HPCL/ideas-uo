@@ -357,15 +357,16 @@
 
 					  <div id="filenamesdiv" style="border:1px solid grey; margin:10px; padding:10px;">
 						<b>Files modified in this PR:</b>
-						<table class="table" id="diffcommittable">
+						<table class="table" id="diffcommittable" style="font-size:10pt;">
 							<thead>
 								<tr>
 									<th>File</th>
 									<th>Commits (last 8 weeks)</th>
+									<th>Lines changed</th>
 								</tr>
 							</thead>
 							<tbody>
-								<tr><td colspan="2">Loading...</td></tr>
+								<tr><td colspan="3">Loading...</td></tr>
 								<!--{% for file in filenames %}
 								<tr>
 									<td>{{file}}</td>
@@ -642,15 +643,27 @@
 
 			for(var i=0; i<result['diffcommits'].length; i++){
 				var commits = "";
-				for(var j=0; j<result['diffcommits'][i]['commits'].length; j++){			
-					commits += "<a href='{{pr.project.source_url|slice:"0:-4"}}/commit/"+result['diffcommits'][i]['commits'][j]+"'>"+result['diffcommits'][i]['commits'][j].substring(0,7)+"</a><br/>"
+				var diffs = "";
+				for(var j=0; j<result['diffcommits'][i]['commits'].length; j++){	
+
+					var diff = result['diffcommits'][i]['commits'][j]['diff'];
+					var diffadds = (diff.charAt(0)=='+' ? 1 : 0);
+					var diffsubs = (diff.charAt(0)=='-' ? 1 : 0);
+
+					diffadds += (diff.match(/\n\+/g) || []).length;
+					diffsubs += (diff.match(/\n\-/g) || []).length;
+
+					commits += "<a href='{{pr.project.source_url|slice:"0:-4"}}/commit/"+result['diffcommits'][i]['commits'][j]['commit']+"'>"+result['diffcommits'][i]['commits'][j]['commit'].substring(0,7)+"</a><br/>";
+
+					diffs += ""+diffadds+"&nbsp;adds,&nbsp;"+diffsubs+"&nbsp;subs<br/>";
 				}	
 
 				table.append("<tr><td>"+
 					result['diffcommits'][i]['filename']+
 					"</td><td>"+
-					commits+
-					//result['diffcommits'][i]['commits'].join("<br/>")+
+							commits+
+					"</td><td>"+
+							diffs+
 					"</td></tr>");
 			}
 

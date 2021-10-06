@@ -63,18 +63,20 @@ def diffCommitData(request):
 
     pr = list(PullRequest.objects.all().filter(id=prid).all())[0]
 
+    #Find all changed files related to the PR by getting all diffs from all commits in PR    
     commits = list(Commit.objects.all().filter(hash__in=[committag.sha for committag in pr.commits.all()]))
     diffs = list(Diff.objects.all().filter(commit__in=[c for c in commits]))
     filenames = [d.file_path for d in diffs]
-    #get just unique filenames
+    #Get just unique filenames
     filenames_set = set(filenames)
     filenames = list(filenames_set)
 
+    #Now find all commits and diffs for the changed files in the past 60 days
     date = datetime.datetime.now() - datetime.timedelta(days=60)
     diffcommits = []
     filtereddiffs = Diff.objects.all().filter(commit__project=pr.project, commit__datetime__gte=date)
     for filename in filenames:
-        diffcommits.append( {'filename': filename, 'commits':[d.commit.hash for d in filtereddiffs.filter(file_path=filename)]} )
+        diffcommits.append( {'filename': filename, 'commits':[{'commit':d.commit.hash, 'diff':d.body} for d in filtereddiffs.filter(file_path=filename)]} )
 
     
     
