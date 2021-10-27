@@ -402,7 +402,7 @@
 						</table>
 					  </div>
 
-		           	  <br/>
+		           	  <br/>  
 
 					  <b>Does this PR meet any of these patterns?</b><br/>
 					  <div style="margin-left:30px;">
@@ -422,6 +422,10 @@
 	   					  	<li>Someone</li>
 	   					  	<li>Things and dodads</li>
 	   					  </ul>
+	   				  </div>
+
+	   				  <br/>
+	   				  <div id='testdiv'>
 	   				  </div>
 
 		            </div>
@@ -615,6 +619,11 @@
 		var pr = urlParams.get('pr')
 		console.log(pr);
 
+
+		/*$(function() {
+			$('[data-bs-toggle="popover"]').popover();
+		});*/
+
 		function loadPatternGraph(){
 			console.log("Rerunning pattern graph...");
 
@@ -653,9 +662,20 @@
 					diffadds += (diff.match(/\n\+/g) || []).length;
 					diffsubs += (diff.match(/\n\-/g) || []).length;
 
-					commits += "<a href='{{pr.project.source_url|slice:"0:-4"}}/commit/"+result['diffcommits'][i]['commits'][j]['commit']+"'>"+result['diffcommits'][i]['commits'][j]['commit'].substring(0,7)+"</a><br/>";
+					commits += "<a target='_blank' href='{{pr.project.source_url|slice:"0:-4"}}/commit/"+result['diffcommits'][i]['commits'][j]['commit']+"'>"+result['diffcommits'][i]['commits'][j]['commit'].substring(0,7)+"</a><br/>";
 
-					diffs += ""+diffadds+"&nbsp;adds,&nbsp;"+diffsubs+"&nbsp;subs<br/>";
+
+					//replaceAll('\n','<br/>')
+					diff = diff.replace(/&/g, '&amp;').replaceAll('\"','&quot;').replaceAll('\'','&lsquo;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+					diffs += "<span data-bs-toggle='popover' data-bs-trigger='hover' data-bs-html='true' data-bs-placement='left' data-bs-content='<pre>"+diff.substring(0,Math.min(diff.length,1000))+"</pre>'>"+diffadds+"&nbsp;adds,&nbsp;"+diffsubs+"&nbsp;subs</span><br/>";
+
+					/*if( result['diffcommits'][i]['filename'].indexOf('test.info') > 0 ){
+						console.log("##########################################");
+						console.log(diff);
+					
+						$('#testdiv').append('<pre>'+diff+'</pre><br/><br/>');
+					}*/
 				}	
 
 				table.append("<tr><td>"+
@@ -666,6 +686,17 @@
 							diffs+
 					"</td></tr>");
 			}
+
+			$('.popover-dismiss').popover({trigger:'focus'});
+
+			//$(function() {
+			//	$('[data-bs-toggle="popover"]').popover();
+			//});
+			
+			setTimeout(function(){
+				$('[data-bs-toggle="popover"]').popover();
+			},1000);
+			
 
 		}});
 

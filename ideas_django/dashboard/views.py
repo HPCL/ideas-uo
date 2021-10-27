@@ -72,9 +72,10 @@ def diffCommitData(request):
     filenames = list(filenames_set)
 
     #Now find all commits and diffs for the changed files in the past 60 days
-    date = datetime.datetime.now() - datetime.timedelta(days=60)
+    #date = datetime.datetime.now() - datetime.timedelta(days=60)
+    date = pr.created_at - datetime.timedelta(days=60)
     diffcommits = []
-    filtereddiffs = Diff.objects.all().filter(commit__project=pr.project, commit__datetime__gte=date)
+    filtereddiffs = Diff.objects.all().filter(commit__project=pr.project, commit__datetime__gte=date, commit__datetime__lte=pr.created_at)
     for filename in filenames:
         diffcommits.append( {'filename': filename, 'commits':[{'commit':d.commit.hash, 'diff':d.body} for d in filtereddiffs.filter(file_path=filename)]} )
 
@@ -110,31 +111,49 @@ def patternGraph1(request):
         enddate = datetime.datetime.today()
 
     
-    #vis.select_month_range()
+    prid = 2250
+    if request.GET.get('pr'):
+        prid = int(request.GET.get('pr'))
+
+    pr = list(PullRequest.objects.all().filter(id=prid).all())[0]
+    commits = list(Commit.objects.all().filter(hash__in=[committag.sha for committag in pr.commits.all()]))
+    diffs = list(Diff.objects.all().filter(commit__in=[c for c in commits]))
+    filenames = [d.file_path for d in diffs]
+
+    
     
 
     Visualizer()
     vis = Visualizer(project_name='FLASH5')
     vis.get_data()
 
-    removed = vis.remove_external()
+    #removed = vis.remove_external()
+    removed = vis.remove_files(filenames)
 
     vis.hide_names = False
 
     #Setting year or range seems to break some graphs
     #if startdate.year == enddate.year:
-    vis.set_year(enddate.year)
+    
+    # TEMPORARILY VIEW ALL YEARS
+    #vis.set_year(enddate.year)
+    
+    #vis.select_month_range()
     #else:    
     #    vis.select_year_range(startdate.year,enddate.year)
 
     #df = vis.plot_zone_heatmap(agg='mean')
     #df = vis.plot_top_N_heatmap(10, locc_metric='locc')
-    df = vis.plot_top_N_heatmap(10, time_range='year', locc_metric='change-size-cos')
+    
+    # TEMPORARILY VIEW ALL YEARS
+    #df = vis.plot_top_N_heatmap(10, time_range='year', locc_metric='change-size-cos')
+    df = vis.plot_top_N_heatmap(10, locc_metric='change-size-cos')
 
     resultdata = {
         #'filename': 'spack-zone-change-size-cos-map-Entire_project-mean.png',
         #'filename': 'FLASH5-top-10-locc-map-Entire_project.png',
-        'filename': 'FLASH5-top-10-change-size-cos-map-'+str(enddate.year)+'.png',
+        #'filename': 'FLASH5-top-10-change-size-cos-map-'+str(enddate.year)+'.png',
+        'filename': 'FLASH5-top-10-change-size-cos-map-Entire_project.png',
     }
 
     return HttpResponse(
