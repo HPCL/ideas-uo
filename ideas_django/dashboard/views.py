@@ -9,6 +9,8 @@ from django.template import loader
 
 import pandas as pd
 
+import re
+
 import sys
 sys.path.insert(1, '/shared/soft/ideas_db/ideas-uo/src/gitutils')
 from github_api import GitHubAPIClient
@@ -35,6 +37,20 @@ def index(request):
 
     issues = list(Issue.objects.all().filter(url__in=[pri.issue.url for pri in PullRequestIssue.objects.all().filter(pr=pr).all()]))
 
+
+    #Find any issue that this PR closed
+    closed_issue = None
+    issue_number = re.search(r'#\d+', pr.description)
+    if issue_number:
+        print(issue_number.group())
+        print( pr.project.source_url.replace('.git', '/issues/'+issue_number.group()[1:]) )
+        closed_issue = list(Issue.objects.all().filter(url=pr.project.source_url.replace('.git', '/issues/'+issue_number.group()[1:])))[0]
+
+
+    #issues = list(Issue.objects.all().filter(project=list(Project.objects.all().filter(name='FLASH5').all())[0], state='closed'))
+    #for issue in issues:
+    #    comments = list(Comment.objects.all().filter(issue=issue))
+
     diffs = list(Diff.objects.all().filter(commit__in=[c for c in commits]))
     filenames = [d.file_path for d in diffs]
     #get just unique filenames
@@ -48,7 +64,7 @@ def index(request):
     
 
 
-    context = {'pr':pr, 'commits':commits, 'issues':issues, 'filenames':filenames, 'events':events, 'comments':comments}
+    context = {'pr':pr, 'commits':commits, 'issues':issues, 'filenames':filenames, 'events':events, 'comments':comments,'closed_issue':closed_issue}
 
     return HttpResponse(template.render(context, request))
 
