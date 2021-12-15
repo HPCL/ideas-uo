@@ -6,6 +6,7 @@ import configparser
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.template import loader
+from django.conf import settings
 
 import pandas as pd
 
@@ -17,6 +18,7 @@ from github_api import GitHubAPIClient
 
 from database.models import Author, Project, ProjectAuthor, Commit, Diff, Issue, PullRequest, PullRequestIssue, IssueTag, Comment, EventPayload
 
+import subprocess
 import os, getpass, warnings
 warnings.filterwarnings('ignore')
 from patterns.visualizer import Visualizer
@@ -26,6 +28,24 @@ from patterns.visualizer import Visualizer
 def index(request):
     print("INDEX")
     template = loader.get_template('dashboard/index.html')
+
+    pid = 30
+    if request.GET.get('pid'):
+        pid = int(request.GET.get('pid'))
+
+    project = list(Project.objects.all().filter(id=pid).all())[0]
+
+    prs = list(PullRequest.objects.all().filter(project=project).all())
+    prs = sorted(prs, key=lambda d: d.number, reverse=True)
+
+    context = {'project':project,'prs':prs}
+
+    return HttpResponse(template.render(context, request))
+
+
+def pr(request):
+    print("PR")
+    template = loader.get_template('dashboard/pr.html')
 
     prid = 2250
     if request.GET.get('pr'):
@@ -69,6 +89,32 @@ def index(request):
     return HttpResponse(template.render(context, request))
 
 
+def refreshProject(request):
+    print("REFRESH")
+
+    pid = 30
+    if request.GET.get('pid'):
+        pid = int(request.GET.get('pid'))
+
+    project = list(Project.objects.all().filter(id=pid).all())[0]
+
+    username = settings.DATABASES['default']['USER']
+    password = settings.DATABASES['default']['PASSWORD']
+
+    cmd = f'cd ../ideas-uo ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} 30'
+    os.system(cmd)
+    result = subprocess.check_output(cmd, shell=True)
+    #print(result)
+    
+    resultdata = {
+        'status':'success'
+    }
+
+    return HttpResponse(
+        json.dumps(resultdata),
+        content_type='application/json'
+    )
+
 
 def diffCommitData(request):
     print("Diff Commit DATA")
@@ -81,6 +127,7 @@ def diffCommitData(request):
 
     #Find all changed files related to the PR by getting all diffs from all commits in PR    
     commits = list(Commit.objects.all().filter(hash__in=[committag.sha for committag in pr.commits.all()]))
+
     diffs = list(Diff.objects.all().filter(commit__in=[c for c in commits]))
     filenames = [d.file_path for d in diffs]
     #Get just unique filenames
@@ -91,14 +138,18 @@ def diffCommitData(request):
     #date = datetime.datetime.now() - datetime.timedelta(days=60)
     date = pr.created_at - datetime.timedelta(days=60)
     diffcommits = []
+
     filtereddiffs = Diff.objects.all().filter(commit__project=pr.project, commit__datetime__gte=date, commit__datetime__lte=pr.created_at)
     for filename in filenames:
         diffcommits.append( {'filename': filename, 'commits':[{'commit':d.commit.hash, 'diff':d.body} for d in filtereddiffs.filter(file_path=filename)]} )
 
-    
+    prcommits = []
+    for commit in commits:
+        prcommits.append({'hash':commit.hash})
     
     resultdata = {
-        'diffcommits':diffcommits
+        'diffcommits':diffcommits,
+        'prcommits':prcommits
     }
 
     return HttpResponse(

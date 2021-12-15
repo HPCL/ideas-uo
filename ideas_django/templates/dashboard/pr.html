@@ -1,0 +1,1215 @@
+<html>
+	
+	{% load static %}
+
+	<head>
+		
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">	
+	
+		<script src="{% static "admin/js/vendor/jquery/jquery.min.js" %}"></script>
+
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
+
+		<style>
+		/*
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+		*/
+
+			.btn-group-xs > .btn, .btn-xs {
+				padding: 1px 5px;
+				font-size: 12px;
+				line-height: 1.5;
+				border-radius: 3px;
+			}
+
+			.container, .backdrop, textarea {
+			  width: 90%;
+			  height: 50vh;
+			}
+
+			.highlights, textarea {
+			  padding: 10px;
+			  font: 20px/28px 'Open Sans', sans-serif;
+			  letter-spacing: 1px;
+			}
+
+			.container {
+			  display: block;
+			  margin: 0 auto;
+			  transform: translateZ(0);
+			  -webkit-text-size-adjust: none;
+			}
+
+			.backdrop {
+			  position: absolute;
+			  z-index: 1;
+			  border: 2px solid #685972;
+			  background-color: #fff;
+			  overflow: auto;
+			  pointer-events: none;
+			  transition: transform 1s;
+			}
+
+			.highlights {
+			  white-space: pre-wrap;
+			  word-wrap: break-word;
+			  color: transparent;
+			}
+
+			textarea {
+			  display: block;
+			  position: absolute;
+			  z-index: 2;
+			  margin: 0;
+			  border: 2px solid #74637f;
+			  border-radius: 0;
+			  color: #444;
+			  background-color: transparent;
+			  overflow: auto;
+			  resize: none;
+			  transition: transform 1s;
+			}
+
+			mark {
+			  border-radius: 3px;
+			  color: transparent;
+			  background-color: #e8a2a8; /* #b1d5e5; */
+			  padding: 3px 0px 3px 0px;
+			}
+
+			/* The sidebar menu */
+			.sidenav {
+			  height: 100%; /* Full-height: remove this if you want "auto" height */
+			  width: 200px; /* Set the width of the sidebar */
+			  position: fixed; /* Fixed Sidebar (stay in place on scroll) */
+			  z-index: 1; /* Stay on top */
+			  top: 0; /* Stay at the top */
+			  left: 0;
+			  background-color: #111; /* Black */
+			  overflow-x: hidden; /* Disable horizontal scroll */
+			  padding-top: 20px;
+			}
+
+			/* The navigation menu links */
+			.sidenav a {
+			  padding: 6px 8px 6px 16px;
+			  text-decoration: none;
+			  font-size: 22px;
+			  color: #818181;
+			  display: block;
+			}
+
+			/* When you mouse over the navigation links, change their color */
+			.sidenav a:hover {
+			  color: #f1f1f1;
+			}
+
+			/* Style page content */
+			.main {
+			  margin-left: 200px; /* Same as the width of the sidebar */
+			  padding: 0px 10px;
+			}
+
+			/* On smaller screens, where height is less than 450px, change the style of the sidebar (less padding and a smaller font size) */
+			@media screen and (max-height: 450px) {
+			  .sidenav {padding-top: 15px;}
+			  .sidenav a {font-size: 18px;}
+			}
+
+			.all_links {
+				stroke: #999;
+				stroke-opacity: 0.7;
+			}
+			.all_nodes {
+				stroke: #fff;
+				stroke-width: 1.5px;
+			}
+			.domain {
+				fill: none;
+				stroke: #000;
+				stroke-opacity: .3;
+				stroke-width: 10px;
+				stroke-linecap: round;
+			}
+			.halo {
+				fill: none;
+				stroke: #ddd;
+				stroke-width: 8px;
+				stroke-linecap: round;
+			}
+			.tick {
+				font-size: 12px;
+			}
+			.selecting circle {
+				fill-opacity: .2;
+			}
+			.selecting circle.selected {
+				stroke: #f00;
+			}
+			.handle {
+				fill: #fff;
+				stroke: #000;
+				stroke-opacity: .5;
+				stroke-width: 1.25px;
+				cursor: pointer;
+			}
+
+
+			#cy {
+		        width: 85%;
+		        height: 80%;
+		        /*position: absolute;
+		        top: 0px;
+		        left: 0px;*/
+		    }
+
+		</style>
+
+	</head>
+
+
+	<body>
+		<div class="sidenav">
+		  <a id="" href="#" onclick="" style="color:white; pointer-events: none; cursor: default;">IDEAS</a>
+
+		  <br/>
+
+		  <a id="" href="." onclick="">Home</a>
+		  <a id="" href="." onclick="">Branches</a>
+		  <a id="" href="/dashboard/?pid=30" onclick="">PR Assistant</a>
+		  <a id="" href="." onclick="">About</a>
+
+		  <br/>
+
+		  <div class="dashboard_hiding_for_now" style="display:none;">
+			  <a id="button1" href="#">Grid On</a>
+			  <a id="button2" href="#">Grid Off</a>
+			  <a id="button3" href="#">Display LOCCs</a>
+			  <a id="button4" href="#">Display Commits</a>
+		  </div>
+		</div>
+
+		<div id="home" class="main" style="padding:50px 50px 0px 50px;">
+
+			<h2>Pull Request Assistant</h2><br/>
+
+			<b><i>Pull Request:</i></b><br/>
+			<!--div style="margin-top:6px;"><u>Title</u>: {{pr.title}}</div>
+			<div style="margin-top:6px;"><u>Date</u>: {{pr.created_at}}</div>
+			<div style="margin-top:6px;"><u>Description</u>: <p style="white-space:pre;">{{pr.description}}</p></div>
+			<div style="margin-top:6px;"><u>Branch</u>: {{commits.0.branch}}</div>
+			<div style="margin-top:6px; margin-bottom:8px;"><u>URL</u>: <a target="_blank" href="{{pr.url}}">{{pr.url}}</a></div-->
+
+			<div style="margin-left:15px; margin-top:8px;">
+
+		      <div class="accordion" id="accordionExample10">
+		        <div class="accordion-item">
+		          <h2 class="accordion-header" id="headingFive">
+		            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+		              <strong>Information</strong> &nbsp;&nbsp; <i class="bi bi-exclamation-triangle-fill" style="color:red; font-size:16pt;"></i>
+		            </button>
+		          </h2>
+		          <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive" data-bs-parent="#accordionExample10">
+		            <div class="accordion-body">
+		              
+						{% if not closed_issue %}	
+							<div class="alert alert-danger" role="alert">
+			  					Warning: This PR is not linked to any issues!
+							</div>
+						{% endif %}
+
+						<div class="row" style="margin-top:6px;">
+							<div class="col-sm-1"><u>Title</u>:</div> 
+							<div class="col-sm-11">{{pr.title}}</div>
+						</div>
+						<div class="row" style="margin-top:6px;">
+							<div class="col-sm-1"><u>Date</u>: </div>
+							<div class="col-sm-11">{{pr.created_at}}</div>
+						</div>
+						<div class="row" style="margin-top:6px;">
+							<div class="col-sm-1" style=""><u>Desc</u>: </div>
+							<div class="col-sm-11"><p style="white-space:pre-wrap;">{{pr.description}}</p></div>
+						</div>
+						<div class="row" style="margin-top:6px;">
+							<div class="col-sm-1"><u>Branch</u>: </div>
+							<div class="col-sm-11">{{commits.0.branch}}</div>
+						</div>
+						<div class="row" style="margin-top:6px; margin-bottom:8px;">
+							<div class="col-sm-1"><u>URL</u>: </div>
+							<div class="col-sm-11"><a target="_blank" href="{{pr.url}}">{{pr.url}}</a></div>
+						</div>
+
+
+						<button id="showcommitsbutton" class="btn btn-sm btn-secondary" onclick="$('#hidediscussionbutton').hide(); $('#showdiscussionbutton').show(); $('#hideissuesbutton').hide(); $('#showissuesbutton').show(); $('#showcommitsbutton').hide(); $('#hidecommitsbutton').show(); $('#discussiondiv').hide(); $('#issuesdiv').hide(); $('#commitsdiv').show();">Show Commits</button><button id="hidecommitsbutton" class="btn btn-sm btn-primary" onclick="$('#hidecommitsbutton').hide(); $('#showcommitsbutton').show(); $('#commitsdiv').hide();" style="display:none;">Hide Commits</button> 
+						
+						<button id="showissuesbutton" class="btn btn-sm btn-secondary" onclick="$('#hidediscussionbutton').hide(); $('#showdiscussionbutton').show(); $('#hidecommitsbutton').hide(); $('#showcommitsbutton').show(); $('#showissuesbutton').hide(); $('#hideissuesbutton').show(); $('#discussiondiv').hide(); $('#commitsdiv').hide(); $('#issuesdiv').show();">Show Issues</button><button id="hideissuesbutton" class="btn btn-sm btn-primary" onclick="$('#hideissuesbutton').hide(); $('#showissuesbutton').show(); $('#issuesdiv').hide();" style="display:none;">Hide Issues</button> 
+
+						<br/>
+
+						<div id="commitsdiv" style="display:none; border:1px solid grey; margin:10px; padding:10px;">
+							<b>Commits:</b>
+							<table class="table">
+								{% for commit in commits %}
+								<tr>
+									<td><a href="{{pr.project.source_url|slice:"0:-4"}}/commit/{{commit.hash}}">{{commit.hash|slice:"0:7"}}</a></td>
+									<td>{{commit.datetime|date:'Y-m-d'}}</td>
+									<td>{{commit.message}}</td>
+								</tr>
+								{% endfor %}
+							</table>
+						</div>
+		
+						<div id="issuesdiv" style="display:none; border:1px solid grey; margin:10px; padding:10px;">
+							<b>Issue closed by this PR:</b>
+							{% if closed_issue %}	
+								<table class="table">
+									<tr>
+										<td>{{closed_issue.title}}</td>
+										<td>{{closed_issue.description}}</td>
+										<td>{{closed_issue.url}}</td>
+									</tr>
+								</table>				
+							{% else %}
+								<table class="table">
+									<tr>
+										<td>None</td>
+									</tr>
+								</table>				
+							{% endif %}
+							<br/>
+							<br/>
+
+							<b>Other Issues:</b>
+							<table class="table">
+								{% if issues|length < 1 %}	
+									<tr><td>None</td></tr>
+								{% endif %}
+
+								{% for issue in issues %}
+								<tr>
+									<td>{{issue.title}}</td>
+									<td>{{issue.description}}</td>
+									<td>{{issue.url}}</td>
+								</tr>
+								{% endfor %}
+							</table>
+						</div>
+
+		            </div>
+		          </div>
+		        </div>
+		      </div>
+
+		      <br/>
+
+		      <div class="accordion" id="accordionExample9">
+		        <div class="accordion-item">
+		          <h2 class="accordion-header" id="headingFour">
+		            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+		              <strong>Commentary</strong> &nbsp;&nbsp; <span><strong>(6)</strong></span>
+		            </button>
+		          </h2>
+		          <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#accordionExample">
+		            <div class="accordion-body">
+		              
+						<b>Comments from PR:</b>
+						<table class="table">
+							{% if comments|length < 1 %}	
+								<tr><td>None</td></tr>
+							{% endif %}
+
+							{% for comment in comments %}
+							<tr>
+								<td style="min-width:110px;">{{comment.created_at|date:'Y-m-d'}}</td>
+								<td>{{comment.author.username}}</td>
+								<td>{{comment.body}}</td>
+							</tr>
+							{% endfor %}
+						</table>
+
+						<br/>
+
+   					  	<b>Out-of-band Conversation:</b>
+
+   					  	<br/>
+
+   					  	<!--button id="showdiscussionbutton" class="btn btn-sm btn-secondary" onclick="$('#hidecommitsbutton').hide(); $('#showcommitsbutton').show(); $('#hideissuesbutton').hide(); $('#showissuesbutton').show(); $('#showdiscussionbutton').hide(); $('#hidediscussionbutton').show(); $('#commitsdiv').hide(); $('#issuesdiv').hide(); $('#discussiondiv').show();">Show Discussion</button><button id="hidediscussionbutton" class="btn btn-sm btn-primary" onclick="$('#hidediscussionbutton').hide(); $('#showdiscussionbutton').show(); $('#discussiondiv').hide();" style="display:none;">Hide Discussion</button> 
+
+						<br/>
+
+						<div id="discussiondiv" style="display:none; border:1px solid grey; margin:10px; padding:10px;">
+							<b>Discussion (Comments):</b>
+							<table class="table">
+								{% if comments|length < 1 %}	
+									<tr><td>None</td></tr>
+								{% endif %}
+
+								{% for comment in comments %}
+								<tr>
+									<td style="min-width:110px;">{{comment.created_at|date:'Y-m-d'}}</td>
+									<td>{{comment.author.username}}</td>
+									<td>{{comment.body}}</td>
+								</tr>
+								{% endfor %}
+							</table>
+						</div-->
+
+						<div style="margin-left:12px; margin-top:6px;w">
+
+							<i><u>Slack</u>:</i><br/>
+
+			   				<table class="table">
+								<tr>
+									<th>Date</th>
+									<th>People</th>
+									<th>Conversation</th>
+								</tr>
+								<tr>
+									<td style="min-width:110px;">2021-12-08</td>
+									<td>Frank, Violet</td>
+									<td>Discussed something</td>
+								</tr>
+								<tr>
+									<td style="min-width:110px;">2021-12-07</td>
+									<td>Violet, Sam, Joe</td>
+									<td>Discussed something else</td>
+								</tr>
+							</table>
+
+							<!--div style="height:210px;">	
+								<div style="width:600px; float:right;">							
+									<b><i>Record new Slack conversation:</i></b>
+									<div style="width:600px; margin-top:10px;">
+										People:<br/> 
+										<input type="text" style="width:100%; border: 2px solid #74637f;"/><br/>
+										Conversation:<br/>
+										<textArea rows="2" style="z-index: 0; position: relative; margin-left:0px; height:60; width:100%"></textArea>
+										<button class="btn btn-sm btn-primary" style="float:right; margin-top:10px;">Submit</button> 
+										<br/><br/>
+									</div>
+								</div>
+							</div-->
+
+							<!--br/-->
+
+							<i><u>Email</u>:</i><br/>
+
+			   				<table class="table">
+								<tr>
+									<th>Date</th>
+									<th>People</th>
+									<th>Conversation</th>
+								</tr>
+								<tr>
+									<td style="min-width:110px;">2021-12-03</td>
+									<td>Julie, Reagan</td>
+									<td>Discussed something</td>
+								</tr>
+								<tr>
+									<td style="min-width:110px;">2021-12-01</td>
+									<td>Julie, Sam, Mark</td>
+									<td>Discussed something else</td>
+								</tr>
+							</table>
+
+							<!--div style="height:210px;">	
+								<div style="width:600px; float:right;">							
+									<b><i>Record new email conversation:</i></b>
+									<div style="width:600px; margin-top:10px;">
+										People:<br/> 
+										<input type="text" style="width:100%; border: 2px solid #74637f;"/><br/>
+										Conversation:<br/>
+										<textArea rows="2" style="z-index: 0; position: relative; margin-left:0px; height:60; width:100%"></textArea>
+										<button class="btn btn-sm btn-primary" style="float:right; margin-top:10px;">Submit</button> 
+										<br/><br/>
+									</div>
+								</div>
+							</div-->
+
+							<!--br/-->
+
+							<i><u>In-person</u>:</i><br/>
+
+			   				<table class="table">
+								<tr>
+									<th>Date</th>
+									<th>People</th>
+									<th>Conversation</th>
+								</tr>
+								<tr>
+									<td style="min-width:110px;">2021-12-12</td>
+									<td>Sam, Violet</td>
+									<td>Discussed something</td>
+								</tr>
+								<tr>
+									<td style="min-width:110px;">2021-12-07</td>
+									<td>Violet, Mark, Joe</td>
+									<td>Discussed something else</td>
+								</tr>
+							</table>
+
+							<!--div style="height:210px;">	
+								<div style="width:600px; float:right;">							
+									<b><i>Record new in-person conversation:</i></b>
+									<div style="width:600px; margin-top:10px;">
+										People:<br/> 
+										<input type="text" style="width:100%; border: 2px solid #74637f;"/><br/>
+										Conversation:<br/>
+										<textArea rows="2" style="z-index: 0; position: relative; margin-left:0px; height:60; width:100%"></textArea>
+										<button class="btn btn-sm btn-primary" style="float:right; margin-top:10px;">Submit</button> 
+										<br/><br/>
+									</div>
+								</div>
+							</div-->
+
+
+							<div style="margin-top:6px;">	
+								<b><i>Record new conversation:</i></b>
+								<div style="width:600px; margin-left:15px;">							
+									
+									<div style="width:600px; margin-top:10px;">
+										Type:<br/>
+										<select>
+											<option>Slack</option>
+											<option>Email</option>
+											<option>In-person</option>
+										</select><br/>
+										People:<br/> 
+										<input type="text" style="width:100%; border: 2px solid #74637f;"/><br/>
+										Conversation:<br/>
+										<textArea rows="2" style="z-index: 0; position: relative; margin-left:0px; height:60; width:100%"></textArea>
+										<button class="btn btn-sm btn-primary" style="float:right; margin-top:10px;">Submit</button> 
+										<br/><br/>
+									</div>
+								</div>
+							</div>
+
+						</div>
+
+		            </div>
+		          </div>
+		        </div>
+		      </div>
+
+			</div>
+
+
+
+			<br/>
+
+
+
+
+			<b><i>Potential follow on:</i></b> <span></span>
+			<br/>
+			<div style="margin-left:15px; margin-top:8px;">
+		      <div class="accordion" id="accordionExample">
+		        <div class="accordion-item">
+		          <h2 class="accordion-header" id="headingOne">
+		            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+		              <strong>Documentation</strong> &nbsp;&nbsp; <i class="bi bi-exclamation-triangle-fill" style="color:red; font-size:16pt;"></i>
+		              <!-- <i class="bi bi-exclamation-triangle"></i> -->
+		            </button>
+		          </h2>
+		          <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+		            <div class="accordion-body">
+   					
+
+
+
+
+					  <div id="docfilenamesdiv" style="border:1px solid grey; margin:10px; padding:10px;">
+						<b>Files modified in this PR:</b>
+						<table class="table" id="docdiffcommittable" style="font-size:10pt;">
+							<thead>
+								<tr>
+									<th>File</th>
+									<th>Commits from this PR</th>
+									<th>Documentation</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr><td colspan="3">Loading...</td></tr>
+								<!--{% for file in filenames %}
+								<tr>
+									<td>{{file}}</td>
+								</tr>
+								{% endfor %}-->
+
+								<!--{% for key,value in diffcommits.items %}
+								<tr>
+									<td>{{key}}</td>
+									<td>
+										{% for commit in value %}
+											{{commit}}
+										{% endfor %}
+									</td>
+								</tr>
+								{% endfor %}-->
+							</tbody>
+						</table>
+					  </div>
+
+
+   					  <b>Does this PR affect user documentation?</b><br/>
+   					  <div class="btn-group btn-group-sm" role="group">
+   					  	<button type="button" class="btn btn-primary">Yes</button> <button type="button" class="btn btn-secondary">No</button>
+   					  </div>
+   					  <div style="margin-left:30px;">
+	   					  <i>Please identify the chapter:</i><br/>
+	   					  <div>
+		   					  &emsp;<input type="checkbox"/> Chapter 1 - Introduction<br/>
+		   					  <b>Part I Getting Started</b><br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 2 - Quick Start<br/>
+		   					  <b>Part II The Flash-X Software System</b><br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 3 - Overview of Flash-X architecture<br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 4 - The Flash-X configuration script (setup)<br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 5 - The Flash.h file<br/>
+							  <b>Part III Driver Unit</b><br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 6 - Driver Unit<br/>
+		   					  <b>Part IV Infrastructure Units</b><br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 7 - Grid Unit<br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 8 - IO Unit<br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 9 - Runtime Parameters Unit<br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 10 - Multispecies Unit<br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 11 - Physical Constants Unit<br/>
+		   					  <b>Part V Physics Units</b><br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 12 - Hydrodynamics Units<br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 13 - Incompressible Navier-Stokes Unit<br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 14 - Equation of State Unit<br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 15 - Local Source Terms<br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 16 - Gravity Unit<br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 17 - Particles Unit<br/>
+		   					  <b>Part VI Monitor Units</b><br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 18 - Logfile Unit<br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 19 - Timer and Profiler Units<br/>
+		   					  <b>Part VII Tools</b><br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 20 - VisIt<br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 21 - Serial Flash-X Output Comparison Utility (sfocu)<br/>
+		   					  &emsp;<input type="checkbox"/> Chapter 22 - Drift<br/>
+		   				  </div>
+					  </div>
+					  <br/>
+
+   					  <b>Analysis</b><br/>
+   					  <div style="margin-left:30px;">
+	   					  Here are some things you should mention in the PR:
+	   					  <ul>
+	   					  	<li>TODO</li>
+	   					  	<li>TODO</li>
+	   					  	<li>TODO</li>
+	   					  </ul>
+	   				  </div>
+		              
+		              <!--h6 style="margin-left:20px;">Infrastructure or physics</h6>
+		                <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+		              <h6 style="margin-left:20px;margin-top:12px;">New functionality or alternative implementation</h6>
+		                <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+		              <h6 style="margin-left:20px;margin-top:12px;">Description -- including design decisions what and why</h6>
+		                <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+		              <h6 style="margin-left:20px;margin-top:12px;">How tested</h6>
+		                <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+		              <h6 style="margin-left:20px;margin-top:12px;">Time spent</h6>
+		                <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+		              <h6 style="margin-left:20px;margin-top:12px;">References if applicable</h6>
+		                <textArea rows="2" style="margin-left:40px; width:400px;"></textArea-->
+		            </div>
+		          </div>
+		        </div>
+		      </div>
+
+		      <br/>
+
+		      <div class="accordion" id="accordionExample6">
+		        <div class="accordion-item">
+		          <h2 class="accordion-header" id="headingTwo">
+		            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+		              <strong>Testing</strong>
+		            </button>
+		          </h2>
+		          <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+		            <div class="accordion-body">
+		              
+   					  <b>Does this PR require new or modified test cases?</b><br/>
+   					  <div class="btn-group btn-group-sm" role="group">
+   					  	<button type="button" class="btn btn-primary">Yes</button> <button type="button" class="btn btn-secondary">No</button>
+   					  </div>
+   					  <div style="margin-left:30px;">
+	   					  Please identify code packages<br/>
+	   					  <div>
+		   					  <input type="checkbox"/> Package 1<br/>
+		   					  <input type="checkbox"/> Package 2<br/>
+		   					  <input type="checkbox"/> Package 3<br/>
+		   				  </div>
+					  </div>
+					  <br/>
+
+   					  <b>Analysis</b><br/>
+   					  <div style="margin-left:30px;">
+	   					  Here are some things you should mention in the PR:
+	   					  <ul>
+	   					  	<li>Something</li>
+	   					  	<li>Someone</li>
+	   					  	<li>Things and dodads</li>
+	   					  </ul>
+	   				  </div>
+
+		              <!--h6 style="margin-left:20px;">Infrastructure or physics</h6>
+		                <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+
+		              <h6 style="margin-left:20px; margin-top:12px;">How tested</h6>
+		                <textArea rows="2" style="margin-left:40px; width:400px;"></textArea-->
+
+		            </div>
+		          </div>
+		        </div>
+		      </div>
+
+		      <br/>
+
+		      <div class="accordion" id="accordionExample7">
+		        <div class="accordion-item">
+		          <h2 class="accordion-header" id="headingThree">
+		            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+		              <strong>Patterns</strong>
+		            </button>
+		          </h2>
+		          <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
+		            <div class="accordion-body">
+
+		              <div>
+		              	<div class="row">
+		              		<div class="col-sm-2" style="text-align:right; padding-top:5px;">Start Date:</div>
+		              		<div class="col-sm-3" style="text-align:left;"><input class="form-control" type=date id="startdate"></div>
+
+		              		<div class="col-sm-2" style="text-align:right; padding-top:5px;">End Date:</div>
+		              		<div class="col-sm-3" style="text-align:left;"><input class="form-control" type=date id="enddate"></div>
+
+		              		<div class="col-sm-2" style="text-align:left; padding-top:2px;"> 
+		              			<button class="btn btn-sm btn-primary" onclick="loadPatternGraph();">Rerun graph</button> 
+		              		</div>
+		              	</div>
+		           		<img id="patterngraph1" src="" style="display:none; width:720px;"/>
+		           		<span id="patternlabel1">Loading...<br/></span>
+		           		<br/>
+		           	  </div>
+
+		           	  <br/>
+
+					  <div id="filenamesdiv" style="border:1px solid grey; margin:10px; padding:10px;">
+						<b>Files modified in this PR:</b>
+						<table class="table" id="diffcommittable" style="font-size:10pt;">
+							<thead>
+								<tr>
+									<th>File</th>
+									<th>Commits (last 8 weeks)</th>
+									<th>Lines changed</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr><td colspan="3">Loading...</td></tr>
+								<!--{% for file in filenames %}
+								<tr>
+									<td>{{file}}</td>
+								</tr>
+								{% endfor %}-->
+
+								<!--{% for key,value in diffcommits.items %}
+								<tr>
+									<td>{{key}}</td>
+									<td>
+										{% for commit in value %}
+											{{commit}}
+										{% endfor %}
+									</td>
+								</tr>
+								{% endfor %}-->
+							</tbody>
+						</table>
+					  </div>
+
+					  <br/>
+
+					  <div id="eventsdiv" style="border:1px solid grey; margin:10px; padding:10px;">
+						<b>Events:</b>
+						<table class="table">
+							{% for event in events %}
+							<tr>
+								<td>{{event.action}}</td>
+								<td>{{event.master_branch}}</td>
+								<td>{{event.description}}</td>
+							</tr>
+							{% endfor %}
+						</table>
+					  </div>
+
+		           	  <br/>  
+
+					  <b>Does this PR meet any of these patterns?</b><br/>
+					  <div style="margin-left:30px;">
+	   					  <div>
+		   					  <input type="checkbox"/> Code Churn - description<br/>
+		   					  <input type="checkbox"/> Pattern 2 - description<br/>
+		   					  <input type="checkbox"/> Pattern 3 - description<br/>
+		   				  </div>
+					  </div>
+					  <br/>
+
+					  <b>Analysis</b><br/>
+   					  <div style="margin-left:30px;">
+	   					  Here are some things you should mention in the PR:
+	   					  <ul>
+	   					  	<li>Something</li>
+	   					  	<li>Someone</li>
+	   					  	<li>Things and dodads</li>
+	   					  </ul>
+	   				  </div>
+
+	   				  <br/>
+	   				  <div id='testdiv'>
+	   				  </div>
+
+		            </div>
+		          </div>
+		        </div>
+		      </div>
+
+		      <br/>
+
+		    </div>
+
+			<!--b>Manual TOC:</b> <span></span>
+			<br/>
+			<br/>
+			
+			<b>Analysis Results:</b> <span ></span>
+			<br/>
+			<br/-->
+			
+			<!--b>Template:</b> <span></span>
+			<br/>
+			<br/>
+			<div>
+		      <div class="accordion" id="accordionExample">
+		        <div class="accordion-item">
+		          <h2 class="accordion-header" id="headingOne">
+		            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+		              <strong>New capability</strong>
+		            </button>
+		          </h2>
+		          <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+		            <div class="accordion-body">
+		              <h6 style="margin-left:20px;">Infrastructure or physics</h6>
+		                <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+		              <h6 style="margin-left:20px;margin-top:12px;">New functionality or alternative implementation</h6>
+		                <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+		              <h6 style="margin-left:20px;margin-top:12px;">Description -- including design decisions what and why</h6>
+		                <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+		              <h6 style="margin-left:20px;margin-top:12px;">How tested</h6>
+		                <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+		              <h6 style="margin-left:20px;margin-top:12px;">Time spent</h6>
+		                <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+		              <h6 style="margin-left:20px;margin-top:12px;">References if applicable</h6>
+		                <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+		            </div>
+		          </div>
+		        </div>
+		      </div>
+
+		      <div class="accordion" id="accordionExample6">
+		        <div class="accordion-item">
+		          <h2 class="accordion-header" id="headingTwo">
+		            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+		              <strong>Enhancement</strong>
+		            </button>
+		          </h2>
+		          <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+		            <div class="accordion-body">
+		              <h6 style="margin-left:20px;">Infrastructure or physics</h6>
+		                <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+
+		              <div class="accordion" id="accordionExample2">
+		                <div class="accordion-item">
+		                  <h2 class="accordion-header" id="headingOne2">
+		                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne2" aria-expanded="true" aria-controls="collapseOne2">
+		                      <strong>Major</strong>
+		                    </button>
+		                  </h2>
+		                  <div id="collapseOne2" class="accordion-collapse collapse" aria-labelledby="headingOne2" data-bs-parent="#accordionExample2">
+		                    <div class="accordion-body">
+		                      <h6 style="margin-left:20px;">Description of design choices, what and why</h6>
+		                        <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+		                      <h6 style="margin-left:20px; margin-top:12px;">Time spent</h6>
+		                        <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+		                    </div>
+		                  </div>
+		                </div>
+		              </div>
+
+		              <div class="accordion" id="accordionExample3">
+		                <div class="accordion-item">
+		                  <h2 class="accordion-header" id="headingOne3">
+		                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne3" aria-expanded="true" aria-controls="collapseOne3">
+		                      <strong>Minor</strong>
+		                    </button>
+		                  </h2>
+		                  <div id="collapseOne3" class="accordion-collapse collapse" aria-labelledby="headingOne3" data-bs-parent="#accordionExample3">
+		                    <div class="accordion-body">
+		                      <h6 style="margin-left:20px;">Generic content</h6>
+		                        <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+		                    </div>
+		                  </div>
+		                </div>
+		              </div>
+
+		              <h6 style="margin-left:20px; margin-top:12px;">How tested</h6>
+		                <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+
+		            </div>
+		          </div>
+		        </div>
+		      </div>
+
+		      <div class="accordion" id="accordionExample7">
+		        <div class="accordion-item">
+		          <h2 class="accordion-header" id="headingThree">
+		            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+		              <strong>Bug-fix</strong>
+		            </button>
+		          </h2>
+		          <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
+		            <div class="accordion-body">
+
+		              <div class="accordion" id="accordionExample4">
+		                <div class="accordion-item">
+		                  <h2 class="accordion-header" id="headingOne4">
+		                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne4" aria-expanded="true" aria-controls="collapseOne4">
+		                      <strong>Major</strong>
+		                    </button>
+		                  </h2>
+		                  <div id="collapseOne4" class="accordion-collapse collapse" aria-labelledby="headingOne4" data-bs-parent="#accordionExample4">
+		                    <div class="accordion-body">
+		                      <h6 style="margin-left:20px;">Description of the bug</h6>
+		                        <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+		                      <h6 style="margin-left:20px; margin-top:12px;">Approach for fixing</h6>
+		                        <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+		                      <h6 style="margin-left:20px; margin-top:12px;">How tested</h6>
+		                        <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+		                      <h6 style="margin-left:20px; margin-top:12px;">Time spent</h6>
+		                        <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+		                    </div>
+		                  </div>
+		                </div>
+		              </div>
+
+		              <div class="accordion" id="accordionExample5">
+		                <div class="accordion-item">
+		                  <h2 class="accordion-header" id="headingOne5">
+		                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne5" aria-expanded="true" aria-controls="collapseOne3">
+		                      <strong>Minor</strong>
+		                    </button>
+		                  </h2>
+		                  <div id="collapseOne5" class="accordion-collapse collapse" aria-labelledby="headingOne5" data-bs-parent="#accordionExample5">
+		                    <div class="accordion-body">
+		                      <h6 style="margin-left:20px;">Description and fix</h6>
+		                        <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+		                    </div>
+		                  </div>
+		                </div>
+		              </div>
+
+		              <h6 style="margin-left:20px; margin-top:12px;">Other comments</h6>
+		                <textArea rows="2" style="margin-left:40px; width:400px;"></textArea>
+
+		            </div>
+		          </div>
+		        </div>
+		      </div>
+			</div-->
+
+			<br/>
+
+			<br/>
+			<table id='branches_table' class="table" style="display:none;">
+				<tbody>
+					<tr><th>Name</th><th>Author</th><th>Created</th><th>Deleted</th></tr>
+				</tbody>
+			</table>
+
+		</div>
+
+
+
+		<div id="docModal" class="modal" tabindex="-1">
+		  <div class="modal-dialog modal-xl">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <h5 class="modal-title">Documentation Helper</h5>
+		        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		      </div>
+		      <div class="modal-body">
+		        
+		        <p>Suggestions highlighted for file <b><i>folder1/arithmetic.py</i></b></p>
+
+				<div class="container">
+				  <div class="backdrop">
+				    <div class="highlights" id="highlightsdiv">
+				    </div>
+				  </div>
+		          <textarea id="dochelper">function = def sub(x,y):
+  """
+  Return the subtraction of two numbers::
+  .. math:: `\mathtt{x} - \mathtt{y}'
+  Parameters
+  ----------
+  x: int, real, complex
+     first operand
+  y: int, real, complex
+     second operand
+  round: positive int, optional
+     If None, does no rounding. Else rounds the result to places specified, e.g., 2.
+  Returns
+  -------
+  z: int, real, complex
+      the result of subtraction
+  Raises
+  ------
+  ValueError:
+      when 'x' or 'y' is not a number
+  See Also
+  --------
+  Of course, subtraction is built-in to Python as minus sign.
+  Notes
+  -----
+  The algorithm is a straightforward implementation of
+  subtraction.
+  References
+  ----------
+  .. [1] Any textbook on mathematics.
+  Examples
+  --------
+  >>> sub(1,2)
+  -1
+  >>> sub(.03333, .01111)
+  .02222
+  >>> sub(.03333, .01111, round=3)
+  .022
+  """
+  return x-y
+</textarea>
+				</div>
+
+
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+		        <!--button type="button" class="btn btn-primary">Save changes</button-->
+		      </div>
+		    </div>
+		  </div>
+		</div>
+
+
+
+	</body>
+
+	<script>
+
+		console.log("javascript is working...");
+
+
+		var startdate = $("#startdate");
+		var date = new Date(new Date().getTime() - (1000*60*60*24*30));
+		startdate.val(date.toISOString().substr(0,10));
+
+		var enddate = $("#enddate");
+		date = new Date();
+		enddate.val(date.toISOString().substr(0,10));
+
+
+		var queryString = window.location.search;
+		var urlParams = new URLSearchParams(queryString);
+		var pr = urlParams.get('pr')
+		console.log(pr);
+
+
+		//Setup our fancy textarea with highlighting ability
+		$("#dochelper").on({
+		  'input': handleInput,
+		  'scroll': handleScroll
+		});
+		function handleInput() {
+		  var text = $("#dochelper").val();
+		  //console.log( text );
+		  var highlightedText = applyHighlights(text);
+		  $("#highlightsdiv").html(highlightedText);
+		}
+		function applyHighlights(text) {
+
+		  //return text
+		  //  .replace(/\n$/g, '\n\n')
+		  //  .replace(/[A-Z].*?\b/g, '<mark>$&</mark>');
+
+		  text = text.replace(/\n$/g, '\n\n');
+	      //[(215, 220), (813, 818)]
+		  //text = [text.slice(0, 818), "</mark>", text.slice(818)].join('');
+		  //text = [text.slice(0, 813), "<mark>", text.slice(813)].join('');
+		  //text = [text.slice(0, 220), "</mark>", text.slice(220)].join('');
+		  //text = [text.slice(0, 215), "<mark>", text.slice(215)].join('');
+		  text = text.replaceAll('round:','<mark>round</mark>:')
+		  text = text.replaceAll('round=','<mark>round</mark>=')
+
+		  console.log( text );
+		  return text
+		}
+		function handleScroll() {
+		  var scrollTop = $("#dochelper").scrollTop();
+		  $(".backdrop").scrollTop(scrollTop);
+		}
+		handleInput();
+
+
+		function showDocEditor(difftext){
+
+			console.log("TEST");
+			console.log(difftext);
+
+			$('#docModal').modal('show');
+
+		}
+
+
+		function loadPatternGraph(){
+			console.log("Rerunning pattern graph...");
+
+			$('#patterngraph1').hide();
+			$('#patternlabel1').show();
+
+			$.ajax({url:'/dashboard/patterngraph1', data:{'pr':pr, 'start':$("#startdate").val(), 'end':$("#enddate").val()}, success:function(result){
+				console.log("success pattern");
+				console.log(result);
+
+				$('#patterngraph1').attr('src', '/media/figures/'+result['filename']);
+				$('#patternlabel1').hide();
+				$('#patterngraph1').show();
+
+
+			}});
+		}
+
+
+		$.ajax({url:'/dashboard/diffcommitdata', data:{'pr':pr}, success:function(result){
+			console.log("success diff commits");
+			console.log(result);
+
+			var table = $("#diffcommittable > tbody");
+			table.empty();
+
+			var doctable = $("#docdiffcommittable > tbody");
+			doctable.empty();
+
+			for(var i=0; i<result['diffcommits'].length; i++){
+				var commits = "";
+				var diffs = "";
+				var doccommits = "";
+				var docdiffs = "";
+				for(var j=0; j<result['diffcommits'][i]['commits'].length; j++){	
+
+					var diff = result['diffcommits'][i]['commits'][j]['diff'];
+					var diffadds = (diff.charAt(0)=='+' ? 1 : 0);
+					var diffsubs = (diff.charAt(0)=='-' ? 1 : 0);
+
+					diffadds += (diff.match(/\n\+/g) || []).length;
+					diffsubs += (diff.match(/\n\-/g) || []).length;
+
+					commits += "<a target='_blank' href='{{pr.project.source_url|slice:"0:-4"}}/commit/"+result['diffcommits'][i]['commits'][j]['commit']+"'>"+result['diffcommits'][i]['commits'][j]['commit'].substring(0,7)+"</a><br/>";
+
+
+					diff = diff.replace(/&/g, '&amp;').replaceAll('\"','&quot;').replaceAll('\'','&lsquo;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+					diffs += "<span data-bs-toggle='popover' data-bs-trigger='hover' data-bs-html='true' data-bs-placement='left' data-bs-content='<pre>"+diff.substring(0,Math.min(diff.length,1000))+"</pre>'>"+diffadds+"&nbsp;adds,&nbsp;"+diffsubs+"&nbsp;subs</span><br/>";
+
+					//see if we should add commit to doc file table
+					for(var k=0; k<result['prcommits'].length; k++){
+						if( result['diffcommits'][i]['commits'][j]['commit'] == result['prcommits'][k]['hash'] ){
+							doccommits += "<a target='_blank' href='{{pr.project.source_url|slice:"0:-4"}}/commit/"+result['diffcommits'][i]['commits'][j]['commit']+"'>"+result['diffcommits'][i]['commits'][j]['commit'].substring(0,7)+"</a><br/>";
+							docdiffs += "<button class='btn btn-xs btn-primary' onclick='showDocEditor(\""+"DIFF STUFF TO GO HERE"+"\");'>View Docs</button><br/>";
+
+						}
+					}
+
+				}	
+
+				table.append("<tr><td>"+
+					result['diffcommits'][i]['filename']+
+					"</td><td>"+
+							commits+
+					"</td><td>"+
+							diffs+
+					"</td></tr>");
+
+				doctable.append("<tr><td>"+
+					result['diffcommits'][i]['filename']+
+					"</td><td>"+
+							doccommits+
+					"</td><td>"+
+							docdiffs+
+					"</td></tr>");
+
+			}
+
+			$('.popover-dismiss').popover({trigger:'focus'});
+
+			//$(function() {
+			//	$('[data-bs-toggle="popover"]').popover();
+			//});
+			
+			setTimeout(function(){
+				$('[data-bs-toggle="popover"]').popover();
+			},1000);
+			
+
+		}});
+
+
+		$.ajax({url:'/dashboard/patterngraph1', data:{'pr':pr}, success:function(result){
+			console.log("success pattern");
+			console.log(result);
+
+			$('#patterngraph1').attr('src', '/media/figures/'+result['filename']);
+			$('#patternlabel1').hide();
+			$('#patterngraph1').show();
+
+
+		}});
+
+
+		$.ajax({url:'/dashboard/branchdata', data:{'test':'test'}, success:function(result){
+			console.log("success");
+			console.log(result);
+
+			$('#open_branches').html(result['open_branches'].join(' '));
+			$('#feature_branches').html(result['feature_branches'].join(' '));
+			$('#created_branches').html(result['created_branches'].join(' '));
+			$('#deleted_branches').html(result['deleted_branches'].join(' '));
+
+
+			var table = $('#branches_table > tbody:last-child');
+
+			for(var i=0; i<result['name_column'].length; i++){
+				console.log(result['name_column'][i]);
+				table.append('<tr><td>'+result['name_column'][i]+'</td><td>'+result['author_column'][i]+'</td><td>'+result['created_column'][i]+'</td><td>'+result['deleted_column'][i]+'</td></tr>');
+			}
+
+
+		}});
+
+
+
+	</script>
+
+</html>
