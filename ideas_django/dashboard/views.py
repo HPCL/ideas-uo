@@ -25,6 +25,7 @@ from patterns.visualizer import Visualizer
 
 # Create your views here.
 
+# Index view - should list all projects
 def index(request):
     print("INDEX")
     template = loader.get_template('dashboard/index.html')
@@ -32,6 +33,24 @@ def index(request):
     pid = 30
     if request.GET.get('pid'):
         pid = int(request.GET.get('pid'))
+
+    projects = list(Project.objects.all())
+    projects = sorted(projects, key=lambda d: d.name, reverse=False)
+
+    context = {'projects':projects}
+
+    return HttpResponse(template.render(context, request))
+
+
+# Project view - should list general project info
+def project(request, *args, **kwargs):
+    print("PROJECT")
+    print( kwargs['pk'] )
+    template = loader.get_template('dashboard/project.html')
+
+    pid = 30
+    if kwargs['pk']:
+        pid = int(kwargs['pk'])
 
     project = list(Project.objects.all().filter(id=pid).all())[0]
 
@@ -43,13 +62,37 @@ def index(request):
     return HttpResponse(template.render(context, request))
 
 
-def pr(request):
+# PR list view - list all the PRs for project
+def prlist(request, *args, **kwargs):
+    print("PRLIST")
+    template = loader.get_template('dashboard/prlist.html')
+
+    pid = 30
+    #if request.GET.get('pid'):
+    #    pid = int(request.GET.get('pid'))
+    if kwargs['pk']:
+        pid = int(kwargs['pk'])
+
+    project = list(Project.objects.all().filter(id=pid).all())[0]
+
+    prs = list(PullRequest.objects.all().filter(project=project).all())
+    prs = sorted(prs, key=lambda d: d.number, reverse=True)
+
+    context = {'project':project,'prs':prs}
+
+    return HttpResponse(template.render(context, request))
+
+
+# Pull Request view - show the assistant for specific PR
+def pr(request, *args, **kwargs):
     print("PR")
     template = loader.get_template('dashboard/pr.html')
 
     prid = 2250
-    if request.GET.get('pr'):
-        prid = int(request.GET.get('pr'))
+    #if request.GET.get('pr'):
+    #    prid = int(request.GET.get('pr'))
+    if kwargs['pk']:
+        prid = int(kwargs['pk'])
 
     pr = list(PullRequest.objects.all().filter(id=prid).all())[0]
 
@@ -89,6 +132,7 @@ def pr(request):
     return HttpResponse(template.render(context, request))
 
 
+# Refresh the GIT and GitHub data for a project (INTENTIONALLY ONLY WORKS FOR PROJECT ID 30)
 def refreshProject(request):
     print("REFRESH")
 
@@ -116,6 +160,7 @@ def refreshProject(request):
     )
 
 
+# Retrieves commit data for a specific PR
 def diffCommitData(request):
     print("Diff Commit DATA")
 
@@ -159,6 +204,8 @@ def diffCommitData(request):
 
 
 
+# Uses the Visualizer code to generate a graph.
+# Works just fro FLASH5 at the moment, but can be made to be more generic.
 def patternGraph1(request):
     print("PATTERN DATA")
 
@@ -229,7 +276,7 @@ def patternGraph1(request):
     )
 
 
-
+# Branches view (is this still needed)
 def branches(request):
     print("BRANCHES")
     template = loader.get_template('dashboard/branches.html')
@@ -238,7 +285,8 @@ def branches(request):
     return HttpResponse(template.render(context, request))
 
 
-
+# Returns branch data for anl_test_repo
+# If this is still useful, need to make more generic
 def branchData(request):
     print("BRANCHES DATA")
 
