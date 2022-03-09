@@ -116,10 +116,10 @@
 
 		  <br/>
 
-		  <a id="" href="." onclick="">Home</a>
-		  <a id="" href="." onclick="">Branches</a>
-		  <a id="" href="." onclick="">PR Assistant</a>
-		  <a id="" href="." onclick="">About</a>
+		  <a id="" href="/dashboard/" onclick="">Home</a>
+		  <a id="" href="#" onclick="">Branches</a>
+		  <a id="" href="#" onclick="">PR Assistant</a>
+		  <a id="" href="#" onclick="">About</a>
 
 		  <br/>
 
@@ -133,14 +133,124 @@
 
 		<div id="home" class="main" style="padding:50px 50px 0px 50px;">
 
-			<h2>Project page for <i>{{project.name}}</i></h2><br/>
+			<h2>Project page for <i>{{project.name}}</i></h2>
+			<i>Last updated: {{project.last_updated|date:'Y-m-d'}} {{project.last_updated|time:'h:i a'}}</i>
 
-			<button id="refreshbutton" class="btn btn-sm btn-primary" style="float:right;" onclick="refreshProject();">
-				<div id="spinner" class="spinner-border spinner-border-sm" role="status" style="display:none;">
-				</div> Refresh Project
-			</button>
+			<div style="float:right;">
+				<a href="/dashboard/prlist/{{project.id}}" class="btn btn-sm btn-primary">View Pull Requests</a>
 
-			<a href="/dashboard/prlist/{{project.id}}" class="btn btn-primary">View Pull Requests</a>
+				<button id="refreshbutton" class="btn btn-sm btn-primary"  onclick="refreshProject();">
+					<div id="spinner" class="spinner-border spinner-border-sm" role="status" style="display:none;">
+					</div> Refresh Project
+				</button>
+			</div>
+
+			<br/>
+			<br/>
+			<br/>
+
+			<b>Project Stats</b><br/>
+
+			<div class="card">
+				<div class="card-body">
+
+					<div class="row" style="margin-top:6px;">
+						<div class="col-sm-3"><u>Project Files</u>:</div> 
+						<div class="col-sm-9">{{files}}</div>
+					</div>
+
+					<div class="row" style="margin-top:6px;">
+						<div class="col-sm-3"><u>Lines of Code</u>:</div> 
+						<div class="col-sm-9">{{loc}}</div>
+					</div>
+
+					<div class="row" style="margin-top:6px;">
+						<div class="col-sm-3"><u>Commits</u>:</div> 
+						<div class="col-sm-9">{{commits|length}}</div>
+					</div>
+					<!--div class="row" style="margin-top:6px;">
+						<div class="col-sm-3"><u>Most Recent Commit</u>:</div> 
+						<div class="col-sm-9">
+							{{commits.0.datetime}}<br/>
+							{{commits.0.author.email}}<br/>
+							{{commits.0.message}}
+						</div>
+					</div-->
+
+					<div class="row" style="margin-top:6px;">
+						<div class="col-sm-3"><u>Pull Requests</u>:</div> 
+						<div class="col-sm-9">{{prs|length}}</div>
+					</div>
+					<!--div class="row" style="margin-top:6px;">
+						<div class="col-sm-3"><u>Most Recent PR</u>:</div> 
+						<div class="col-sm-9">
+							{{prs.0.created_at}}<br/>
+							{{prs.0.author.email}}<br/>
+							{{prs.0.title}}<br/>
+							{{prs.0.description|slice:":60"}}{% if prs.0.description|length|get_digit:"-1" > 60 %}...{% endif %}
+						</div>
+					</div-->
+
+					<div class="row" style="margin-top:6px;">
+						<div class="col-sm-3"><u>Issues</u>:</div> 
+						<div class="col-sm-9">{{issues|length}}</div>
+					</div>
+					<!--div class="row" style="margin-top:6px;">
+						<div class="col-sm-3"><u>Most Recent Issue</u>:</div> 
+						<div class="col-sm-9">
+							{{issues.0.created_at}}<br/>
+							{{issues.0.author.email}}<br/>
+							{{issues.0.title}}<br/>
+							{{issues.0.description|slice:":60"}}{% if issues.0.description|length|get_digit:"-1" > 60 %}...{% endif %}
+						</div>
+					</div-->
+				</div>
+			</div>
+
+			<br/>
+
+			<b>Recent Activity</b><br/>
+
+			<div class="card">
+				<div class="card-body">
+					<b>Commit</b> {{commits.0.hash|slice:"32:40"}}<br/>
+					<b>Branch</b> {{commits.0.branch}} <br/>
+					<b>Date</b> {{commits.0.datetime}}<br/>
+					<b>Author</b> {{commits.0.author.email}}<br/>
+					{{commits.0.message}}
+				</div>
+			</div>
+
+			<br/>
+
+			<div class="card">
+				<div class="card-body">
+					<b>Pull Request</b> {{prs.0.created_at}}<br/>
+					<b>Author</b> {{prs.0.author.email}}<br/>
+					<b>Title</b> {{prs.0.title}}<br/>
+					{{prs.0.description|slice:":60"}}{% if prs.0.description|length|get_digit:"-1" > 60 %}...{% endif %}
+				</div>
+			</div>
+
+			<br/>
+
+			<div class="card">
+				<div class="card-body">
+					<b>Issue</b> {{issues.0.created_at}}<br/>
+					<b>Author</b> {{issues.0.author.email}}<br/>
+					<b>Title</b> {{issues.0.title}}<br/>
+					{{issues.0.description|slice:":60"}}{% if issues.0.description|length|get_digit:"-1" > 60 %}...{% endif %}
+				</div>
+			</div>
+
+			<br/>
+			<br/>
+
+
+			<!--div class="row" style="margin-top:6px;">
+				<div class="col-sm-1"><u>Date</u>: </div>
+				<div class="col-sm-11">{{pr.created_at}}</div>
+			</div-->
 
 <!--
 			<b>Pull Requests for <i>{{project.name}}</i>:</b><br/>
