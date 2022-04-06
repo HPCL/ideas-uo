@@ -8,25 +8,28 @@
 
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">	
 	
+	    <link rel="stylesheet" href="{% static "codemirror/lib/codemirror.css" %}">
+        <link rel="stylesheet" href="{% static "codemirror/addon/hint/show-hint.cs" %}s">
+
 		<script src="{% static "admin/js/vendor/jquery/jquery.min.js" %}"></script>
 
 		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
 
+		<script src="{% static "codemirror/lib/codemirror.js" %}"></script>
+        <script src="{% static "codemirror/mode/clike/clike.js" %}"></script>
+        <script src="{% static "codemirror/mode/xml/xml.js" %}"></script>
+        <script src="{% static "codemirror/mode/python/python.js" %}"></script>
+        <script src="{% static "codemirror/mode/javascript/javascript.j" %}s"></script>
+        <script src="{% static "codemirror/mode/css/css.js" %}"></script>
+        <script src="{% static "codemirror/mode/htmlmixed/htmlmixed.js" %}"></script>
+        <script src="{% static "codemirror/addon/edit/matchbrackets.js" %}"></script>
+        <script src="{% static "codemirror/addon/hint/show-hint.js" %}"></script>
+        <script src="{% static "codemirror/addon/selection/mark-selection.js" %}"></script>
 		<style>
 		/*
 		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-
-		*/
-
-			.btn-group-xs > .btn, .btn-xs {
-				padding: 1px 5px;
-				font-size: 12px;
-				line-height: 1.5;
-				border-radius: 3px;
-			}
-
 			.container, .backdrop, textarea {
 			  width: 90%;
 			  height: 50vh;
@@ -78,9 +81,21 @@
 			mark {
 			  border-radius: 3px;
 			  color: transparent;
-			  background-color: #e8a2a8; /* #b1d5e5; */
+			  background-color: #e8a2a8;
 			  padding: 3px 0px 3px 0px;
 			}
+		*/
+
+			.styled-background { background-color: #ff7; }
+
+			.btn-group-xs > .btn, .btn-xs {
+				padding: 1px 5px;
+				font-size: 12px;
+				line-height: 1.5;
+				border-radius: 3px;
+			}
+
+
 
 			/* The sidebar menu */
 			.sidenav {
@@ -507,6 +522,7 @@
 
 			<b><i>Potential follow on:</i></b> <span></span>
 			<br/>
+
 			<div style="margin-left:15px; margin-top:8px;">
 		      <div class="accordion" id="accordionExample">
 		        <div class="accordion-item">
@@ -519,8 +535,6 @@
 		          <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
 		            <div class="accordion-body">
    					
-
-
 
 
 					  <div id="docfilenamesdiv" style="border:1px solid grey; margin:10px; padding:10px;">
@@ -954,14 +968,18 @@
 		      </div>
 		      <div class="modal-body">
 		        
-		        <p>Suggestions highlighted for file <b><i>folder1/arithmetic.py</i></b></p>
+		        <p>Suggestions highlighted for file <b><i><span id="dochelpertitle">folder1/arithmetic.py</span></i></b></p>
 
-				<div class="container">
+				<div class="" style="border:1px solid #ccc; margin-bottom:5px;">
+
+				  <textarea id="dochelper" style=""></textarea>
+<!--				 
 				  <div class="backdrop">
 				    <div class="highlights" id="highlightsdiv">
 				    </div>
 				  </div>
-		          <textarea id="dochelper">function = def sub(x,y):
+				  	          
+				  <textarea id="dochelper">function = def sub(x,y):
   """
   Return the subtraction of two numbers::
   .. math:: `\mathtt{x} - \mathtt{y}'
@@ -1003,10 +1021,13 @@
   return x-y
 </textarea>
 				</div>
-
+-->
 
 		      </div>
 		      <div class="modal-footer">
+		      	<button id="patchbutton" class="btn btn-primary" onclick="patchFile();">
+					Download Patch
+				</button>
 		        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 		        <!--button type="button" class="btn btn-primary">Save changes</button-->
 		      </div>
@@ -1034,12 +1055,13 @@
 
 		var queryString = window.location.search;
 		var urlParams = new URLSearchParams(queryString);
-		var pr = urlParams.get('pr')
+		var pr = {{pr.pk}} //urlParams.get('pr')
 		console.log(pr);
+		var filename = "";
 
 
 		//Setup our fancy textarea with highlighting ability
-		$("#dochelper").on({
+		/*$("#dochelper").on({
 		  'input': handleInput,
 		  'scroll': handleScroll
 		});
@@ -1071,17 +1093,71 @@
 		  var scrollTop = $("#dochelper").scrollTop();
 		  $(".backdrop").scrollTop(scrollTop);
 		}
-		handleInput();
+		handleInput();*/
 
+        var editor = CodeMirror.fromTextArea(document.getElementById("dochelper"), {
+            lineNumbers: true,        
+            mode: "text/x-python", //"text/x-c++src", //"text/html",
+            matchBrackets: true,
+            spellcheck: true,
+            autocorrect: true,
+            styleSelectedText: true
+        });
 
-		function showDocEditor(difftext){
+		function showDocEditor(docfilename, difftext){
 
 			console.log("TEST");
 			console.log(difftext);
 
-			$('#docModal').modal('show');
+			filename = docfilename;
+
+			$('#dochelpertitle').html(filename);
+
+			//$('#dochelper').empty();
+
+			$.ajax({url:'/dashboard/getfile/', type:'POST', data:{'pr':pr,'filename':filename}, success:function(result){
+				console.log("get file contents");
+				console.log(result);
+
+
+		        editor.setValue(result['filecontents']);
+
+		        editor.markText({line: 4, ch: 9}, {line: 4, ch: 24}, {className: "styled-background"});
+		        editor.markText({line: 6, ch: 12}, {line: 6, ch: 22}, {className: "styled-background"});
+
+		        setTimeout(function(){
+		        	editor.refresh();
+		    	},1);
+
+				$('#docModal').modal('show');
+			}});
 
 		}
+
+
+		function patchFile(){
+
+          	console.log(editor.getValue());
+
+          	
+          	$.ajax({url:'/dashboard/createpatch', data:{'pr': pr, 'filename':filename, 'filecontents':editor.getValue()}, success:function(result){
+
+				console.log("success ajax");
+				console.log(result);
+
+				var element = document.createElement('a');
+			    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(result.patch));
+			    element.setAttribute('download', 'arithmetic.py.patch');
+
+			    element.style.display = 'none';
+			    document.body.appendChild(element);
+
+			    element.click();
+
+			    document.body.removeChild(element);
+			}});
+			
+        }
 
 
 		function loadPatternGraph(){
@@ -1103,7 +1179,16 @@
 		}
 
 
-		$.ajax({url:'/dashboard/diffcommitdata', data:{'pr':pr}, success:function(result){
+		$.ajaxSetup({
+			beforeSend: function(xhr, settings){
+				xhr.setRequestHeader("X-CSRFToken", "{{csrf_token}}");
+			}
+		})
+
+		console.log("PR");
+		console.log(pr);
+
+		$.ajax({url:'/dashboard/diffcommitdata/', type:'POST', data:{'pr':pr}, success:function(result){
 			console.log("success diff commits");
 			console.log(result);
 
@@ -1137,7 +1222,7 @@
 					for(var k=0; k<result['prcommits'].length; k++){
 						if( result['diffcommits'][i]['commits'][j]['commit'] == result['prcommits'][k]['hash'] ){
 							doccommits += "<a target='_blank' href='{{pr.project.source_url|slice:"0:-4"}}/commit/"+result['diffcommits'][i]['commits'][j]['commit']+"'>"+result['diffcommits'][i]['commits'][j]['commit'].substring(0,7)+"</a><br/>";
-							docdiffs += "<button class='btn btn-xs btn-primary' onclick='showDocEditor(\""+"DIFF STUFF TO GO HERE"+"\");'>View Docs</button><br/>";
+							docdiffs += "<button class='btn btn-xs btn-primary' onclick='showDocEditor(\""+result['diffcommits'][i]['filename']+"\",\""+"DIFF STUFF TO GO HERE"+"\");'>View Docs</button><br/>";
 
 						}
 					}

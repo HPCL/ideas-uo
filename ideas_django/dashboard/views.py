@@ -67,8 +67,21 @@ def project(request, *args, **kwargs):
     loc = countlines(r'../ideas-uo/'+project.name)
     files = countfiles(r'../ideas-uo/'+project.name)
 
+    '''for thing in os.listdir(start):
+        thing = os.path.join(start, thing)
+        if os.path.isfile(thing):
+            if thing.endswith('.py'):
+                with open(thing, 'r') as f:'''
 
-    context = {'project':project,'prs':prs, 'commits':commits, 'issues':issues, 'loc':loc, 'files':files}
+    #config.read('../ideas-uo/credentials.ini')
+
+    with open('../ideas-uo/anl_test_repo/folder1/arithmetic.py', 'r') as f:
+        lines = f.readlines()
+        f.close()
+
+
+
+    context = {'project':project,'prs':prs, 'commits':commits, 'issues':issues, 'loc':loc, 'files':files, 'file':''.join(lines).replace('\\','\\\\').replace('\n', '\\n').replace('\'','\\\'')}
 
     return HttpResponse(template.render(context, request))
 
@@ -171,13 +184,54 @@ def refreshProject(request):
     )
 
 
+# Refresh the GIT and GitHub data for a project (INTENTIONALLY ONLY WORKS FOR PROJECT ID 30)
+def createPatch(request):
+    print("CREATE PATCH")
+
+    pid = 30
+    if request.GET.get('pid'):
+        pid = int(request.GET.get('pid'))
+
+    project = list(Project.objects.all().filter(id=pid).all())[0]
+
+    #TODO pull name from request and project from pr id
+
+    with open('../ideas-uo/anl_test_repo/folder1/arithmetic.py', 'w') as f:
+        f.write(request.GET.get('filecontents'))
+        f.close()
+    
+    cmd = f'cd ../ideas-uo/anl_test_repo ; git diff folder1/arithmetic.py > arithmetic.py.patch'
+    os.system(cmd)
+    #result = subprocess.check_output(cmd, shell=True)
+
+    with open('../ideas-uo/anl_test_repo/arithmetic.py.patch', 'r') as f:
+        lines = f.readlines()
+        f.close()
+    os.remove('../ideas-uo/anl_test_repo/arithmetic.py.patch')    
+
+    cmd = f'cd ../ideas-uo/anl_test_repo ; git checkout -- folder1/arithmetic.py'
+    os.system(cmd)
+
+    resultdata = {
+        'status':'success',
+        'patch': ''.join(lines)
+    }
+
+    return HttpResponse(
+        json.dumps(resultdata),
+        content_type='application/json'
+    )
+
+
 # Retrieves commit data for a specific PR
 def diffCommitData(request):
     print("Diff Commit DATA")
 
+    print(request.POST.get('pr'))
+
     prid = 2250
-    if request.GET.get('pr'):
-        prid = int(request.GET.get('pr'))
+    if request.POST.get('pr'):
+        prid = int(request.POST.get('pr'))
 
     pr = list(PullRequest.objects.all().filter(id=prid).all())[0]
 
@@ -213,6 +267,31 @@ def diffCommitData(request):
         content_type='application/json'
     )
 
+
+def getFile(request):
+
+    print("Get File DATA")
+
+    #print(request.POST.get('pr'))
+
+    #prid = 2250
+    #if request.POST.get('pr'):
+    #    prid = int(request.POST.get('pr'))
+
+
+    with open('../ideas-uo/anl_test_repo/folder1/arithmetic.py', 'r') as f:
+        lines = f.readlines()
+        f.close()
+
+
+    resultdata = {
+        'filecontents':''.join(lines),
+    }
+
+    return HttpResponse(
+        json.dumps(resultdata),
+        content_type='application/json'
+    )
 
 
 # Uses the Visualizer code to generate a graph.
