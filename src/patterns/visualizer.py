@@ -276,6 +276,8 @@ class Visualizer(Patterns):
         The my_df argument is assuming you know how to create and pass the files vs developers dataframe
         """
 
+        print(self.commit_data)
+
         sorted_hot_files, stats_df = self.make_file_developer_df(top_N=top_N, locc_metric=locc_metric,
                                                                  time_range=time_range, my_df=my_df)
         # Figure out number formatting (this is horribly inefficient, I'm sure there is a better way)
