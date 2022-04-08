@@ -618,6 +618,7 @@ class Patterns(Fetcher):
                     'not contain the required "%s" column"' % locc_metric)
             work_df = my_df
 
+        print("Printing work df")
         print(work_df)
 
         sorted_hot_files = pd.DataFrame()
