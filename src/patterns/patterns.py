@@ -599,3 +599,16 @@ class Patterns(Fetcher):
             sorted_hot_files = hot_files[sorted_dev_list]
         self.top_N_map = sorted_hot_files
         return sorted_hot_files, stats_df
+
+
+    def make_directory_developer_df(self, top_N=-1, locc_metric='change-size-cos', time_range=None, my_df=pd.DataFrame()):
+        
+        print("INFO: Creating developer matrix...")
+
+        # Create the directory x developers matrix, using the value_column parameter as the values
+        if 'unique_author' not in self.commit_data.columns:
+            self.set_unique_authors()
+        
+        print(self.commit_data)
+
+        return sorted_hot_files, stats_df
