@@ -611,4 +611,6 @@ class Patterns(Fetcher):
         
         print(self.commit_data)
 
+        sorted_hot_files = pd.DataFrame()
+        stats_df = pd.DataFrame()
         return sorted_hot_files, stats_df
