@@ -609,7 +609,16 @@ class Patterns(Fetcher):
         if 'unique_author' not in self.commit_data.columns:
             self.set_unique_authors()
         
-        print(self.commit_data)
+        if my_df.empty:
+            work_df, stats = self.get_time_range_df(time_range, sum=False)
+        else:
+            # TODO -- enable time ranges with user-provided dataframe my_df
+            if locc_metric not in my_df.columns:
+                err('The dataframe you provided to make_file_developer_df() does '
+                    'not contain the required "%s" column"' % locc_metric)
+            work_df = my_df
+
+        print(work_df)
 
         sorted_hot_files = pd.DataFrame()
         stats_df = pd.DataFrame()
