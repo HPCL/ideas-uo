@@ -605,10 +605,10 @@ class Patterns(Fetcher):
         extracted_col = self.commit_data["filepath"]
         df = pd.DataFrame(extracted_col)
         df2 = extracted_col.reset_index()
-        filepath = df2["filepath"]
-        print(type(filepath))
+        filepaths = df2["filepath"].tolist()
+        print(type(filepaths))
 
-        display(filepath)
+        display(filepaths)
 
 
     def make_directory_developer_df(self, top_N=-1, locc_metric='change-size-cos', time_range=None, my_df=pd.DataFrame()):
