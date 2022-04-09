@@ -601,12 +601,12 @@ class Patterns(Fetcher):
         return sorted_hot_files, stats_df
 
     def extract_directories(self):
-        print("INFO: Extracting head directory from filepath...")
+        print("INFO: Extracting head directories from filepaths...")
         extracted_col = self.commit_data["filepath"]
         df = pd.DataFrame(extracted_col)
-        # df2 = extracted_col.reset_index()
         filepaths = df["filepath"].tolist()
         
+        # extracting the name of head directory from each filepath
         for i in range(len(filepaths)):
             temp = filepaths[i]
             if(filepaths[i].find('src/') != -1):
@@ -621,8 +621,8 @@ class Patterns(Fetcher):
                 temp = split[0]
             filepaths[i] = temp
 
-        df["filepath"] = filepaths
-        display(df)
+        # copying the directory names back to the extracted_col df
+        df["directory"] = filepaths
 
 
     def make_directory_developer_df(self, top_N=-1, locc_metric='change-size-cos', time_range=None, my_df=pd.DataFrame()):
