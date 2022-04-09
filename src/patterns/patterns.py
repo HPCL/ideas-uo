@@ -611,6 +611,8 @@ class Patterns(Fetcher):
         if 'unique_author' not in self.commit_data.columns:
             self.set_unique_authors()
 
+        print("Im getting here")
+
         # if 'direcory' not in self.commit_data.columns:
         #     self.extract_directories()
         
