@@ -610,8 +610,8 @@ class Patterns(Fetcher):
         # Create the directory x developers matrix, using the value_column parameter as the values
         if 'unique_author' not in self.commit_data.columns:
             self.set_unique_authors()
-
-        print("Im getting here")
+        else
+            print("Im getting here")
 
         # if 'direcory' not in self.commit_data.columns:
         #     self.extract_directories()
