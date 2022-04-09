@@ -606,7 +606,7 @@ class Patterns(Fetcher):
         df = pd.DataFrame()
         df = df.join(extracted_col)
 
-        display(df)
+        display(extracted_col)
 
     def make_directory_developer_df(self, top_N=-1, locc_metric='change-size-cos', time_range=None, my_df=pd.DataFrame()):
         
@@ -615,8 +615,6 @@ class Patterns(Fetcher):
         # Create the directory x developers matrix, using the value_column parameter as the values
         if 'unique_author' not in self.commit_data.columns:
             self.set_unique_authors()
-        else:
-            print("Im getting here")
 
         if 'direcory' not in self.commit_data.columns:
             self.extract_directories()
