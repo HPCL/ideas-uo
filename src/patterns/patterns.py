@@ -608,7 +608,7 @@ class Patterns(Fetcher):
         filepaths = df2["filepath"].tolist()
         
         # for i in range(len(filepaths)):
-        for i in range(5):
+        for i in range(20):
             print(filepaths[i])
             temp = filepaths[i]
             if(filepaths[i].find('/src/') != -1):
