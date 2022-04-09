@@ -689,6 +689,4 @@ class Patterns(Fetcher):
         else: sorted_hot_directories = hot_directories[sorted_dev_list]
         self.top_N_map = sorted_hot_directories
 
-        display(sorted_hot_directories)
-
         return sorted_hot_directories, stats_df

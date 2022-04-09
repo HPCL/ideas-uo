@@ -381,3 +381,27 @@ class Visualizer(Patterns):
     def plot_top_N_concept_heatmap(self, top_N=10, locc_metric='change-size-cos', time_range=None, my_df=pd.DataFrame()):
         
         sorted_hot_files, stats_df = self.make_directory_developer_df(top_N=top_N, locc_metric=locc_metric, time_range=time_range, my_df=my_df)
+
+        # Figure out number formatting (this is horribly inefficient, I'm sure there is a better way)
+        if (self.commit_data[locc_metric].astype(int) == self.commit_data[locc_metric]).all():
+            number_fmt = 'g'
+        else:
+            number_fmt = '.1f'
+
+        # make a lovely heatmap
+        fig, ax = plt.subplots(figsize=(top_N + 2, top_N))  # Sample figsize in inches
+        if sorted_hot_files.empty:
+            print("We found no data for this time period!")
+            return sorted_hot_files
+        g = sns.heatmap(sorted_hot_files, annot=True, linewidths=.5, ax=ax, fmt=number_fmt, cmap=self.config['cmap_hm'],
+                        cbar_kws={'label': 'Values: %s' % locc_metric})
+        if self.hide_names:
+            g.set(xticklabels=[])
+            ax.get_xaxis().set_visible(False)
+        time_range_str = self.get_time_range_str(time_range)
+        ax.set_title(self.get_title_str(time_range, stats_df, locc_metric, False))
+        if not os.path.exists('figures'): os.mkdir('figures')
+        fig.savefig('figures/%s-top-%d-%s-map-%s.png' % (self.project, top_N, locc_metric,
+                    time_range_str.replace(', ','_').replace(' ','_')), format='png', dpi=self.config['output_dpi'],
+                    bbox_inches='tight')
+        return sorted_hot_files
