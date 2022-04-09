@@ -659,6 +659,17 @@ class Patterns(Fetcher):
         heat_obj = d.pivot_table(index='directory', columns='unique_author', values=locc_metric, aggfunc=np.sum,
                                  fill_value=0).dropna()
 
+        # Get a df containing developers (1st column) and total contributions (2nd column)
+        sorted_developers = heat_obj.sum(axis='rows').sort_values(ascending=False)
+        self.top_developers = sorted_developers
+        if top_N> 0: top_developers = sorted_developers.head(top_N)
+        else: top_developers = sorted_developers
+        hot_developers = heat_obj[top_developers.index]  # top-N developers
+
+        # Similarly, get a list of top-N files, directory (column 1), changes (column 2)
+        top_files = heat_obj.sum(axis='columns').sort_values(ascending=False)
+        if top_N > 0: top_files = top_files.head(top_N)
+
         sorted_hot_files = pd.DataFrame()
         stats_df = pd.DataFrame()
         return sorted_hot_files, stats_df
