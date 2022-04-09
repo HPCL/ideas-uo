@@ -605,13 +605,11 @@ class Patterns(Fetcher):
         extracted_col = self.commit_data["filepath"]
         df = pd.DataFrame(extracted_col)
         df2 = extracted_col.reset_index()
-        filepaths = df2["filepath"].tolist()
+        filepaths = df["filepath"].tolist()
 
         # display(filepaths)
         
-        # for i in range(len(filepaths)):
-        for i in range(20):
-            print(filepaths[i])
+        for i in range(len(filepaths)):
             temp = filepaths[i]
             if(filepaths[i].find('src/') != -1):
                 split = temp.split("src/", 1)
