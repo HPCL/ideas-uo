@@ -600,6 +600,8 @@ class Patterns(Fetcher):
         self.top_N_map = sorted_hot_files
         return sorted_hot_files, stats_df
 
+    def extract_directories(self):
+        print("INFO: Extracting head directory from filepath...")
 
     def make_directory_developer_df(self, top_N=-1, locc_metric='change-size-cos', time_range=None, my_df=pd.DataFrame()):
         
@@ -608,6 +610,9 @@ class Patterns(Fetcher):
         # Create the directory x developers matrix, using the value_column parameter as the values
         if 'unique_author' not in self.commit_data.columns:
             self.set_unique_authors()
+
+        # if 'direcory' not in self.commit_data.columns:
+        #     self.extract_directories()
         
         if my_df.empty:
             work_df, stats = self.get_time_range_df(time_range, sum=False)
@@ -617,9 +622,6 @@ class Patterns(Fetcher):
                 err('The dataframe you provided to make_file_developer_df() does '
                     'not contain the required "%s" column"' % locc_metric)
             work_df = my_df
-
-        print("Printing work df")
-        print(work_df)
 
         sorted_hot_files = pd.DataFrame()
         stats_df = pd.DataFrame()
