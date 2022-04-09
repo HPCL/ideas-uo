@@ -623,9 +623,7 @@ class Patterns(Fetcher):
 
         # copying the directory names back to the extracted_col df
         df["directory"] = filepaths
-        # Also update the global dataframe
-        self.commit_data = self.commit_data.merge(df[['filepath','directory']], how='right', on='filepath')
-        # self.commit_data.index = self.commit_data['datetime']    # DO NOT REMOVE
+        self.commit_data["directory"] = df["directory"]
         display(self.commit_data)
 
     def make_directory_developer_df(self, top_N=-1, locc_metric='change-size-cos', time_range=None, my_df=pd.DataFrame()):
