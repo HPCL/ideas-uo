@@ -623,8 +623,8 @@ class Patterns(Fetcher):
 
         # copying the directory names back to the extracted_col df
         df["directory"] = filepaths
+        # updating global dataframe
         self.commit_data["directory"] = df["directory"]
-        display(self.commit_data)
 
     def make_directory_developer_df(self, top_N=-1, locc_metric='change-size-cos', time_range=None, my_df=pd.DataFrame()):
         
@@ -634,7 +634,7 @@ class Patterns(Fetcher):
         if 'unique_author' not in self.commit_data.columns:
             self.set_unique_authors()
 
-        if 'direcory' not in self.commit_data.columns:
+        if 'directory' not in self.commit_data.columns:
             self.extract_directories()
         
         if my_df.empty:
@@ -645,6 +645,19 @@ class Patterns(Fetcher):
                 err('The dataframe you provided to make_file_developer_df() does '
                     'not contain the required "%s" column"' % locc_metric)
             work_df = my_df
+
+        if locc_metric not in work_df.select_dtypes(include=['float64', 'int']):
+            err('plot_top_N_heatmap column parameter must be one of %s' % ','.join(work_df.select_dtypes(
+                include=['float64','int']).columns))
+
+        d = pd.DataFrame(work_df.groupby(['directory', 'unique_author'])[locc_metric].sum())
+        d.reset_index(level=d.index.names, inplace=True)
+
+        # Compute the stats
+        stats_df = d.describe().loc[['count','mean', 'std', 'min', 'max']]
+
+        heat_obj = d.pivot_table(index='directory', columns='unique_author', values=locc_metric, aggfunc=np.sum,
+                                 fill_value=0).dropna()
 
         sorted_hot_files = pd.DataFrame()
         stats_df = pd.DataFrame()
