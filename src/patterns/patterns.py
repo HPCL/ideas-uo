@@ -611,14 +611,14 @@ class Patterns(Fetcher):
         for i in range(5):
             print(filepaths[i])
             temp = filepaths[i]
-            if(filepaths[i].find('/src/')):
+            if(filepaths[i].find('/src/') != -1):
                 split = temp.split("/src/", 1)
                 temp = split[1]
-                if(temp.find('/')):
+                if(temp.find('/') != -1):
                     split = temp.split("/", 1)
                     temp = split[0]
                 filepaths[i] = temp
-            elif(filepaths[i].find('/')):
+            elif(filepaths[i].find('/') != -1):
                 split = temp.split("/", 1)
                 temp = split[0]
             filepaths[i] = temp
