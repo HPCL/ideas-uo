@@ -606,10 +606,12 @@ class Patterns(Fetcher):
         df = pd.DataFrame(extracted_col)
         df2 = extracted_col.reset_index()
         filepaths = df2["filepath"].tolist()
+
+        print(filepaths)
         
         # for i in range(len(filepaths)):
         for i in range(20):
-            print(filepaths[i])
+            # print(filepaths[i])
             temp = filepaths[i]
             if(filepaths[i].find('/src/') != -1):
                 split = temp.split("/src/", 1)
@@ -622,7 +624,7 @@ class Patterns(Fetcher):
                 split = temp.split("/", 1)
                 temp = split[0]
             filepaths[i] = temp
-            print(filepaths[i])
+            # print(filepaths[i])
 
 
     def make_directory_developer_df(self, top_N=-1, locc_metric='change-size-cos', time_range=None, my_df=pd.DataFrame()):
