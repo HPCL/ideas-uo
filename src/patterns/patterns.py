@@ -667,26 +667,28 @@ class Patterns(Fetcher):
         hot_developers = heat_obj[top_developers.index]  # top-N developers
 
         # Similarly, get a list of top-N files, directory (column 1), changes (column 2)
-        top_files = heat_obj.sum(axis='columns').sort_values(ascending=False)
-        if top_N > 0: top_files = top_files.head(top_N)
+        top_directories = heat_obj.sum(axis='columns').sort_values(ascending=False)
+        if top_N > 0: top_directories = top_directories.head(top_N)
 
         # Now, go back to the original matrix df and extract only the hot files
-        hot_files = heat_obj.iloc[heat_obj.index.isin(top_files.to_dict().keys())]
+        hot_directories = heat_obj.iloc[heat_obj.index.isin(top_directories.to_dict().keys())]
         # drop 0 columns
-        hot_files = hot_files.loc[:, (hot_files != 0).any(axis=0)]
+        hot_directories = hot_directories.loc[:, (hot_directories != 0).any(axis=0)]
 
         # Next, we need to clean up our top-developer list since some developers got
         # removed in the previous step
         sorted_full_dev_list = list(sorted_developers.to_dict().keys())
         sorted_dev_list = []
         for dev in sorted_full_dev_list:
-            if dev in hot_files.columns:
+            if dev in hot_directories.columns:
                 sorted_dev_list.append(dev)
 
         # Create a new matrix that has only the top-n developer columns (sorted in
         # descending order); this produces an n x n matrix dataframe, a subset of heat_obj
-        if top_N > 0: sorted_hot_files = hot_files[sorted_dev_list[:top_N]]
-        else: sorted_hot_files = hot_files[sorted_dev_list]
-        self.top_N_map = sorted_hot_files
+        if top_N > 0: sorted_hot_directories = hot_directories[sorted_dev_list[:top_N]]
+        else: sorted_hot_directories = hot_directories[sorted_dev_list]
+        self.top_N_map = sorted_hot_directories
 
-        return sorted_hot_files, stats_df
+        display(sorted_hot_directories)
+
+        return sorted_hot_directories, stats_df
