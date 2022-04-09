@@ -623,7 +623,7 @@ class Patterns(Fetcher):
 
         # copying the directory names back to the extracted_col df
         df["directory"] = filepaths
-
+        display(df)
 
     def make_directory_developer_df(self, top_N=-1, locc_metric='change-size-cos', time_range=None, my_df=pd.DataFrame()):
         
