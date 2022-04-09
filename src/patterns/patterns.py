@@ -670,6 +670,23 @@ class Patterns(Fetcher):
         top_files = heat_obj.sum(axis='columns').sort_values(ascending=False)
         if top_N > 0: top_files = top_files.head(top_N)
 
-        sorted_hot_files = pd.DataFrame()
-        stats_df = pd.DataFrame()
+        # Now, go back to the original matrix df and extract only the hot files
+        hot_files = heat_obj.iloc[heat_obj.index.isin(top_files.to_dict().keys())]
+        # drop 0 columns
+        hot_files = hot_files.loc[:, (hot_files != 0).any(axis=0)]
+
+        # Next, we need to clean up our top-developer list since some developers got
+        # removed in the previous step
+        sorted_full_dev_list = list(sorted_developers.to_dict().keys())
+        sorted_dev_list = []
+        for dev in sorted_full_dev_list:
+            if dev in hot_files.columns:
+                sorted_dev_list.append(dev)
+
+        # Create a new matrix that has only the top-n developer columns (sorted in
+        # descending order); this produces an n x n matrix dataframe, a subset of heat_obj
+        if top_N > 0: sorted_hot_files = hot_files[sorted_dev_list[:top_N]]
+        else: sorted_hot_files = hot_files[sorted_dev_list]
+        self.top_N_map = sorted_hot_files
+
         return sorted_hot_files, stats_df
