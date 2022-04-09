@@ -603,9 +603,7 @@ class Patterns(Fetcher):
     def extract_directories(self):
         print("INFO: Extracting head directory from filepath...")
         extracted_col = self.commit_data["filepath"]
-        df = df.join(extracted_col)
-
-        display(df)
+        print(type(extracted_col))
 
     def make_directory_developer_df(self, top_N=-1, locc_metric='change-size-cos', time_range=None, my_df=pd.DataFrame()):
         
