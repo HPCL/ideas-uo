@@ -607,7 +607,7 @@ class Patterns(Fetcher):
         df2 = extracted_col.reset_index()
         filepaths = df2["filepath"].tolist()
 
-        print(filepaths)
+        display(filepaths)
         
         # for i in range(len(filepaths)):
         for i in range(20):
