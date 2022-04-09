@@ -602,6 +602,11 @@ class Patterns(Fetcher):
 
     def extract_directories(self):
         print("INFO: Extracting head directory from filepath...")
+        extracted_col = self.commit_data["filepath"]
+        df = pd.DataFrame()
+        df = df.join(extracted_col)
+
+        display(df)
 
     def make_directory_developer_df(self, top_N=-1, locc_metric='change-size-cos', time_range=None, my_df=pd.DataFrame()):
         
@@ -613,8 +618,8 @@ class Patterns(Fetcher):
         else:
             print("Im getting here")
 
-        # if 'direcory' not in self.commit_data.columns:
-        #     self.extract_directories()
+        if 'direcory' not in self.commit_data.columns:
+            self.extract_directories()
         
         if my_df.empty:
             work_df, stats = self.get_time_range_df(time_range, sum=False)
