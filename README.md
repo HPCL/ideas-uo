@@ -85,6 +85,6 @@ To run the tests in a specific subdirectory, simply add the path to the above co
 
 Here is an example to add a project (in this case, hypre) to the database server sansa.cs.uoregon.edu (mysql). In the directory containing the ideas-uo repository clone:
 ```
-$ python3 -m src.gitutils.db_interface --host sansa.cs.uoregon.edu --username ideas_admin --password <IDEAS_ADMIN_PWD> --port 3331 --database ideas_db --add_project "https://github.com/hypre-space/hypre"
+$ python3 -m src.gitutils.db_interface --host sansa.cs.uoregon.edu --username ideas_admin --password <IDEAS_ADMIN_PWD> --port 3331 --database ideas_db --add_project "https://github.com/hypre-space/hypre.git"
 ```
 
