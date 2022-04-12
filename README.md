@@ -80,3 +80,11 @@ in `requirements.txt`, then in the top-level repository directory `ideas-uo`, ru
 python -m pytest -v
 ```
 To run the tests in a specific subdirectory, simply add the path to the above command.
+
+## To add a project to the repository:
+
+Here is an example to add a project (in this case, hypre) to the database server sansa.cs.uoregon.edu (mysql). In the directory containing the ideas-uo repository clone:
+```
+$ python3 -m src.gitutils.db_interface --host sansa.cs.uoregon.edu --username ideas_admin --password <IDEAS_ADMIN_PWD> --port 3331 --database ideas_db --add_project "https://github.com/hypre-space/hypre"
+```
+
