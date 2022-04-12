@@ -207,6 +207,21 @@ class Patterns(Fetcher):
         else:
             print("INFO: No external files found. Total size: %d changes" % after)
 
+    def remove_files(self, files_to_keep):
+        """Remove all files from df except the file in the pasted in list"""
+        before = self.commit_data.shape[0]
+        df = self.commit_data
+
+        self.commit_data = self.commit_data[
+            self.commit_data['filepath'].map(lambda x: x in files_to_keep)
+        ].reindex()
+
+        after = self.commit_data.shape[0]
+        if before > after:
+            print("INFO: Removed %d files. New total size: %d changes" % (before-after,after))
+        else:
+            print("INFO: No files found to remove. Total size: %d changes" % after)
+
     def set_unique_authors(self):
         """" Use fuzzy matching to identify multiple different names that likely belong to the same developer """
         print("INFO: Analyzing author names, this can take a few minutes...")

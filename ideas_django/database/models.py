@@ -2,7 +2,7 @@ from django.db import models
 
 # Create your models here.
 class Author(models.Model):
-    username = models.CharField(max_length=64)
+    username = models.CharField(max_length=64, null=True, blank=True)
     email = models.EmailField(null=True)
     name = models.CharField(max_length=256, null=True)
     url = models.CharField(max_length=256, null=True)

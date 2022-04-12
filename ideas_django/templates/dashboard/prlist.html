@@ -136,20 +136,31 @@
 			<h2>Pull Request Assistant</h2><br/>
 
 
-			<b>List of all projects:</b><br/>
+			<button id="refreshbutton" class="btn btn-sm btn-primary" style="float:right;" onclick="refreshProject();">
+				<div id="spinner" class="spinner-border spinner-border-sm" role="status" style="display:none;">
+				</div> Refresh Project
+			</button>
 
-
+			<b>Pull Requests for <i>{{project.name}}</i>:</b><br/>
+			<!--div style="margin-top:6px;"><u>Title</u>: {{pr.title}}</div>
+			<div style="margin-top:6px;"><u>Date</u>: {{pr.created_at}}</div>
+			<div style="margin-top:6px;"><u>Description</u>: <p style="white-space:pre;">{{pr.description}}</p></div>
+			<div style="margin-top:6px;"><u>Branch</u>: {{commits.0.branch}}</div>
+			<div style="margin-top:6px; margin-bottom:8px;"><u>URL</u>: <a target="_blank" href="{{pr.url}}">{{pr.url}}</a></div-->
+				
 			<table class="table">
 				<tr>
-					<th>Name</th>
-					<th>Last Updated</th>
+					<th>Number</th>
+					<th>Title</th>
+					<th>Date</th>
 					<th>URL</th>
 				</tr>
-				{% for project in projects %}
+				{% for pr in prs %}
 				<tr>
-					<td><a href="/dashboard/project/{{project.id}}">{{project.name}}</a></td>
-					<td>{{project.last_updated|date:'Y-m-d'}} {{project.last_updated|time:'h:i a'}}</td>
-					<td><a target="_blank" href="{{project.url}}">{{project.source_url}}</a></td>
+					<td><a href="/dashboard/pr/{{pr.id}}">{{pr.number}}</a></td>
+					<td>{{pr.title}}</td>
+					<td>{{pr.created_at|date:'Y-m-d'}}</td>
+					<td><a target="_blank" href="{{pr.url}}">{{pr.url}}</a></td>
 				</tr>
 				{% endfor %}
 			</table>
