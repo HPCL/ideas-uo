@@ -115,8 +115,8 @@ class DatabaseInterface:
         if url.find('.')>0:
             name = urlparse(url)
             name = os.path.basename(name.path)
-            name = name[:name.index('.')]
-            name
+            if name.find('.') >= 0:
+               name = name[:name.index('.')]
         else:
             # Local path
             name = os.path.split(url)[-1]
