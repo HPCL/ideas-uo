@@ -188,32 +188,49 @@ def refreshProject(request):
 def createPatch(request):
     print("CREATE PATCH")
 
-    pid = 30
-    if request.GET.get('pid'):
-        pid = int(request.GET.get('pid'))
+    prid = 2250
+    if request.POST.get('pr'):
+        prid = int(request.POST.get('pr'))
 
-    project = list(Project.objects.all().filter(id=pid).all())[0]
+    filename = 'folder1/arithmetic.py'
+    if request.POST.get('filename'):
+        filename = request.POST.get('filename')
+
+    print(filename)
+    print(filename.rindex('/'))
+    print(filename[filename.rindex('/')+1:])
+
+    pr = list(PullRequest.objects.all().filter(id=prid).all())[0]
+
+    #project = list(Project.objects.all().filter(id=pid).all())[0]
+
 
     #TODO pull name from request and project from pr id
 
-    with open('../ideas-uo/anl_test_repo/folder1/arithmetic.py', 'w') as f:
-        f.write(request.GET.get('filecontents'))
+    #with open('../ideas-uo/anl_test_repo/folder1/arithmetic.py', 'w') as f:
+    with open('../ideas-uo/'+pr.project.name+'/'+filename, 'w') as f:
+        f.write(request.POST.get('filecontents'))
         f.close()
     
-    cmd = f'cd ../ideas-uo/anl_test_repo ; git diff folder1/arithmetic.py > arithmetic.py.patch'
+    #cmd = f'cd ../ideas-uo/anl_test_repo ; git diff folder1/arithmetic.py > arithmetic.py.patch'
+    cmd = f'cd ../ideas-uo/'+pr.project.name+' ; git diff '+filename+' > '+filename[filename.rindex('/')+1:]+'.patch'
     os.system(cmd)
     #result = subprocess.check_output(cmd, shell=True)
 
-    with open('../ideas-uo/anl_test_repo/arithmetic.py.patch', 'r') as f:
+    #with open('../ideas-uo/anl_test_repo/arithmetic.py.patch', 'r') as f:
+    with open('../ideas-uo/'+pr.project.name+'/'+filename[filename.rindex('/')+1:]+'.patch', 'r') as f:
         lines = f.readlines()
         f.close()
-    os.remove('../ideas-uo/anl_test_repo/arithmetic.py.patch')    
+    os.remove('../ideas-uo/'+pr.project.name+'/'+filename[filename.rindex('/')+1:]+'.patch')    
 
-    cmd = f'cd ../ideas-uo/anl_test_repo ; git checkout -- folder1/arithmetic.py'
+    #cmd = f'cd ../ideas-uo/anl_test_repo ; git checkout -- folder1/arithmetic.py'
+    cmd = f'cd ../ideas-uo/'+pr.project.name+' ; git checkout -- '+filename
     os.system(cmd)
+
 
     resultdata = {
         'status':'success',
+        'filename':filename[filename.rindex('/')+1:]+'.patch',
         'patch': ''.join(lines)
     }
 
@@ -274,12 +291,19 @@ def getFile(request):
 
     #print(request.POST.get('pr'))
 
-    #prid = 2250
-    #if request.POST.get('pr'):
-    #    prid = int(request.POST.get('pr'))
+    prid = 2250
+    if request.POST.get('pr'):
+        prid = int(request.POST.get('pr'))
+
+    filename = 'folder1/arithmetic.py'
+    if request.POST.get('filename'):
+        filename = request.POST.get('filename')
+
+    pr = list(PullRequest.objects.all().filter(id=prid).all())[0]
 
 
-    with open('../ideas-uo/anl_test_repo/folder1/arithmetic.py', 'r') as f:
+    #with open('../ideas-uo/anl_test_repo/folder1/arithmetic.py', 'r') as f:
+    with open('../ideas-uo/'+pr.project.name+'/'+filename, 'r') as f:
         lines = f.readlines()
         f.close()
 

@@ -1039,6 +1039,7 @@
 
 	</body>
 
+
 	<script>
 
 		console.log("javascript is working...");
@@ -1058,6 +1059,7 @@
 		var pr = {{pr.pk}} //urlParams.get('pr')
 		console.log(pr);
 		var filename = "";
+		var htmlNode = document.createElement("h1");
 
 
 		//Setup our fancy textarea with highlighting ability
@@ -1104,6 +1106,7 @@
             styleSelectedText: true
         });
 
+
 		function showDocEditor(docfilename, difftext){
 
 			console.log("TEST");
@@ -1125,6 +1128,26 @@
 		        editor.markText({line: 4, ch: 9}, {line: 4, ch: 24}, {className: "styled-background"});
 		        editor.markText({line: 6, ch: 12}, {line: 6, ch: 22}, {className: "styled-background"});
 
+		        editor.on("cursorActivity", function(){
+		        	console.log("Hi");
+		        	console.log(editor.getCursor());
+
+		        	var cursor = editor.getCursor();
+
+		        	if( cursor.line == 4 && cursor.ch >= 9 && cursor.ch <= 24 ){
+		      		  	var text = document.createTextNode("Test text");
+		        		htmlNode.innerHTML = '';
+		        		htmlNode.style.color = 'red';
+		        		htmlNode.style.zIndex = '9999';
+		        		htmlNode.appendChild(text);
+		        		editor.addWidget({line: 4, ch:9},htmlNode,true);
+		        	}else{
+		        		console.log(htmlNode);
+		        		htmlNode.remove();
+		        	}
+		        });
+
+
 		        setTimeout(function(){
 		        	editor.refresh();
 		    	},1);
@@ -1140,14 +1163,14 @@
           	console.log(editor.getValue());
 
           	
-          	$.ajax({url:'/dashboard/createpatch', data:{'pr': pr, 'filename':filename, 'filecontents':editor.getValue()}, success:function(result){
+          	$.ajax({url:'/dashboard/createpatch/', type:'POST', data:{'pr': pr, 'filename':filename, 'filecontents':editor.getValue()}, success:function(result){
 
 				console.log("success ajax");
 				console.log(result);
 
 				var element = document.createElement('a');
 			    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(result.patch));
-			    element.setAttribute('download', 'arithmetic.py.patch');
+			    element.setAttribute('download', result.filename);
 
 			    element.style.display = 'none';
 			    document.body.appendChild(element);
