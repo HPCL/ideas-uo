@@ -799,10 +799,12 @@ class DatabaseInterface:
                         filename = diff['filename']
                         filename = filename[filename.index('/'):filename.index(' ')][1:]
 
+                        diffheader = diff['header']
+
                         # TODO: Source analysis - programming language
                         language = 'PLACEHOLDER'
-                        query = f'insert into diff (file_path, language, commit_id, body) values (%s, %s, %s, %s)'
-                        cursor.execute(query, (filename, language, commit_id, body,))
+                        query = f'insert into diff (file_path, language, commit_id, body, header) values (%s, %s, %s, %s, %s)'
+                        cursor.execute(query, (filename, language, commit_id, body, diffheader,))
                         self.db.commit()
 
                         logger.debug(f'{name}: Inserted diff in file {filename} for commit {hash}')

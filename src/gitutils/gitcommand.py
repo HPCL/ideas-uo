@@ -146,12 +146,16 @@ class GitCommand(object):
                                 filename = filenameline[11:len(filenameline)]
                                 #print('FILENAME '+ filename)
 
+                                diffheader = diff
+
                                 line = next(lines)
+                                diffheader += line
 
                                 #skip extra line if this line is seen
                                 if line.startswith(b'new file mode'):
-                                    next(lines)
+                                    diffheader += next(lines)
                                     diff = next(lines)
+                                    diffheader += diff
                                     if diff.startswith(b'diff'):
                                         break
 
@@ -159,14 +163,15 @@ class GitCommand(object):
 
                                     #skip just one line if this line is seen
                                     if line.startswith(b'new file mode'):
-                                        next(lines)
+                                        diffheader += next(lines)
 
                                     else:
-                                        next(lines)
-                                        next(lines)
+                                        diffheader += next(lines)
+                                        diffheader += next(lines)
 
                                     #skip ahead until see first + or -
                                     diff = next(lines)
+                                    diffheader += diff
                                     # while not (diff.startswith(b'+') or diff.startswith(b'-')) or (diff.startswith(b'+++') or diff.startswith(b'---')) :
                                     #     diff = next(lines)
 
@@ -191,7 +196,7 @@ class GitCommand(object):
                                         except:
                                             break
 
-                                    diffs.append({'filename':filename, 'diff':diffinfo})
+                                    diffs.append({'filename':filename, 'diff':diffinfo, 'header':diffheader.decode("utf-8", errors='ignore')})
 
                                 #else:
                                     #ignore deleted files for now
@@ -288,12 +293,16 @@ class GitCommand(object):
                                 filename = filenameline[11:len(filenameline)]
                                 #print('FILENAME '+ filename)
 
+                                diffheader = diff 
+
                                 line = next(lines)
+                                diffheader += line
 
                                 #skip extra line if this line is seen
                                 if line.startswith(b'new file mode'):
-                                    next(lines)
+                                    diffheader += next(lines)
                                     diff = next(lines)
+                                    diffheader += diff
                                     if diff.startswith(b'diff'):
                                         break
 
@@ -301,14 +310,15 @@ class GitCommand(object):
 
                                     #skip just one line if this line is seen
                                     if line.startswith(b'new file mode'):
-                                        next(lines)
+                                        diffheader += next(lines)
 
                                     else:
-                                        next(lines)
-                                        next(lines)
+                                        diffheader += next(lines)
+                                        diffheader += next(lines)
 
                                     #skip ahead until see first + or -
                                     diff = next(lines)
+                                    diffheader += diff
                                     while not (diff.startswith(b'+') or diff.startswith(b'-')) or (diff.startswith(b'+++') or diff.startswith(b'---')) :
                                         diff = next(lines)
 
@@ -333,7 +343,7 @@ class GitCommand(object):
                                         except:
                                             break
 
-                                    diffs.append({'filename':filename, 'diff':diffinfo})
+                                    diffs.append({'filename':filename, 'diff':diffinfo, 'header':diffheader.decode("utf-8", errors='ignore')})
 
                                 #else:
                                     #ignore deleted files for now
