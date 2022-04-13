@@ -167,24 +167,24 @@ class GitCommand(object):
 
                                     #skip ahead until see first + or -
                                     diff = next(lines)
-                                    while not (diff.startswith(b'+') or diff.startswith(b'-')) or (diff.startswith(b'+++') or diff.startswith(b'---')) :
-                                        diff = next(lines)
+                                    # while not (diff.startswith(b'+') or diff.startswith(b'-')) or (diff.startswith(b'+++') or diff.startswith(b'---')) :
+                                    #     diff = next(lines)
 
                                     diffinfo = []
                                     while len(diff) >= 1:
 
-                                        if (diff.startswith(b'+') or diff.startswith(b'-')):
-                                            diffinfo.append(diff.decode("utf-8", errors='ignore'))
+                                        # if (diff.startswith(b'+') or diff.startswith(b'-')):
+                                        diffinfo.append(diff.decode("utf-8", errors='ignore'))
 
-                                        elif diff.startswith(b'diff'):
-                                            break
-                                        elif len(diff) < 2:
-                                            try:
-                                                diff = next(lines)
-                                                if len(diff) < 2:
-                                                    break
-                                            except:
-                                                break
+                                        # elif diff.startswith(b'diff'):
+                                        #     break
+                                        # elif len(diff) < 2:
+                                        #     try:
+                                        #         diff = next(lines)
+                                        #         if len(diff) < 2:
+                                        #             break
+                                        #     except:
+                                        #         break
 
                                         try:
                                             diff = next(lines)
