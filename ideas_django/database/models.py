@@ -124,6 +124,7 @@ class Diff(models.Model):
     file_path = models.FilePathField(max_length=256)
     language = models.CharField(max_length=64)
     body = models.TextField()
+    header = models.TextField(null=True)
     commit = models.ForeignKey(Commit, on_delete=models.CASCADE)
 
     class Meta:
