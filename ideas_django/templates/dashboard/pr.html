@@ -1059,7 +1059,12 @@
 		var pr = {{pr.pk}} //urlParams.get('pr')
 		console.log(pr);
 		var filename = "";
-		var htmlNode = document.createElement("h1");
+		var popupNode = document.createElement("div");
+			popupNode.style.border = '2px solid grey'
+    		popupNode.style.padding = '5px'
+    		popupNode.style.background = 'white'
+    		popupNode.style.color = 'black';
+    		popupNode.style.zIndex = '9999';
 
 
 		//Setup our fancy textarea with highlighting ability
@@ -1129,21 +1134,16 @@
 		        editor.markText({line: 6, ch: 12}, {line: 6, ch: 22}, {className: "styled-background"});
 
 		        editor.on("cursorActivity", function(){
-		        	console.log("Hi");
-		        	console.log(editor.getCursor());
-
+		     
 		        	var cursor = editor.getCursor();
 
 		        	if( cursor.line == 4 && cursor.ch >= 9 && cursor.ch <= 24 ){
-		      		  	var text = document.createTextNode("Test text");
-		        		htmlNode.innerHTML = '';
-		        		htmlNode.style.color = 'red';
-		        		htmlNode.style.zIndex = '9999';
-		        		htmlNode.appendChild(text);
-		        		editor.addWidget({line: 4, ch:9},htmlNode,true);
+		      		  	var text = document.createTextNode("We can say a bunch of stuff about why this is highlighted right here.");
+		        		popupNode.innerHTML = '';
+		        		popupNode.appendChild(text);
+		        		editor.addWidget({line: 4, ch:9},popupNode,true);
 		        	}else{
-		        		console.log(htmlNode);
-		        		htmlNode.remove();
+		        		popupNode.remove();
 		        	}
 		        });
 
