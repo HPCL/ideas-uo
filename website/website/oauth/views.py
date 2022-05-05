@@ -5,7 +5,7 @@ import pprint
 from .utils import get_access_token, get_user
 
 
-def handle(request):
+def user(request):
     code = request.GET.get('code')
 
     if not code:
