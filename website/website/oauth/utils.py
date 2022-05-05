@@ -2,6 +2,7 @@ import os
 import requests
 from django.conf import settings
 
+
 def get_access_token(code):
   access_token_url = 'https://github.com/login/oauth/access_token'
   payload = {
@@ -14,14 +15,8 @@ def get_access_token(code):
   }
 
   response = requests.post(access_token_url, data=payload, headers=headers)
-  try:
-    responses = response.json()
-    return responses['access_token']
-  except Exception as e:
-    # push error to session errors
-    print('error in get_access_token', e)
-    raise Exception from e
-
+  responses = response.json()
+  return responses['access_token']
 
 
 def get_user(access_token):
@@ -32,9 +27,5 @@ def get_user(access_token):
   }
 
   response = requests.get(user_url, headers=headers)
-  try:
-    responses = response.json()
-    return responses
-  except Exception as e:
-    # push error to session errors
-    raise Exception from e
+  responses = response.json()
+  return responses
