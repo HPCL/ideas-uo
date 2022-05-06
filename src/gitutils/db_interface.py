@@ -683,7 +683,7 @@ class DatabaseInterface:
                     since = cursor.fetchone()[0]
 
                 # Shift last update by 30 hours (server timeout) earlier to account for potential commits missed during last update
-                dt = arrow.get(since).datetime - datetime.timedelta(hours=30)
+                dt = arrow.get(since).datetime - datetime.timedelta(hours=60)
                 since = dt.strftime('%Y-%m-%d %H:%M:%S')
 
                 logger.debug(f'{name}: Existing project, grabbing all commit data since {since} until {until}.')
@@ -704,6 +704,7 @@ class DatabaseInterface:
         name = self.get_git_name(url)
         branches = not self.args.no_branches
         since = arrow.get(since).datetime.isoformat()
+        #until = arrow.get(until).datetime.isoformat()
         logger.debug(f'{name}: Mining repository. This may take a while...')
 
         if url[0] == '/':
@@ -760,6 +761,8 @@ class DatabaseInterface:
                     self.db.commit()
 
                     logger.debug(f'{name}: Inserted author {author_id} works on project {project_id}')
+
+                logger.debug(f'Author {author_id} commits on project: '+str(len(data[author]['commits'])))
 
                 # Insert commits
                 for commit in data[author]['commits']:
