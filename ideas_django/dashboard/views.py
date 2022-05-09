@@ -240,6 +240,40 @@ def createPatch(request):
     )
 
 
+# Run some code quality checks and return results
+def codeCheck(request):
+    print("CODE CHECK")
+
+    pid = 30
+    if request.GET.get('pid'):
+        pid = int(request.GET.get('pid'))
+
+    project = list(Project.objects.all().filter(id=pid).all())[0]
+
+    #username = settings.DATABASES['default']['USER']
+    #password = settings.DATABASES['default']['PASSWORD']
+    #cmd = f'cd ../ideas-uo ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} 30'
+    #os.system(cmd)
+    #result = subprocess.check_output(cmd, shell=True)
+
+    #Run a linter
+
+    #Run FLASH5 codecheck script?
+
+
+    
+    resultdata = {
+        'status':'success'
+        'linter':'test1'
+        'codecheck':'test2'
+    }
+
+    return HttpResponse(
+        json.dumps(resultdata),
+        content_type='application/json'
+    )
+
+
 # Retrieves commit data for a specific PR
 def diffCommitData(request):
     print("Diff Commit DATA")
