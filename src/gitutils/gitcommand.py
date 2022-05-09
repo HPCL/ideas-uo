@@ -186,7 +186,7 @@ class GitCommand(object):
                                     diffheader += diff
                                     # while not (diff.startswith(b'+') or diff.startswith(b'-')) or (diff.startswith(b'+++') or diff.startswith(b'---')) :
                                     #     diff = next(lines)
-                                    diff = next(lines)
+                                    #diff = next(lines)
 
                                     diffinfo = []
                                     while len(diff) >= 1:
