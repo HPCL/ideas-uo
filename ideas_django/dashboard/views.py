@@ -244,21 +244,24 @@ def createPatch(request):
 def codeCheck(request):
     print("CODE CHECK")
 
-    pid = 30
-    if request.GET.get('pid'):
-        pid = int(request.GET.get('pid'))
+    prid = 2250
+    if request.POST.get('pr'):
+        prid = int(request.POST.get('pr'))
 
     project = list(Project.objects.all().filter(id=pid).all())[0]
 
-    #username = settings.DATABASES['default']['USER']
-    #password = settings.DATABASES['default']['PASSWORD']
-    #cmd = f'cd ../ideas-uo ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} 30'
+    filename = 'folder1/arithmetic.py'
+    if request.POST.get('filename'):
+        filename = request.POST.get('filename')
+
+
+    #Run a linter on give filename in given project
+
+    #Also run FLASH5 codecheck script?
+
+    #cmd = f'cd ../ideas-uo/'+pr.project.name+' ; git diff '+filename+' > '+filename[filename.rindex('/')+1:]+'.patch'
     #os.system(cmd)
     #result = subprocess.check_output(cmd, shell=True)
-
-    #Run a linter
-
-    #Run FLASH5 codecheck script?
 
 
     
