@@ -712,6 +712,7 @@ class Patterns(Fetcher):
             err('plot_top_N_heatmap column parameter must be one of %s' % ','.join(work_df.select_dtypes(
                 include=['float64','int']).columns))
 
-        display(work_df)
+        #display(work_df)
         d = pd.DataFrame(work_df.groupby(['filepath', 'unique_author'])[locc_metric].sum())
         d.reset_index(level=d.index.names, inplace=True)
+        display(d)
