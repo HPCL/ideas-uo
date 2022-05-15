@@ -405,3 +405,6 @@ class Visualizer(Patterns):
                     time_range_str.replace(', ','_').replace(' ','_')), format='png', dpi=self.config['output_dpi'],
                     bbox_inches='tight')
         return sorted_hot_files
+
+    def calculate_bus_factor(self, time_range=None, my_df=pd.DataFrame()):
+        display(self.commit_data)
