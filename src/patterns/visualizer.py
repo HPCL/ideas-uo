@@ -407,4 +407,8 @@ class Visualizer(Patterns):
         return sorted_hot_files
 
     def calculate_bus_factor(self, time_range=None, my_df=pd.DataFrame()):
-        display(self.commit_data)
+        my_df = self.commit_data
+        print("INFO: Extracting filepaths from commits dataframe...")
+        extracted_col = self.commit_data["filepath"]
+        df = pd.DataFrame(extracted_col)
+        display(df)
