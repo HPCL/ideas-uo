@@ -6,6 +6,7 @@ import seaborn as sns
 import os
 from patterns.patterns import Patterns
 from gitutils.utils import err
+from subprocess import Popen, PIPE
 
 
 class Visualizer(Patterns):
@@ -411,4 +412,11 @@ class Visualizer(Patterns):
         print("INFO: Extracting filepaths from commits dataframe...")
         extracted_col = self.commit_data["filepath"]
         df = pd.DataFrame(extracted_col)
-        display(df)
+        filepaths = df["filepath"].tolist()
+
+        for i in range(len(filepaths)):
+            path = filepaths[i]
+            stdout = Popen('git blame ' + path, shell=True, stdout=PIPE).stdout
+            output = stdout.read()
+            print (output)
+            break
