@@ -407,7 +407,7 @@ class Visualizer(Patterns):
                     bbox_inches='tight')
         return sorted_hot_files
 
-    def calculate_bus_factor(self, time_range=None, my_df=pd.DataFrame()):
+    def bus_factor_RIG(self, time_range=None, my_df=pd.DataFrame()):
         my_df = self.commit_data
         print("INFO: Extracting filepaths from commits dataframe...")
         extracted_col = self.commit_data["filepath"]
@@ -421,3 +421,7 @@ class Visualizer(Patterns):
             output = stdout.read()
             print (output)
             break
+
+    def bus_factor_CST(self, top_N=10, locc_metric='locc+', time_range=None, my_df=pd.DataFrame()):
+        sorted_hot_files, stats_df = self.make_file_developer_df(top_N=top_N, locc_metric=locc_metric,
+                                                                 time_range=time_range, my_df=my_df)
