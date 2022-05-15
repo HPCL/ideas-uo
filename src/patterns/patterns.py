@@ -713,5 +713,5 @@ class Patterns(Fetcher):
                 include=['float64','int']).columns))
 
         d = pd.DataFrame(work_df.groupby(['filepath', 'unique_author'])[locc_metric].sum())
-        d.reset_index(level=d.index.names, inplace=True)
+        # d.reset_index(level=d.index.names, inplace=True)
         display(d)
