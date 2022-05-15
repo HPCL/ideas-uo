@@ -529,8 +529,6 @@ class Patterns(Fetcher):
         ):  # self.authors_data = df.merge(df2, how='inner', on='author')
             self.set_unique_authors()
 
-        display(self.commit_data)
-
         if my_df.empty:
             work_df, stats = self.get_time_range_df(time_range, sum=False)
         else:
@@ -692,3 +690,28 @@ class Patterns(Fetcher):
         self.top_N_map = sorted_hot_directories
 
         return sorted_hot_directories, stats_df
+
+
+    def get_busfactor_data(self, locc_metric='change-size-cos', time_range=None, my_df=pd.DataFrame()):
+        print("INFO: Creating developer matrix...")
+
+        # Create the files x developers matrix, using the value_column parameter as the values
+        if 'unique_author' not in self.commit_data.columns:   #self.authors_data = df.merge(df2, how='inner', on='author')
+            self.set_unique_authors()
+
+        if my_df.empty:
+            work_df, stats = self.get_time_range_df(time_range, sum=False)
+        else:
+            # TODO -- enable time ranges with user-provided dataframe my_df
+            if locc_metric not in my_df.columns:
+                err('The dataframe you provided to make_file_developer_df() does '
+                    'not contain the required "%s" column"' % locc_metric)
+            work_df = my_df
+
+        if locc_metric not in work_df.select_dtypes(include=['float64', 'int']):
+            err('plot_top_N_heatmap column parameter must be one of %s' % ','.join(work_df.select_dtypes(
+                include=['float64','int']).columns))
+
+        d = pd.DataFrame(work_df.groupby(['filepath', 'unique_author'])[locc_metric].sum())
+        d.reset_index(level=d.index.names, inplace=True)
+        display(d)

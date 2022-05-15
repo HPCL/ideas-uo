@@ -422,6 +422,5 @@ class Visualizer(Patterns):
             print (output)
             break
 
-    def bus_factor_CST(self, top_N=10, locc_metric='locc+', time_range=None, my_df=pd.DataFrame()):
-        sorted_hot_files, stats_df = self.make_file_developer_df(top_N=top_N, locc_metric=locc_metric,
-                                                                 time_range=time_range, my_df=my_df)
+    def bus_factor_CST(self, top_N=10, locc_metric='change-size-cos', time_range=None, my_df=pd.DataFrame()):
+        self.get_busfactor_data(locc_metric=locc_metric, time_range=time_range, my_df=my_df)
