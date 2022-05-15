@@ -415,8 +415,9 @@ class Visualizer(Patterns):
         filepaths = df["filepath"].tolist()
 
         for i in range(len(filepaths)):
-            path = filepaths[i]
-            stdout = Popen('git blame ' + path, shell=True, stdout=PIPE).stdout
+            command = 'git blame ' + filepaths[i]
+            print(command)
+            stdout = Popen(command, shell=True, stdout=PIPE).stdout
             output = stdout.read()
             print (output)
             break
