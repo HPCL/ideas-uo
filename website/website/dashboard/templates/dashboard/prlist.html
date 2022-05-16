@@ -1,0 +1,222 @@
+<html>
+	
+	{% load static %}
+
+	<head>
+		
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">	
+	
+		<script src="{% static "admin/js/vendor/jquery/jquery.min.js" %}"></script>
+
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
+
+		<style>
+		/*
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+		*/
+
+
+			/* The sidebar menu */
+			.sidenav {
+			  height: 100%; /* Full-height: remove this if you want "auto" height */
+			  width: 200px; /* Set the width of the sidebar */
+			  position: fixed; /* Fixed Sidebar (stay in place on scroll) */
+			  z-index: 1; /* Stay on top */
+			  top: 0; /* Stay at the top */
+			  left: 0;
+			  background-color: #111; /* Black */
+			  overflow-x: hidden; /* Disable horizontal scroll */
+			  padding-top: 20px;
+			}
+
+			/* The navigation menu links */
+			.sidenav a {
+			  padding: 6px 8px 6px 16px;
+			  text-decoration: none;
+			  font-size: 22px;
+			  color: #818181;
+			  display: block;
+			}
+
+			/* When you mouse over the navigation links, change their color */
+			.sidenav a:hover {
+			  color: #f1f1f1;
+			}
+
+			/* Style page content */
+			.main {
+			  margin-left: 200px; /* Same as the width of the sidebar */
+			  padding: 0px 10px;
+			}
+
+			/* On smaller screens, where height is less than 450px, change the style of the sidebar (less padding and a smaller font size) */
+			@media screen and (max-height: 450px) {
+			  .sidenav {padding-top: 15px;}
+			  .sidenav a {font-size: 18px;}
+			}
+
+			.all_links {
+				stroke: #999;
+				stroke-opacity: 0.7;
+			}
+			.all_nodes {
+				stroke: #fff;
+				stroke-width: 1.5px;
+			}
+			.domain {
+				fill: none;
+				stroke: #000;
+				stroke-opacity: .3;
+				stroke-width: 10px;
+				stroke-linecap: round;
+			}
+			.halo {
+				fill: none;
+				stroke: #ddd;
+				stroke-width: 8px;
+				stroke-linecap: round;
+			}
+			.tick {
+				font-size: 12px;
+			}
+			.selecting circle {
+				fill-opacity: .2;
+			}
+			.selecting circle.selected {
+				stroke: #f00;
+			}
+			.handle {
+				fill: #fff;
+				stroke: #000;
+				stroke-opacity: .5;
+				stroke-width: 1.25px;
+				cursor: pointer;
+			}
+
+
+			#cy {
+		        width: 85%;
+		        height: 80%;
+		        /*position: absolute;
+		        top: 0px;
+		        left: 0px;*/
+		    }
+
+		</style>
+
+	</head>
+
+
+	<body>
+		<div class="sidenav">
+		  <a id="" href="#" onclick="" style="color:white; pointer-events: none; cursor: default;">IDEAS</a>
+
+		  <br/>
+
+		  <a id="" href="." onclick="">Home</a>
+		  <a id="" href="." onclick="">Branches</a>
+		  <a id="" href="." onclick="">PR Assistant</a>
+		  <a id="" href="." onclick="">About</a>
+
+		  <br/>
+
+		  <div class="dashboard_hiding_for_now" style="display:none;">
+			  <a id="button1" href="#">Grid On</a>
+			  <a id="button2" href="#">Grid Off</a>
+			  <a id="button3" href="#">Display LOCCs</a>
+			  <a id="button4" href="#">Display Commits</a>
+		  </div>
+		</div>
+
+		<div id="home" class="main" style="padding:50px 50px 0px 50px;">
+
+			<h2>Pull Request Assistant</h2><br/>
+
+
+			<button id="refreshbutton" class="btn btn-sm btn-primary" style="float:right;" onclick="refreshProject();">
+				<div id="spinner" class="spinner-border spinner-border-sm" role="status" style="display:none;">
+				</div> Refresh Project
+			</button>
+
+			<b>Pull Requests for <i>{{project.name}}</i>:</b><br/>
+			<!--div style="margin-top:6px;"><u>Title</u>: {{pr.title}}</div>
+			<div style="margin-top:6px;"><u>Date</u>: {{pr.created_at}}</div>
+			<div style="margin-top:6px;"><u>Description</u>: <p style="white-space:pre;">{{pr.description}}</p></div>
+			<div style="margin-top:6px;"><u>Branch</u>: {{commits.0.branch}}</div>
+			<div style="margin-top:6px; margin-bottom:8px;"><u>URL</u>: <a target="_blank" href="{{pr.url}}">{{pr.url}}</a></div-->
+				
+			<table class="table">
+				<tr>
+					<th>Number</th>
+					<th>Title</th>
+					<th>Date</th>
+					<th>URL</th>
+				</tr>
+				{% for pr in prs %}
+				<tr>
+					<td><a href="/dashboard/pr/{{pr.id}}">{{pr.number}}</a></td>
+					<td>{{pr.title}}</td>
+					<td>{{pr.created_at|date:'Y-m-d'}}</td>
+					<td><a target="_blank" href="{{pr.url}}">{{pr.url}}</a></td>
+				</tr>
+				{% endfor %}
+			</table>
+
+
+
+		</div>
+
+	</body>
+
+	<script>
+
+		console.log("javascript is working...");
+
+
+		var startdate = $("#startdate");
+		var date = new Date(new Date().getTime() - (1000*60*60*24*30));
+		startdate.val(date.toISOString().substr(0,10));
+
+		var enddate = $("#enddate");
+		date = new Date();
+		enddate.val(date.toISOString().substr(0,10));
+
+
+		var queryString = window.location.search;
+		var urlParams = new URLSearchParams(queryString);
+		var pid = urlParams.get('pid')
+		console.log(pid);
+
+
+		/*$(function() {
+			$('[data-bs-toggle="popover"]').popover();
+		});*/
+
+		function refreshProject(){
+			console.log("refreshing project...");
+
+			if( $('#refreshbutton').hasClass('disabled') ){
+				return false;
+			}else{
+
+				$('#refreshbutton').addClass('disabled'); 
+				$('#spinner').show(); 
+
+				$.ajax({url:'/dashboard/refreshproject', data:{'pid':pid}, success:function(result){
+					console.log("success ajax");
+					console.log(result);
+
+					//refresh the page here
+					location.reload();
+
+				}});
+			}
+		}
+
+
+	</script>
+
+</html>
