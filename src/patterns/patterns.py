@@ -727,9 +727,11 @@ class Patterns(Fetcher):
             author = d['unique_author'][ind]
             d_commits = d['locc'][ind]
             if(path == tot_commits_per_file['filepath'][it]):
+                print("in the if")
                 tot_commits = tot_commits_per_file['locc'][it]
                 d.iat[ind, 3] = d_commits/tot_commits
             else:
+                print("in the else")
                 it+=1
                 tot_commits = tot_commits_per_file['locc'][it]
                 d.iat[ind, 3] = d_commits/tot_commits
