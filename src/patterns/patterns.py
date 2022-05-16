@@ -718,7 +718,7 @@ class Patterns(Fetcher):
         d.reset_index(level=d.index.names, inplace=True)
         tot_commits_per_file = pd.DataFrame(d.groupby(['filepath'])[locc_metric].sum())
         tot_commits_per_file.reset_index(level=tot_commits_per_file.index.names, inplace=True)
-        
+
         it = 0              #iterator for tot_commits_per_file dataframe
         for ind in d.index:
             path = d['filepath'][ind]
@@ -731,6 +731,20 @@ class Patterns(Fetcher):
                 it = it+1
                 tot_commits = tot_commits_per_file['locc'][it]
                 d.iat[ind, d.columns.get_loc('dev_knowledge')] = d_commits/tot_commits
-        
+
         display(d.head(10))
         display(tot_commits_per_file.head(10))
+
+        authors_commits_df = pd.DataFrame(d.groupby(['unique_author'])[locc_metric].sum())
+        authors_commits_df.reset_index(level=authors_commits_df.index.names, inplace=True)
+        tot_developers = len(authors_commits_df.index)
+        primary_X = 1/tot_developers
+        secondary_X = primary_X/2
+
+        authors_commits_df["dev_knowledge"] = 0
+        tot_commits = authors_commits_df['locc'].sum()
+        for ind in authors_commits_df.index:
+            d_commits = authors_commits_df['locc'][ind]
+            authors_commits_df.iat[ind, authors_commits_df.columns.get_loc('dev_knowledge')] = d_commits/tot_commits
+
+        display(authors_commits_df.head(10))
