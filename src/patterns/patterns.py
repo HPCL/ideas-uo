@@ -751,17 +751,17 @@ class Patterns(Fetcher):
 
         prim_devs = []
         secon_devs = []
-        primary_dev = secon_devs = 0
+        primary_dev = sec_devs = 0
         for ind in authors_commits_df.index:
             dev_knowledge = authors_commits_df['dev_knowledge'][ind]
             if dev_knowledge >= primary_X:
                 primary_dev += 1
                 prim_devs.append(authors_commits_df['unique_author'][ind])
             elif dev_knowledge<primary_X and dev_knowledge>=secondary_X:
-                secon_devs += 1
+                sec_devs += 1
                 secon_devs.append(authors_commits_df['unique_author'][ind])
 
-        bus_factor = prim_devs + secon_devs
+        bus_factor = primary_dev + sec_devs
         print("Primary Developers: " + prim_devs)
         print("Secondary Developers: " + secon_devs)
         print("Bus Factor: " + bus_factor)
