@@ -726,13 +726,13 @@ class Patterns(Fetcher):
             path = d['filepath'][ind]
             author = d['unique_author'][ind]
             d_commits = d['locc'][ind]
-            if(path != tot_commits_per_file['filepath'][it]):
+            if(path == tot_commits_per_file['filepath'][it]):
                 tot_commits = tot_commits_per_file['locc'][it]
-                d['dev_knowledge'][ind] = d_commits/tot_commits
+                d['ind']['dev_knowledge'] = d_commits/tot_commits
             else:
                 it+=1
                 tot_commits = tot_commits_per_file['locc'][it]
-                d['dev_knowledge'][ind] = d_commits/tot_commits
+                d['ind']['dev_knowledge'] = d_commits/tot_commits
             k+=1
             if k==5:
                 break
