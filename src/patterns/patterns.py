@@ -720,9 +720,8 @@ class Patterns(Fetcher):
         display(d.head(10))
         display(tot_commits_per_file.head(10))
         k=0
-        for i, j in tot_commits_per_file.iterrows():
-            print(i, j)
-            print()
+        for ind in tot_commits_per_file.index:
+            print(tot_commits_per_file['filepath'][ind], tot_commits_per_file['locc'][ind])
             k+=1
             if k==5:
                 break
