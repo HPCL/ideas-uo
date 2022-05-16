@@ -732,8 +732,8 @@ class Patterns(Fetcher):
                 tot_commits = tot_commits_per_file['locc'][it]
                 d.iat[ind, d.columns.get_loc('dev_knowledge')] = d_commits/tot_commits
 
-        display(d.head(10))
-        display(tot_commits_per_file.head(10))
+        display(d.head(5))
+        display(tot_commits_per_file.head(5))
 
         authors_commits_df = pd.DataFrame(d.groupby(['unique_author'])[locc_metric].sum())
         authors_commits_df.reset_index(level=authors_commits_df.index.names, inplace=True)
@@ -747,4 +747,21 @@ class Patterns(Fetcher):
             d_commits = authors_commits_df['locc'][ind]
             authors_commits_df.iat[ind, authors_commits_df.columns.get_loc('dev_knowledge')] = d_commits/tot_commits
 
-        display(authors_commits_df.head(10))
+        display(authors_commits_df.head(5))
+
+        prim_devs = []
+        secon_devs = []
+        primary_dev = secon_devs = 0
+        for ind in authors_commits_df.index:
+            dev_knowledge = authors_commits_df['dev_knowledge'][ind]
+            if dev_knowledge >= primary_X:
+                primary_dev += 1
+                prim_devs.append(authors_commits_df['unique_author'][ind])
+            elif dev_knowledge<primary_X and dev_knowledge>=secondary_X:
+                secon_devs += 1
+                secon_devs.append(authors_commits_df['unique_author'][ind])
+
+        bus_factor = prim_devs + secon_devs
+        print("Primary Developers: " + prim_devs)
+        print("Secondary Developers: " + secon_devs)
+        print("Bus Factor: " + bus_factor)
