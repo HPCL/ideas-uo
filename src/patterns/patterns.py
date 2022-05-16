@@ -715,4 +715,6 @@ class Patterns(Fetcher):
         #display(work_df)
         d = pd.DataFrame(work_df.groupby(['filepath', 'unique_author'])[locc_metric].sum())
         d.reset_index(level=d.index.names, inplace=True)
-        display(d.head(20))
+        tot_commits_per_file = pd.DataFrame(d.groupby(['filepath'])[locc_metric].sum())
+        display(d.head(10))
+        display(tot_commits_per_file.head(10))
