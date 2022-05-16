@@ -729,12 +729,13 @@ class Patterns(Fetcher):
             if(path == tot_commits_per_file['filepath'][it]):
                 print("in the if")
                 tot_commits = tot_commits_per_file['locc'][it]
-                d.iat[ind, 3] = d_commits/tot_commits
+                print(tot_commits)
+                d.loc[d.index[ind], 'dev_knowledge'] = d_commits/tot_commits
             else:
                 print("in the else")
-                it+=1
+                it = it+1
                 tot_commits = tot_commits_per_file['locc'][it]
-                d.iat[ind, 3] = d_commits/tot_commits
+                d.loc[d.index[ind], 'dev_knowledge'] = d_commits/tot_commits
             k+=1
             if k==5:
                 break
