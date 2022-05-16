@@ -423,4 +423,9 @@ class Visualizer(Patterns):
             break
 
     def bus_factor_CST(self, locc_metric='change-size-cos', time_range=None, my_df=pd.DataFrame()):
-        self.get_busfactor_data(locc_metric=locc_metric, time_range=time_range, my_df=my_df)
+        tot_developers, prim_devs, secon_devs, bus_factor = self.get_busfactor_data(locc_metric=locc_metric, time_range=time_range, my_df=my_df)
+
+        print("Total developers: ", tot_developers)
+        print("Primary Developers: ", prim_devs)
+        print("Secondary Developers: ", secon_devs)
+        print("Bus Factor: ", bus_factor)

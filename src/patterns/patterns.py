@@ -762,10 +762,5 @@ class Patterns(Fetcher):
                 secon_devs.append(authors_commits_df['unique_author'][ind])
 
         bus_factor = primary_dev + sec_devs
-        print("Total developers: ", tot_developers)
-        print("Primary Developers: ")
-        print(prim_devs)
-        print("Secondary Developers: ")
-        print(secon_devs)
-        print("Bus Factor: ")
-        print(bus_factor)
+
+        return tot_developers, prim_devs, secon_devs, bus_factor
