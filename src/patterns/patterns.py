@@ -728,9 +728,8 @@ class Patterns(Fetcher):
             d_commits = d['locc'][ind]
             if(path == tot_commits_per_file['filepath'][it]):
                 tot_commits = tot_commits_per_file['locc'][it]
-                print(d_commits/tot_commits)
                 d.iloc[ind, d.columns.get_loc('dev_knowledge')] = d_commits/tot_commits
-                print(d.columns.get_loc('dev_knowledge'))
+                print(d.iloc[ind, d.columns.get_loc('locc')])
             else:
                 it = it+1
                 tot_commits = tot_commits_per_file['locc'][it]
