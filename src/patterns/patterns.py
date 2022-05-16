@@ -719,6 +719,10 @@ class Patterns(Fetcher):
         tot_commits_per_file.reset_index(level=tot_commits_per_file.index.names, inplace=True)
         display(d.head(10))
         display(tot_commits_per_file.head(10))
+        k=0
         for i, j in tot_commits_per_file.iterrows():
             print(i, j)
             print()
+            k+=1
+            if k==5:
+                break
