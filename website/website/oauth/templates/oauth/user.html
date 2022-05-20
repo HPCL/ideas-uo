@@ -1,5 +1,12 @@
 {% extends 'oauth/base.html' %}
 
 {% block content %}
-  <pre>{{user}}</pre>
+    <h1>Hello, {{user.login}}</h1>
+    
+    <h2>These are your repos:</h2>
+
+    {% for repo in repos %}
+        <h3><a href="{% repo.html_url %}" target="_blank">{% repo.name %}</a></h3>  
+    {% endfor %}
+    
 {% endblock content %}
