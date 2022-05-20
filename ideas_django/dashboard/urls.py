@@ -16,5 +16,6 @@ urlpatterns = [
     url(r'^patterngraph1/$', views.patternGraph1, name='patterngraph1'),
     url(r'^diffcommitdata/$', views.diffCommitData, name='diffcommitdata'),
     url(r'^getfile/$', views.getFile, name='getfile'),
+    url(r'^codecheck/$', views.codeCheck, name='codecheck'),
 ]
 

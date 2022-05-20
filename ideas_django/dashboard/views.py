@@ -240,6 +240,43 @@ def createPatch(request):
     )
 
 
+# Run some code quality checks and return results
+def codeCheck(request):
+    print("CODE CHECK")
+
+    prid = 2250
+    if request.POST.get('pr'):
+        prid = int(request.POST.get('pr'))
+
+    project = list(Project.objects.all().filter(id=pid).all())[0]
+
+    filename = 'folder1/arithmetic.py'
+    if request.POST.get('filename'):
+        filename = request.POST.get('filename')
+
+
+    #Run a linter on give filename in given project
+
+    #Also run FLASH5 codecheck script?
+
+    #cmd = f'cd ../ideas-uo/'+pr.project.name+' ; git diff '+filename+' > '+filename[filename.rindex('/')+1:]+'.patch'
+    #os.system(cmd)
+    #result = subprocess.check_output(cmd, shell=True)
+
+
+    
+    resultdata = {
+        'status':'success'
+        'linter':'test1'
+        'codecheck':'test2'
+    }
+
+    return HttpResponse(
+        json.dumps(resultdata),
+        content_type='application/json'
+    )
+
+
 # Retrieves commit data for a specific PR
 def diffCommitData(request):
     print("Diff Commit DATA")

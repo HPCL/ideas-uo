@@ -1,6 +1,8 @@
 import os
 import sys
 
+import logging
+
 try:
   import src.gitutils.command as command
   from src.gitutils.utils import *
@@ -8,6 +10,15 @@ except:
   import gitutils.command as command
   from gitutils.utils import *
 
+# Setup Logger
+logger = logging.getLogger('db_interface')
+# Handler should already be taken care of
+#logger.setLevel(logging.DEBUG)
+#ch = logging.StreamHandler()
+#ch.setLevel(level=logging.DEBUG)
+#formatter = logging.Formatter(fmt="[%(levelname)s]: %(asctime)s - %(message)s")
+#ch.setFormatter(fmt=formatter)
+#logger.addHandler(hdlr=ch)
 
 class GitCommand(object):
 
@@ -74,13 +85,14 @@ class GitCommand(object):
 
         for version in versions:
             #checkout the versions
-            print('git checkout %s%s' % (prefix,version))
+            logger.debug('git checkout %s%s' % (prefix,version))
             retcode, out, err = command.Command('git checkout %s%s' % (prefix,version)).run(dryrun=False)
-            print(out)
+            #print(out)
 
 
         #git log -p # this will list all commits and the code additions in addition to dates and messages.
         # function-context for python just adds all the surrounding lines of code to the diff output
+        logger.debug(f'git log -p --branches=* --all --date=iso-strict-local --function-context --since {since} --until {until}')
         retcode, out, err = command.Command(f'git log -p --branches=* --all --date=iso-strict-local --function-context --since {since} --until {until}').run()
         lines = iter(out.splitlines())
 
@@ -174,9 +186,13 @@ class GitCommand(object):
                                     diffheader += diff
                                     # while not (diff.startswith(b'+') or diff.startswith(b'-')) or (diff.startswith(b'+++') or diff.startswith(b'---')) :
                                     #     diff = next(lines)
+                                    #diff = next(lines)
 
                                     diffinfo = []
                                     while len(diff) >= 1:
+
+                                        if diff.startswith(b'diff'):
+                                            break
 
                                         # if (diff.startswith(b'+') or diff.startswith(b'-')):
                                         diffinfo.append(diff.decode("utf-8", errors='ignore'))
@@ -190,6 +206,7 @@ class GitCommand(object):
                                         #             break
                                         #     except:
                                         #         break
+
 
                                         try:
                                             diff = next(lines)
