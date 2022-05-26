@@ -1,0 +1,35 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ideas-uo</title>
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body> 
+    <div class="sidenav">
+        <a id="" href="#" onclick="" style="color:white; pointer-events: none; cursor: default;">IDEAS</a>
+
+        <br/>
+
+        <a id="" href="." onclick="">Home</a>
+        <a id="" href="." onclick="">Branches</a>
+        <a id="" href="." onclick="">PR Assistant</a>
+        <a id="" href="." onclick="">About</a>
+
+        <br/>
+
+        <div class="dashboard_hiding_for_now" style="display:none;">
+            <a id="button1" href="#">Grid On</a>
+            <a id="button2" href="#">Grid Off</a>
+            <a id="button3" href="#">Display LOCCs</a>
+            <a id="button4" href="#">Display Commits</a>
+        </div>
+    </div>
+
+    {% block content %}{% endblock content %}
+</body>
+</html>

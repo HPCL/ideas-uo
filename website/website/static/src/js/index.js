@@ -1,5 +1,6 @@
-console.log("javascript is working...");
+import $ from 'jquery';
 
+console.log("javascript is working...");
 
 var startdate = $("#startdate");
 var date = new Date(new Date().getTime() - (1000 * 60 * 60 * 24 * 30));
@@ -14,11 +15,6 @@ var queryString = window.location.search;
 var urlParams = new URLSearchParams(queryString);
 var pid = urlParams.get('pid')
 console.log(pid);
-
-
-/*$(function() {
-    $('[data-bs-toggle="popover"]').popover();
-});*/
 
 function refreshProject() {
     console.log("refreshing project...");

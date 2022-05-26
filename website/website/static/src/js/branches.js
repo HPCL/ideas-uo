@@ -1,3 +1,5 @@
+import $ from 'jquery';
+
 console.log("javascript is working...");
 
 $.ajax({
@@ -17,7 +19,5 @@ $.ajax({
             console.log(result['name_column'][i]);
             table.append('<tr><td>' + result['name_column'][i] + '</td><td>' + result['author_column'][i] + '</td><td>' + result['created_column'][i] + '</td><td>' + result['deleted_column'][i] + '</td></tr>');
         }
-
-
     }
 });

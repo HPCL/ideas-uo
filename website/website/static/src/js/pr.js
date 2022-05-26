@@ -1,3 +1,4 @@
+import $ from 'jquery';
 
 console.log("javascript is working...");
 
@@ -13,7 +14,7 @@ enddate.val(date.toISOString().substr(0, 10));
 
 var queryString = window.location.search;
 var urlParams = new URLSearchParams(queryString);
-var pr = {{ pr.pk }} //urlParams.get('pr')
+var pr = urlParams.get('pr') //{{ pr.pk }}
 console.log(pr);
 var filename = "";
 var popupNode = document.createElement("div");
@@ -23,41 +24,7 @@ popupNode.style.background = 'white'
 popupNode.style.color = 'black';
 popupNode.style.zIndex = '9999';
 
-
-//Setup our fancy textarea with highlighting ability
-/*$("#dochelper").on({
-    'input': handleInput,
-    'scroll': handleScroll
-});
-function handleInput() {
-    var text = $("#dochelper").val();
-    //console.log( text );
-    var highlightedText = applyHighlights(text);
-    $("#highlightsdiv").html(highlightedText);
-}
-function applyHighlights(text) {
-
-    //return text
-    //  .replace(/\n$/g, '\n\n')
-    //  .replace(/[A-Z].*?\b/g, '<mark>$&</mark>');
-
-    text = text.replace(/\n$/g, '\n\n');
-    //[(215, 220), (813, 818)]
-    //text = [text.slice(0, 818), "</mark>", text.slice(818)].join('');
-    //text = [text.slice(0, 813), "<mark>", text.slice(813)].join('');
-    //text = [text.slice(0, 220), "</mark>", text.slice(220)].join('');
-    //text = [text.slice(0, 215), "<mark>", text.slice(215)].join('');
-    text = text.replaceAll('round:','<mark>round</mark>:')
-    text = text.replaceAll('round=','<mark>round</mark>=')
-
-    console.log( text );
-    return text
-}
-function handleScroll() {
-    var scrollTop = $("#dochelper").scrollTop();
-    $(".backdrop").scrollTop(scrollTop);
-}
-handleInput();*/
+let csrf_token = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
 var editor = CodeMirror.fromTextArea(document.getElementById("dochelper"), {
     lineNumbers: true,
@@ -167,7 +134,7 @@ function loadPatternGraph() {
 
 $.ajaxSetup({
     beforeSend: function (xhr, settings) {
-        xhr.setRequestHeader("X-CSRFToken", "{{csrf_token}}");
+        xhr.setRequestHeader("X-CSRFToken", csrf_token);
     }
 })
 
@@ -199,7 +166,7 @@ $.ajax({
                 diffadds += (diff.match(/\n\+/g) || []).length;
                 diffsubs += (diff.match(/\n\-/g) || []).length;
 
-                commits += "<a target='_blank' href='"+result['source_url']+"/commit/" + result['diffcommits'][i]['commits'][j]['commit'] + "'>" + result['diffcommits'][i]['commits'][j]['commit'].substring(0, 7) + "</a><br/>";
+                commits += "<a target='_blank' href='" + result['source_url'] + "/commit/" + result['diffcommits'][i]['commits'][j]['commit'] + "'>" + result['diffcommits'][i]['commits'][j]['commit'].substring(0, 7) + "</a><br/>";
 
 
                 diff = diff.replace(/&/g, '&amp;').replaceAll('\"', '&quot;').replaceAll('\'', '&lsquo;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -208,7 +175,7 @@ $.ajax({
                 //see if we should add commit to doc file table
                 for (var k = 0; k < result['prcommits'].length; k++) {
                     if (result['diffcommits'][i]['commits'][j]['commit'] == result['prcommits'][k]['hash']) {
-                        doccommits += "<a target='_blank' href='"+result['source_url']+"/commit/" + result['diffcommits'][i]['commits'][j]['commit'] + "'>" + result['diffcommits'][i]['commits'][j]['commit'].substring(0, 7) + "</a><br/>";
+                        doccommits += "<a target='_blank' href='" + result['source_url'] + "/commit/" + result['diffcommits'][i]['commits'][j]['commit'] + "'>" + result['diffcommits'][i]['commits'][j]['commit'].substring(0, 7) + "</a><br/>";
                         docdiffs += "<button class='btn btn-xs btn-primary' onclick='showDocEditor(\"" + result['diffcommits'][i]['filename'] + "\",\"" + "DIFF STUFF TO GO HERE" + "\");'>View Docs</button><br/>";
 
                     }
@@ -235,10 +202,6 @@ $.ajax({
         }
 
         $('.popover-dismiss').popover({ trigger: 'focus' });
-
-        //$(function() {
-        //	$('[data-bs-toggle="popover"]').popover();
-        //});
 
         setTimeout(function () {
             $('[data-bs-toggle="popover"]').popover();

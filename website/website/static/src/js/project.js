@@ -1,5 +1,6 @@
-console.log("javascript is working...");
+import $ from 'jquery';
 
+console.log("javascript is working...");
 
 var startdate = $("#startdate");
 var date = new Date(new Date().getTime() - (1000 * 60 * 60 * 24 * 30));

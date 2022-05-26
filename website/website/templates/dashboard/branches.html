@@ -1,151 +1,51 @@
-<html>
-	
-	{% load static %}
+{% extends 'dashboard/base.html %}
+{% load static %}
 
-	<head>
-		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">		
-	
-		<script src="{% static "admin/js/vendor/jquery/jquery.min.js" %}"></script>
+{% block content %}
+<div class="sidenav">
+    <a id="" href="#" onclick="" style="color:white; pointer-events: none; cursor: default;">IDEAS</a>
 
-		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <br/>
 
-		<style>
-			/* The sidebar menu */
-			.sidenav {
-			  height: 100%; /* Full-height: remove this if you want "auto" height */
-			  width: 200px; /* Set the width of the sidebar */
-			  position: fixed; /* Fixed Sidebar (stay in place on scroll) */
-			  z-index: 1; /* Stay on top */
-			  top: 0; /* Stay at the top */
-			  left: 0;
-			  background-color: #111; /* Black */
-			  overflow-x: hidden; /* Disable horizontal scroll */
-			  padding-top: 20px;
-			}
+    <a id="" href="." onclick="">Home</a>
+    <a id="" href="#" onclick="">Branches</a>
+    <a id="" href="." onclick="">About</a>
 
-			/* The navigation menu links */
-			.sidenav a {
-			  padding: 6px 8px 6px 16px;
-			  text-decoration: none;
-			  font-size: 22px;
-			  color: #818181;
-			  display: block;
-			}
+    <br/>
 
-			/* When you mouse over the navigation links, change their color */
-			.sidenav a:hover {
-			  color: #f1f1f1;
-			}
+    <div class="dashboard_hiding_for_now" style="display:none;">
+        <a id="button1" href="#">Grid On</a>
+        <a id="button2" href="#">Grid Off</a>
+        <a id="button3" href="#">Display LOCCs</a>
+        <a id="button4" href="#">Display Commits</a>
+    </div>
+</div>
 
-			/* Style page content */
-			.main {
-			  margin-left: 200px; /* Same as the width of the sidebar */
-			  padding: 0px 10px;
-			}
+<div id="home" class="main" style="padding:50px 50px 0px 50px;">
 
-			/* On smaller screens, where height is less than 450px, change the style of the sidebar (less padding and a smaller font size) */
-			@media screen and (max-height: 450px) {
-			  .sidenav {padding-top: 15px;}
-			  .sidenav a {font-size: 18px;}
-			}
+    <h2>Branches</h2><br/>
 
-			.all_links {
-				stroke: #999;
-				stroke-opacity: 0.7;
-			}
-			.all_nodes {
-				stroke: #fff;
-				stroke-width: 1.5px;
-			}
-			.domain {
-				fill: none;
-				stroke: #000;
-				stroke-opacity: .3;
-				stroke-width: 10px;
-				stroke-linecap: round;
-			}
-			.halo {
-				fill: none;
-				stroke: #ddd;
-				stroke-width: 8px;
-				stroke-linecap: round;
-			}
-			.tick {
-				font-size: 12px;
-			}
-			.selecting circle {
-				fill-opacity: .2;
-			}
-			.selecting circle.selected {
-				stroke: #f00;
-			}
-			.handle {
-				fill: #fff;
-				stroke: #000;
-				stroke-opacity: .5;
-				stroke-width: 1.25px;
-				cursor: pointer;
-			}
+    Open: <span id="open_branches"></span>
+    <br/>
+    <br/>
+    Feature: <span id="feature_branches"></span>
+    <br/>
+    <br/>
+    Created: <span id="created_branches"></span>
+    <br/>
+    <br/>
+    Deleted: <span id="deleted_branches"></span>
+    <br/>
+    <br/>
 
 
-			#cy {
-		        width: 85%;
-		        height: 80%;
-		        /*position: absolute;
-		        top: 0px;
-		        left: 0px;*/
-		    }
-		</style>
+    <br/>
+    <table id='branches_table' class="table">
+        <tbody>
+            <tr><th>Name</th><th>Author</th><th>Created</th><th>Deleted</th></tr>
+        </tbody>
+    </table>
+</div>
 
-	</head>
-
-
-	<body>
-		<div class="sidenav">
-		  <a id="" href="#" onclick="" style="color:white; pointer-events: none; cursor: default;">IDEAS</a>
-
-		  <br/>
-
-		  <a id="" href="." onclick="">Home</a>
-		  <a id="" href="#" onclick="">Branches</a>
-		  <a id="" href="." onclick="">About</a>
-
-		  <br/>
-
-		  <div class="dashboard_hiding_for_now" style="display:none;">
-			  <a id="button1" href="#">Grid On</a>
-			  <a id="button2" href="#">Grid Off</a>
-			  <a id="button3" href="#">Display LOCCs</a>
-			  <a id="button4" href="#">Display Commits</a>
-		  </div>
-		</div>
-
-		<div id="home" class="main" style="padding:50px 50px 0px 50px;">
-
-			<h2>Branches</h2><br/>
-
-			Open: <span id="open_branches"></span>
-			<br/>
-			<br/>
-			Feature: <span id="feature_branches"></span>
-			<br/>
-			<br/>
-			Created: <span id="created_branches"></span>
-			<br/>
-			<br/>
-			Deleted: <span id="deleted_branches"></span>
-			<br/>
-			<br/>
-
-
-			<br/>
-			<table id='branches_table' class="table">
-				<tbody>
-					<tr><th>Name</th><th>Author</th><th>Created</th><th>Deleted</th></tr>
-				</tbody>
-			</table>
-
-		</div>
-
-	</body>
-</html>
+<script src="{% static 'js/branches.bundle.js' %}"></script>
+{% enblock content %}
