@@ -723,13 +723,13 @@ class Patterns(Fetcher):
         for ind in d.index:
             path = d['filepath'][ind]
             author = d['unique_author'][ind]
-            d_commits = d['locc'][ind]
+            d_commits = d[locc_metric][ind] #changed here
             if(path == tot_commits_per_file['filepath'][it]):
-                tot_commits = tot_commits_per_file['locc'][it]
+                tot_commits = tot_commits_per_file[locc_metric][it] #changed here
                 d.iat[ind, d.columns.get_loc('dev_knowledge')] = d_commits/tot_commits
             else:
                 it = it+1
-                tot_commits = tot_commits_per_file['locc'][it]
+                tot_commits = tot_commits_per_file[locc_metric][it] #changed here
                 d.iat[ind, d.columns.get_loc('dev_knowledge')] = d_commits/tot_commits
 
         display(d.head(5))
@@ -742,9 +742,9 @@ class Patterns(Fetcher):
         secondary_X = primary_X/2
 
         authors_commits_df["dev_knowledge"] = 0
-        tot_commits = authors_commits_df['locc'].sum()
+        tot_commits = authors_commits_df[locc_metric].sum()  #changed here
         for ind in authors_commits_df.index:
-            d_commits = authors_commits_df['locc'][ind]
+            d_commits = authors_commits_df[locc_metric][ind] #changed here
             authors_commits_df.iat[ind, authors_commits_df.columns.get_loc('dev_knowledge')] = d_commits/tot_commits
 
         display(authors_commits_df.head(5))
