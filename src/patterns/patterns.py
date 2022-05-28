@@ -747,6 +747,8 @@ class Patterns(Fetcher):
             d_commits = authors_commits_df[locc_metric][ind]
             authors_commits_df.iat[ind, authors_commits_df.columns.get_loc('dev_knowledge')] = d_commits/tot_commits
         
+        display(authors_commits_df.head(5))
+        print("sorting")
         authors_commits_df.sort_values(by=['dev_knowledge'], ascending=False)
 
         display(authors_commits_df.head(5))
