@@ -709,7 +709,7 @@ class Patterns(Fetcher):
             work_df = my_df
 
         if locc_metric not in work_df.select_dtypes(include=['float64', 'int']):
-            err('plot_top_N_heatmap column parameter must be one of %s' % ','.join(work_df.select_dtypes(
+            err('get_busfactor_data column parameter must be one of %s' % ','.join(work_df.select_dtypes(
                 include=['float64','int']).columns))
 
         #display(work_df)
@@ -723,13 +723,13 @@ class Patterns(Fetcher):
         for ind in d.index:
             path = d['filepath'][ind]
             author = d['unique_author'][ind]
-            d_commits = d[locc_metric][ind] #changed here
+            d_commits = d[locc_metric][ind]
             if(path == tot_commits_per_file['filepath'][it]):
-                tot_commits = tot_commits_per_file[locc_metric][it] #changed here
+                tot_commits = tot_commits_per_file[locc_metric][it]
                 d.iat[ind, d.columns.get_loc('dev_knowledge')] = d_commits/tot_commits
             else:
                 it = it+1
-                tot_commits = tot_commits_per_file[locc_metric][it] #changed here
+                tot_commits = tot_commits_per_file[locc_metric][it]
                 d.iat[ind, d.columns.get_loc('dev_knowledge')] = d_commits/tot_commits
 
         display(d.head(5))
@@ -742,10 +742,12 @@ class Patterns(Fetcher):
         secondary_X = primary_X/2
 
         authors_commits_df["dev_knowledge"] = 0
-        tot_commits = authors_commits_df[locc_metric].sum()  #changed here
+        tot_commits = authors_commits_df[locc_metric].sum()
         for ind in authors_commits_df.index:
-            d_commits = authors_commits_df[locc_metric][ind] #changed here
+            d_commits = authors_commits_df[locc_metric][ind]
             authors_commits_df.iat[ind, authors_commits_df.columns.get_loc('dev_knowledge')] = d_commits/tot_commits
+        
+        authors_commits_df.sort_values(by=['dev_knowledge'], ascending=False)
 
         display(authors_commits_df.head(5))
 
