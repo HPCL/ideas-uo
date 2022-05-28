@@ -749,8 +749,7 @@ class Patterns(Fetcher):
         
         display(authors_commits_df.head(5))
         print("sorting")
-        authors_commits_df.sort_values(by=['dev_knowledge'], ascending=False)
-
+        authors_commits_df.sort_values(by=['dev_knowledge'], ascending=False, inplace=True)
         display(authors_commits_df.head(5))
 
         prim_devs = []
