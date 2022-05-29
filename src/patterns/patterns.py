@@ -736,8 +736,8 @@ class Patterns(Fetcher):
                     tot_commits = tot_commits_per_file[locc_metric][it]
                     d.iat[ind, d.columns.get_loc('dev_knowledge')] = d_commits/tot_commits
 
-            display(d.head(5))
-            display(tot_commits_per_file.head(5))
+            # display(d.head(5))
+            # display(tot_commits_per_file.head(5))
 
             authors_commits_df = pd.DataFrame(d.groupby(['unique_author'])[locc_metric].sum())
             authors_commits_df.reset_index(level=authors_commits_df.index.names, inplace=True)
@@ -753,7 +753,7 @@ class Patterns(Fetcher):
             
             authors_commits_df.sort_values(by=['dev_knowledge'], ascending=False, inplace=True)
             
-            display(authors_commits_df.head(5))
+            # display(authors_commits_df.head(5))
 
             for ind in authors_commits_df.index:
                 dev_knowledge = authors_commits_df['dev_knowledge'][ind]
@@ -763,6 +763,18 @@ class Patterns(Fetcher):
                 elif dev_knowledge<primary_X and dev_knowledge>=secondary_X:
                     sec_devs += 1
                     secon_devs.append(authors_commits_df['unique_author'][ind])
+
+        elif(metric == 'last-change-all'):
+            display(work_df.head(10))
+            # d = pd.DataFrame(work_df.groupby(['filepath', 'unique_author'])[locc_metric].sum())
+            # d["dev_knowledge"] = 0
+            # d.reset_index(level=d.index.names, inplace=True)
+
+        elif(metric == 'non-consec-changes'):
+            pass
+
+        elif(metric == 'weightes-non-consec'):
+            pass
 
         bus_factor = primary_dev + sec_devs
 
