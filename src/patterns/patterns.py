@@ -772,7 +772,7 @@ class Patterns(Fetcher):
 
         elif(metric == 'last-change-all'):
             d = work_df[['filepath', 'unique_author']].copy()
-            d.reset_index(evel=d.index.names, inplace=True)
+            d.reset_index(level=d.index.names, inplace=True)
 
             display(d.head(5))
 
