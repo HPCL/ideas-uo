@@ -801,7 +801,7 @@ class Patterns(Fetcher):
             #d.sort_values(by=['dev_knowledge'], ascending=False, inplace=True)
             d.reset_index(level=d.index.names, inplace=True)
 
-            display(dev_knowledge_df.head(5))            
+            display(d.head(5))            
 
         elif(metric == 'non-consec-changes'):
             pass
