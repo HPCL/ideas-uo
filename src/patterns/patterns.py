@@ -780,17 +780,12 @@ class Patterns(Fetcher):
             column_names = ["filepath", "unique_author", "datetime", "dev_knowledge"]
             dev_knowledge_df = pd.DataFrame(columns = column_names)
 
-            it = 0
             path = d['filepath'][0]
             datetime = d['datetime'][0]
             author = d['unique_author'][0]
             for ind in range(1,len(d.index)):
                 if(path != d['filepath'][ind]):
-                    dev_knowledge_df.at['filepath', it] = path
-                    dev_knowledge_df.at['unique_author', it] = author
-                    dev_knowledge_df.at['datetime', it] = datetime
-                    dev_knowledge_df.at['dev_knowledge', it] = 1
-                    it+=1
+                    dev_knowledge_df.loc[len(dev_knowledge_df.index)] = [path, author, datetime, 1]
                     path = d['filepath'][ind]
                     datetime = d['datetime'][ind]
                     author = d['unique_author'][ind]
