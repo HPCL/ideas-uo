@@ -775,7 +775,7 @@ class Patterns(Fetcher):
             d.sort_values(by=['filepath'], inplace=True)
             d.reset_index(level=d.index.names, inplace=True)
 
-            display(d.head(10))
+            #display(d.head(10))
 
             column_names = ["filepath", "unique_author", "datetime", "dev_knowledge"]
             dev_knowledge_df = pd.DataFrame(columns = column_names)
@@ -796,6 +796,12 @@ class Patterns(Fetcher):
                     author = d['unique_author'][ind]
 
             display(dev_knowledge_df.head(5))
+
+            d = pd.DataFrame(dev_knowledge_df.groupby(['unique_author'])['dev_knowledge'].sum())
+            #d.sort_values(by=['dev_knowledge'], ascending=False, inplace=True)
+            d.reset_index(level=d.index.names, inplace=True)
+
+            display(dev_knowledge_df.head(5))            
 
         elif(metric == 'non-consec-changes'):
             pass
