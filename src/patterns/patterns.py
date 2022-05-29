@@ -771,8 +771,13 @@ class Patterns(Fetcher):
                     secon_devs.append(authors_commits_df['unique_author'][ind])
 
         elif(metric == 'last-change-all'):
-            display(work_df.head(10))
             d = work_df[['filepath', 'unique_author', 'datetime']].copy()
+            d.reset_index(level=d.index.names, inplace=True)
+
+            display(d.head(5))
+
+            d.sort_values(by=['filepath'], inplace=True)
+
             display(d.head(5))
 
         elif(metric == 'non-consec-changes'):
