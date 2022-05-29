@@ -791,9 +791,9 @@ class Patterns(Fetcher):
                     author = d['unique_author'][ind]
                     ind+=1
                 if datetime < d['datetime'][ind]:
-                    path, datetime, author = d['filepath', 'datetime', 'unique_author'][ind]
-                    # datetime = d['datetime'][ind]
-                    # author = d['unique_author'][ind]
+                    path = d['filepath'][ind]
+                    datetime = d['datetime'][ind]
+                    author = d['unique_author'][ind]
 
             display(dev_knowledge_df.head(5))
 
