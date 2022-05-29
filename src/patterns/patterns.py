@@ -715,11 +715,19 @@ class Patterns(Fetcher):
         prim_devs = []
         secon_devs = []
         primary_dev = sec_devs = 0
+        tot_developers = 0
+
+        #*1
+        d = pd.DataFrame(work_df.groupby(['filepath', 'unique_author'])[locc_metric].sum())
+        d["dev_knowledge"] = 0
+        d.reset_index(level=d.index.names, inplace=True)
+        #*2
+        authors_commits_df = pd.DataFrame(d.groupby(['unique_author'])[locc_metric].sum())
+        authors_commits_df.reset_index(level=authors_commits_df.index.names, inplace=True)
+        tot_developers = len(authors_commits_df.index)
 
         if(metric == 'mul-changes-equal'):
-            d = pd.DataFrame(work_df.groupby(['filepath', 'unique_author'])[locc_metric].sum())
-            d["dev_knowledge"] = 0
-            d.reset_index(level=d.index.names, inplace=True)
+            #copied *1
             tot_commits_per_file = pd.DataFrame(d.groupby(['filepath'])[locc_metric].sum())
             tot_commits_per_file.reset_index(level=tot_commits_per_file.index.names, inplace=True)
 
@@ -739,9 +747,7 @@ class Patterns(Fetcher):
             # display(d.head(5))
             # display(tot_commits_per_file.head(5))
 
-            authors_commits_df = pd.DataFrame(d.groupby(['unique_author'])[locc_metric].sum())
-            authors_commits_df.reset_index(level=authors_commits_df.index.names, inplace=True)
-            tot_developers = len(authors_commits_df.index)
+            #copied *2
             primary_X = 1/tot_developers
             secondary_X = primary_X/2
 
@@ -766,9 +772,8 @@ class Patterns(Fetcher):
 
         elif(metric == 'last-change-all'):
             display(work_df.head(10))
-            # d = pd.DataFrame(work_df.groupby(['filepath', 'unique_author'])[locc_metric].sum())
-            # d["dev_knowledge"] = 0
-            # d.reset_index(level=d.index.names, inplace=True)
+            d = work_df[['filepath', 'unique_author', 'datetime']].copy()
+            display(d.head(5))
 
         elif(metric == 'non-consec-changes'):
             pass
