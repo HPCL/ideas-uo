@@ -798,7 +798,7 @@ class Patterns(Fetcher):
             #display(dev_knowledge_df.head(5))
 
             d = pd.DataFrame(dev_knowledge_df.groupby(['unique_author'])['dev_knowledge'].sum())
-            d["dev_knowledge"] = d["dev_knowledge"].apply(lambda a: a / 100)
+            d["dev_knowledge"] = d["dev_knowledge"].apply(lambda a: a / 1000)
             d.sort_values(by=['dev_knowledge'], ascending=False, inplace=True)
             d.reset_index(level=d.index.names, inplace=True)
 
