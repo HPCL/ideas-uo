@@ -725,6 +725,8 @@ class Patterns(Fetcher):
         authors_commits_df = pd.DataFrame(d.groupby(['unique_author'])[locc_metric].sum())
         authors_commits_df.reset_index(level=authors_commits_df.index.names, inplace=True)
         tot_developers = len(authors_commits_df.index)
+        primary_X = 1/tot_developers
+        secondary_X = primary_X/2
 
         if(metric == 'mul-changes-equal'):
             #copied *1
@@ -748,8 +750,6 @@ class Patterns(Fetcher):
             # display(tot_commits_per_file.head(5))
 
             #copied *2
-            primary_X = 1/tot_developers
-            secondary_X = primary_X/2
 
             authors_commits_df["dev_knowledge"] = 0
             tot_commits = authors_commits_df[locc_metric].sum()
@@ -802,7 +802,16 @@ class Patterns(Fetcher):
             d.sort_values(by=['dev_knowledge'], ascending=False, inplace=True)
             d.reset_index(level=d.index.names, inplace=True)
 
-            display(d.head(5))            
+            display(d.head(5))
+
+            for ind in d.index:
+                dev_knowledge = d['dev_knowledge'][ind]
+                if dev_knowledge >= primary_X:
+                    primary_dev += 1
+                    prim_devs.append(d['unique_author'][ind])
+                elif dev_knowledge<primary_X and dev_knowledge>=secondary_X:
+                    sec_devs += 1
+                    secon_devs.append(d['unique_author'][ind])
 
         elif(metric == 'non-consec-changes'):
             pass
