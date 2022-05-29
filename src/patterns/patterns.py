@@ -781,11 +781,14 @@ class Patterns(Fetcher):
             dev_knowledge_df = pd.DataFrame(columns = column_names)
 
             it = 0
+            print("error here2")
             path = d['filepath'][0]
             datetime = d['datetime'][0]
             author = d['unique_author'][0]
+            print("error here")
             for ind in range(1,len(d.index)):
                 if(path != d['filepath'][ind]):
+                    print("error here1")
                     dev_knowledge_df.iat[it, dev_knowledge_df.columns.get_loc('filepath')] = path
                     dev_knowledge_df.iat[it, dev_knowledge_df.columns.get_loc('unique_author')] = author
                     dev_knowledge_df.iat[it, dev_knowledge_df.columns.get_loc('datetime')] = datetime
