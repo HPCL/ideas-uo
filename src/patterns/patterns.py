@@ -800,7 +800,7 @@ class Patterns(Fetcher):
                     datetime = d['datetime'][ind]
                     author = d['unique_author'][ind]
 
-            display(dev_knowledge_df(5))
+            display(dev_knowledge_df.head(5))
 
         elif(metric == 'non-consec-changes'):
             pass
