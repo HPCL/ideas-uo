@@ -784,7 +784,7 @@ class Patterns(Fetcher):
             path = d['filepath'][0]
             datetime = d['datetime'][0]
             author = d['unique_author'][0]
-            for ind in range(1,d.index):
+            for ind in range(1,len(d.index)):
                 if(path != d['filepath'][ind]):
                     dev_knowledge_df.iat[it, dev_knowledge_df.columns.get_loc('filepath')] = path
                     dev_knowledge_df.iat[it, dev_knowledge_df.columns.get_loc('unique_author')] = author
