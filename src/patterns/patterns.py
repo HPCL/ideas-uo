@@ -771,7 +771,7 @@ class Patterns(Fetcher):
                     secon_devs.append(authors_commits_df['unique_author'][ind])
 
         elif(metric == 'last-change-all'):
-            d = work_df[['filepath', 'unique_author', 'datetime']].copy()
+            d = work_df[['filepath', 'unique_author']].copy()
             d.reset_index(drop=True)
 
             display(d.head(5))
