@@ -775,7 +775,7 @@ class Patterns(Fetcher):
             d.sort_values(by=['filepath'], inplace=True)
             d.reset_index(level=d.index.names, inplace=True)
 
-            #display(d.head(5))
+            display(d.head(10))
 
             column_names = ["filepath", "unique_author", "datetime", "dev_knowledge"]
             dev_knowledge_df = pd.DataFrame(columns = column_names)
