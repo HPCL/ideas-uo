@@ -777,6 +777,31 @@ class Patterns(Fetcher):
 
             display(d.head(5))
 
+            column_names = ["filepath", "unique_author", "datetime", "dev_knowledge"]
+            dev_knowledge_df = pd.DataFrame(columns = column_names)
+
+            it = 0
+            path = d['filepath'][0]
+            datetime = d['datetime'][0]
+            author = d['unique_author'][0]
+            for ind in range(1,d.index):
+                if(path != d['filepath'][ind]):
+                    dev_knowledge_df.iat[it, dev_knowledge_df.columns.get_loc('filepath')] = path
+                    dev_knowledge_df.iat[it, dev_knowledge_df.columns.get_loc('unique_author')] = author
+                    dev_knowledge_df.iat[it, dev_knowledge_df.columns.get_loc('datetime')] = datetime
+                    dev_knowledge_df.iat[it, dev_knowledge_df.columns.get_loc('dev_knowledge')] = 1
+                    it+=1
+                    path = d['filepath'][ind]
+                    datetime = d['datetime'][ind]
+                    author = d['unique_author'][ind]
+                    ind+=1
+                if datetime < d['datetime'][ind]:
+                    path = d['filepath'][ind]
+                    datetime = d['datetime'][ind]
+                    author = d['unique_author'][ind]
+
+            display(dev_knowledge_df(5))
+
         elif(metric == 'non-consec-changes'):
             pass
 
