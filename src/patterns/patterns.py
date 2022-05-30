@@ -814,7 +814,7 @@ class Patterns(Fetcher):
                     secon_devs.append(d['unique_author'][ind])
 
         elif(metric == 'non-consec-changes'):
-            display(work_df
+            display(work_df)
 
         elif(metric == 'weightes-non-consec'):
             pass
