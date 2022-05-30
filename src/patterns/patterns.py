@@ -825,8 +825,8 @@ class Patterns(Fetcher):
                 next_index = ind + 1
                 while(next_index not in d.index):
                     next_index += 1
-                if(path == d['filepath'][ind+1] and author == d['unique_author'][ind+1]):
-                    d.drop(ind+1, inplace=True)
+                if(path == d['filepath'][next_index] and author == d['unique_author'][next_index]):
+                    d.drop(next_index, inplace=True)
 
             d.reset_index(drop=True, inplace=True)
             display(d.head(7))
