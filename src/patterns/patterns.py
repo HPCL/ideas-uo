@@ -814,14 +814,20 @@ class Patterns(Fetcher):
                     secon_devs.append(d['unique_author'][ind])
 
         elif(metric == 'non-consec-changes'):
-            d = work_df[['filepath', 'unique_author']].copy()
+            d = work_df[['filepath', 'unique_author', locc_metric]].copy()
             d.sort_values(by=['filepath', 'datetime'], inplace=True)
             d.reset_index(level=d.index.names, inplace=True)
-            display(d.head(3))
-            d.drop(0, inplace=True)
-            display(d.head(3))
-            d.reset_index(drop=True, inplace=True)
-            display(d.head(3))
+
+            display(d.head(5))
+            for ind in range(len(d.index) - 1):
+                path = d['filepath'][ind]
+                author = d['unique_author'][ind]
+                if(path == d['filepath'][ind+1] and author == d['unique_author'][ind+1]):
+                    d.drop(ind+1, inplace=True)
+                    d.reset_index(drop=True, inplace=True)
+
+            display(d.head(5))
+
 
         elif(metric == 'weighted-non-consec'):
             pass
