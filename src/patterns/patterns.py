@@ -818,7 +818,7 @@ class Patterns(Fetcher):
             d.sort_values(by=['filepath', 'datetime'], inplace=True)
             d.reset_index(level=d.index.names, inplace=True)
 
-            display(d.head(7))
+            display(d.head(10))
             for ind in range(len(d.index) - 1):
                 # while(ind not in d.index):
                 #     ind += 1
@@ -836,7 +836,7 @@ class Patterns(Fetcher):
                         d.iat[ind, d.columns.get_loc(locc_metric)] = 0
 
             # d.reset_index(drop=True, inplace=True)
-            display(d.head(7))
+            display(d.head(10))
 
 
         elif(metric == 'weighted-non-consec'):
