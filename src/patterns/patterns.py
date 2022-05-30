@@ -830,40 +830,42 @@ class Patterns(Fetcher):
                     else:
                         d.iat[ind, d.columns.get_loc(locc_metric)] = 0
 
-            display(d.head(5))
+            display(d.head(7))
 
             df = pd.DataFrame(d.groupby(['filepath', 'unique_author'])[locc_metric].sum())
             df["dev_knowledge"] = 0
             df.reset_index(level=df.index.names, inplace=True)
 
-            tot_commits_per_file = pd.DataFrame(df.groupby(['filepath'])[locc_metric].sum())
-            tot_commits_per_file.reset_index(level=tot_commits_per_file.index.names, inplace=True)
+            display(df.head(7))
 
-            it = 0              #iterator for tot_commits_per_file dataframe
-            for ind in df.index:
-                path = df['filepath'][ind]
-                author = df['unique_author'][ind]
-                d_commits = df[locc_metric][ind]
-                if(path == tot_commits_per_file['filepath'][it]):
-                    tot_commits = tot_commits_per_file[locc_metric][it]
-                    df.iat[ind, df.columns.get_loc('dev_knowledge')] = d_commits/tot_commits
-                else:
-                    it = it+1
-                    tot_commits = tot_commits_per_file[locc_metric][it]
-                    df.iat[ind, df.columns.get_loc('dev_knowledge')] = d_commits/tot_commits
+            # tot_commits_per_file = pd.DataFrame(df.groupby(['filepath'])[locc_metric].sum())
+            # tot_commits_per_file.reset_index(level=tot_commits_per_file.index.names, inplace=True)
 
-            df.sort_values(by=['dev_knowledge'], ascending=False, inplace=True)
+            # it = 0              #iterator for tot_commits_per_file dataframe
+            # for ind in df.index:
+            #     path = df['filepath'][ind]
+            #     author = df['unique_author'][ind]
+            #     d_commits = df[locc_metric][ind]
+            #     if(path == tot_commits_per_file['filepath'][it]):
+            #         tot_commits = tot_commits_per_file[locc_metric][it]
+            #         df.iat[ind, df.columns.get_loc('dev_knowledge')] = d_commits/tot_commits
+            #     else:
+            #         it = it+1
+            #         tot_commits = tot_commits_per_file[locc_metric][it]
+            #         df.iat[ind, df.columns.get_loc('dev_knowledge')] = d_commits/tot_commits
 
-            display(df.head(5))
+            # df.sort_values(by=['dev_knowledge'], ascending=False, inplace=True)
 
-            for ind in df.index:
-                dev_knowledge = df['dev_knowledge'][ind]
-                if dev_knowledge >= primary_X:
-                    primary_dev += 1
-                    prim_devs.append(df['unique_author'][ind])
-                elif dev_knowledge<primary_X and dev_knowledge>=secondary_X:
-                    sec_devs += 1
-                    secon_devs.append(df['unique_author'][ind])
+            # display(df.head(5))
+
+            # for ind in df.index:
+            #     dev_knowledge = df['dev_knowledge'][ind]
+            #     if dev_knowledge >= primary_X:
+            #         primary_dev += 1
+            #         prim_devs.append(df['unique_author'][ind])
+            #     elif dev_knowledge<primary_X and dev_knowledge>=secondary_X:
+            #         sec_devs += 1
+            #         secon_devs.append(df['unique_author'][ind])
 
         elif(metric == 'weighted-non-consec'):
             pass
