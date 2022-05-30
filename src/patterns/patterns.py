@@ -850,18 +850,24 @@ class Patterns(Fetcher):
                 tot_commits = tot_commits_per_file[locc_metric][path]
                 df.iat[ind, df.columns.get_loc('dev_knowledge')] = d_commits/tot_commits
 
-            df.sort_values(by=['dev_knowledge'], ascending=False, inplace=True)
+            authors_commits_df["dev_knowledge"] = 0
+            tot_commits = authors_commits_df[locc_metric].sum()
+            for ind in authors_commits_df.index:
+                d_commits = authors_commits_df[locc_metric][ind]
+                authors_commits_df.iat[ind, authors_commits_df.columns.get_loc('dev_knowledge')] = d_commits/tot_commits
 
-            display(df.head(7))
+            authors_commits_df.sort_values(by=['dev_knowledge'], ascending=False, inplace=True)
+            
+            display(authors_commits_df.head(5))
 
-            for ind in df.index:
-                dev_knowledge = df['dev_knowledge'][ind]
+            for ind in authors_commits_df.index:
+                dev_knowledge = authors_commits_df['dev_knowledge'][ind]
                 if dev_knowledge >= primary_X:
                     primary_dev += 1
-                    prim_devs.append(df['unique_author'][ind])
+                    prim_devs.append(authors_commits_df['unique_author'][ind])
                 elif dev_knowledge<primary_X and dev_knowledge>=secondary_X:
                     sec_devs += 1
-                    secon_devs.append(df['unique_author'][ind])
+                    secon_devs.append(authors_commits_df['unique_author'][ind])
 
         elif(metric == 'weighted-non-consec'):
             pass
