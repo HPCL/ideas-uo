@@ -818,7 +818,7 @@ class Patterns(Fetcher):
             d.sort_values(by=['filepath', 'datetime'], inplace=True)
             d.reset_index(level=d.index.names, inplace=True)
             display(d.head(3))
-            d.drop(0)
+            d.drop(0, inplace=True)
             display(d.head(3))
             d.reset_index(drop=True, inplace=True)
             display(d.head(3))
