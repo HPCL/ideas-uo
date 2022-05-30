@@ -764,15 +764,6 @@ class Patterns(Fetcher):
             #display(authors_commits_df.head(5))
             results = authors_commits_df
 
-            for ind in authors_commits_df.index:
-                dev_knowledge = authors_commits_df['dev_knowledge'][ind]
-                if dev_knowledge >= primary_X:
-                    primary_dev += 1
-                    prim_devs.append(authors_commits_df['unique_author'][ind])
-                elif dev_knowledge<primary_X and dev_knowledge>=secondary_X:
-                    sec_devs += 1
-                    secon_devs.append(authors_commits_df['unique_author'][ind])
-
         elif(metric == 'last-change-all'):
             d = work_df[['filepath', 'unique_author']].copy()
             d.sort_values(by=['filepath'], inplace=True)
@@ -807,15 +798,6 @@ class Patterns(Fetcher):
 
             #display(d.head(5))
             results = d
-
-            for ind in d.index:
-                dev_knowledge = d['dev_knowledge'][ind]
-                if dev_knowledge >= primary_X:
-                    primary_dev += 1
-                    prim_devs.append(d['unique_author'][ind])
-                elif dev_knowledge<primary_X and dev_knowledge>=secondary_X:
-                    sec_devs += 1
-                    secon_devs.append(d['unique_author'][ind])
 
         elif(metric == 'non-consec-changes'):
             d = work_df[['filepath', 'unique_author', locc_metric]].copy()
@@ -874,15 +856,6 @@ class Patterns(Fetcher):
             #display(project_knowledge.head(5))
             results = project_knowledge
 
-            for ind in project_knowledge.index:
-                dev_knowledge = project_knowledge['dev_knowledge'][ind]
-                if dev_knowledge >= primary_X:
-                    primary_dev += 1
-                    prim_devs.append(project_knowledge['unique_author'][ind])
-                elif dev_knowledge<primary_X and dev_knowledge>=secondary_X:
-                    sec_devs += 1
-                    secon_devs.append(project_knowledge['unique_author'][ind])
-
         elif(metric == 'weighted-non-consec'):
             d = work_df[['filepath', 'unique_author', locc_metric]].copy()
             d.sort_values(by=['filepath', 'datetime'], inplace=True)
@@ -937,14 +910,14 @@ class Patterns(Fetcher):
             #display(project_knowledge.head(5))
             results = project_knowledge
 
-            for ind in project_knowledge.index:
-                dev_knowledge = project_knowledge['dev_knowledge'][ind]
-                if dev_knowledge >= primary_X:
-                    primary_dev += 1
-                    prim_devs.append(project_knowledge['unique_author'][ind])
-                elif dev_knowledge<primary_X and dev_knowledge>=secondary_X:
-                    sec_devs += 1
-                    secon_devs.append(project_knowledge['unique_author'][ind])
+        for ind in results.index:
+            dev_knowledge = results['dev_knowledge'][ind]
+            if dev_knowledge >= primary_X:
+                primary_dev += 1
+                prim_devs.append(results['unique_author'][ind])
+            elif dev_knowledge<primary_X and dev_knowledge>=secondary_X:
+                sec_devs += 1
+                secon_devs.append(results['unique_author'][ind])
 
         bus_factor = primary_dev + sec_devs
 
