@@ -830,16 +830,16 @@ class Patterns(Fetcher):
                     else:
                         d.iat[ind, d.columns.get_loc(locc_metric)] = 0
 
-            display(d.head(7))
+            #display(d.head(7))
 
             df = pd.DataFrame(d.groupby(['filepath', 'unique_author'])[locc_metric].sum())
             df["dev_knowledge"] = 0
             df.reset_index(level=df.index.names, inplace=True)
-
             display(df.head(7))
 
-            # tot_commits_per_file = pd.DataFrame(df.groupby(['filepath'])[locc_metric].sum())
-            # tot_commits_per_file.reset_index(level=tot_commits_per_file.index.names, inplace=True)
+            tot_commits_per_file = pd.DataFrame(df.groupby(['filepath'])[locc_metric].sum())
+            tot_commits_per_file.set_index('filepath', inplace=True)
+            display(tot_commits_per_file(5))
 
             # it = 0              #iterator for tot_commits_per_file dataframe
             # for ind in df.index:
