@@ -820,6 +820,8 @@ class Patterns(Fetcher):
 
             display(d.head(7))
             for ind in range(len(d.index) - 1):
+                while(ind not in d.index):
+                    ind += 1
                 path = d['filepath'][ind]
                 author = d['unique_author'][ind]
                 next_index = ind + 1
