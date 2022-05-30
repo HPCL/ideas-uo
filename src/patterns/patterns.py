@@ -728,6 +728,8 @@ class Patterns(Fetcher):
         primary_X = 1/tot_developers
         secondary_X = primary_X/2
 
+        results = authors_commits_df
+
         if(metric == 'mul-changes-equal'):
             #copied *1
             tot_commits_per_file = pd.DataFrame(d.groupby(['filepath'])[locc_metric].sum())
@@ -759,7 +761,8 @@ class Patterns(Fetcher):
             
             authors_commits_df.sort_values(by=['dev_knowledge'], ascending=False, inplace=True)
             
-            display(authors_commits_df.head(5))
+            #display(authors_commits_df.head(5))
+            results = authors_commits_df
 
             for ind in authors_commits_df.index:
                 dev_knowledge = authors_commits_df['dev_knowledge'][ind]
@@ -802,7 +805,8 @@ class Patterns(Fetcher):
             d.sort_values(by=['dev_knowledge'], ascending=False, inplace=True)
             d.reset_index(level=d.index.names, inplace=True)
 
-            display(d.head(5))
+            #display(d.head(5))
+            results = d
 
             for ind in d.index:
                 dev_knowledge = d['dev_knowledge'][ind]
@@ -853,7 +857,7 @@ class Patterns(Fetcher):
                 d_commits = df[locc_metric][ind]
                 tot_commits = tot_commits_per_file[locc_metric][path]
                 df.iat[ind, df.columns.get_loc('dev_knowledge')] = d_commits/tot_commits
-            display(df.head(5))
+            #display(df.head(5))
 
             #knowledge of each developer on the whole project
             project_knowledge = pd.DataFrame(d.groupby(['unique_author'])[locc_metric].sum())
@@ -867,7 +871,8 @@ class Patterns(Fetcher):
             
             project_knowledge.sort_values(by=['dev_knowledge'], ascending=False, inplace=True)
             del project_knowledge[locc_metric]
-            display(project_knowledge.head(5))
+            #display(project_knowledge.head(5))
+            results = project_knowledge
 
             for ind in project_knowledge.index:
                 dev_knowledge = project_knowledge['dev_knowledge'][ind]
@@ -929,7 +934,8 @@ class Patterns(Fetcher):
             
             project_knowledge.sort_values(by=['dev_knowledge'], ascending=False, inplace=True)
             del project_knowledge[locc_metric]
-            display(project_knowledge.head(5))
+            #display(project_knowledge.head(5))
+            results = project_knowledge
 
             for ind in project_knowledge.index:
                 dev_knowledge = project_knowledge['dev_knowledge'][ind]
@@ -942,4 +948,4 @@ class Patterns(Fetcher):
 
         bus_factor = primary_dev + sec_devs
 
-        return tot_developers, prim_devs, secon_devs, bus_factor
+        return tot_developers, prim_devs, secon_devs, bus_factor, results
