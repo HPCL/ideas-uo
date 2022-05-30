@@ -824,12 +824,16 @@ class Patterns(Fetcher):
                 #     ind += 1
                 path = d['filepath'][ind]
                 author = d['unique_author'][ind]
+                locc_val = d[locc_metric][ind]
                 next_index = ind + 1
             #     while(next_index not in d.index):
             #         next_index += 1
                 if(path == d['filepath'][next_index] and author == d['unique_author'][next_index]):
-                    # d.drop(next_index, inplace=True)
-                    d.iat[next_index, d.columns.get_loc(locc_metric)] = 0
+                    if locc_val >= d[locc_metric][next_index]:
+                        d.iat[next_index, d.columns.get_loc(locc_metric)] = locc_val
+                        d.iat[ind, d.columns.get_loc(locc_metric)] = 0
+                    else:
+                        d.iat[ind, d.columns.get_loc(locc_metric)] = 0
 
             # d.reset_index(drop=True, inplace=True)
             display(d.head(7))
