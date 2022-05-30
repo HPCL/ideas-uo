@@ -820,17 +820,17 @@ class Patterns(Fetcher):
 
             display(d.head(7))
             for ind in range(len(d.index) - 1):
-                while(ind not in d.index):
-                    ind += 1
-                path = d['filepath'][ind]
+                # while(ind not in d.index):
+                #     ind += 1
+                # path = d['filepath'][ind]
                 author = d['unique_author'][ind]
-                next_index = ind + 1
-                while(next_index not in d.index):
-                    next_index += 1
-                if(path == d['filepath'][next_index] and author == d['unique_author'][next_index]):
-                    d.drop(next_index, inplace=True)
+            #     next_index = ind + 1
+            #     while(next_index not in d.index):
+            #         next_index += 1
+            #     if(path == d['filepath'][next_index] and author == d['unique_author'][next_index]):
+            #         d.drop(next_index, inplace=True)
 
-            d.reset_index(drop=True, inplace=True)
+            # d.reset_index(drop=True, inplace=True)
             display(d.head(7))
 
 
