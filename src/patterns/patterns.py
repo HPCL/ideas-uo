@@ -759,7 +759,7 @@ class Patterns(Fetcher):
             
             authors_commits_df.sort_values(by=['dev_knowledge'], ascending=False, inplace=True)
             
-            # display(authors_commits_df.head(5))
+            display(authors_commits_df.head(5))
 
             for ind in authors_commits_df.index:
                 dev_knowledge = authors_commits_df['dev_knowledge'][ind]
@@ -814,7 +814,7 @@ class Patterns(Fetcher):
                     secon_devs.append(d['unique_author'][ind])
 
         elif(metric == 'non-consec-changes'):
-            pass
+            display(work_df.head(5))
 
         elif(metric == 'weightes-non-consec'):
             pass
