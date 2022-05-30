@@ -691,7 +691,6 @@ class Patterns(Fetcher):
 
         return sorted_hot_directories, stats_df
 
-
     def get_busfactor_data(self, locc_metric='change-size-cos', metric='mul-changes-equal', time_range=None, my_df=pd.DataFrame()):
         print("INFO: Creating developer matrix...")
 
