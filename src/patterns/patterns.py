@@ -846,11 +846,11 @@ class Patterns(Fetcher):
                 d_commits = df[locc_metric][ind]
                 if(path == tot_commits_per_file['filepath'][it]):
                     tot_commits = tot_commits_per_file[locc_metric][it]
-                    df.iat[ind, d.columns.get_loc('dev_knowledge')] = d_commits/tot_commits
+                    df.iat[ind, df.columns.get_loc('dev_knowledge')] = d_commits/tot_commits
                 else:
                     it = it+1
                     tot_commits = tot_commits_per_file[locc_metric][it]
-                    df.iat[ind, d.columns.get_loc('dev_knowledge')] = d_commits/tot_commits
+                    df.iat[ind, df.columns.get_loc('dev_knowledge')] = d_commits/tot_commits
 
             display(df.head(10))
 
