@@ -815,11 +815,9 @@ class Patterns(Fetcher):
 
         elif(metric == 'non-consec-changes'):
             d = work_df[['filepath', 'unique_author']].copy()
-            display(d.head(5))
-            d.sort_values(by=['unique_author', 'datetime'], inplace=True)
-            display(d.head(5))
+            d.sort_values(by=['unique_author', 'filepath', 'datetime'], inplace=True)
             d.reset_index(level=d.index.names, inplace=True)
-            display(d.head(5))
+            display(d.head(20))
 
         elif(metric == 'weighted-non-consec'):
             pass
