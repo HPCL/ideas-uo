@@ -831,18 +831,21 @@ class Patterns(Fetcher):
                     else:
                         d.iat[ind, d.columns.get_loc(locc_metric)] = 0
 
-            display(d.head(10))
+            #display(d.head(5))
 
+            #total commits of each author on each filepath
             df = pd.DataFrame(d.groupby(['filepath', 'unique_author'])[locc_metric].sum())
             df["dev_knowledge"] = 0
             df.reset_index(level=df.index.names, inplace=True)
-            display(df.head(10))
+            #display(df.head(5))
 
+            #total commits on the file by all authors collectively
             tot_commits_per_file = pd.DataFrame(df.groupby(['filepath'])[locc_metric].sum())
             tot_commits_per_file.reset_index(level=tot_commits_per_file.index.names, inplace=True)
             tot_commits_per_file.set_index('filepath', inplace=True)
-            display(tot_commits_per_file.head(5))
+            #display(tot_commits_per_file.head(5))
 
+            #calculating developer knowledge of each developer for each file
             it = 0              #iterator for tot_commits_per_file dataframe
             for ind in df.index:
                 path = df['filepath'][ind]
@@ -850,6 +853,28 @@ class Patterns(Fetcher):
                 d_commits = df[locc_metric][ind]
                 tot_commits = tot_commits_per_file[locc_metric][path]
                 df.iat[ind, df.columns.get_loc('dev_knowledge')] = d_commits/tot_commits
+            display(df.head(5))
+
+            project_knowledge = pd.DataFrame(d.groupby(['unique_author'])[locc_metric].sum())
+            project_knowledge.reset_index(level=project_knowledge.index.names, inplace=True)
+            project_knowledge["dev_knowledge"] = 0
+            tot_commits = project_knowledge[locc_metric].sum()
+
+            for ind in project_knowledge.index:
+                d_commits = project_knowledge[locc_metric][ind]
+                project_knowledge.iat[ind, project_knowledge.columns.get_loc('dev_knowledge')] = d_commits/tot_commits
+            
+            project_knowledge.sort_values(by=['dev_knowledge'], ascending=False, inplace=True)
+            display(project_knowledge.head(10))
+
+            for ind in project_knowledge.index:
+                dev_knowledge = project_knowledge['dev_knowledge'][ind]
+                if dev_knowledge >= primary_X:
+                    primary_dev += 1
+                    prim_devs.append(project_knowledge['unique_author'][ind])
+                elif dev_knowledge<primary_X and dev_knowledge>=secondary_X:
+                    sec_devs += 1
+                    secon_devs.append(project_knowledge['unique_author'][ind])
 
         elif(metric == 'weighted-non-consec'):
             pass
