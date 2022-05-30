@@ -824,7 +824,7 @@ class Patterns(Fetcher):
                 author = d['unique_author'][ind]
                 if(path == d['filepath'][ind+1] and author == d['unique_author'][ind+1]):
                     d.drop(ind+1, inplace=True)
-                    d.reset_index(drop=True, inplace=True)
+                    ind+=1
 
             display(d.head(5))
 
