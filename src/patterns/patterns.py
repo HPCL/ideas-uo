@@ -855,6 +855,7 @@ class Patterns(Fetcher):
                 df.iat[ind, df.columns.get_loc('dev_knowledge')] = d_commits/tot_commits
             display(df.head(5))
 
+            #knowledge of each developer on the whole project
             project_knowledge = pd.DataFrame(d.groupby(['unique_author'])[locc_metric].sum())
             project_knowledge.reset_index(level=project_knowledge.index.names, inplace=True)
             project_knowledge["dev_knowledge"] = 0
@@ -865,7 +866,8 @@ class Patterns(Fetcher):
                 project_knowledge.iat[ind, project_knowledge.columns.get_loc('dev_knowledge')] = d_commits/tot_commits
             
             project_knowledge.sort_values(by=['dev_knowledge'], ascending=False, inplace=True)
-            display(project_knowledge.head(10))
+            project_knowledge.reset_index(level=project_knowledge.index.names, inplace=True)
+            display(project_knowledge.head(5))
 
             for ind in project_knowledge.index:
                 dev_knowledge = project_knowledge['dev_knowledge'][ind]
