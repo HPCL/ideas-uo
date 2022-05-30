@@ -814,9 +814,9 @@ class Patterns(Fetcher):
                     secon_devs.append(d['unique_author'][ind])
 
         elif(metric == 'non-consec-changes'):
-            display(work_df.head(7))
+            #display(work_df.head(5))
             sorted_df = work_df.sort_values(by = ['unique_author', 'datetime'])
-            display(sorted_df.head(7))
+            display(sorted_df.head(5))
 
         elif(metric == 'weightes-non-consec'):
             pass
