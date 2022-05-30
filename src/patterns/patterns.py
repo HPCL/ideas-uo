@@ -818,6 +818,7 @@ class Patterns(Fetcher):
             d.sort_values(by=['filepath', 'datetime'], inplace=True)
             d.reset_index(level=d.index.names, inplace=True)
 
+            #eliminating consective commits and keeping the one with max locc_metric value
             for ind in range(len(d.index) - 1):
                 path = d['filepath'][ind]
                 author = d['unique_author'][ind]
@@ -830,17 +831,17 @@ class Patterns(Fetcher):
                     else:
                         d.iat[ind, d.columns.get_loc(locc_metric)] = 0
 
-            #display(d.head(7))
+            display(d.head(10))
 
             df = pd.DataFrame(d.groupby(['filepath', 'unique_author'])[locc_metric].sum())
             df["dev_knowledge"] = 0
             df.reset_index(level=df.index.names, inplace=True)
-            #display(df.head(7))
+            display(df.head(10))
 
             tot_commits_per_file = pd.DataFrame(df.groupby(['filepath'])[locc_metric].sum())
             tot_commits_per_file.reset_index(level=tot_commits_per_file.index.names, inplace=True)
             tot_commits_per_file.set_index('filepath', inplace=True)
-            #display(tot_commits_per_file.head(5))
+            display(tot_commits_per_file.head(5))
 
             it = 0              #iterator for tot_commits_per_file dataframe
             for ind in df.index:
@@ -849,25 +850,6 @@ class Patterns(Fetcher):
                 d_commits = df[locc_metric][ind]
                 tot_commits = tot_commits_per_file[locc_metric][path]
                 df.iat[ind, df.columns.get_loc('dev_knowledge')] = d_commits/tot_commits
-
-            authors_commits_df["dev_knowledge"] = 0
-            tot_commits = authors_commits_df[locc_metric].sum()
-            for ind in authors_commits_df.index:
-                d_commits = authors_commits_df[locc_metric][ind]
-                authors_commits_df.iat[ind, authors_commits_df.columns.get_loc('dev_knowledge')] = d_commits/tot_commits
-
-            authors_commits_df.sort_values(by=['dev_knowledge'], ascending=False, inplace=True)
-            
-            display(authors_commits_df.head(5))
-
-            for ind in authors_commits_df.index:
-                dev_knowledge = authors_commits_df['dev_knowledge'][ind]
-                if dev_knowledge >= primary_X:
-                    primary_dev += 1
-                    prim_devs.append(authors_commits_df['unique_author'][ind])
-                elif dev_knowledge<primary_X and dev_knowledge>=secondary_X:
-                    sec_devs += 1
-                    secon_devs.append(authors_commits_df['unique_author'][ind])
 
         elif(metric == 'weighted-non-consec'):
             pass
