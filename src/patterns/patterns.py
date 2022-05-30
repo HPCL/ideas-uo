@@ -887,7 +887,7 @@ class Patterns(Fetcher):
             weight = 1
             for ind in range(len(d.index) - 1):
                 path = d['filepath'][ind]
-                locc_val = d[locc_metric]
+                locc_val = d[locc_metric][ind]
                 d.iat[ind, d.columns.get_loc(locc_metric)] = locc_val*weight
                 next_index = ind + 1
                 if(path == d['filepath'][next_index]):
