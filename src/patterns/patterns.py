@@ -866,7 +866,6 @@ class Patterns(Fetcher):
                 project_knowledge.iat[ind, project_knowledge.columns.get_loc('dev_knowledge')] = d_commits/tot_commits
             
             project_knowledge.sort_values(by=['dev_knowledge'], ascending=False, inplace=True)
-            project_knowledge.reset_index(level=project_knowledge.index.names, inplace=True)
             display(project_knowledge.head(5))
 
             for ind in project_knowledge.index:
@@ -879,7 +878,23 @@ class Patterns(Fetcher):
                     secon_devs.append(project_knowledge['unique_author'][ind])
 
         elif(metric == 'weighted-non-consec'):
-            pass
+            d = work_df[['filepath', 'unique_author', locc_metric]].copy()
+            d.sort_values(by=['filepath', 'datetime'], inplace=True)
+            d.reset_index(level=d.index.names, inplace=True)
+            display(d.head(7))
+
+            #multiplying by weight to locc_metric for a file depending upon order
+            weight = 1
+            for ind in range(len(d.index) - 1):
+                path = d['filepath'][ind]
+                locc_val = d[locc_metric]
+                d.iat[ind, d.columns.get_loc(locc_metric)] = locc_val*weight
+                next_index = ind + 1
+                if(path == d['filepath'][next_index]):
+                    weight += 1
+                else:
+                    weight = 1
+            display(d.head(7))
 
         bus_factor = primary_dev + sec_devs
 
