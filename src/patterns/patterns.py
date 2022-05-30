@@ -816,6 +816,7 @@ class Patterns(Fetcher):
         elif(metric == 'non-consec-changes'):
             d = work_df[['filepath', 'unique_author', locc_metric]].copy()
             d.sort_values(by=['filepath', 'datetime'], inplace=True)
+            d["dev_knowledge"] = 0
             d.reset_index(level=d.index.names, inplace=True)
 
             for ind in range(len(d.index) - 1):
@@ -832,9 +833,27 @@ class Patterns(Fetcher):
 
             display(d.head(10))
 
-            tot_commits_df = pd.DataFrame(d.groupby(['filepath', 'unique_author'])[locc_metric].sum())
+            tot_commits_per_file = pd.DataFrame(d.groupby(['filepath'])[locc_metric].sum())
+            tot_commits_per_file.reset_index(level=tot_commits_per_file.index.names, inplace=True)
 
-            display(tot_commits_df.head(10))
+            it = 0              #iterator for tot_commits_per_file dataframe
+            for ind in d.index:
+                path = d['filepath'][ind]
+                author = d['unique_author'][ind]
+                d_commits = d[locc_metric][ind]
+                if(path == tot_commits_per_file['filepath'][it]):
+                    tot_commits = tot_commits_per_file[locc_metric][it]
+                    d.iat[ind, d.columns.get_loc('dev_knowledge')] = d_commits/tot_commits
+                else:
+                    it = it+1
+                    tot_commits = tot_commits_per_file[locc_metric][it]
+                    d.iat[ind, d.columns.get_loc('dev_knowledge')] = d_commits/tot_commits
+
+            # tot_commits_df = pd.DataFrame(d.groupby(['filepath', 'unique_author'])[locc_metric].sum())
+            # tot_commits_df["dev_knowledge"] = 0
+            # tot_commits_df.reset_index(level=tot_commits_df.index.names, inplace=True)
+
+            display(d.head(10))
 
         elif(metric == 'weighted-non-consec'):
             pass
