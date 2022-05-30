@@ -818,15 +818,18 @@ class Patterns(Fetcher):
             d.sort_values(by=['filepath', 'datetime'], inplace=True)
             d.reset_index(level=d.index.names, inplace=True)
 
-            display(d.head(5))
+            display(d.head(7))
             for ind in range(len(d.index) - 1):
                 path = d['filepath'][ind]
                 author = d['unique_author'][ind]
+                next_index = ind + 1
+                while(next_index not in d.index):
+                    next_index += 1
                 if(path == d['filepath'][ind+1] and author == d['unique_author'][ind+1]):
                     d.drop(ind+1, inplace=True)
-                    ind+=1
 
-            display(d.head(5))
+            d.reset_index(drop=True, inplace=True)
+            display(d.head(7))
 
 
         elif(metric == 'weighted-non-consec'):
