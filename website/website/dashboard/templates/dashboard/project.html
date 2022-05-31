@@ -2,8 +2,6 @@
 {% load static %}
 
 {% block content %}
-<div id="home" class="main" style="padding:50px 50px 0px 50px;">
-
     <h2>Project page for <i>{{project.name}}</i></h2>
     <i>Last updated: {{project.last_updated|date:'Y-m-d'}} {{project.last_updated|time:'h:i a'}}</i>
 
@@ -32,7 +30,11 @@
 
             <div class="row" style="margin-top:6px;">
                 <div class="col-sm-3"><u>Lines of Code</u>:</div> 
-                <div class="col-sm-9">{{loc}}</div>
+                <div class="col-sm-9">
+                    Python: {{pythonloc}}<br/>
+                    C/C++: {{cloc}}<br/>
+                    Fortran: {{fortranloc}}<br/>
+                </div>
             </div>
 
             <div class="row" style="margin-top:6px;">
@@ -105,8 +107,6 @@
     
     <br/>
     <br/>
-</div>
-
 {% endblock content %}
 
 

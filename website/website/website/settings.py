@@ -151,3 +151,4 @@ SESSION_COOKIE_SECURE = True
 # https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/#csrf-cookie-secure
 CSRF_COOKIE_SECURE = True
 
+LOGIN_REDIRECT_URL = 'index'
