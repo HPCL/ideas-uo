@@ -12,8 +12,8 @@ import pandas as pd
 import re
 
 import sys
-sys.path.insert(1, '/shared/soft/ideas_db/ideas-uo/src/gitutils')
-from github_api import GitHubAPIClient
+sys.path.insert(1, '/shared/soft/ideas_db/ideas-uo/src')
+from gitutils.github_api import GitHubAPIClient
 
 from database.models import Project, Commit, Diff, Issue, PullRequest, PullRequestIssue, Comment, EventPayload
 
@@ -61,8 +61,11 @@ def project(request, *args, **kwargs):
     issues = sorted(issues, key=lambda d: d.number, reverse=True)
 
 
-    loc = countlines(r'../ideas-uo/'+project.name)
+    pythonloc = countlinespython(r'../ideas-uo/'+project.name)
+    fortranloc = countlinesfortran(r'../ideas-uo/'+project.name)
+    cloc = countlinesc(r'../ideas-uo/'+project.name)
     files = countfiles(r'../ideas-uo/'+project.name)
+
 
     '''for thing in os.listdir(start):
         thing = os.path.join(start, thing)
@@ -78,7 +81,7 @@ def project(request, *args, **kwargs):
 
 
 
-    context = {'project':project,'prs':prs, 'commits':commits, 'issues':issues, 'loc':loc, 'files':files, 'file':''.join(lines).replace('\\','\\\\').replace('\n', '\\n').replace('\'','\\\'')}
+    context = {'project':project,'prs':prs, 'commits':commits, 'issues':issues, 'pythonloc':pythonloc, 'fortranloc':fortranloc, 'cloc':cloc, 'files':files, 'file':''.join(lines).replace('\\','\\\\').replace('\n', '\\n').replace('\'','\\\'')}
 
     return HttpResponse(template.render(context, request))
 
@@ -273,7 +276,8 @@ def diffCommitData(request):
     
     resultdata = {
         'diffcommits':diffcommits,
-        'prcommits':prcommits
+        'prcommits':prcommits,
+        'source_url':pr.project.source_url.slice(0,-4)
     }
 
     return HttpResponse(
@@ -500,6 +504,61 @@ def countlines(start, lines=0, header=True, begin_start=None):
 
     return lines
 
+
+def countlinespython(start, lines=0, header=True, begin_start=None):
+
+    for thing in os.listdir(start):
+        thing = os.path.join(start, thing)
+        if os.path.isfile(thing):
+            if thing.endswith('.py'):
+                with open(thing, 'r') as f:
+                    newlines = f.readlines()
+                    newlines = len(newlines)
+                    lines += newlines
+
+    for thing in os.listdir(start):
+        thing = os.path.join(start, thing)
+        if os.path.isdir(thing):
+            lines = countlines(thing, lines, header=False, begin_start=start)
+
+    return lines
+
+
+def countlinesfortran(start, lines=0, header=True, begin_start=None):
+
+    for thing in os.listdir(start):
+        thing = os.path.join(start, thing)
+        if os.path.isfile(thing):
+            if thing.endswith('.F90'):
+                with open(thing, 'r') as f:
+                    newlines = f.readlines()
+                    newlines = len(newlines)
+                    lines += newlines
+
+    for thing in os.listdir(start):
+        thing = os.path.join(start, thing)
+        if os.path.isdir(thing):
+            lines = countlines(thing, lines, header=False, begin_start=start)
+
+    return lines
+
+def countlinesc(start, lines=0, header=True, begin_start=None):
+
+    for thing in os.listdir(start):
+        thing = os.path.join(start, thing)
+        if os.path.isfile(thing):
+            if thing.endswith('.c') or thing.endswith('.h') or thing.endswith('.cpp'):
+                with open(thing, 'r') as f:
+                    newlines = f.readlines()
+                    newlines = len(newlines)
+                    lines += newlines
+
+    for thing in os.listdir(start):
+        thing = os.path.join(start, thing)
+        if os.path.isdir(thing):
+            lines = countlines(thing, lines, header=False, begin_start=start)
+
+    return lines
 
 def countfiles(start, files=0, header=True, begin_start=None):
 

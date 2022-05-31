@@ -1,11 +1,9 @@
-# Website __development__ setup instructions
+# Website setup
 
-## Setting the python environment
-
-### Create a python virtual environment
+1. Create a python virtual environment
 `python3 -m venv env`
 
-### Activate it
+2. Activate it
 
 For Windows:
 `env\Scripts\activate.bat`
@@ -13,11 +11,10 @@ For Windows:
 For Unix or MacOs:
 `source env/bin/activate`
 
-## Installing dependencies
+3. Install python dependencies
 
 `pip install -r requirements.txt`
 
-## Run the development server
+4. Run the development server
 
-within the `./website` folder run: `python manage.py runserver`
-
+Within the `./website` folder run: `python manage.py runserver`
