@@ -47,5 +47,10 @@
     </table>
 </div>
 
-<script src="{% static 'js/branches.bundle.js' %}"></script>
 {% enblock content %}
+
+
+{% block script %}
+    <script src="{% static 'js/branches.js' %}"></script>
+{% endblock script %}
+    

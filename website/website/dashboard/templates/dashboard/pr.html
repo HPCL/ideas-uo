@@ -34,7 +34,7 @@
                     <div class="col-sm-11">{{pr.created_at}}</div>
                 </div>
                 <div class="row" style="margin-top:6px;">
-                    <div class="col-sm-1" style=""><u>Desc</u>: </div>
+                    <div class="col-sm-1"><u>Desc</u>: </div>
                     <div class="col-sm-11"><p style="white-space:pre-wrap;">{{pr.description}}</p></div>
                 </div>
                 <div class="row" style="margin-top:6px;">
@@ -469,7 +469,7 @@
 
             <div class="" style="border:1px solid #ccc; margin-bottom:5px;">
 
-                <textarea id="dochelper" style=""></textarea>
+                <textarea id="dochelper"></textarea>
             </div>
             <div class="modal-footer">
             <button id="patchbutton" class="btn btn-primary" onclick="patchFile();">
@@ -481,5 +481,9 @@
     </div>
 </div>
 
-<script src="{% static 'js/branches.bundle.js' %}"></script>
 {% endblock content %}
+
+
+{% block script %}
+<script src="{% static 'js/branches.js' %}"></script>
+{% endblock script %}

@@ -1,5 +1,3 @@
-import $ from 'jquery';
-
 console.log("javascript is working...");
 
 $.ajax({
