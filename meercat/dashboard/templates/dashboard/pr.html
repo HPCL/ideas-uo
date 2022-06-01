@@ -1,4 +1,4 @@
-{% extends 'dashboard/base.html %}
+{% extends 'dashboard/base.html' %}
 {% load static %}
 {% block content %}
 <h2>Pull Request Assistant</h2><br/>
@@ -482,5 +482,6 @@
 
 
 {% block script %}
+<script src="{% static 'js/pr.js' %}"></script>
 <script src="{% static 'js/branches.js' %}"></script>
 {% endblock script %}

@@ -61,24 +61,16 @@ def project(request, *args, **kwargs):
     issues = sorted(issues, key=lambda d: d.number, reverse=True)
 
 
-    pythonloc = countlinespython(r'../ideas-uo/'+project.name)
-    fortranloc = countlinesfortran(r'../ideas-uo/'+project.name)
-    cloc = countlinesc(r'../ideas-uo/'+project.name)
-    files = countfiles(r'../ideas-uo/'+project.name)
+    pythonloc = countlinespython(r'../'+project.name)
+    fortranloc = countlinesfortran(r'../'+project.name)
+    cloc = countlinesc(r'../'+project.name)
+    files = countfiles(r'../'+project.name)
 
 
-    '''for thing in os.listdir(start):
-        thing = os.path.join(start, thing)
-        if os.path.isfile(thing):
-            if thing.endswith('.py'):
-                with open(thing, 'r') as f:'''
-
-    #config.read('../ideas-uo/credentials.ini')
-
-    with open('../ideas-uo/anl_test_repo/folder1/arithmetic.py', 'r') as f:
+    #TODO: should be able to remove this
+    with open('../anl_test_repo/folder1/arithmetic.py', 'r') as f:
         lines = f.readlines()
         f.close()
-
 
 
     context = {'project':project,'prs':prs, 'commits':commits, 'issues':issues, 'pythonloc':pythonloc, 'fortranloc':fortranloc, 'cloc':cloc, 'files':files, 'file':''.join(lines).replace('\\','\\\\').replace('\n', '\\n').replace('\'','\\\'')}
@@ -169,7 +161,7 @@ def refreshProject(request):
     username = settings.DATABASES['default']['USER']
     password = settings.DATABASES['default']['PASSWORD']
 
-    cmd = f'cd ../ideas-uo ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} 30'
+    cmd = f'cd .. ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} 30'
     os.system(cmd)
     result = subprocess.check_output(cmd, shell=True)
     #print(result)
@@ -208,23 +200,23 @@ def createPatch(request):
     #TODO pull name from request and project from pr id
 
     #with open('../ideas-uo/anl_test_repo/folder1/arithmetic.py', 'w') as f:
-    with open('../ideas-uo/'+pr.project.name+'/'+filename, 'w') as f:
+    with open('../'+pr.project.name+'/'+filename, 'w') as f:
         f.write(request.POST.get('filecontents'))
         f.close()
     
     #cmd = f'cd ../ideas-uo/anl_test_repo ; git diff folder1/arithmetic.py > arithmetic.py.patch'
-    cmd = f'cd ../ideas-uo/'+pr.project.name+' ; git diff '+filename+' > '+filename[filename.rindex('/')+1:]+'.patch'
+    cmd = f'cd ../'+pr.project.name+' ; git diff '+filename+' > '+filename[filename.rindex('/')+1:]+'.patch'
     os.system(cmd)
     #result = subprocess.check_output(cmd, shell=True)
 
     #with open('../ideas-uo/anl_test_repo/arithmetic.py.patch', 'r') as f:
-    with open('../ideas-uo/'+pr.project.name+'/'+filename[filename.rindex('/')+1:]+'.patch', 'r') as f:
+    with open('../'+pr.project.name+'/'+filename[filename.rindex('/')+1:]+'.patch', 'r') as f:
         lines = f.readlines()
         f.close()
-    os.remove('../ideas-uo/'+pr.project.name+'/'+filename[filename.rindex('/')+1:]+'.patch')    
+    os.remove('../'+pr.project.name+'/'+filename[filename.rindex('/')+1:]+'.patch')    
 
     #cmd = f'cd ../ideas-uo/anl_test_repo ; git checkout -- folder1/arithmetic.py'
-    cmd = f'cd ../ideas-uo/'+pr.project.name+' ; git checkout -- '+filename
+    cmd = f'cd ../'+pr.project.name+' ; git checkout -- '+filename
     os.system(cmd)
 
 
@@ -304,7 +296,7 @@ def getFile(request):
 
 
     #with open('../ideas-uo/anl_test_repo/folder1/arithmetic.py', 'r') as f:
-    with open('../ideas-uo/'+pr.project.name+'/'+filename, 'r') as f:
+    with open('../'+pr.project.name+'/'+filename, 'r') as f:
         lines = f.readlines()
         f.close()
 
@@ -406,7 +398,7 @@ def branchData(request):
     print("BRANCHES DATA")
 
     config = configparser.ConfigParser()
-    config.read('../ideas-uo/credentials.ini')
+    config.read('../credentials.ini')
 
     GitHubAPIClient.set_credentials(username=config['github']['login'], token=config['github']['token'])
 
@@ -445,7 +437,8 @@ def branchData(request):
                 branches.loc[name] = row
                 branches.loc[name, event_type] = date
 
-    branches = branches.drop(['main', 'staged', 'development']).fillna('None')
+    #TODO: update this to only attempt to drop if keys exist, otherwise error is thrown.
+    #branches = branches.drop(['main', 'staged', 'development']).fillna('None')
 
     #might be easier to use for javascript
     name_column = branches.index.to_list()
@@ -519,7 +512,7 @@ def countlinespython(start, lines=0, header=True, begin_start=None):
     for thing in os.listdir(start):
         thing = os.path.join(start, thing)
         if os.path.isdir(thing):
-            lines = countlines(thing, lines, header=False, begin_start=start)
+            lines = countlinespython(thing, lines, header=False, begin_start=start)
 
     return lines
 
@@ -538,7 +531,7 @@ def countlinesfortran(start, lines=0, header=True, begin_start=None):
     for thing in os.listdir(start):
         thing = os.path.join(start, thing)
         if os.path.isdir(thing):
-            lines = countlines(thing, lines, header=False, begin_start=start)
+            lines = countlinesfortran(thing, lines, header=False, begin_start=start)
 
     return lines
 
@@ -556,7 +549,7 @@ def countlinesc(start, lines=0, header=True, begin_start=None):
     for thing in os.listdir(start):
         thing = os.path.join(start, thing)
         if os.path.isdir(thing):
-            lines = countlines(thing, lines, header=False, begin_start=start)
+            lines = countlinesc(thing, lines, header=False, begin_start=start)
 
     return lines
 
