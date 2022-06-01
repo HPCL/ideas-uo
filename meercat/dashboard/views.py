@@ -368,7 +368,7 @@ def patternGraph1(request):
     
     # TEMPORARILY VIEW ALL YEARS
     #df = vis.plot_top_N_heatmap(10, time_range='year', locc_metric='change-size-cos')
-    df = vis.plot_top_N_heatmap(10, locc_metric='change-size-cos')
+    #df = vis.plot_top_N_heatmap(10, locc_metric='change-size-cos')
 
     resultdata = {
         #'filename': 'spack-zone-change-size-cos-map-Entire_project-mean.png',
