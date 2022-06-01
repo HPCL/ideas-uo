@@ -12,7 +12,9 @@ enddate.val(date.toISOString().substr(0, 10));
 
 var queryString = window.location.search;
 var urlParams = new URLSearchParams(queryString);
-var pr = urlParams.get('pr') //{{ pr.pk }}
+var pr = $("#pr").val(); //urlParams.get('pr') //{{ pr.pk }}
+console.log("The PR id...");
+console.log($("#pr"));
 console.log(pr);
 var filename = "";
 var popupNode = document.createElement("div");

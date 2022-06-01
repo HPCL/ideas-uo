@@ -269,7 +269,7 @@ def diffCommitData(request):
     resultdata = {
         'diffcommits':diffcommits,
         'prcommits':prcommits,
-        'source_url':pr.project.source_url.slice(0,-4)
+        'source_url':pr.project.source_url[0:-4]
     }
 
     return HttpResponse(
