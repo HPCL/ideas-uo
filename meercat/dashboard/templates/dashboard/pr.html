@@ -1,6 +1,7 @@
 {% extends 'dashboard/base.html' %}
 {% load static %}
 {% block content %}
+{% csrf_token %}
 <h2>Pull Request Assistant</h2><br/>
 
 <b><i>Pull Request:</i></b><br/>
