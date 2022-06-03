@@ -176,7 +176,7 @@ $.ajax({
                 for (var k = 0; k < result['prcommits'].length; k++) {
                     if (result['diffcommits'][i]['commits'][j]['commit'] == result['prcommits'][k]['hash']) {
                         doccommits += "<a target='_blank' href='" + result['source_url'] + "/commit/" + result['diffcommits'][i]['commits'][j]['commit'] + "'>" + result['diffcommits'][i]['commits'][j]['commit'].substring(0, 7) + "</a><br/>";
-                        docdiffs += "<button class='btn btn-xs btn-primary' onclick='showDocEditor(\"" + result['diffcommits'][i]['filename'] + "\",\"" + "DIFF STUFF TO GO HERE" + "\");'>View Docs</button><br/>";
+                        docdiffs += "<button class='btn btn-sm btn-primary' onclick='showDocEditor(\"" + result['diffcommits'][i]['filename'] + "\",\"" + "DIFF STUFF TO GO HERE" + "\");'>View Docs</button><br/>";
 
                     }
                 }
