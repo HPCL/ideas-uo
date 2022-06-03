@@ -13,6 +13,7 @@ import re
 
 import sys
 sys.path.insert(1, '/shared/soft/ideas_db/ideas-uo/src')
+sys.path.insert(1, '../src')
 from gitutils.github_api import GitHubAPIClient
 
 from database.models import Project, Commit, Diff, Issue, PullRequest, PullRequestIssue, Comment, EventPayload
