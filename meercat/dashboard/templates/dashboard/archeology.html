@@ -1,0 +1,82 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block content %}
+{% csrf_token %}
+<h2>Pull Request Assistant</h2><br/>
+
+<b><i>Archeology:</i></b><br/>
+
+<div style="margin-left:15px; margin-top:8px;">
+
+TABLE WILL GO HERE
+
+                <table class="table">
+                    {% for author in authors %}
+                    <tr>
+                        <td><a href="#" onclick="$('#myModal').modal('show');">{{author.author.username}} - {{author.author.email}}</a></td>
+                        <td>{{author.type}}</td>
+                        <td>{{author.link}}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+
+
+
+</div>
+
+<div id="myModal" class="modal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Popup</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+            
+                <div class="" style="border:1px solid #ccc; margin-bottom:5px;">
+                        TESTING
+
+                        <!-- Add a button here that will call javascript 
+                                The javascript will use $ajax to submit yes/no to the server. 
+
+                                $.ajax({
+                                    url: '/dashboard/archeologyresults/', type: 'POST', data: { 'pr': pr, 'filename': filename }, 
+                                    success: function (result) {
+
+                                        console.log("success ajax");
+
+                                    }
+                                });
+
+                        -->
+                </div>
+
+                
+            </div>
+            <div class="modal-footer">
+
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input id="pr" type="hidden" value="{{ pr.pk }}"/>
+
+{% endblock content %}
+
+
+{% block script %}
+<script src="{% static 'codemirror/lib/codemirror.js' %}"></script>
+<script src="{% static 'codemirror/mode/clike/clike.js' %}"></script>
+<script src="{% static 'codemirror/mode/xml/xml.js' %}"></script>
+<script src="{% static 'codemirror/mode/python/python.js' %}"></script>
+<script src="{% static 'codemirror/mode/javascript/javascript.js' %}s"></script>
+<script src="{% static 'codemirror/mode/css/css.js' %}"></script>
+<script src="{% static 'codemirror/mode/htmlmixed/htmlmixed.js' %}"></script>
+<script src="{% static 'codemirror/addon/edit/matchbrackets.js' %}"></script>
+<script src="{% static 'codemirror/addon/hint/show-hint.js' %}"></script>
+<script src="{% static 'codemirror/addon/selection/mark-selection.js' %}"></script>
+<script src="{% static 'js/pr.js' %}"></script>
+<script src="{% static 'js/branches.js' %}"></script>
+{% endblock script %}

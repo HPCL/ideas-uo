@@ -9,6 +9,7 @@ urlpatterns = [
     path('project/<int:pk>', views.project, name='project'),
     path('prlist/<int:pk>', views.prlist, name='prlist'),
     path('pr/<int:pk>', views.pr, name='pr'),
+    path('archeology/<int:pk>', views.archeology, name='archeology'),
     path('refreshproject', views.refreshProject, name='refreshproject'),
     path('createpatch', views.createPatch, name='createpatch'),
     path('branches', views.branches, name='branches'),

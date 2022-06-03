@@ -148,6 +148,40 @@ def pr(request, *args, **kwargs):
     return HttpResponse(template.render(context, request))
 
 
+# Pull Request view - show the assistant for specific PR
+def archeology(request, *args, **kwargs):
+
+    template = loader.get_template('dashboard/archeology.html')
+
+    # Get PR id
+    prid = 0
+    if kwargs['pk']:
+        prid = int(kwargs['pk'])
+
+    pr = list(PullRequest.objects.all().filter(id=prid).all())[0]
+
+    # Get filename
+    filename = ''
+    if request.GET.get('filename'):
+        filename = request.GET.get('filename')
+
+    # Get diffs for file
+    diffs = Diff.objects.all().filter(file_path=filename).all()
+
+    # Get commits, authors for those (diffs)
+    authors = set([d.commit.author for d in diffs])
+
+    table = [{'author':author, 'type':'commit','link':''} for author in authors]
+
+
+
+
+    context = {'pr':pr,'authors':table}
+
+    return HttpResponse(template.render(context, request))
+
+
+
 # Refresh the GIT and GitHub data for a project (INTENTIONALLY ONLY WORKS FOR PROJECT ID 30)
 def refreshProject(request):
     print("REFRESH")
