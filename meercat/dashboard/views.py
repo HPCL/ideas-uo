@@ -172,7 +172,7 @@ def archeology(request, *args, **kwargs):
     # Get commits, authors for those (diffs)
     authors = set([d.commit.author for d in diffs])
 
-    table = [{'author':author, 'type':'commit','link':''} for author in authors]
+    table = [{'author':author, 'type':'commit','link':'more info'} for author in authors]
 
 
 
