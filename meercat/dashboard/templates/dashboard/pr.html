@@ -2,7 +2,7 @@
 {% load static %}
 {% block content %}
 {% csrf_token %}
-<h2>Pull Request Assistant</h2><br/>
+<h2>MeerCAT - Merge Code Analysis Toolkit</h2><br/>
 
 <b><i>Pull Request:</i></b><br/>
 
@@ -248,7 +248,7 @@
                 <thead>
                     <tr>
                         <th>File</th>
-                        <th>Commits from this PR</th>
+                        <th>Commits (last 8 weeks)</th>
                         <th>Documentation</th>
                     </tr>
                 </thead>
@@ -355,7 +355,6 @@
 
     <br/>
 
-
     <div class="accordion" id="accordionExample8">
         <div class="accordion-item">
             <h2 class="accordion-header" id="headingSix">
@@ -373,7 +372,7 @@
                             <thead>
                                 <tr>
                                     <th>File</th>
-                                    <th>Commits from this PR</th>
+                                    <th>Commits (last 8 weeks)</th>
                                     <th>Results</th>
                                 </tr>
                             </thead>
@@ -401,16 +400,58 @@
 
                     <br/>
 
-                    <b>Analysis</b><br/>
-                    <div style="margin-left:30px;">
-                      TODO:
-                      <ul>
-                        <li>TODO</li>
-                        <li>TODO</li>
-                        <li>TODO</li>
-                      </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <br/>
+
+    <div class="accordion" id="accordionExample9">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingSeven">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSeven" aria-expanded="false" aria-controls="collapseSeven">
+                  <strong>Archeology</strong> &nbsp;&nbsp; <i class="bi bi-exclamation-triangle-fill" style="color:red; font-size:16pt;"></i>
+                  <!-- <i class="bi bi-exclamation-triangle"></i> -->
+                </button>
+            </h2>
+            <div id="collapseSeven" class="accordion-collapse collapse" aria-labelledby="headingSeven" data-bs-parent="#accordionExample9">
+                <div class="accordion-body">
+                
+                    <div id="afilenamesdiv" style="border:1px solid grey; margin:10px; padding:10px;">
+                        <b>Files modified in this PR:</b>
+                        <table class="table" id="adiffcommittable" style="font-size:10pt;">
+                            <thead>
+                                <tr>
+                                    <th>File</th>
+                                    <th>Commits (last 8 weeks)</th>
+                                    <th>Results</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td colspan="3">Loading...</td></tr>
+                                <!--{% for file in filenames %}
+                                <tr>
+                                    <td>{{file}}</td>
+                                </tr>
+                                {% endfor %}-->
+
+                                <!--{% for key,value in diffcommits.items %}
+                                <tr>
+                                    <td>{{key}}</td>
+                                    <td>
+                                        {% for commit in value %}
+                                            {{commit}}
+                                        {% endfor %}
+                                    </td>
+                                </tr>
+                                {% endfor %}-->
+                            </tbody>
+                        </table>
                     </div>
-              
+
+                    <br/>
+
                 </div>
             </div>
         </div>

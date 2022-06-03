@@ -152,11 +152,18 @@ $.ajax({
         var doctable = $("#docdiffcommittable > tbody");
         doctable.empty();
 
+        var cqtable = $("#cqdiffcommittable > tbody");
+        cqtable.empty();
+
+        var atable = $("#adiffcommittable > tbody");
+        atable.empty();
+
         for (var i = 0; i < result['diffcommits'].length; i++) {
             var commits = "";
             var diffs = "";
             var doccommits = "";
             var docdiffs = "";
+            var alinks = "";
             for (var j = 0; j < result['diffcommits'][i]['commits'].length; j++) {
 
                 var diff = result['diffcommits'][i]['commits'][j]['diff'];
@@ -177,6 +184,7 @@ $.ajax({
                     if (result['diffcommits'][i]['commits'][j]['commit'] == result['prcommits'][k]['hash']) {
                         doccommits += "<a target='_blank' href='" + result['source_url'] + "/commit/" + result['diffcommits'][i]['commits'][j]['commit'] + "'>" + result['diffcommits'][i]['commits'][j]['commit'].substring(0, 7) + "</a><br/>";
                         docdiffs += "<button class='btn btn-sm btn-primary' onclick='showDocEditor(\"" + result['diffcommits'][i]['filename'] + "\",\"" + "DIFF STUFF TO GO HERE" + "\");'>View Docs</button><br/>";
+                        alinks += "<a class='btn btn-sm btn-primary' href='/dashboard/archeology/" + pr + "?filename=" +result['diffcommits'][i]['filename']+ "'>View Archeology</a><br/>";
 
                     }
                 }
@@ -198,6 +206,22 @@ $.ajax({
                 "</td><td>" +
                 docdiffs +
                 "</td></tr>");
+
+            cqtable.append("<tr><td>"+
+                    result['diffcommits'][i]['filename']+
+                    "</td><td>"+
+                            doccommits+
+                    "</td><td>"+
+                            docdiffs+
+                    "</td></tr>");
+
+            atable.append("<tr><td>"+
+                    result['diffcommits'][i]['filename']+
+                    "</td><td>"+
+                            doccommits+
+                    "</td><td>"+
+                            alinks+
+                    "</td></tr>");
 
         }
 

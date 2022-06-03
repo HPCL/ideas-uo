@@ -281,6 +281,8 @@ def diffCommitData(request):
     #Find all changed files related to the PR by getting all diffs from all commits in PR    
     commits = list(Commit.objects.all().filter(hash__in=[committag.sha for committag in pr.commits.all()]))
 
+    print("Commits: "+str(len(commits)))
+
     diffs = list(Diff.objects.all().filter(commit__in=[c for c in commits]))
     filenames = [d.file_path for d in diffs]
     #Get just unique filenames
