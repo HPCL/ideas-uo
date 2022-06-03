@@ -7,4 +7,5 @@ urlpatterns = [
     path('oauth/', include('oauth.urls')),
     path('admin/', admin.site.urls),
     path('login/', auth_views.LoginView.as_view(template_name='oauth/login.html'), name='login')
+    path('logout/', auth_views.LogoutView.as_view(template_name='oauth/logout.html'), name='logout')
 ]
