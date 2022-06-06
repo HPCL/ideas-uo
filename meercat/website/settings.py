@@ -143,15 +143,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 # GitHub OAuth client ID. This is public information.
 GH_CLIENT_ID = 'e7c936f5c399dc9a9184'
 
-
-# Set this to True to avoid transmitting the session cookie over HTTP accidentally.
-# https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/#session-cookie-secure
-SESSION_COOKIE_SECURE = True
-
-# Set this to True to avoid transmitting the CSRF cookie over HTTP accidentally.
-# https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/#csrf-cookie-secure
-CSRF_COOKIE_SECURE = True
-
 LOGIN_REDIRECT_URL = 'index'
 
 LOGIN_URL = 'login'
