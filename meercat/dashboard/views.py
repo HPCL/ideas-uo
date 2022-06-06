@@ -6,6 +6,8 @@ import configparser
 from django.http import HttpResponse
 from django.template import loader
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
+
 
 import pandas as pd
 
@@ -24,6 +26,7 @@ warnings.filterwarnings('ignore')
 from patterns.visualizer import Visualizer
 
 # Index view - should list all projects
+@login_required
 def index(request):
     print("INDEX")
     template = loader.get_template('dashboard/index.html')
@@ -41,6 +44,7 @@ def index(request):
 
 
 # Project view - should list general project info
+@login_required
 def project(request, *args, **kwargs):
     print("PROJECT")
     print( kwargs['pk'] )
@@ -80,6 +84,7 @@ def project(request, *args, **kwargs):
 
 
 # PR list view - list all the PRs for project
+@login_required
 def prlist(request, *args, **kwargs):
     print("PRLIST")
     template = loader.get_template('dashboard/prlist.html')
@@ -101,6 +106,7 @@ def prlist(request, *args, **kwargs):
 
 
 # Pull Request view - show the assistant for specific PR
+@login_required
 def pr(request, *args, **kwargs):
     print("PR")
     template = loader.get_template('dashboard/pr.html')
@@ -186,6 +192,7 @@ def archeology(request, *args, **kwargs):
 
 
 # Refresh the GIT and GitHub data for a project (INTENTIONALLY ONLY WORKS FOR PROJECT ID 30)
+@login_required
 def refreshProject(request):
     print("REFRESH")
 
@@ -214,6 +221,7 @@ def refreshProject(request):
 
 
 # Refresh the GIT and GitHub data for a project (INTENTIONALLY ONLY WORKS FOR PROJECT ID 30)
+@login_required
 def createPatch(request):
     print("CREATE PATCH")
 
@@ -270,6 +278,7 @@ def createPatch(request):
 
 
 # Retrieves commit data for a specific PR
+@login_required
 def diffCommitData(request):
     print("Diff Commit DATA")
 
@@ -317,6 +326,7 @@ def diffCommitData(request):
     )
 
 
+@login_required
 def getFile(request):
 
     print("Get File DATA")
@@ -352,6 +362,7 @@ def getFile(request):
 
 # Uses the Visualizer code to generate a graph.
 # Works just for FLASH5 at the moment, but can be made to be more generic.
+@login_required
 def patternGraph1(request):
     print("PATTERN DATA")
 
@@ -423,6 +434,7 @@ def patternGraph1(request):
 
 
 # Branches view (is this still needed)
+@login_required
 def branches(request):
     print("BRANCHES")
     template = loader.get_template('dashboard/branches.html')
@@ -433,6 +445,7 @@ def branches(request):
 
 # Returns branch data for anl_test_repo
 # If this is still useful, need to make more generic
+@login_required
 def branchData(request):
     print("BRANCHES DATA")
 

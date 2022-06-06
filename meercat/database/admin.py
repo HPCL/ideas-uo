@@ -7,6 +7,10 @@ from .models import Author, Project, ProjectAuthor, Commit, Diff, Issue, PullReq
 class AuthorAdmin(admin.ModelAdmin):
     list_display = ('id', 'username', 'email')
  
+@admin.register(ProjectRole)
+class ProjectRoleAdmin(admin.ModelAdmin):
+    list_display = ('user', 'project', 'role')
+
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'source_url', 'last_updated', 'fork_of')

@@ -1,4 +1,6 @@
 from django.db import models
+from django.contrib.auth.models import User
+from django.utils.translation import gettext_lazy as _
 
 # Create your models here.
 class Author(models.Model):
@@ -36,6 +38,23 @@ class Project(models.Model):
 
     def __str__(self):
         return self.name
+
+class ProjectRole(models.Model):
+
+    class RoleChoices(models.TextChoices):
+        DEVELOPER = 'DEV', _('Developer')
+        PROJECT_MANAGER = 'PM', _('Project Manager')
+
+    role = models.CharField(max_length=3, choices=RoleChoices.choices)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='project_roles')
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='members')
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'project'], name='unique_user_project_assignment'
+            )
+        ]
 
 class Tag(models.Model):
     tag = models.CharField(max_length=64)
