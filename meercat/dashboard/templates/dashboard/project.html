@@ -2,7 +2,8 @@
 {% load static %}
 
 {% block content %}
-    <h2>Project page for <i>{{project.name}}</i></h2>
+
+    <h2>Project: <i>{{project.name}}</i></h2>
     <i>Last updated: {{project.last_updated|date:'Y-m-d'}} {{project.last_updated|time:'h:i a'}}</i>
 
     <div style="float:right;">
@@ -93,7 +94,7 @@
     <br/>
     <br/>
     <br/>
-    
+
 {% endblock content %}
 
 

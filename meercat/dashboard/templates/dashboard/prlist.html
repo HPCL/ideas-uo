@@ -2,15 +2,14 @@
 {% load static %}
 
 {% block content %}
-    <h2>Pull Request Assistant</h2><br/>
-
+    <!--h4>Pull Request Assistant</h4><br/-->
 
     <button id="refreshbutton" class="btn btn-sm btn-primary" style="float:right;" onclick="refreshProject();">
         <div id="spinner" class="spinner-border spinner-border-sm" role="status" style="display:none;">
         </div> Refresh Project
     </button>
 
-    <b>Pull Requests for <i>{{project.name}}</i>:</b><br/>	
+    <h4>Pull Requests for <i>{{project.name}}</i></h4>
     <table class="table">
         <tr>
             <th>Number</th>
