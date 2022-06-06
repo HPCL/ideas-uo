@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Author, Project, ProjectAuthor, Commit, Diff, Issue, PullRequest, Comment
+from .models import Author, Project, ProjectAuthor, Commit, Diff, Issue, PullRequest, Comment, ProjectRole
  
 # Register your models here.
 @admin.register(Author)
