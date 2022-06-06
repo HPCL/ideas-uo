@@ -124,7 +124,9 @@ def pr(request, *args, **kwargs):
     if issue_number:
         print(issue_number.group())
         print( pr.project.source_url.replace('.git', '/issues/'+issue_number.group()[1:]) )
-        closed_issue = list(Issue.objects.all().filter(url=pr.project.source_url.replace('.git', '/issues/'+issue_number.group()[1:])))[0]
+        closed_issue_list = list(Issue.objects.all().filter(url=pr.project.source_url.replace('.git', '/issues/'+issue_number.group()[1:])))
+        if len(closed_issue_list) > 0:
+            closed_issue = closed_issue_list[0]
 
 
     #issues = list(Issue.objects.all().filter(project=list(Project.objects.all().filter(name='FLASH5').all())[0], state='closed'))
