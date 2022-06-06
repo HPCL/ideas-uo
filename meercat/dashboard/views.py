@@ -167,7 +167,7 @@ def archeology(request, *args, **kwargs):
         filename = request.GET.get('filename')
 
     # Get diffs for file
-    diffs = Diff.objects.all().filter(file_path=filename).all()
+    diffs = Diff.objects.all().filter(commit__project=pr.project, file_path=filename).all()
 
     # Get commits, authors for those (diffs)
     authors = set([d.commit.author for d in diffs])
@@ -177,7 +177,7 @@ def archeology(request, *args, **kwargs):
 
 
 
-    context = {'pr':pr,'authors':table}
+    context = {'pr':pr, 'filename': filename, 'authors':table}
 
     return HttpResponse(template.render(context, request))
 

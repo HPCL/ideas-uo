@@ -2,13 +2,13 @@
 {% load static %}
 {% block content %}
 {% csrf_token %}
-<h2>Pull Request Assistant</h2><br/>
+<!--h2>Pull Request Assistant</h2><br/;-->
 
-<b><i>Archeology:</i></b><br/>
+<h4>Archeology for <i>{{pr.project.name}}</i></h4><br/>
 
 <div style="margin-left:15px; margin-top:8px;">
 
-TABLE WILL GO HERE
+<b>Authors who have worked on <i>{{filename}}</i></b><br/>
 
                 <table class="table">
                     {% for author in authors %}
