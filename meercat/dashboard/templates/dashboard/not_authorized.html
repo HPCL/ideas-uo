@@ -1,0 +1,10 @@
+{% extends 'dashboard/base.html' %}
+
+
+{% block content %}
+    <h2>Not Authorized</h2>
+
+    <p>you are not authorized to view this page.</p>
+    <p><a href="{% url 'index' %}">return to dashboard</a></p>
+{% endblock content %}
+    

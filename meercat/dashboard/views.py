@@ -6,8 +6,8 @@ import configparser
 from django.http import HttpResponse
 from django.template import loader
 from django.conf import settings
-from django.contrib.auth.decorators import login_required
-
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.shortcuts import redirect, render
 
 import pandas as pd
 
@@ -18,18 +18,42 @@ sys.path.insert(1, '/shared/soft/ideas_db/ideas-uo/src')
 sys.path.insert(1, '../src')
 from gitutils.github_api import GitHubAPIClient
 
-from database.models import Project, Commit, Diff, Issue, PullRequest, PullRequestIssue, Comment, EventPayload
+from database.models import Project, ProjectRole, Commit, Diff, Issue, PullRequest, PullRequestIssue, Comment, EventPayload
 
 import subprocess
 import os, warnings
 warnings.filterwarnings('ignore')
 from patterns.visualizer import Visualizer
 
+def not_authorized(request):
+    return render(request, 'dashboard/not_authorized.html')
+
+
 # Index view - should list all projects
 @login_required
 def index(request):
     print("INDEX")
-    template = loader.get_template('dashboard/index.html')
+
+    pid = 30
+    if request.GET.get('pid'):
+        pid = int(request.GET.get('pid'))
+
+    if request.user.is_staff:
+        return redirect('staff_index')
+
+    devProjects = getUserProjectsByRole(request.user, 'DEV') 
+    devProjects = sorted(devProjects, key=lambda d: d.name, reverse=False)
+    
+    PMProjects = getUserProjectsByRole(request.user, 'PM')
+    PMProjects = sorted(PMProjects, key=lambda d: d.name, reverse=False)
+    
+    context = {'devProjects': devProjects, 'PMProjects': PMProjects}
+ 
+    return render(request, 'dashboard/index.html', context)
+
+@login_required
+def staff_index(request):
+    print("STAFF INDEX")
 
     pid = 30
     if request.GET.get('pid'):
@@ -38,21 +62,22 @@ def index(request):
     projects = list(Project.objects.all())
     projects = sorted(projects, key=lambda d: d.name, reverse=False)
 
-    context = {'projects':projects}
-
-    return HttpResponse(template.render(context, request))
-
+    return render(request, 'dashboard/staff_index.html', {'projects': projects})
 
 # Project view - should list general project info
-@login_required
 def project(request, *args, **kwargs):
     print("PROJECT")
     print( kwargs['pk'] )
-    template = loader.get_template('dashboard/project.html')
+    
 
     pid = 30
     if kwargs['pk']:
         pid = int(kwargs['pk'])
+
+    if not hasAccessToProject(request.user, pid):
+        return redirect('not_authorized')
+
+    template = loader.get_template('dashboard/project.html')
 
     project = list(Project.objects.all().filter(id=pid).all())[0]
 
@@ -95,6 +120,10 @@ def prlist(request, *args, **kwargs):
     if kwargs['pk']:
         pid = int(kwargs['pk'])
 
+        
+    if not hasAccessToProject(request.user, pid):
+        return redirect('not_authorized')
+
     project = list(Project.objects.all().filter(id=pid).all())[0]
 
     prs = list(PullRequest.objects.all().filter(project=project).all())
@@ -116,6 +145,9 @@ def pr(request, *args, **kwargs):
     #    prid = int(request.GET.get('pr'))
     if kwargs['pk']:
         prid = int(kwargs['pk'])
+
+    if not hasAccessToPR(request.user, prid):
+        return redirect('not_authorized')
 
     pr = list(PullRequest.objects.all().filter(id=prid).all())[0]
 
@@ -167,6 +199,9 @@ def archeology(request, *args, **kwargs):
     if kwargs['pk']:
         prid = int(kwargs['pk'])
 
+    if not hasAccessToPR(request.user, prid):
+        return redirect('not_authorized')
+
     pr = list(PullRequest.objects.all().filter(id=prid).all())[0]
 
     # Get filename
@@ -200,6 +235,9 @@ def refreshProject(request):
     if request.GET.get('pid'):
         pid = int(request.GET.get('pid'))
 
+    if not hasAccessToProject(request.user, pid):
+        return redirect('not_authorized')
+
     project = list(Project.objects.all().filter(id=pid).all())[0]
 
     username = settings.DATABASES['default']['USER']
@@ -228,6 +266,9 @@ def createPatch(request):
     prid = 2250
     if request.POST.get('pr'):
         prid = int(request.POST.get('pr'))
+
+    if not hasAccessToPR(request.user, prid):
+        return redirect('not_authorized')
 
     filename = 'folder1/arithmetic.py'
     if request.POST.get('filename'):
@@ -288,6 +329,9 @@ def diffCommitData(request):
     if request.POST.get('pr'):
         prid = int(request.POST.get('pr'))
 
+    if not hasAccessToPR(request.user, prid):
+        return redirect('not_authorized')
+
     pr = list(PullRequest.objects.all().filter(id=prid).all())[0]
 
     #Find all changed files related to the PR by getting all diffs from all commits in PR    
@@ -336,6 +380,9 @@ def getFile(request):
     prid = 2250
     if request.POST.get('pr'):
         prid = int(request.POST.get('pr'))
+
+    if not hasAccessToPR(request.user, prid):
+        return redirect('not_authorized')
 
     filename = 'folder1/arithmetic.py'
     if request.POST.get('filename'):
@@ -620,4 +667,19 @@ def countfiles(start, files=0, header=True, begin_start=None):
             if os.path.isdir(thing):
                 files = countfiles(thing, files, header=False, begin_start=start)
 
-    return files    
+    return files
+
+def getUserProjectsByRole(user, role):
+    projectRoles = list(ProjectRole.objects.filter(user__id=user.id, role=role))
+    projectIds = [role.project.id for role in projectRoles]
+    projects = [Project.objects.get(id=projectId) for projectId in projectIds]
+
+    return projects
+
+
+def hasAccessToProject(user, project_id):
+    return ProjectRole.objects.filter(user__id=user.id, project=project_id).exists()
+
+def hasAccessToPR(user, pr_id):
+    project_id = PullRequest.objects.get(id=pr_id).project.id
+    return ProjectRole.objects.filter(user__id=user.id, project=project_id).exists()
