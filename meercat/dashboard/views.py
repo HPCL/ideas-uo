@@ -65,11 +65,16 @@ def project(request, *args, **kwargs):
     issues = list(Issue.objects.all().filter(project=project).all())
     issues = sorted(issues, key=lambda d: d.number, reverse=True)
 
+    print("Done loading db data.  Now checking repo contents...")
 
     pythonloc = countlinespython(r'../'+project.name)
+    print(".")
     fortranloc = countlinesfortran(r'../'+project.name)
+    print("..")
     cloc = countlinesc(r'../'+project.name)
+    print("...")
     files = countfiles(r'../'+project.name)
+    print("....")
 
 
     #TODO: should be able to remove this
