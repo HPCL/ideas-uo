@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('database', '0037_projectrole_user_alter_projectrole_id'),
+        ('database', '0038_projectrole_user_alter_projectrole_id'),
     ]
 
     operations = [
