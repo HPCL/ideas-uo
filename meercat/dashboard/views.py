@@ -90,11 +90,18 @@ def project(request, *args, **kwargs):
     issues = list(Issue.objects.all().filter(project=project).all())
     issues = sorted(issues, key=lambda d: d.number, reverse=True)
 
+    print("Done loading db data.  Now checking repo contents...")
+
+    # TODO: these are super slow for some projects (spack)
 
     pythonloc = countlinespython(r'../'+project.name)
+    print(".")
     fortranloc = countlinesfortran(r'../'+project.name)
+    print("..")
     cloc = countlinesc(r'../'+project.name)
+    print("...")
     files = countfiles(r'../'+project.name)
+    print("....")
 
 
     #TODO: should be able to remove this
@@ -609,9 +616,10 @@ def countlinespython(start, lines=0, header=True, begin_start=None):
                     lines += newlines
 
     for thing in os.listdir(start):
-        thing = os.path.join(start, thing)
-        if os.path.isdir(thing):
-            lines = countlinespython(thing, lines, header=False, begin_start=start)
+        if not thing.startswith('.git') and not thing.startswith('repos'):
+            thing = os.path.join(start, thing)
+            if os.path.isdir(thing):
+                lines = countlinespython(thing, lines, header=False, begin_start=start)
 
     return lines
 
@@ -628,9 +636,10 @@ def countlinesfortran(start, lines=0, header=True, begin_start=None):
                     lines += newlines
 
     for thing in os.listdir(start):
-        thing = os.path.join(start, thing)
-        if os.path.isdir(thing):
-            lines = countlinesfortran(thing, lines, header=False, begin_start=start)
+        if not thing.startswith('.git') and not thing.startswith('repos'):
+            thing = os.path.join(start, thing)
+            if os.path.isdir(thing):
+                lines = countlinesfortran(thing, lines, header=False, begin_start=start)
 
     return lines
 
@@ -641,14 +650,18 @@ def countlinesc(start, lines=0, header=True, begin_start=None):
         if os.path.isfile(thing):
             if thing.endswith('.c') or thing.endswith('.h') or thing.endswith('.cpp'):
                 with open(thing, 'r') as f:
-                    newlines = f.readlines()
-                    newlines = len(newlines)
-                    lines += newlines
+                    try:
+                        newlines = f.readlines()
+                        newlines = len(newlines)
+                        lines += newlines
+                    except:
+                        pass    
 
     for thing in os.listdir(start):
-        thing = os.path.join(start, thing)
-        if os.path.isdir(thing):
-            lines = countlinesc(thing, lines, header=False, begin_start=start)
+        if not thing.startswith('.git') and not thing.startswith('repos'):
+            thing = os.path.join(start, thing)
+            if os.path.isdir(thing):
+                lines = countlinesc(thing, lines, header=False, begin_start=start)
 
     return lines
 
@@ -662,7 +675,7 @@ def countfiles(start, files=0, header=True, begin_start=None):
             files += 1
 
     for thing in os.listdir(start):
-        if not thing.startswith('.git'):
+        if not thing.startswith('.git') and not thing.startswith('repos'):
             thing = os.path.join(start, thing)
             if os.path.isdir(thing):
                 files = countfiles(thing, files, header=False, begin_start=start)
