@@ -685,8 +685,14 @@ def getUserProjectsByRole(user, role):
 
 
 def hasAccessToProject(user, project_id):
-    return user.is_staff or ProjectRole.objects.filter(user__id=user.id, project=project_id).exists()
+    if user.is_staff:
+        return True
+
+    return ProjectRole.objects.filter(user__id=user.id, project=project_id).exists()
 
 def hasAccessToPR(user, pr_id):
+    if user.is_staff:
+        return True
+
     project_id = PullRequest.objects.get(id=pr_id).project.id
-    return user.is_staff or ProjectRole.objects.filter(user__id=user.id, project=project_id).exists()
+    return ProjectRole.objects.filter(user__id=user.id, project=project_id).exists()
