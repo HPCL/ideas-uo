@@ -92,13 +92,15 @@ def project(request, *args, **kwargs):
 
     print("Done loading db data.  Now checking repo contents...")
 
-    pythonloc = countlinespython(r'../'+project.name)
+    # TODO: these are super slow for some projects (spack)
+
+    pythonloc = 0 #countlinespython(r'../'+project.name)
     print(".")
-    fortranloc = countlinesfortran(r'../'+project.name)
+    fortranloc = 0 #countlinesfortran(r'../'+project.name)
     print("..")
-    cloc = countlinesc(r'../'+project.name)
+    cloc = 0 #countlinesc(r'../'+project.name)
     print("...")
-    files = countfiles(r'../'+project.name)
+    files = 0 #countfiles(r'../'+project.name)
     print("....")
 
 
@@ -683,8 +685,8 @@ def getUserProjectsByRole(user, role):
 
 
 def hasAccessToProject(user, project_id):
-    return ProjectRole.objects.filter(user__id=user.id, project=project_id).exists()
+    return user.is_staff or ProjectRole.objects.filter(user__id=user.id, project=project_id).exists()
 
 def hasAccessToPR(user, pr_id):
     project_id = PullRequest.objects.get(id=pr_id).project.id
-    return ProjectRole.objects.filter(user__id=user.id, project=project_id).exists()
+    return user.is_staff or ProjectRole.objects.filter(user__id=user.id, project=project_id).exists()
