@@ -5,7 +5,7 @@
     <h2>MeerCAT - Merge Code Analysis Toolkit</h2><br/>
 
 
-    <h4>Projects you manage:</h4>
+    <h4>All Projects:</h4>
 
 
     <table class="table">
@@ -14,25 +14,7 @@
             <th>Last Updated</th>
             <th>URL</th>
         </tr>
-        {% for project in PMProjects %}
-        <tr>
-            <td><a href="/dashboard/project/{{project.id}}">{{project.name}}</a></td>
-            <td>{{project.last_updated|date:'Y-m-d'}} {{project.last_updated|time:'h:i a'}}</td>
-            <td><a target="_blank" href="{{project.url}}">{{project.source_url}}</a></td>
-        </tr>
-        {% endfor %}
-    </table>
-
-    <h4>Projects you develop:</h4>
-
-
-    <table class="table">
-        <tr>
-            <th>Name</th>
-            <th>Last Updated</th>
-            <th>URL</th>
-        </tr>
-        {% for project in devProjects %}
+        {% for project in projects %}
         <tr>
             <td><a href="/dashboard/project/{{project.id}}">{{project.name}}</a></td>
             <td>{{project.last_updated|date:'Y-m-d'}} {{project.last_updated|time:'h:i a'}}</td>
