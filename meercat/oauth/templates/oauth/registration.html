@@ -1,0 +1,31 @@
+{% extends 'oauth/base.html' %}
+
+{% block content %}
+<h2 class="mb-4">Register</h2>
+
+<p class="fw-bold">Access to this site is restricted.</p> 
+<p class="fw-bold">If you require an account, fill the following fields so we can start a conversation to create an account for you.</p>
+
+<form action="{% url 'register' %}" method="POST">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div class="form-group mb-3">
+        <label for="{{ form.name.id_for_label }}" class="form-label">Name:</label>
+        {{ form.name }}
+        {{ form.name.erros }}
+    </div>
+    <div class="form-group mb-3">
+        <label for="{{ form.email.id_for_label }}" class="form-label">GitHub account email:</label>
+        {{ form.email }}
+        {{ form.email.errors }}
+    </div>
+    <div class="form-group mb-3">
+        <label for="{{ form.message.id_for_label }}" class="form-label">message:</label>
+        {{ form.message }}
+        {{ form.message.errors }}
+    </div>
+    <div class="form-group">
+        <button class="btn btn-primary mb-5">register</button>
+    </div>
+</form>
+{% endblock content %}

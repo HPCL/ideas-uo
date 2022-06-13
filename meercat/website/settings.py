@@ -146,3 +146,7 @@ GH_CLIENT_ID = 'e7c936f5c399dc9a9184'
 LOGIN_REDIRECT_URL = 'index'
 
 LOGIN_URL = 'login'
+
+
+# Output sent emails to console. Use in development only.
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

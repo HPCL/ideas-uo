@@ -83,3 +83,14 @@
     width: 85%;
     height: 80%;
 }
+
+.errorlist {
+    list-style-type: none;
+    color: #cc0000;
+    padding: 0;
+}
+
+.errorlist li {
+    font-size: small;
+    padding: .5rem 0;
+}

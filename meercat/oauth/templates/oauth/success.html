@@ -1,0 +1,9 @@
+{% extends 'oauth/base.html' %}
+
+{% block content %}  
+    <h2>Your message has been received</h2><br/>
+
+    <div class="border-top pt-3">
+        <p>{{ name }}, we will reply to you as soon as we can via the email you provided ({{ email }})</p>
+    </div>
+{% endblock content %}
