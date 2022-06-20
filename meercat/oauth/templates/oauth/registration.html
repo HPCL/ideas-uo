@@ -15,6 +15,16 @@
         {{ form.name.erros }}
     </div>
     <div class="form-group mb-3">
+        <label for="{{ form.personal_email.id_for_label }}" class="form-label">Personal email (optional):</label>
+        {{ form.personal_email }}
+        {{ form.personal_email.errors }}
+    </div>
+    <div class="form-group mb-3">
+        <label for="{{ form.username.id_for_label }}" class="form-label">GitHub username:</label>
+        {{ form.username }}
+        {{ form.username.erros }}
+    </div>
+    <div class="form-group mb-3">
         <label for="{{ form.email.id_for_label }}" class="form-label">GitHub account email:</label>
         {{ form.email }}
         {{ form.email.errors }}
@@ -28,4 +38,5 @@
         <button class="btn btn-primary mb-5">register</button>
     </div>
 </form>
+<p class="mb-5">Already have an account? <a href="{% url 'authorize' %}">Log in</a></p>
 {% endblock content %}
