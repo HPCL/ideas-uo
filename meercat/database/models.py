@@ -4,15 +4,15 @@ from django.utils.translation import gettext_lazy as _
 
 # Create your models here.
 class GitHubCredentials(models.Model):
-    GitHub_login = models.CharField(max_length=200)
-    GitHub_email = models.EmailField(max_length=200)
+    login = models.CharField(max_length=200)
+    email = models.EmailField(max_length=200)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = 'GitHub Credentials'
 
     def __str__(self):
-        return self.GitHub_login
+        return self.login
 
 class Author(models.Model):
     username = models.CharField(max_length=64, null=True, blank=True)

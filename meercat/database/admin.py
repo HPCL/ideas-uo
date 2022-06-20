@@ -8,6 +8,7 @@ from .models import GitHubCredentials, Author, Project, ProjectAuthor, Commit, D
 class GitHubCredentialsInline(admin.StackedInline):
     model = GitHubCredentials
     can_delete = False
+    verbose_name = 'GitHub Credentials'
 
 class UserAdmin(BaseUserAdmin):
     inlines = (GitHubCredentialsInline,)
