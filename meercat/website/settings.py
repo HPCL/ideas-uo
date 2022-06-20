@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+from django.contrib.messages import constants as messages
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -33,6 +34,15 @@ DEBUG = True
 ALLOWED_HOSTS = [
     'sansa.cs.uoregon.edu',
 ]
+
+# Messages constants, used for bootstrap styling
+MESSAGE_TAGS = {
+    messages.DEBUG: 'alert-secondary',
+    messages.INFO: 'alert-info',
+    messages.SUCCESS: 'alert-success',
+    messages.WARNING: 'alert-warning',
+    messages.ERROR: 'alert-danger',
+}
 
 
 # Application definition
@@ -145,7 +155,7 @@ GH_CLIENT_ID = 'e7c936f5c399dc9a9184'
 
 LOGIN_REDIRECT_URL = 'index'
 
-LOGIN_URL = 'login'
+LOGIN_URL = 'authorize'
 
 
 # Output sent emails to console. Use in development only.

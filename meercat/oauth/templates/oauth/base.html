@@ -18,8 +18,13 @@
     </div>
 
     <div id="home" class="main" style="padding:50px 50px 0px 50px;">
+    
+    {% include "oauth/messages.html" %}
     {% block content %}{% endblock content %}
     </div>
         
+    
+    <script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
 </body>
 </html>
