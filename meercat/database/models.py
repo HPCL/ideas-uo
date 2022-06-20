@@ -3,6 +3,17 @@ from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 
 # Create your models here.
+class GitHubCredentials(models.Model):
+    GitHub_login = models.CharField(max_length=200)
+    GitHub_email = models.EmailField(max_length=200)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = 'GitHub Credentials'
+
+    def __str__(self):
+        return self.GitHub_login
+
 class Author(models.Model):
     username = models.CharField(max_length=64, null=True, blank=True)
     email = models.EmailField(null=True)
@@ -45,6 +56,7 @@ class ProjectRole(models.Model):
         DEVELOPER = 'DEV', _('Developer')
         PROJECT_MANAGER = 'PM', _('Project Manager')
 
+    id = models.AutoField(primary_key=True)
     role = models.CharField(max_length=3, choices=RoleChoices.choices)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='project_roles')
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='members')

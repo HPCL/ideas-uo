@@ -1,8 +1,20 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.models import User
 
-from .models import Author, Project, ProjectAuthor, Commit, Diff, Issue, PullRequest, Comment, ProjectRole
+from .models import GitHubCredentials, Author, Project, ProjectAuthor, Commit, Diff, Issue, PullRequest, Comment, ProjectRole
  
 # Register your models here.
+class GitHubCredentialsInline(admin.StackedInline):
+    model = GitHubCredentials
+    can_delete = False
+
+class UserAdmin(BaseUserAdmin):
+    inlines = (GitHubCredentialsInline,)
+
+admin.site.unregister(User)
+admin.site.register(User, UserAdmin)
+
 @admin.register(Author)
 class AuthorAdmin(admin.ModelAdmin):
     list_display = ('id', 'username', 'email')
