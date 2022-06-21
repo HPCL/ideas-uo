@@ -24,6 +24,12 @@
   display: block;
 }
 
+.sidenav p {
+    padding: 6px 8px 6px 16px;
+    font-size: 16px;
+    color: #818181;
+}
+
 /* When you mouse over the navigation links, change their color */
 .sidenav a:hover {
   color: #f1f1f1;
