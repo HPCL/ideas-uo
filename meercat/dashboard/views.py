@@ -232,6 +232,86 @@ def archeology(request, *args, **kwargs):
     return HttpResponse(template.render(context, request))
 
 
+# File explorer
+#localhost:8080/dashboard/filex/25?filename=path  where 25 is test_anl id and path is to file
+def file_explorer(request, *args, **kwargs):
+
+    template = loader.get_template('dashboard/file_explorer.html')
+
+    # Get PR id
+    prid = 0
+    if kwargs['pk']:
+        prid = int(kwargs['pk'])
+
+    #pr = list(PullRequest.objects.all().filter(id=prid).all())[0]
+
+    # Get filename
+    filename = ''
+    if request.GET.get('filename'):
+        filename = request.GET.get('filename')
+
+    # Build developer table
+
+    diffs = Diff.objects.all().filter(file_path=filename).all()
+
+    # Get commits, authors for those (diffs)
+    #authors = set([d.commit.author for d in diffs])
+    info = [(d.commit.datetime, d.commit.author, d.commit.hash) for d in diffs]
+
+    author_count = {}
+    for date, author, link in info:
+        if author in author_count:
+            author_count[author] += 1
+        else:
+            author_count[author] = 1
+
+    new_info = []
+    authors = []
+    for date, author, link in sorted(info, reverse=True):
+        if author in authors: continue
+        new_info.append((date, author, author_count[author], link))
+        authors.append(author)
+
+    dev_table = [{'author':author, 'number_commits': count, 'most_recent_commit':date,'commit_link':link} for date, author, count, link in new_info]
+
+    # Build blame table
+
+    project = list(Project.objects.all().filter(id=prid).all())[0]  #get project name
+
+    cmd = f'cd ../{project.name} ; git blame {filename} > {filename[filename.rindex("/")+1:]}.blame'
+    os.system(cmd)
+    #result = subprocess.check_output(cmd, shell=True)
+
+    #with open('../ideas-uo/anl_test_repo/arithmetic.py.patch', 'r') as f:
+    with open('../'+project.name+'/'+filename[filename.rindex('/')+1:]+'.blame', 'r') as f:
+        lines = f.readlines()
+        f.close()
+    os.remove('../'+project.name+'/'+filename[filename.rindex('/')+1:]+'.blame') 
+
+    print(f'blame:\n{lines}')
+
+    # List PRs
+
+    #diffs = Diff.objects.all().filter(file_path=filename).all()
+
+    # List Issues
+
+    #diffs = Diff.objects.all().filter(file_path=filename).all()
+
+    # Place in call graph
+
+    #???
+
+    # List tests that use
+
+    #???
+
+    context = {'file':filename,'authors':dev_table}
+
+    return HttpResponse(template.render(context, request))
+
+
+
 
 # Refresh the GIT and GitHub data for a project (INTENTIONALLY ONLY WORKS FOR PROJECT ID 30)
 @login_required
