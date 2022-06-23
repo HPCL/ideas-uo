@@ -4,7 +4,7 @@
 <div class="container">
   <h1 class="my-5">OAuth</h1>
   <a
-    href="{{authorize_url}}"
+    href="{% url 'authorize_github' %}"
     class="btn btn-primary"
     id="oauth-login"
     role="button"
