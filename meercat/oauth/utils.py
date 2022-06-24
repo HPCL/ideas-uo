@@ -12,7 +12,7 @@ def authenticate(request, gh_user):
     if gh_user['email'] and User.objects.filter(githubcredentials__email=gh_user['email']).exists():
         meercat_user = User.objects.get(githubcredentials__email=gh_user['email'])
 
-    if gh_user['login'] and User.objects.filter(githubcredentials__email=gh_user['login']).exists():
+    if gh_user['login'] and User.objects.filter(githubcredentials__login=gh_user['login']).exists():
         meercat_user = User.objects.get(githubcredentials__login=gh_user['login'])
 
     if meercat_user is not None:
