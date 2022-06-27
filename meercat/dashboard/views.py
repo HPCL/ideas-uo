@@ -19,7 +19,6 @@ sys.path.insert(1, '../src')
 from gitutils.github_api import GitHubAPIClient
 
 from database.models import Project, ProjectRole, Commit, Diff, Issue, PullRequest, PullRequestIssue, Comment, EventPayload
-from oauth.utils import get_access_token, get_user, get_user_repos
 
 import subprocess
 import os, warnings
@@ -69,13 +68,7 @@ def staff_index(request):
 def project(request, *args, **kwargs):
     print("PROJECT")
     print( kwargs['pk'] )
-    
 
-    try:
-        access_token = get_access_token(code)
-        print("TOKEN {access_token}")
-    except:
-        pass
 
     pid = 30
     if kwargs['pk']:
@@ -420,7 +413,7 @@ def getFile(request):
     #    output = os.popen('fortran-linter ../'+pr.project.name+'/'+filename+' --syntax-only').read()
     #    linter_results = json.loads(output)
 
-    print("LINTER RESULTS: "+str(linter_results))    
+    #print("LINTER RESULTS: "+str(linter_results))    
 
     resultdata = {
         'filecontents': ''.join(lines),

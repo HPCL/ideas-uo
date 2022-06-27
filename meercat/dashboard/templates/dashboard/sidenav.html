@@ -1,5 +1,8 @@
+{% load static %}
 <div class="sidenav">
-    <a id="" href="#" onclick="" style="color:white; pointer-events: none; cursor: default;">MeerCAT</a>
+    <a id="" href="#" onclick="" style="color:white; pointer-events: none; cursor: default; margin-left:-10px;">
+        <img src="{% static 'images/meercat_logo_reverse.png' %}" width="36px"/> MeerCAT
+    </a>
     <p class="text-white">logged in as <br/> <b>{{ user.githubcredentials.login }}</b></p>
 
 
