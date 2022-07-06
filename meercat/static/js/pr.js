@@ -55,20 +55,39 @@ function showDocEditor(docfilename, difftext) {
 
             editor.setValue(result['filecontents']);
 
-            editor.markText({ line: 4, ch: 9 }, { line: 4, ch: 24 }, { className: "styled-background" });
-            editor.markText({ line: 6, ch: 12 }, { line: 6, ch: 22 }, { className: "styled-background" });
+            //editor.markText({ line: 3, ch: 0 }, { line: 3, ch: 13 }, { className: "styled-background" });
+            //editor.markText({ line: 6, ch: 12 }, { line: 6, ch: 22 }, { className: "styled-background" });
+            //editor.markText({ line: 4, ch: 2 }, { line: 4, ch: 6 }, { className: "styled-background" });
+
+            for(var i=0; i<result['linter_results'].length; i++){
+                editor.markText({ line: result['linter_results'][i].line-1, ch: result['linter_results'][i].column }, { line: result['linter_results'][i].line-1, ch: 100 }, { className: "styled-background" });
+            }
+
 
             editor.on("cursorActivity", function () {
 
                 var cursor = editor.getCursor();
+                //console.log(cursor);
 
-                if (cursor.line == 4 && cursor.ch >= 9 && cursor.ch <= 24) {
+                popupNode.remove();
+
+                /*if (cursor.line == 3 && cursor.ch >= 0 && cursor.ch <= 13) {
                     var text = document.createTextNode("We can say a bunch of stuff about why this is highlighted right here.");
                     popupNode.innerHTML = '';
                     popupNode.appendChild(text);
                     editor.addWidget({ line: 4, ch: 9 }, popupNode, true);
                 } else {
                     popupNode.remove();
+                }*/
+
+                for(var i=0; i<result['linter_results'].length; i++){
+
+                    if (cursor.line == result['linter_results'][i].line-1 && cursor.ch >= result['linter_results'][i].column) {
+                        var text = document.createTextNode(result['linter_results'][i].type +": "+ result['linter_results'][i].message);
+                        popupNode.innerHTML = '';
+                        popupNode.appendChild(text);
+                        editor.addWidget({ line: cursor.line, ch: 9 }, popupNode, true);
+                    }
                 }
             });
 
