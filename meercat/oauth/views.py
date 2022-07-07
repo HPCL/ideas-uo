@@ -17,7 +17,7 @@ def authorize_github(request):
     #If session has a token, try to login
     oauth_token = request.session.get('oauth_token', False)
     if oauth_token:
-        github = OAuth2Session(client_id, token=oauth_token)
+        github = OAuth2Session(client_id, token=oauth_token, scope=['repo'])
         gh_user = github.get('https://api.github.com/user').json()
 
         autheitcation_success = authenticate(request, gh_user)
