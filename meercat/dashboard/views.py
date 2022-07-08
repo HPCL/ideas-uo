@@ -97,7 +97,8 @@ def whitelist(request, *args, **kwargs):
 def project(request, *args, **kwargs):
     print("PROJECT")
     print( kwargs['pk'] )
-    
+
+
     pid = 30
     if kwargs['pk']:
         pid = int(kwargs['pk'])
@@ -433,14 +434,26 @@ def getFile(request):
     pr = list(PullRequest.objects.all().filter(id=prid).all())[0]
 
 
-    #with open('../ideas-uo/anl_test_repo/folder1/arithmetic.py', 'r') as f:
+    # Open and read the file
     with open('../'+pr.project.name+'/'+filename, 'r') as f:
         lines = f.readlines()
         f.close()
 
+    # If python file or fortran file, get linter results
+    linter_results = []
+    if filename.endswith('.py'): 
+        output = os.popen('export PYTHONPATH=${PYTHONPATH}:'+os.path.abspath('../'+pr.project.name)+' ; cd ../'+pr.project.name+' ; pylint --output-format=json '+filename).read()
+        linter_results = json.loads(output)
+
+    #if filename.endswith('.F90'): 
+    #    output = os.popen('fortran-linter ../'+pr.project.name+'/'+filename+' --syntax-only').read()
+    #    linter_results = json.loads(output)
+
+    #print("LINTER RESULTS: "+str(linter_results))    
 
     resultdata = {
-        'filecontents':''.join(lines),
+        'filecontents': ''.join(lines),
+        'linter_results': linter_results
     }
 
     return HttpResponse(
