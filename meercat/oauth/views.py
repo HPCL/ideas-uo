@@ -1,4 +1,5 @@
 from requests_oauthlib import OAuth2Session
+from oauthlib.oauth2.rfc6749.errors import AccessDeniedError
 from django.shortcuts import render, redirect
 from django.conf import settings
 from django.contrib import messages
@@ -10,8 +11,12 @@ from .forms import RegistrationForm
 import os
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1' # This is set so requests-oauthlib does not throw an error over HTTP
 
-client_id = settings.GH_CLIENT_ID
-client_secret = os.environ['GH_CLIENT_SECRET']
+if settings.OAUTH_DEVELOPMENT:
+    client_id = settings.GH_CLIENT_ID_DEV
+    client_secret = os.environ['GH_CLIENT_SECRET_DEV']
+else:
+    client_id = settings.GH_CLIENT_ID
+    client_secret = os.environ['GH_CLIENT_SECRET']
 
 def authorize_github(request):
     #If session has a token, try to login
@@ -26,8 +31,9 @@ def authorize_github(request):
 
     # If token not present or invalid, authorize again
     authorization_base_url = 'https://github.com/login/oauth/authorize'
+    scope = ['repo']
 
-    github = OAuth2Session(client_id, scope=['repo'])
+    github = OAuth2Session(client_id, scope=scope)
     authorization_url, state = github.authorization_url(authorization_base_url)
 
     request.session['oauth_state'] = state
@@ -36,8 +42,18 @@ def authorize_github(request):
 def callback(request):
     token_url = 'https://github.com/login/oauth/access_token'
     github = OAuth2Session(client_id, state=request.session['oauth_state'])
-    token = github.fetch_token(token_url, client_secret=client_secret,
+
+    try:
+        token = github.fetch_token(token_url, client_secret=client_secret,
                                authorization_response=request.build_absolute_uri())
+    except AccessDeniedError as ade:
+        print(ade)
+        messages.error(request, 'You have denied application access. To log in, please authorize through GitHub.')
+        return redirect('login')
+    except Exception as ex:
+        print(e)
+        messages.error(request, 'There was an error during GitHub authorization. Please contact the meercat team and try again later.')
+        return redirect('login')
 
     request.session['oauth_token'] = token
     gh_user = github.get('https://api.github.com/user').json()
