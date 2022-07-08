@@ -41,6 +41,7 @@ class Author(models.Model):
         return self.username
 
 class Project(models.Model):
+    id = models.AutoField(primary_key=True)
     source_url = models.URLField()
     name = models.CharField(max_length=64)
     last_updated = models.DateTimeField(auto_now=True)
@@ -252,6 +253,18 @@ class PullRequest(models.Model):
 
     def __str__(self):
         return f'Pull Request #{self.number}: {self.title}'
+
+
+class Notification(models.Model):
+    notes = models.TextField(blank=True)
+    modified_at = models.DateTimeField(auto_now=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    pull_request = models.ForeignKey(PullRequest, on_delete=models.CASCADE)
+    pending = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f'pr {self.pull_request.number}: notification for {user} ({"pending" if self.pending else "sent"})'
+
 
 class Milestone(models.Model):
     state = models.CharField(max_length=64)
