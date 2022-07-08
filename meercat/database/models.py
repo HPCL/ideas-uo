@@ -14,6 +14,17 @@ class GitHubCredentials(models.Model):
     def __str__(self):
         return self.login
 
+class GitLabCredentials(models.Model):
+    username = models.CharField(max_length=200)
+    email = models.EmailField(max_length=200)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = 'GitLab Credentials'
+
+    def __str__(self):
+        return self.login
+
 class Author(models.Model):
     username = models.CharField(max_length=64, null=True, blank=True)
     email = models.EmailField(null=True)
