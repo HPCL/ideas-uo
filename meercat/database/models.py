@@ -23,7 +23,7 @@ class GitLabCredentials(models.Model):
         verbose_name = 'GitLab Credentials'
 
     def __str__(self):
-        return self.login
+        return self.username
 
 class Author(models.Model):
     username = models.CharField(max_length=64, null=True, blank=True)

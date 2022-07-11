@@ -5,11 +5,19 @@
   <h1 class="my-5">OAuth</h1>
   <a
     href="{% url 'authorize_github' %}"
-    class="btn btn-primary oauth-login"
+    class="btn btn-primary d-inline-block"
     role="button"
     >
       Log in with GitHub
-      <span id="octocat"></span>
+      <span id="octocat" class="oauth-icon"></span>
+    </a>
+    <a
+    href="{% url 'authorize_gitlab' %}"
+    class="btn btn-primary d-inline-block"
+    role="button"
+    >
+      Log in with GitLab
+      <span id="gitlab-icon" class="oauth-icon"></span>
     </a>
   <p class="mt-5">Don't have an account? <a href="{% url 'register' %}">Register</a></p>
 </div>
