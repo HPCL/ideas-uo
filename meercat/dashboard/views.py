@@ -409,9 +409,9 @@ def getFile(request):
         output = os.popen('export PYTHONPATH=${PYTHONPATH}:'+os.path.abspath('../'+pr.project.name)+' ; cd ../'+pr.project.name+' ; pylint --output-format=json '+filename).read()
         linter_results = json.loads(output)
 
-    #if filename.endswith('.F90'): 
-    #    output = os.popen('fortran-linter ../'+pr.project.name+'/'+filename+' --syntax-only').read()
-    #    linter_results = json.loads(output)
+    if filename.endswith('.F90'): 
+        output = os.popen('fortran-linter ../'+pr.project.name+'/'+filename+' --syntax-only').read()
+        linter_results = json.loads(output.split('../'+pr.project.name+'/'+filename))
 
     #print("LINTER RESULTS: "+str(linter_results))    
 
