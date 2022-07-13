@@ -13,6 +13,11 @@
             <div id="spinner" class="spinner-border spinner-border-sm" role="status" style="display:none;">
             </div> Refresh Project
         </button>
+        
+        {% if show_whitelist %}
+            <a class="btn btn-sm btn-primary" href="{% url 'whitelist' pk=project.id %}" role="button">whitelist</a>
+        {% endif %}
+            
     </div>
 
     <br/>
@@ -99,5 +104,5 @@
 
 
 {% block script %}
-<script src="{% static 'js/project.bundle.js' %}"></script>
+<script src="{% static 'js/project.js' %}"></script>
 {% endblock script %}

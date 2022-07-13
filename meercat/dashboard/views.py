@@ -8,6 +8,8 @@ from django.template import loader
 from django.conf import settings
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import redirect, render
+from django.core.exceptions import ObjectDoesNotExist
+from django.contrib import messages
 
 import pandas as pd
 
@@ -64,6 +66,33 @@ def staff_index(request):
 
     return render(request, 'dashboard/staff_index.html', {'projects': projects})
 
+@login_required
+def whitelist(request, *args, **kwargs):
+    pid = 30
+    if kwargs['pk']:
+        pid = int(kwargs['pk'])
+
+    if not hasAccessToProject(request.user, pid):
+        return redirect('not_authorized')
+
+    project = Project.objects.get(id=pid)
+
+    if ProjectRole.objects.filter(project=project, user=request.user).exists():
+        project_role = ProjectRole.objects.get(project=project, user=request.user)
+    else:
+        messages.error('Sorry, we could not get your whitelist')
+        return redirect('project', pk=pid)
+
+    project_owner = project.source_url.split('/')[-2] #Owner always has index -2. HTTPS urls are of the form https://github.com/owner/repo.git
+    whitelist = project_role.whitelist 
+
+    if whitelist is None:
+        whitelist = ""
+
+    context = {'project_owner': project_owner, 'project': project, 'whitelist': whitelist}
+
+    return render(request, 'dashboard/whitelist.html', context)
+
 # Project view - should list general project info
 def project(request, *args, **kwargs):
     print("PROJECT")
@@ -80,6 +109,13 @@ def project(request, *args, **kwargs):
     template = loader.get_template('dashboard/project.html')
 
     project = list(Project.objects.all().filter(id=pid).all())[0]
+
+    # chose wether to display whitelist button if user is staff
+    show_whitelist = True
+    if request.user.is_staff:
+        has_project_role = ProjectRole.objects.filter(project=project, user=request.user).exists()
+        if not has_project_role:
+            show_whitelist = False
 
     prs = list(PullRequest.objects.all().filter(project=project).all())
     prs = sorted(prs, key=lambda d: d.number, reverse=True)
@@ -110,7 +146,7 @@ def project(request, *args, **kwargs):
         f.close()
 
 
-    context = {'project':project,'prs':prs, 'commits':commits, 'issues':issues, 'pythonloc':pythonloc, 'fortranloc':fortranloc, 'cloc':cloc, 'files':files, 'file':''.join(lines).replace('\\','\\\\').replace('\n', '\\n').replace('\'','\\\'')}
+    context = {'show_whitelist': show_whitelist, 'project':project,'prs':prs, 'commits':commits, 'issues':issues, 'pythonloc':pythonloc, 'fortranloc':fortranloc, 'cloc':cloc, 'files':files, 'file':''.join(lines).replace('\\','\\\\').replace('\n', '\\n').replace('\'','\\\'')}
 
     return HttpResponse(template.render(context, request))
 

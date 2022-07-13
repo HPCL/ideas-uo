@@ -100,3 +100,20 @@
     font-size: small;
     padding: .5rem 0;
 }
+
+.oauth-login {
+    line-height: 2rem;
+}
+
+#octocat {
+    background: url('/static/images/GitHub-Mark-Light-32px.png') no-repeat;
+    background-size: 28px 28px;
+    padding: 3px 16px;
+    margin-left: 10px;
+}
+
+#gitlab-icon {
+    background: url('/static/images/gitlab-logo-700.png') no-repeat;
+    background-size: 48px 48px;
+    padding: 12px 20px;
+}
