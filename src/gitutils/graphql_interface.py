@@ -154,7 +154,9 @@ def fetch_prs(owner, repo, source):
                 'createdAt': node['milestone']['createdAt'],
                 'updatedAt': node['milestone']['updatedAt']}
 
-
+            #need to modify graphql_queries to make this work.  See GraphQL docs on git hub.
+            #if source != Source.GITLAB:
+            #    pr['review_comments'] = [collect_comment(comment, source) for comment in node['review_comments']['nodes'] if comment]
 
             centry = 'notes' if source == Source.GITLAB else 'comments'
             pr['comments'] = [collect_comment(comment, source) for comment in node[centry]['nodes'] if comment]

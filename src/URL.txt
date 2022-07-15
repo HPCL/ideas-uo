@@ -47,3 +47,4 @@ https://github.com/Nek5000/Nek5000.git
 https://github.com/nwchemgit/nwchem.git
 https://github.com/spack/spack.git
 https://github.com/hypre-space/hypre
+https://github.com/Flash-X/Flash-X.git

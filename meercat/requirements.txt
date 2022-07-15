@@ -1,3 +1,4 @@
+arrow==1.2.2
 asgiref==3.5.0
 astroid==2.11.5
 black==22.3.0
