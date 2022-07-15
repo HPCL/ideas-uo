@@ -286,7 +286,7 @@ def refreshProject(request):
     username = settings.DATABASES['default']['USER']
     password = settings.DATABASES['default']['PASSWORD']
 
-    cmd = f'cd .. ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} 30'
+    cmd = f'cd .. ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {pid}'
     os.system(cmd)
     result = subprocess.check_output(cmd, shell=True)
     #print(result)
