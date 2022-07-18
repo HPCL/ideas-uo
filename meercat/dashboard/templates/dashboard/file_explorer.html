@@ -4,36 +4,174 @@
 {% csrf_token %}
 <h2>File Explorer</h2><br/>
 
-<b><i>File name:</i></b> {{file}}<br/>
+<b><i>File name:</i></b> {{file}} - <a href="{{project.source_url|slice:"0:-4"}}/blob/{{branch}}/{{file}}">Go to file on GitHub</a><br/>
 
 <div style="margin-left:15px; margin-top:8px;">
 
-    <h3>Functions defined in file:</h3>
+    <h3>Functions/Subroutines defined in file:</h3>
+
+                <table class="table" style="border:1px solid black;margin-left:auto;margin-right:auto;">
+                  <thead style="text-align:center">
+                    <tr>
+                        <th>Signature</th>
+                        <th>Doc String</th>
+                        <th>Doc String Comments</th>
+                        <th>Calling functions (test in red)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for func in functions %}
+                    <div id="myModal{{forloop.counter}}" class="modal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Docstring</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+            
+                <div class="" style="border:1px solid #ccc; margin-bottom:5px;">
+                        <pre>{{func.docstring}}</pre>
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+                    <tr>
+                        <td><b>{{func.signature_name}}</b>{{func.signature_params}}</td>
+                        <td style="text-align:center">{% if func.docstring %}<a href="#" onclick="$('#myModal{{forloop.counter}}').modal('show');">Yes</a>
+                            {% else %}
+                            
+                            {% endif %}
+
+                        </td>
+                        <td>{{func.result}}</td>
+                        <td>{% if func.supported %}
+                                <!-- [('folder1/arithmetic.py', 'list_sub', 'code'), ('folder1/test_arithmetic.py', 'test_sub', 'test')] -->
+                                {% for caller_list in func.callers %}
+                                    <a target='_blank' href="{{project.source_url|slice:"0:-4"}}/blob/{{branch}}/{{caller_list.0}}"
+                                     {% if caller_list.2 == 'test'%}
+                                        style='color:red'
+                                     {% endif %}
+                                        >Go to {{caller_list.0}} to find <b><i>{{caller_list.1}}</i></b> on GitHub</a><br/>
+<br>
+                                {% endfor %}
+                            {% else %}
+                                Project not currently supported.
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
 
     <h3>Developers:</h3>
 
-    <!-- authors = [{'author':author, 'number_commits': count, 'most_recent_commit':date,'commit_link':link}, ...] -->
 
-                <table class="table">
+                <table class="table" style="border:1px solid black;margin-left:auto;margin-right:auto;">
+                  <thead style="text-align:center">
+                    <tr>
+                        <th>Author</th>
+                        <th>Total number of commits</th>
+                        <th>Total lines changed</th>
+                        <th>Date of last commit</th>
+                        <th>Link to last commit</th>
+                    </tr>
+                  </thead>
+                  <tbody style="text-align:center">
                     {% for author in authors %}
                     <tr>
                         <td><a href="#" onclick="$('#myModal').modal('show');">{{author.author.username}} - {{author.author.email}}</a></td>
                         <td>{{author.number_commits}}</td>
+                        <td>{{author.lines}}</td>
                         <td>{{author.most_recent_commit}}</td>
-                        <td>{{author.commit_link}}</td>
+                        <td><a href="{{project.source_url|slice:"0:-4"}}/commit/{{author.link}}">Go to commit on GitHub</a></td>
                     </tr>
                     {% endfor %}
+                  </tbody>
                 </table>
+                {% if authors_len == 0 %}
+                    <div class='alert alert-warning'>
+                    Possible reasons for an empty table:
+                    <ul>
+                        <li>File moved/restructured (and not touched since)</li>
+                        <li>File imported from outside of project (and not touched since)</li>
+                    </ul>
+                    </div>
+                {% endif %}
 
     <h3>Change History</h3>
 
-    <h3>Pull Requests:</h3>
+        <a href="{{project.source_url|slice:"0:-4"}}/blame/{{branch}}/{{file}}">Go to file blame on GitHub</a>
 
-    <h3>Issues:</h3>
+    <p>
+    <h3>Included in Pull Requests:</h3>
 
-    <h3>Call Graph Location:</h3>
+                <table class="table" style="border:1px solid black;margin-left:auto;margin-right:auto;">
+                  <thead style="text-align:center">
+                    <tr>
+                        <th>PR #</th>
+                        <th>PR URL</th>
+                        <th>PR Issue link</th>
+                        <th>Notes</th>
+                    </tr>
+                  </thead>
+                  <tbody style="text-align:center">
+                    {% for pr in prs %}
 
-    <h3>Tests that use:</h3>
+                    <div id="prModal{{forloop.counter}}" class="modal" tabindex="-1">
+                        <div class="modal-dialog modal-xl">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">PR Notes</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                
+                                    <div class="" style="border:1px solid #ccc; margin-bottom:5px;">
+                                            <pre>{{pr.notes}}</pre>
+
+                                    </div>
+
+                                </div>
+                                <div class="modal-footer">
+
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <tr>
+                        <td>{{pr.number}}</td>
+                        <td><a href="{{pr.url}}">Go to PR on GitHub</a><br/></td>
+                        <td>{{pr.issue_url}}</td>
+                        <td style="text-align:center">{% if pr.notes %}<a href="#" onclick="$('#prModal{{forloop.counter}}').modal('show');">{{pr.notes_kind}}</a>
+                            {% else %}
+                            
+                            {% endif %}
+
+                        </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+
+    <p>
+    <h3>Related to Issues:</h3>
+
+    In progress.
+
+    <p>
+    <h3>Interested Parties:</h3>
+
+    In progress.
 
 
 
@@ -43,13 +181,13 @@
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Popup</h5>
+                <h5 class="modal-title">Docstring</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
             
                 <div class="" style="border:1px solid #ccc; margin-bottom:5px;">
-                        TESTING
+                        <pre id="docstring"/>
 
                         <!-- Add a button here that will call javascript 
                                 The javascript will use $ajax to submit yes/no to the server. 

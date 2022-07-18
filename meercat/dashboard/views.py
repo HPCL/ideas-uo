@@ -18,7 +18,7 @@ sys.path.insert(1, '/shared/soft/ideas_db/ideas-uo/src')
 sys.path.insert(1, '../src')
 from gitutils.github_api import GitHubAPIClient
 
-from database.models import Project, ProjectRole, Commit, Diff, Issue, PullRequest, PullRequestIssue, Comment, EventPayload
+from database.models import Project, ProjectRole, Commit, Diff, Issue, PullRequest, PullRequestIssue, Comment, EventPayload, CommitTag
 
 import subprocess
 import os, warnings
@@ -233,31 +233,491 @@ def archeology(request, *args, **kwargs):
 
 
 # File explorer
-#localhost:8080/dashboard/filex/25?filename=path  where 25 is test_anl id and path is to file
+#localhost:8080/dashboard/filex/25?branch=master&filename=path  where 25 is test_anl id and path is to file
 def file_explorer(request, *args, **kwargs):
 
     template = loader.get_template('dashboard/file_explorer.html')
+
 
     # Get PR id
     prid = 0
     if kwargs['pk']:
         prid = int(kwargs['pk'])
 
-    #pr = list(PullRequest.objects.all().filter(id=prid).all())[0]
+    #simulate project info
+    project_info = {
+        26: {'docstring_kind': 'robodoc', 'docstring_mandatory': {'NAME': False, 'SYNOPSIS': False, 'DESCRIPTION': False, 'ARGUMENTS':False},
+            'testing_kind': 'custom', 'main':'master'},  #flash5
+        30: {'docstring_kind': 'numpy', 'docstring_mandatory':{},
+            'testing_kind': 'pytest', 'main':'main'}     #anl_test_repo
+    }
+    project_callers = {}  #needs to be set somewhere global
+
+    project_callers[30] =  { #needs to be part of project profile
+         ('check_fum', 'folder1/arithmetic.py'): [],
+         ('concat',
+          'folder2/strings.py'): [('folder2/test_strings.py', 'test_concat', 'test')],
+         ('count', 'folder2/strings.py'): [],
+         ('foo',
+          'folder3/more_functions.py'): [('folder2/strings.py', 'fum', 'code')],
+         ('fum',
+          'folder2/strings.py'): [('folder1/arithmetic.py', 'check_fum', 'code')],
+         ('list_sub', 'folder1/arithmetic.py'): [],
+         ('sub',
+          'folder1/arithmetic.py'): [('folder1/arithmetic.py', 'list_sub', 'code'),
+          ('folder1/test_arithmetic.py', 'test_sub', 'test')],
+         ('test_concat', 'folder2/test_strings.py'): [],
+         ('test_sub', 'folder1/test_arithmetic.py'): []
+         } 
+
+    def get_callers(sig, file_name, call_dict):
+        end_name = sig.find('(')
+        if end_name==-1:
+            print(f'get_callers warning: did not find ( in {sig}')
+            return []
+        name = sig[:end_name].strip()
+        if (name, filename) not in call_dict:
+            print(f'get_callers warning: did not find {(name,filename)} in call_dict')
+            return []
+        return call_dict[(name, filename)]
+
+    #only need this if missing entry in project_callers
+    def get_tests(filename, signature, extension, testing_kind):
+        if extension == '.py' and testing_kind in ['pytest']:
+            return ''
+        return ''
+
+    project = list(Project.objects.all().filter(id=prid).all())[0]  #get project name
+
+    # Get branch
+    branch = ''
+    if request.GET.get('branch'):
+        branch = request.GET.get('branch')
+
+    #Refresh repo
+
+    #Switch to branch
 
     # Get filename
     filename = ''
     if request.GET.get('filename'):
         filename = request.GET.get('filename')
 
+    # Get file type
+    import os, mimetypes
+    name, extension = os.path.splitext(filename)
+    if not extension:
+        extension = mimetypes.guess_extension(filename)
+
+    docstring_kind = project_info[prid]['docstring_kind'] if prid in project_info else 'Unknown'
+    testing_kind = project_info[prid]['testing_kind'] if prid in project_info else 'Unknown'
+
+    # read file so can get signatures and doc strings
+
+    with open('../'+project.name+'/'+filename, 'r') as f:
+        lines = f.readlines()
+        f.close()
+
+    def get_py_signature(lines, i):
+        if not lines[i].startswith('def '): return i, ''
+        j = i
+        while not lines[i].strip().endswith(':'):
+            i += 1
+            if i >= len(lines):
+                print(f'get_signature warning: no colon found for {lines[j]}')
+                return i, ''
+        return i, ''.join([line for line in lines[j:i+1]]).strip('\n')[4:]
+
+    def get_py_doc_string(lines, i):
+        #skip over white space
+        while lines[i].strip()=='':
+            i+=1
+        #check for triple quotes
+        if lines[i].strip() not in ["'''", '"""']: return (i, [], 'No docstring found')  #did not find
+
+        i+=1  #move beyond opening quotes
+        docstring = []
+        issue = ''
+        while i<len(lines):
+            if lines[i].strip() in ["'''", '"""']: break  #found end
+
+            #keep adding lines
+            docstring.append(lines[i])
+            i += 1
+        else:
+            issue = 'No end found to docstring'
+
+        return (i, docstring, issue)
+        
+    def check_py_numpy_param_match(signature:str, doc:list):
+        doc_string = ''.join(doc)
+        import docstring_parser
+
+        '''
+          Parameters
+          ----------
+          x: int, real, complex
+             first operand
+          y: int, real, complex
+             second operand
+          round: positive int, optional
+             If None, does no rounding. Else rounds the result to places specified, e.g., 2.
+        '''
+        parsed_doc = docstring_parser.numpydoc.parse(doc_string)
+        params = parsed_doc.params
+        param_names = [p.arg_name for p in params]
+        param_types = [p.type_name for p in params]
+
+        #for google
+        '''
+
+            Args:
+                param1 (int): The first parameter.
+                param2 (str): The second parameter.
+
+            parsed_doc = docstring_parser.google.parse(doc)
+            params = parsed_doc.params
+            param_names = [p.arg_name for p in params]
+            param_types = [p.type_name for p in params]
+        '''
+
+        arg_names = get_py_signature_args(signature)
+
+        #check if 2 lists match up
+        check = [p==a for p,a in zip(param_names,arg_names)]
+        if not all(check):
+            return f'mismatch. ARGUMENTS: {param_names}'
+        return 'ARGUMENTS match'
+
+    def get_py_signature_args(signature):
+        i = signature.find('(')
+        if i==-1:
+            print(f'get_py_signature_args found no starting ( in {signature}')
+            return []
+        j = signature.find(')')
+        if j==-1:
+            print(f'get_py_signature_args found no ending ) in {signature}')
+            return []
+        raw_args = signature[i+1:j].split(',')
+        arg_names = []
+        for raw in raw_args:
+          i = raw.find(':')
+          if i==-1:
+            arg_names.append(raw.strip())
+          else:
+            arg_names.append(raw[:i].strip())
+        return arg_names
+
+    def check_robodoc_mandatory(mandatory:dict, doc_lines:list) -> list:
+        #mandatory {'NAME': False, 'SYNOPSIS': False, 'DESCRIPTION': False, 'ARGUMENTS':False}
+
+        mandatory_sections = mandatory.copy()
+        issues = []
+        j = 0
+        while j<len(doc_lines):
+            for section in mandatory_sections.keys():
+                if doc_lines[j].find(section) != -1:
+                    if mandatory_sections[section]:
+                        #duplicate section
+                        issues.append(f'{section} appears twice')
+                    else:
+                        mandatory_sections[section] = True  #all good
+            j+=1  #keep looking
+
+        for key,val in mandatory_sections.items():
+            if not val: issues.append(f'mandatory {key} missing')
+
+        return ['Mandatory sections present'] if not issues else issues
+
+    def check_numpy_mandatory(mandatory:list, doc_lines:list) -> list:
+        #doc_string = ''.join(doc)
+        #import docstring_parser
+
+        '''
+          Parameters
+          ----------
+          x: ...
+        '''
+        found = []
+        i = 0
+        while i<len(doc_lines):
+            for man in mandatory:
+                if lines[i].strip()==man and lines[i+1].strip()=='-'*len(man):
+                    #found section - is it empty?
+                    if lines[i+2].strip() != '':
+                        found.append((man, True))
+                    else:
+                        found.append((man, False))  #empty section
+                    i += 2
+                    break
+            else:
+                #did not break so move 1 line ahead
+                i += 1
+
+        issues = []
+        for man in mandatory:
+            ct = found.count((man,True))
+            cf = found.count((man,False))
+            if (ct+cf)==0:
+                issues.append(f'Missing mandatory section {man}')
+            elif ct==1 and cf==0:
+                continue #looks good
+            elif ct==0 and cf==1:
+                issues.append(f'Mandatory section {man} empty')
+                continue
+            elif (ct+cf)>1:
+                issues.append(f'Mandatory section {man} appears twice')
+                continue
+
+        return issues
+
+    def check_f90_robodoc_param_match(signature, doc_lines) -> str:
+        assert isinstance(signature, str)
+        assert isinstance(doc_lines, list)
+
+        '''
+        !! ARGUMENTS
+        !!  blkcnt - number of blocks
+        !!  blklst : block list
+        !!  nstep - current cycle number
+        !!  dt,ds - current time step length (2 args)
+        !!  stime - current simulation time
+        '''
+
+        #first find the ARGUMENTS section
+        j = 0
+        while j<len(doc_lines):
+            k = doc_lines[j].find('ARGUMENTS')
+            if k != -1: break  #found it
+            j+=1  #keep looking
+        else:
+            #Get here if while condition is false
+            return ['ARGUMENTS heading not found in docstring']
+
+        #found ARGUMENTS section - now get arguments
+        all_headers = ['NAME','SYNOPSIS','DESCRIPTION','PARAMETERS','RESULT','EXAMPLE','SIDE EFFECTS', 'NOTES','SEE ALSO']
+        param_names = []
+        param_types = []
+        j += 1  #move beyond ARGUMENTS line
+        while j<len(doc_lines):
+
+            #check if ends by a non-comment line
+            if not doc_lines[j].startswith('!!'):
+                break
+
+            #check if get to new section (so end of ARGUMENTS)
+            line = doc_lines[j][2:].strip()  #remove !! and padding
+            if line in all_headers:
+                break
+
+            #check if - or : in line. If so, argument name is defined
+            hyphen = line.find(' - ')
+            index = line.find(' : ') if hyphen == -1 else hyphen  #try colon if do not find hyphen 
+
+            #if not found, keep moving along
+            if index == -1:
+                j += 1
+                continue  #looking for - to signal arg name
+
+            #record arg name(s) found
+            arg_name = line[:index].strip()
+            for aname in arg_name.split(','):  #can have more than one name preceding hyphen
+                param_names.append(aname)
+            j += 1
+
+        #have param_names - now get actual params from sig
+        i = signature.find('(')
+        j = signature.find(')')
+        assert i != -1 and j != -1
+
+        #build list of actual params
+        arg_names = [arg.strip() for arg in signature[i+1:j].split(',')]
+
+        #check if 2 lists match up
+        check = [p==a for p,a in zip(param_names,arg_names)]
+        if not all(check):
+            return [f'mismatch. ARGUMENTS: {param_names}']
+        return ['ARGUMENTS match']
+
+    def get_robodoc_string_plus_sig(lines, i):
+        assert lines[i].startswith('!!****if*')  or lines[i].startswith('!!****f*')#assumes lines[i] is beginning of docstring
+
+        #returns
+        #   i: index of last line of signature
+        #   doc: list of lines of docstring preceding signature
+        #   sig: signature as string with no \n or &, e.g., 'foo(a,b,c)'
+        #   issue: string that describes issues found while parsing
+
+        j = i
+        i+=1  #move past header
+        #found header now look for ending
+        while not lines[i].startswith('!!**') and lines[i].startswith('!!'):
+            i+=1  #move to next
+            if i>=len(lines):
+                return i-1, lines[j:i-1], '', [f'No end found for docstring starting with {lines[j]}']
+        #found non comment line - assume ending
+        i+=1  #move past ending
+        doc = lines[j:i]
+
+        #now look for subroutine
+        while not lines[i].startswith('subroutine '):
+            i += 1
+            if i >= len(lines):
+                return i-1, doc, '', [f'No subroutine found for docstring {lines[j]}']
+        j = i
+        while not lines[i].strip().endswith(')'):
+            i += 1
+            if i >= len(lines):
+                return i-1, doc, ' '.join(lines[j:j+1]).strip('\n').replace('&', ' ')[10:], [f'No closing ) for subroutine {lines[j]}']
+
+        #looks good!
+        return i, doc, ' '.join(lines[j:i+1]).strip('\n').replace('&', ' ')[10:], []
+
+    ###################################
+    # Start main code
+
+    # handle flash5
+
+    # robodoc guidelines taken from https://flash.rochester.edu/site/flashcode/user_support/robodoc_standards_F3/
+
+    if extension == '.F90' and docstring_kind == 'robodoc':
+        function_info = []
+        i = 0
+        while i<len(lines):
+
+            #look for docstring
+            if lines[i].startswith('!!****f*') or lines[i].startswith('!!****if*'):
+                i, doc_lines, sig_string, collection_issue = get_robodoc_string_plus_sig(lines, i)  #parses out both docstring and signature
+                function_info.append((sig_string, doc_lines, collection_issue))
+                
+
+            #look for subroutine with missing docstring
+            elif lines[i].startswith('subroutine '):
+                #found subroutine while looking for docstring - so missing docstring
+                j = i
+                nodoc_issue = ['No docstring']
+                while not lines[i].strip().endswith(')'):
+                    i += 1
+                    if i >= len(lines):
+                        nodoc_issue.append(f'No ) found for {lines[j]} so added')
+                        function_info.append((' '.join(lines[j:i]).strip('\n').replace('&', ' ')[10:]+')', [], nodoc_issue))
+                        break
+                if i>=len(lines): break
+                #looks good
+                function_info.append((' '.join(lines[j:i+1]).strip('\n').replace('&', ' ')[10:], [], nodoc_issue))  #no doc string
+
+            i+=1  #keep looking
+
+        #done looking for docstrings and subroutines in file. Now work on callers and docstring alignment and mandatory fields
+
+        extended_info = []
+        mandatories = project_info[prid]['docstring_mandatory']
+        for sig, doc, issue in function_info:
+            param_issues  = check_f90_robodoc_param_match(sig, doc) if doc else []
+            mandatory_issues  = check_robodoc_mandatory(mandatories, doc) if doc else []
+            supported = False 
+            caller_list = []
+            call_dict = {} if prid not in project_callers else project_callers[prid]
+            if call_dict:
+                supported = True
+                caller_list = get_callers(sig, filename, call_dict)
+            print(issue, param_issues, mandatory_issues)
+            all_issues = issue + param_issues + mandatory_issues
+            extended_info.append((sig, doc, all_issues, supported, caller_list))  #add in new issues, and caller info
+
+        function_table = [{'signature_name': sig[:sig.find('(')], 'signature_params':sig[sig.find('('):].replace(',', ', '), 'docstring': ''.join(doc), 'result': issues, 'supported': supported, 'callers':callers} for sig, doc, issues, supported, callers in extended_info]
+
+    elif extension == '.py' and docstring_kind == 'numpy':  #anl_test_repo
+        function_info = []
+        i = 0
+        while i<len(lines):
+            line = lines[i]
+            sig_start = i
+            i, signature = get_py_signature(lines,i)
+            if not signature:
+                i += 1  #move on and keep searching
+                continue
+
+            #is signature line - check for doc string
+            issues = []
+            sig_end = i
+            i, doc, issue = get_py_doc_string(lines, sig_end+1)
+            issues.append(issue)
+            i += 1  #move beyond docstring
+
+            if doc:
+                param_issue = check_py_numpy_param_match(signature, doc)
+                mandatory_issue = check_numpy_mandatory(['params', 'returns', 'raises'], doc)
+                issues.append(param_issue)
+
+            supported = False 
+            caller_list = []
+            call_dict = {} if prid not in project_callers else project_callers[prid]
+            if call_dict:
+                supported = True
+                caller_list = get_callers(signature, filename, call_dict)
+
+            function_info.append((signature, doc, issues, supported, caller_list))
+
+        function_table = [{'signature_name': sig[:sig.find('(')], 'signature_params':sig[sig.find('('):].replace(',', ', '), 'docstring': ''.join(doc), 'result': ','.join([iss for iss in issues if iss]), 'supported': supported, 'callers':callers} for sig, doc, issues, supported, callers in function_info]
+
+    else:
+        function_table = []  #can't handle project yet
+
+
     # Build developer table
 
-    diffs = Diff.objects.all().filter(file_path=filename).all()
+    diffs = Diff.objects.all().filter(commit__project=project, file_path=filename).all()
+
+    #print(diffs)
+    author_loc = {}
+
+    for d in diffs:
+        body = d.body
+        author = d.commit.author
+        loc_count = body.count('\n+') + body.count('\n-')
+        if author in author_loc:
+            author_loc[author] += loc_count 
+        else:
+            author_loc[author] = loc_count
 
     # Get commits, authors for those (diffs)
-    #authors = set([d.commit.author for d in diffs])
-    info = [(d.commit.datetime, d.commit.author, d.commit.hash) for d in diffs]
 
+    info = [(d.commit.datetime, d.commit.author, d.commit.hash) for d in diffs]
+    commit_messages = [d.commit.message for d in diffs]
+    commit_hashes = [d.commit.hash for d in diffs]
+
+    tags = CommitTag.objects.all().filter(sha__in=commit_hashes)
+
+    prs = list(set(PullRequest.objects.all().filter(commits__in=tags)))  #all prs that go with file commits
+
+    pr_messages = [(pr.number, pr.url, pr.title, pr.description) for pr in prs]
+
+    '''
+    print('pr_messages', '\n')
+    for n, u, title, desc in pr_messages:
+        print(n, ' ', u)
+        print(title, ' ::: ', desc, '\n')
+    '''
+    pr_comments = list(Comment.objects.all().filter(pr__in=prs))
+
+    print('comments','\n')
+    for com in pr_comments:
+        print(com.author, ' ', com.body, '\n')
+
+    issues = list(Issue.objects.all().filter(url__in=[pri.issue.url for pri in PullRequestIssue.objects.all().filter(pr__in=prs).all()]))
+
+    print('issues', issues, '\n')
+
+    #issue_number = re.search(r'#\d+', pr.description)
+
+    #closed_issue_list = list(Issue.objects.all().filter(url=project.source_url.replace('.git', '/issues/'+issue_number.group()[1:])))
+
+    #issue_messsages = [(iss.title, iss.description) for iss in closed_issue_list]
+
+    #issue_comments = list(Comment.objects.all().filter(issue__in=closed_issue_list))
+
+    #print('issue comments', issue_comments)
     author_count = {}
     for date, author, link in info:
         if author in author_count:
@@ -267,17 +727,21 @@ def file_explorer(request, *args, **kwargs):
 
     new_info = []
     authors = []
-    for date, author, link in sorted(info, reverse=True):
+    for date, author, link in sorted(info, reverse=False):
         if author in authors: continue
-        new_info.append((date, author, author_count[author], link))
+        new_info.append((date, author, author_count[author], author_loc[author], link))
         authors.append(author)
 
-    dev_table = [{'author':author, 'number_commits': count, 'most_recent_commit':date,'commit_link':link} for date, author, count, link in new_info]
+
+    #see here for avoiding author alisases: https://towardsdatascience.com/string-matching-with-fuzzywuzzy-e982c61f8a84
+    #combine counts for same author with different aliases.
+
+    dev_table = [{'author':author, 'number_commits': count, 'lines': loc, 'most_recent_commit':date,'commit_link':link} for date, author, count, loc, link in new_info]
 
     # Build blame table
 
-    project = list(Project.objects.all().filter(id=prid).all())[0]  #get project name
 
+    '''
     cmd = f'cd ../{project.name} ; git blame {filename} > {filename[filename.rindex("/")+1:]}.blame'
     os.system(cmd)
     #result = subprocess.check_output(cmd, shell=True)
@@ -289,8 +753,23 @@ def file_explorer(request, *args, **kwargs):
     os.remove('../'+project.name+'/'+filename[filename.rindex('/')+1:]+'.blame') 
 
     print(f'blame:\n{lines}')
+    '''
 
-    # List PRs
+    def compute_issue_url(pr):
+        issue_tags = ['close', 'closes', 'closed', 'fix', 'fixes', 'fixed', 'resolve', 'resolves', 'resolved']
+        description = pr.description.strip()
+        for tag in issue_tags:
+            if tag+' #' in description or tag+'#' in description:
+                i = description.find('#')
+                issnum = int(description[i+1:])
+                issue_list = list(Issue.objects.all().filter(url=project.source_url.replace('.git', '/issues/'+issnum.group()[1:])))
+                issue_url = issue_list[0].url
+                return [tag, issue_url]
+        return ['','']
+
+    prs_table = sorted([{'number':pr.number, 'url':pr.url, 'issue_url': compute_issue_url(pr), 'notes':['Signature Change'] if pr.number==1279 else ["Work in Progress"], 'notes_kind':'Major' if pr.number==1279 else 'TBD'} for pr in prs], key=lambda d: d['number'])
+
+
 
     #diffs = Diff.objects.all().filter(file_path=filename).all()
 
@@ -298,15 +777,17 @@ def file_explorer(request, *args, **kwargs):
 
     #diffs = Diff.objects.all().filter(file_path=filename).all()
 
-    # Place in call graph
-
-    #???
-
-    # List tests that use
-
-    #???
-
-    context = {'file':filename,'authors':dev_table}
+    context = {'file':filename,
+                 'project': project,
+                 'language': extension,
+                 'documentation': docstring_kind,
+                 'branch':branch,
+                 'authors':dev_table,
+                 'authors_len': len(dev_table),
+                 'functions_supported': True if function_table else False,
+                 'functions':function_table,
+                 'prs':prs_table
+                 }
 
     return HttpResponse(template.render(context, request))
 
@@ -782,3 +1263,559 @@ def hasAccessToPR(user, pr_id):
 
     project_id = PullRequest.objects.get(id=pr_id).project.id
     return ProjectRole.objects.filter(user__id=user.id, project=project_id).exists()
+
+#localhost:8080/dashboard/firstresponder/26?prid=17
+def firstresponder(request, *args, **kwargs):
+
+    #template = loader.get_template('dashboard/firstresponder.html')
+
+
+    # Get PR id
+    if kwargs['pk']:
+        proj_id = int(kwargs['pk'])
+    else:
+        return HttpResponse(
+            json.dumps('Missing project'),
+            content_type='application/json'
+            )
+
+    project_info = get_project_info(proj_id)
+
+    if project_info==None:
+        return HttpResponse(
+            json.dumps(f'Project id missing from project_info {proj_id}'),
+            content_type='application/json'
+            )
+
+    proj_list = list(Project.objects.all().filter(id=proj_id).all())
+    if not proj_list:
+        return HttpResponse(
+            json.dumps(f'Unknown project {proj_id}'),
+            content_type='application/json'
+            )
+
+    proj_object = proj_list[0]
+
+    if request.GET.get('prid'):
+        pr_id = request.GET.get('prid')
+    else:
+        return HttpResponse(
+            json.dumps(f'Missing Pull Request number'),
+            content_type='application/json'
+            )
+
+    pr_list = list(PullRequest.objects.all().filter(id=pr_id).all())
+    if not pr_list:
+        return HttpResponse(
+            json.dumps(f'Illegal Pull Request number {pr_id}'),
+            content_type='application/json'
+            )
+
+    pr_object = pr_list[0]
+
+    pr_info = first_responder_function(proj_object, pr_object)
+
+    return HttpResponse(
+        json.dumps(pr_info),
+        content_type='application/json'
+        )
+
+def first_responder_function(proj_object, pr_object):
+
+    proj_name = proj_object.name  #get project name
+    proj_id = proj_object.id
+    project_info = get_project_info(proj_id)  #see functions at end
+    if project_info==None:
+        return ['', [f'Project id missing from project_info {proj_id}']]
+
+    if 'docstring_kind' in project_info:
+        docstring_kind = project_info['docstring_kind']
+    else:
+        return ['', [f"Can't find docstring_kind"]]
+
+    #get set up on right feature branch
+    commits_list = list(Commit.objects.all().filter(hash__in=[committag.sha for committag in pr_object.commits.all()]))
+    if not commits_list:
+        message = f'''# The MeerCat Pull-Request Assistant is stuck
+
+## It finds no commits for this PR!
+
+
+[Please see the Pull-Request Assistant page for more detail.](http://meercat.org)
+'''
+        return [message, []]
+
+    branch = commits_list[0].branch
+    cmd = f'cd ../{proj_name} ; git checkout {branch}'
+    try:
+        os.system(cmd)
+    except:
+        return ['', [f'Failure to checkout branch {cmd}']]
+
+    #get all files in PR
+    diffs = list(Diff.objects.all().filter(commit__in=[c for c in commits_list]))
+    filenames = [d.file_path for d in diffs]
+    #Get just unique filenames
+    filenames_set = set(filenames)
+    filenames = list(filenames_set)
+
+    file_lines = []
+    for filename in filenames:
+        name, extension = os.path.splitext(filename)
+        if (extension and extension in project_info['extensions']) or (not extension and filename in project_info['filenames']):
+            with open('../'+proj_name+'/'+filename, 'r') as f:
+                lines = f.readlines()
+                f.close()
+            file_lines.append((name,  extension, lines))
+        else:
+            print(f'Uncheckable currently: {filename}')
+            file_lines.append((name,  extension, None))
+
+    #Gather info on each file in file_lines
+    all_files = []
+    for name, extension, lines in file_lines:
+        if lines and extension == '.F90' and docstring_kind == 'robodoc':  #Flash5
+            function_info = []
+            i = 0  #start at top of file
+            while i<len(lines):
+
+                #look for docstring  (*if* says internal)
+                if lines[i].startswith('!!****f*') or lines[i].startswith('!!****if*'):
+                    doc_start = i
+                    i, doc_lines, sig_string, collection_issue = get_robodoc_string_plus_sig(lines, i)  #parses out both docstring and signature, i last line of doc
+                    function_info.append((sig_string, doc_lines, doc_start, collection_issue))
+                    
+                #look for subroutine with missing docstring
+                elif lines[i].startswith('subroutine '):
+                    #found subroutine while looking for docstring - so missing docstring
+                    j = i
+                    nodoc_issue = ['No docstring']
+
+                    #deal with multi-line signature - uses & as line continuation
+                    while not lines[i].strip().endswith(')'):
+                        i += 1
+                        if i >= len(lines):
+                            nodoc_issue.append(f'No ) found for {lines[j]} so added')
+                            function_info.append((' '.join(lines[j:i]).strip('\n').replace('&', ' ')[10:]+')', [], nodoc_issue))
+                            break
+                    if i>=len(lines): break
+
+                    #found good signature
+                    function_info.append((' '.join(lines[j:i+1]).strip('\n').replace('&', ' ')[10:], [], nodoc_issue))  #no doc string
+
+                i+=1  #keep looking through file
+
+            #done looking for docstrings and subroutines in file. Now work on docstring alignment and mandatory fields
+
+            extended_info = []
+            mandatories = project_info['docstring_mandatory']  #what are mandatory fields?
+            for sig, doc, start, issue in function_info:
+                param_issues  = check_f90_robodoc_param_match(sig, doc, start) if doc else []  #check if params section aligns with signature
+                mandatory_issues  = check_robodoc_mandatory(mandatories, doc, start) if doc else []  #check if all manadatory sections present and not blank
+                all_issues = issue + param_issues + mandatory_issues
+                extended_info.append((sig, doc, all_issues))  #add in new issues
+
+            file_table = [{'signature_name': sig[:sig.find('(')], 'signature_params':sig[sig.find('('):].replace(',', ', '), 'docstring': ''.join(doc), 'result': issues} for sig, doc, issues in extended_info]
+
+            #done with F90 and robodocs parsing case
+
+        elif lines and extension == '.py' and docstring_kind == 'numpy':  #anl_test_repo
+            function_info = []
+            i = 0
+
+            #find function signature then look for docstring following
+            while i<len(lines):
+                line = lines[i]
+                sig_start = i
+                i, signature = get_py_signature(lines,i)
+                if not signature:
+                    i += 1  #move on and keep searching
+                    continue
+
+                #is signature line - check for doc string
+                sig_end = i
+                i, doc_triple, issue = get_py_doc_string(lines, sig_end)  #doc_triple: [docstring, doc_start, doc_end], i = last line of doc string
+                mandatories = project_info['docstring_mandatory']
+                param_issues = check_py_numpy_param_match(signature, doc_triple) if doc_triple else []
+                mandatory_issues  = check_numpy_mandatory(mandatories, doc_triple) if doc_triple else []
+                print(signature,issue, param_issues, mandatory_issues)
+                all_issues = issue + param_issues + mandatory_issues
+                function_info.append((signature, doc_triple, all_issues))
+
+                i += 1  #move beyond docstring
+
+            file_table = [{'signature_name': sig[:sig.find('(')], 'signature_params':sig[sig.find('('):].replace(',', ', '), 'docstring': doc_triple, 'result': issues} for sig, doc_triple, issues in function_info]
+
+            #done with py and numpy parsing case
+        else:
+            print(f'failed on {docstring_kind} and {extension}')
+            file_table = []  #can't handle project yet
+
+        all_files.append((name+extension, file_table))
+
+    #all_files:
+    #   name, file_table
+    #       {sig, params, doc, issues}  #issues = ('...', j=file line number)
+    #       {sig, params, doc, issues}
+    #       ...
+
+    k = 0
+    n = len(all_files)
+    for name,ft in all_files:
+        for sig_dict in ft:
+            if sig_dict['result']:
+                k += 1
+                break
+
+    message = f'''# The MeerCat Pull-Request Assistant has information for you
+
+## {k} out of {n} files in this PR were found to have issues.
+
+## We have suggestions for adding a few more tags.
+
+[Please see the Pull-Request Assistant page for more detail.](http://meercat.org)
+'''
+
+    return [message, all_files]
+
+
+#### Simulating global data about projects
+
+def get_project_info(project_id):
+    #simulate project info
+    project_info = {
+        26: {'docstring_kind': 'robodoc',
+             'docstring_mandatory': ['NAME', 'SYNOPSIS', 'DESCRIPTION', 'ARGUMENTS'],
+            'testing_kind': 'custom',
+             'main':'master',
+            'filenames':[],
+            'extensions':['.F90']},  #flash5
+
+        30: {'docstring_kind': 'numpy',
+             'docstring_mandatory':['Parameters', 'Returns', 'Raises'],
+            'testing_kind': 'pytest',
+             'main':'main',
+            'filenames':[],
+            'extensions':['.py', '.F90']}     #anl_test_repo
+    }
+    return project_info[project_id] if project_id in project_info else None
+
+def get_callers(sig, file_name):
+    project_callers[30] =  { #needs to be part of project profile
+     ('check_fum', 'folder1/arithmetic.py'): [],
+     ('concat',
+      'folder2/strings.py'): [('folder2/test_strings.py', 'test_concat', 'test')],
+     ('count', 'folder2/strings.py'): [],
+     ('foo',
+      'folder3/more_functions.py'): [('folder2/strings.py', 'fum', 'code')],
+     ('fum',
+      'folder2/strings.py'): [('folder1/arithmetic.py', 'check_fum', 'code')],
+     ('list_sub', 'folder1/arithmetic.py'): [],
+     ('sub',
+      'folder1/arithmetic.py'): [('folder1/arithmetic.py', 'list_sub', 'code'),
+      ('folder1/test_arithmetic.py', 'test_sub', 'test')],
+     ('test_concat', 'folder2/test_strings.py'): [],
+     ('test_sub', 'folder1/test_arithmetic.py'): []
+     } 
+    end_name = sig.find('(')
+    if end_name==-1:
+        print(f'get_callers warning: did not find ( in {sig}')
+        return []
+    name = sig[:end_name].strip()
+    if (name, filename) not in project_callers:
+        print(f'get_callers warning: did not find {(name,filename)} in project_callers')
+        return []
+    return project_callers[(name, filename)]
+
+
+#### Utility functions for parsing files and other things
+
+def get_robodoc_string_plus_sig(lines, i):
+    assert lines[i].startswith('!!****if*')  or lines[i].startswith('!!****f*')#assumes lines[i] is beginning of docstring
+
+    #parameters
+    #   lines: list of lines (strings) to search
+    #   i: index in lines to start search
+
+    #Assumes
+    #   assumes lines[i] is start of robodoc string in Fortran
+
+    #returns
+    #   i: index of last line of signature
+    #   doc: list of lines of docstring preceding signature (maybe empty)
+    #   sig: signature as string with no \n or &, e.g., 'foo(a,b,c)'
+    #   issue: list of strings that describe issues found while parsing
+
+    j = i
+    i+=1  #move past header
+    #found header now look for ending
+    while not lines[i].startswith('!!**') and lines[i].startswith('!!'):
+        i+=1  #move to next
+        if i>=len(lines):
+            return i-1, lines[j:i-1], '', [(f'No end found for docstring', j)]
+    #found non comment line - assume ending
+    i+=1  #move past ending
+    doc = lines[j:i]
+
+    #now look for subroutine
+    while not lines[i].startswith('subroutine '):
+        i += 1
+        if i >= len(lines):
+            return i-1, doc, '', [(f'No subroutine found for docstring', j)]
+    j = i
+    while lines[i].find(')') == -1:
+        i += 1
+        if i >= len(lines):
+            return i-1, doc, ' '.join(lines[j:j+1]).strip('\n').replace('&', ' ')[10:], [(f'No closing ) for subroutine', j)]
+
+    #looks good!
+    raw_sig = ' '.join(lines[j:i+1]).strip('\n').replace('&', ' ')[10:]
+    return i, doc, raw_string[:, raw_string.find(')')], []
+
+def check_f90_robodoc_param_match(signature, doc_lines, doc_start) -> str:
+    assert isinstance(signature, str)
+    assert isinstance(doc_lines, list)
+
+    '''
+    !! ARGUMENTS
+    !!  blkcnt - number of blocks
+    !!  blklst : block list
+    !!  nstep - current cycle number
+    !!  dt,ds - current time step length (2 args)
+    !!  stime - current simulation time
+    '''
+
+    #first find the ARGUMENTS section
+    j = 0
+    while j<len(doc_lines):
+        k = doc_lines[j].find('ARGUMENTS')
+        if k != -1: break  #found it
+        j+=1  #keep looking
+    else:
+        #Get here if while condition is false
+        return [('ARGUMENTS heading not found in docstring', doc_start)]
+    arg_start = j
+    #found ARGUMENTS section - now get arguments
+    all_headers = ['NAME','SYNOPSIS','DESCRIPTION','PARAMETERS','RESULT','EXAMPLE','SIDE EFFECTS', 'NOTES','SEE ALSO']
+    param_names = []
+    param_types = []
+    j += 1  #move beyond ARGUMENTS line
+    while j<len(doc_lines):
+
+        #check if ends by a non-comment line
+        if not doc_lines[j].startswith('!!'):
+            break
+
+        #check if get to new section (so end of ARGUMENTS)
+        line = doc_lines[j][2:].strip()  #remove !! and padding
+        if line in all_headers:
+            break
+
+        #check if - or : in line. If so, argument name is defined
+        hyphen = line.find(' - ')
+        index = line.find(' : ') if hyphen == -1 else hyphen  #try colon if do not find hyphen 
+
+        #if not found, keep moving along
+        if index == -1:
+            j += 1
+            continue  #looking for - to signal arg name
+
+        #record arg name(s) found
+        arg_name = line[:index].strip()
+        for aname in arg_name.split(','):  #can have more than one name preceding hyphen
+            param_names.append(aname)
+        j += 1
+
+    #have param_names - now get actual params from sig
+    i = signature.find('(')
+    j = signature.find(')')
+    assert i != -1 and j != -1
+
+    #build list of actual params
+    arg_names = [arg.strip() for arg in signature[i+1:j].split(',')]
+
+    #check if 2 lists match up
+    issues = []
+    for p,a in zip(param_names,arg_names):
+        if p==a: continue
+        issues.append((f'mismatch. ARGUMENTS: {(p,a)}', doc_start+arg_start))
+    return issues
+
+def check_robodoc_mandatory(mandatory_sections:list, doc_lines:list, doc_start:int) -> list:
+    #mandatory ['NAME', 'SYNOPSIS', 'DESCRIPTION', 'ARGUMENTS']
+
+    found_mandatory_sections = []
+    issues = []
+    j = 0
+    while j<len(doc_lines):
+        for section in mandatory_sections:
+            if doc_lines[j].find(section) != -1: found_mandatory_sections.append(section)
+        j+=1  #keep looking
+
+    diff = set(mandatory_sections) - set(found_mandatory_sections)
+
+    if diff: issues.append((f'Mandatory sections missing: {diff}', doc_start))
+
+    if len(mandatory_sections) < len(found_mandatory_sections): issues.append((f'Mandatory section(s) appear twice: {found_mandatory_sections}', doc_start))
+
+    return issues
+
+def get_py_signature(lines, i):
+        if not lines[i].startswith('def '): return i, ''
+        j = i
+        while lines[i].find(':') == -1:
+            i += 1
+            if i >= len(lines):
+                print(f'get_signature warning: no ending colon found for {lines[j]}')
+                return i, ''
+        raw_sig = ''.join([line for line in lines[j:i+1]]).strip('\n')[4:]  #could have comment at end
+        return i, raw_sig[:raw_sig.find(':')]
+
+def get_py_doc_string(lines, i):
+    
+    sig = i
+    i += 1 #move past signature
+
+    while lines[i].strip()=='':  #skip over white space
+        i+=1
+
+    #check for triple quotes
+    if lines[i].strip() not in ["'''", '"""']: return (i, [], [('No docstring found', sig)])  #did not find
+    doc_start = i
+    i+=1  #move beyond opening quotes
+    docstring = []
+    issue = []
+    while i<len(lines):
+        if lines[i].strip() in ["'''", '"""']:
+            doc_end = i
+            break  #found end
+
+        #keep adding lines
+        docstring.append(lines[i])
+        i += 1
+    else:
+        issue = [('No end found to docstring', doc_start)]
+        doc_end = i-1  #last line of file
+
+    return (i, [docstring, doc_start, doc_end], issue)
+    
+def check_py_numpy_param_match(signature:str, doc:list):
+    #doc: [doclist, doc_start, doc_end]
+    doc_list, doc_start, doc_end = doc
+    doc_string = ''.join(doc_list)
+    import docstring_parser
+
+    '''
+      Parameters
+      ----------
+      x: int, real, complex
+         first operand
+      y: int, real, complex
+         second operand
+      round: positive int, optional
+         If None, does no rounding. Else rounds the result to places specified, e.g., 2.
+    '''
+    parsed_doc = docstring_parser.numpydoc.parse(doc_string)
+    params = parsed_doc.params
+    param_names = [p.arg_name for p in params]
+    param_types = [p.type_name for p in params]
+
+    #for google
+    '''
+
+        Args:
+            param1 (int): The first parameter.
+            param2 (str): The second parameter.
+
+        parsed_doc = docstring_parser.google.parse(doc)
+        params = parsed_doc.params
+        param_names = [p.arg_name for p in params]
+        param_types = [p.type_name for p in params]
+    '''
+
+    arg_names = get_py_signature_args(signature)
+
+    #check if 2 lists match up
+    check = [p==a for p,a in zip(param_names,arg_names)]
+    if  all(check): return []
+    i = 0
+    while i<len(doc_lines):
+        if doc_lines[i].strip()=='Parameters' and doc_lines[i+1].strip()=='-'*len('Parameters'):
+            param_start = doc_start + i
+            break
+        i += 1
+    else:
+        #did not break so did not find, weird
+        print(f'Warning: Parameters not found in {doc}')
+        param_start = doc_start
+    return [(f'mismatch. Parameters: {param_names}', param_start)]
+
+
+def get_py_signature_args(signature):
+    i = signature.find('(')
+    if i==-1:
+        print(f'get_py_signature_args found no starting ( in {signature}')
+        return []
+    j = signature.find(')')
+    if j==-1:
+        print(f'get_py_signature_args found no ending ) in {signature}')
+        return []
+    raw_args = signature[i+1:j].split(',')
+    arg_names = []
+    for raw in raw_args:
+      i = raw.find(':')
+      if i==-1:
+        arg_names.append(raw.strip())
+      else:
+        arg_names.append(raw[:i].strip())
+    return arg_names
+
+def check_numpy_mandatory(mandatory:list, doc:list) -> list:
+    #doc_string = ''.join(doc)
+    #import docstring_parser
+
+    doc_list, doc_start, doc_end = doc
+
+    '''
+      Parameters
+      ----------
+      x: ...
+    '''
+    found = []
+    i = 0
+    while i<len(doc_list):
+        for man in mandatory:
+            if doc_list[i].strip()==man and doc_list[i+1].strip()=='-'*len(man):
+                #found section - is it empty?
+                if doc_list[i+2].strip() != '':
+                    found.append((man, True))
+                else:
+                    found.append((man, False))  #empty section
+                i += 2
+                break
+        else:
+            #did not break so move 1 line ahead
+            i += 1
+
+    issues = []
+    for man in mandatory:
+        ct = found.count((man,True))
+        cf = found.count((man,False))
+        if (ct+cf)==0:
+            issues.append((f'Missing mandatory section {man}', doc_start))
+        elif ct==1 and cf==0:
+            continue #looks good
+        elif ct==0 and cf==1:
+            issues.append((f'Mandatory section {man} empty', doc_start))
+            continue
+        elif (ct+cf)>1:
+            issues.append((f'Mandatory section {man} appears twice', doc_start))
+            continue
+
+    return issues
+
+
+
+
+
+

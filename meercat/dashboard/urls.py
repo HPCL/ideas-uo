@@ -13,6 +13,7 @@ urlpatterns = [
     path('pr/<int:pk>', views.pr, name='pr'),
     path('archeology/<int:pk>', views.archeology, name='archeology'),
     path('filex/<int:pk>', views.file_explorer, name='file_explorer'),
+    path('firstresponder/<int:pk>', views.firstresponder, name='firstresponder'),
     path('refreshproject', views.refreshProject, name='refreshproject'),
     path('createpatch', views.createPatch, name='createpatch'),
     path('branches', views.branches, name='branches'),
