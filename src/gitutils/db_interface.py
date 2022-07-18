@@ -160,7 +160,7 @@ class DatabaseInterface:
 
             for pr in prs:
                 #ignore PRs that are older than the since date, unless updated after since.
-                since_time = arrow.get(since).datetime - datetime.timedelta(hours=60)
+                since_time = arrow.get(since).datetime - datetime.timedelta(hours=240)
 
                 if arrow.get(pr['updatedAt']) >= since_time:
                     username = pr['author']['username']
@@ -430,7 +430,7 @@ class DatabaseInterface:
             for issue in issues:
 
                 #ignore issues that are older than the since date, unless updated after since.
-                since_time = arrow.get(since).datetime - datetime.timedelta(hours=60)
+                since_time = arrow.get(since).datetime - datetime.timedelta(hours=240)
 
                 if arrow.get(issue['updatedAt']) >= since_time:
                     username = issue['author']['username']
@@ -729,7 +729,10 @@ class DatabaseInterface:
     def process_project(self, url, since, until):
         name = self.get_git_name(url)
         branches = not self.args.no_branches
-        since = arrow.get(since).datetime.isoformat()
+        try:
+            since = arrow.get(since).datetime.isoformat()
+        except:
+            pass    
         #until = arrow.get(until).datetime.isoformat()
         logger.debug(f'{name}: Mining repository. This may take a while...')
 
