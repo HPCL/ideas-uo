@@ -33,6 +33,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     'sansa.cs.uoregon.edu',
+    '127.0.0.1',
 ]
 
 # Messages constants, used for bootstrap styling
@@ -148,10 +149,7 @@ STATICFILES_DIRS = [
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
-
-# GitHub OAuth client ID. This is public information.
-GH_CLIENT_ID = 'e7c936f5c399dc9a9184'
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_REDIRECT_URL = 'index'
 
@@ -160,3 +158,12 @@ LOGIN_URL = 'login'
 
 # Output sent emails to console. Use in development only.
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# GitHub/GitLab OAuth client ID. This is public information.
+GH_CLIENT_ID = 'e7c936f5c399dc9a9184'
+
+# GitHub OAuth development settings. If OAUTH_DEVELOPMENT is true, another OAuth App 
+# for development purposes will be used.
+OAUTH_DEVELOPMENT = True
+GH_CLIENT_ID_DEV = 'b44b1c4126f79ca90fb3'
+GL_CLIENT_ID_DEV = 'b29490c6207a6eb48fee63ac330b4f363c11c36bfc501dcd0cd0f85b83294554'

@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
 
-from .models import GitHubCredentials, Author, Project, ProjectAuthor, Commit, Diff, Issue, PullRequest, Comment, ProjectRole
+from .models import GitHubCredentials, GitLabCredentials, Author, Project, ProjectAuthor, Commit, Diff, Issue, PullRequest, Comment, ProjectRole
  
 # Register your models here.
 class GitHubCredentialsInline(admin.StackedInline):
@@ -10,8 +10,13 @@ class GitHubCredentialsInline(admin.StackedInline):
     can_delete = False
     verbose_name = 'GitHub Credentials'
 
+class GitLabCredentialsInline(admin.StackedInline):
+    model = GitLabCredentials
+    can_delete = False
+    verbose_name = 'GiLab Credentials'
+
 class UserAdmin(BaseUserAdmin):
-    inlines = (GitHubCredentialsInline,)
+    inlines = (GitHubCredentialsInline, GitLabCredentialsInline)
 
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
