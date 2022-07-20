@@ -183,6 +183,7 @@ $.ajax({
             var doccommits = "";
             var docdiffs = "";
             var alinks = "";
+            var issues = "N/A";
             for (var j = 0; j < result['diffcommits'][i]['commits'].length; j++) {
 
                 var diff = result['diffcommits'][i]['commits'][j]['diff'];
@@ -202,9 +203,16 @@ $.ajax({
                 for (var k = 0; k < result['prcommits'].length; k++) {
                     if (result['diffcommits'][i]['commits'][j]['commit'] == result['prcommits'][k]['hash']) {
                         doccommits += "<a target='_blank' href='" + result['source_url'] + "/commit/" + result['diffcommits'][i]['commits'][j]['commit'] + "'>" + result['diffcommits'][i]['commits'][j]['commit'].substring(0, 7) + "</a><br/>";
-                        docdiffs += "<button class='btn btn-sm btn-primary' onclick='showDocEditor(\"" + result['diffcommits'][i]['filename'] + "\",\"" + "DIFF STUFF TO GO HERE" + "\");'>View Docs</button><br/>";
+                        docdiffs += "<button class='btn btn-sm btn-primary' onclick='showDocEditor(\"" + result['diffcommits'][i]['filename'] + "\",\"" + "DIFF STUFF TO GO HERE" + "\");'>View File in Editor</button><br/>";
                         alinks += "<a class='btn btn-sm btn-primary' href='/dashboard/archeology/" + pr + "?filename=" +result['diffcommits'][i]['filename']+ "'>View Archeology</a><br/>";
 
+                    }
+                }
+
+                //see if there are docstring issues
+                for (var k = 0; k < result['docstring_results'][1].length; k++) {
+                    if (result['diffcommits'][i]['filename'] == result['docstring_results'][1][k][0]) {
+                        issues = result['docstring_results'][1][k][1].length;
                     }
                 }
 
@@ -219,11 +227,11 @@ $.ajax({
                 "</td></tr>");
 
             doctable.append("<tr><td>" +
-                result['diffcommits'][i]['filename'] +
+                    "<a href='/dashboard/pr/"+pr+"'>"+result['diffcommits'][i]['filename'] +"</a>"+
                 "</td><td>" +
-                doccommits +
+                    issues +
                 "</td><td>" +
-                docdiffs +
+                    docdiffs +
                 "</td></tr>");
 
             cqtable.append("<tr><td>"+
