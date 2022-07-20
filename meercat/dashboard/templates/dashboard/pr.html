@@ -500,22 +500,49 @@
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
-            <h5 class="modal-title">Documentation Helper</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title">Documentation Helper</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
             
-            <p>Suggestions highlighted for file <b><i><span id="dochelpertitle">folder1/arithmetic.py</span></i></b></p>
+                <p>Suggestions highlighted for file <b><i><span id="dochelpertitle">folder1/arithmetic.py</span></i></b></p>
 
-            <div class="" style="border:1px solid #ccc; margin-bottom:5px;">
+                <div class="" style="border:1px solid #ccc; margin-bottom:5px;">
 
-                <textarea id="dochelper"></textarea>
+                    <textarea id="dochelper"></textarea>
+                </div>
             </div>
             <div class="modal-footer">
-            <button id="patchbutton" class="btn btn-primary" onclick="patchFile();">
-                Download Patch
-            </button>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button id="patchbutton" class="btn btn-primary" onclick="patchFile();">
+                    Download Patch
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="codeQualityModal" class="modal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Code Quality Helper</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                
+                <p>Suggestions highlighted for file <b><i><span id="cqhelpertitle">folder1/arithmetic.py</span></i></b></p>
+
+                <div class="" style="border:1px solid #ccc; margin-bottom:5px;">
+
+                    <textarea id="cqhelper"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="patchbutton2" class="btn btn-primary" onclick="cqPatchFile();">
+                    Download Patch
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>

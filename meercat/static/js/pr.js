@@ -35,6 +35,14 @@ var editor = CodeMirror.fromTextArea(document.getElementById("dochelper"), {
     styleSelectedText: true
 });
 
+var cqeditor = CodeMirror.fromTextArea(document.getElementById("cqhelper"), {
+    lineNumbers: true,
+    mode: "text/x-python", //"text/x-c++src", //"text/html",
+    matchBrackets: true,
+    spellcheck: true,
+    autocorrect: true,
+    styleSelectedText: true
+});
 
 function showDocEditor(docfilename, difftext) {
 
@@ -59,10 +67,24 @@ function showDocEditor(docfilename, difftext) {
             //editor.markText({ line: 6, ch: 12 }, { line: 6, ch: 22 }, { className: "styled-background" });
             //editor.markText({ line: 4, ch: 2 }, { line: 4, ch: 6 }, { className: "styled-background" });
 
-            for(var i=0; i<result['linter_results'].length; i++){
-                editor.markText({ line: result['linter_results'][i].line-1, ch: result['linter_results'][i].column }, { line: result['linter_results'][i].line-1, ch: 100 }, { className: "styled-background" });
+            //for(var i=0; i<result['linter_results'].length; i++){
+            //    editor.markText({ line: result['linter_results'][i].line-1, ch: result['linter_results'][i].column }, { line: result['linter_results'][i].line-1, ch: 100 }, { className: "styled-background" });
+            //}
+
+            for(var i=0; i<result['docstring_results'][1].length; i++){
+
+                if( result['docstring_results'][1][i][0] == filename ){
+                    for(var j=0; j<result['docstring_results'][1][i][1].length; j++){
+
+                        if( result['docstring_results'][1][i][1][j].result.length > 0 ){  
+                            console.log("MARK LINE: " + result['docstring_results'][1][i][1][j].result[0][1] );                      
+                            editor.markText({ line: result['docstring_results'][1][i][1][j].result[0][1], ch: 0 }, { line: result['docstring_results'][1][i][1][j].result[0][1], ch: 100 }, { className: "styled-background" });
+                        }
+                    }
+                }
             }
 
+            popupNode.remove();
 
             editor.on("cursorActivity", function () {
 
@@ -80,15 +102,25 @@ function showDocEditor(docfilename, difftext) {
                     popupNode.remove();
                 }*/
 
-                for(var i=0; i<result['linter_results'].length; i++){
+                for(var i=0; i<result['docstring_results'][1].length; i++){
 
-                    if (cursor.line == result['linter_results'][i].line-1 && cursor.ch >= result['linter_results'][i].column) {
-                        var text = document.createTextNode(result['linter_results'][i].type +": "+ result['linter_results'][i].message);
-                        popupNode.innerHTML = '';
-                        popupNode.appendChild(text);
-                        editor.addWidget({ line: cursor.line, ch: 9 }, popupNode, true);
+                    if( result['docstring_results'][1][i][0] == filename ){
+                        for(var j=0; j<result['docstring_results'][1][i][1].length; j++){
+
+                            if( result['docstring_results'][1][i][1][j].result.length > 0 ){                        
+
+                                if (cursor.line == result['docstring_results'][1][i][1][j].result[0][1] ) {
+                                    var text = document.createTextNode(result['docstring_results'][1][i][1][j].result[0][0]);
+                                    popupNode.innerHTML = '';
+                                    popupNode.appendChild(text);
+                                    editor.addWidget({ line: cursor.line, ch: 9 }, popupNode, true);
+                                }
+                            }
+                        }
                     }
                 }
+
+
             });
 
 
@@ -103,6 +135,64 @@ function showDocEditor(docfilename, difftext) {
 }
 
 
+
+function showCqEditor(docfilename, difftext) {
+
+    console.log("CQ TEST");
+    console.log(difftext);
+
+    filename = docfilename;
+
+    $('#cqhelpertitle').html(filename);
+
+    //$('#dochelper').empty();
+
+    $.ajax({
+        url: '/dashboard/getfile/', type: 'POST', data: { 'pr': pr, 'filename': filename }, success: function (result) {
+            console.log("get file contents");
+            console.log(result);
+
+            cqeditor.setValue(result['filecontents']);
+
+            //editor.markText({ line: 3, ch: 0 }, { line: 3, ch: 13 }, { className: "styled-background" });
+            //editor.markText({ line: 6, ch: 12 }, { line: 6, ch: 22 }, { className: "styled-background" });
+            //editor.markText({ line: 4, ch: 2 }, { line: 4, ch: 6 }, { className: "styled-background" });
+
+            for(var i=0; i<result['linter_results'].length; i++){
+                cqeditor.markText({ line: result['linter_results'][i].line-1, ch: result['linter_results'][i].column }, { line: result['linter_results'][i].line-1, ch: 100 }, { className: "styled-background" });
+            }
+
+            popupNode.remove();
+
+            cqeditor.on("cursorActivity", function () {
+
+                var cursor = cqeditor.getCursor();
+
+                popupNode.remove();
+
+                for(var i=0; i<result['linter_results'].length; i++){
+
+                    if (cursor.line == result['linter_results'][i].line-1 && cursor.ch >= result['linter_results'][i].column) {
+                        var text = document.createTextNode(result['linter_results'][i].type +": "+ result['linter_results'][i].message);
+                        popupNode.innerHTML = '';
+                        popupNode.appendChild(text);
+                        cqeditor.addWidget({ line: cursor.line, ch: 9 }, popupNode, true);
+                    }
+                }
+            });
+
+
+            setTimeout(function () {
+                cqeditor.refresh();
+            }, 1);
+
+            $('#codeQualityModal').modal('show');
+        }
+    });
+
+}
+
+
 function patchFile() {
 
     console.log(editor.getValue());
@@ -110,6 +200,33 @@ function patchFile() {
 
     $.ajax({
         url: '/dashboard/createpatch/', type: 'POST', data: { 'pr': pr, 'filename': filename, 'filecontents': editor.getValue() }, success: function (result) {
+
+            console.log("success ajax");
+            console.log(result);
+
+            var element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(result.patch));
+            element.setAttribute('download', result.filename);
+
+            element.style.display = 'none';
+            document.body.appendChild(element);
+
+            element.click();
+
+            document.body.removeChild(element);
+        }
+    });
+
+}
+
+
+function cqPatchFile() {
+
+    console.log(cqeditor.getValue());
+
+
+    $.ajax({
+        url: '/dashboard/createpatch/', type: 'POST', data: { 'pr': pr, 'filename': filename, 'filecontents': cqeditor.getValue() }, success: function (result) {
 
             console.log("success ajax");
             console.log(result);
@@ -181,9 +298,11 @@ $.ajax({
             var commits = "";
             var diffs = "";
             var doccommits = "";
-            var docdiffs = "";
+            var docbuttons = "";
+            var cqbuttons = "";
             var alinks = "";
-            var issues = "N/A";
+            var issues = 0;
+
             for (var j = 0; j < result['diffcommits'][i]['commits'].length; j++) {
 
                 var diff = result['diffcommits'][i]['commits'][j]['diff'];
@@ -203,20 +322,27 @@ $.ajax({
                 for (var k = 0; k < result['prcommits'].length; k++) {
                     if (result['diffcommits'][i]['commits'][j]['commit'] == result['prcommits'][k]['hash']) {
                         doccommits += "<a target='_blank' href='" + result['source_url'] + "/commit/" + result['diffcommits'][i]['commits'][j]['commit'] + "'>" + result['diffcommits'][i]['commits'][j]['commit'].substring(0, 7) + "</a><br/>";
-                        docdiffs += "<button class='btn btn-sm btn-primary' onclick='showDocEditor(\"" + result['diffcommits'][i]['filename'] + "\",\"" + "DIFF STUFF TO GO HERE" + "\");'>View File in Editor</button><br/>";
+                        docbuttons += "<button class='btn btn-sm btn-primary' onclick='showDocEditor(\"" + result['diffcommits'][i]['filename'] + "\",\"" + "DIFF STUFF TO GO HERE" + "\");'>View File in Editor</button><br/>";
+                        cqbuttons += "<button class='btn btn-sm btn-primary' onclick='showCqEditor(\"" + result['diffcommits'][i]['filename'] + "\",\"" + "DIFF STUFF TO GO HERE" + "\");'>View File in Editor</button><br/>";
                         alinks += "<a class='btn btn-sm btn-primary' href='/dashboard/archeology/" + pr + "?filename=" +result['diffcommits'][i]['filename']+ "'>View Archeology</a><br/>";
 
                     }
                 }
 
-                //see if there are docstring issues
-                for (var k = 0; k < result['docstring_results'][1].length; k++) {
-                    if (result['diffcommits'][i]['filename'] == result['docstring_results'][1][k][0]) {
-                        issues = result['docstring_results'][1][k][1].length;
+            }
+
+            //see if there are docstring issues
+            for (var k = 0; k < result['docstring_results'][1].length; k++) {
+                if (result['diffcommits'][i]['filename'] == result['docstring_results'][1][k][0]) {
+                    for (var m = 0; m < result['docstring_results'][1][k][1].length; m++) {
+                        if( result['docstring_results'][1][k][1][m].result.length > 0 ){
+                            issues++;
+                            //issues = result['docstring_results'][1][k][1].length;
+                        }
                     }
                 }
-
             }
+
 
             table.append("<tr><td>" +
                 result['diffcommits'][i]['filename'] +
@@ -231,16 +357,16 @@ $.ajax({
                 "</td><td>" +
                     issues +
                 "</td><td>" +
-                    docdiffs +
+                    docbuttons +
                 "</td></tr>");
 
             cqtable.append("<tr><td>"+
-                    result['diffcommits'][i]['filename']+
-                    "</td><td>"+
-                            doccommits+
-                    "</td><td>"+
-                            docdiffs+
-                    "</td></tr>");
+                    "<a href='/dashboard/pr/"+pr+"'>"+result['diffcommits'][i]['filename'] +"</a>"+
+                "</td><td>"+
+                    "N/A"+
+                "</td><td>"+
+                    cqbuttons+
+                "</td></tr>");
 
             atable.append("<tr><td>"+
                     result['diffcommits'][i]['filename']+
