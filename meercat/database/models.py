@@ -3,6 +3,27 @@ from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 
 # Create your models here.
+class EventLog(models.Model):
+    
+    class EventTypeChoices(models.TextChoices):
+        FEATURE = 'FEAT', _('Feature used')
+        ERROR = 'ERR', _('Error')
+        NOTIFICATION = 'NOTIFICATION', _('Notification sent')
+        NOTIFICATION_FAIL = 'NOTIFICATION_FAIL', _('Failed to send notification')
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True)
+    uri = models.CharField(max_length=500, blank=True)
+    view_name = models.CharField(max_length=200, blank=True)
+    view_args = models.JSONField(blank=True, default=list)
+    view_kwargs = models.JSONField(blank=True, default=dict)
+    datetime = models.DateTimeField()
+    event_type = models.CharField(max_length=25, choices=EventTypeChoices.choices)
+    log = models.TextField(blank=True)
+    json = models.JSONField(blank=True, default=dict)
+
+    def __str__(self):
+        return str(self.datetime) + ':' + self.get_event_type_display()
+
 class GitHubCredentials(models.Model):
     login = models.CharField(max_length=200)
     email = models.EmailField(max_length=200)
