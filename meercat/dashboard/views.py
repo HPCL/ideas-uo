@@ -10,6 +10,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import redirect, render
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
+from django.views.decorators.csrf import csrf_exempt
 
 import pandas as pd
 
@@ -961,10 +962,14 @@ def diffCommitData(request):
     prcommits = []
     for commit in commits:
         prcommits.append({'hash':commit.hash})
+
+    docstring_results = first_responder_function(pr.project, pr)
+
     
     resultdata = {
         'diffcommits':diffcommits,
         'prcommits':prcommits,
+        'docstring_results':docstring_results,
         'source_url':pr.project.source_url[0:-4]
     }
 
@@ -1002,23 +1007,52 @@ def getFile(request):
 
     # If python file or fortran file, get linter results
     linter_results = []
+    docstring_results = []
+
     if filename.endswith('.py'): 
         output = os.popen('export PYTHONPATH=${PYTHONPATH}:'+os.path.abspath('../'+pr.project.name)+' ; cd ../'+pr.project.name+' ; pylint --output-format=json '+filename).read()
         linter_results = json.loads(output)
+        docstring_results = first_responder_function(pr.project, pr)
 
     if filename.endswith('.F90'): 
         output = os.popen('fortran-linter ../'+pr.project.name+'/'+filename+' --syntax-only').read()
         linter_results = json.loads(output.split('../'+pr.project.name+'/'+filename))
 
-    #print("LINTER RESULTS: "+str(linter_results))    
+    #print("LINTER RESULTS: "+str(linter_results))
+    print("DOC CHECKER RESULTS: "+str(docstring_results))
+
+
 
     resultdata = {
         'filecontents': ''.join(lines),
-        'linter_results': linter_results
+        'linter_results': linter_results,
+        'docstring_results': docstring_results
     }
 
     return HttpResponse(
         json.dumps(resultdata),
+        content_type='application/json'
+    )
+
+
+@csrf_exempt
+def githubBot(request):
+
+    print("Callback from webhook bot on github")
+
+    payload = json.loads(request.body)
+
+    #print( str(payload) )
+
+    print( "Action Type: " + str(payload['action']) )
+    print( "Pull Request Number: " + str(payload['number']) )
+    print( "Repository: " + str(payload['repository']['clone_url']) )
+
+
+
+
+    return HttpResponse(
+        json.dumps({'results':'success'}),
         content_type='application/json'
     )
 

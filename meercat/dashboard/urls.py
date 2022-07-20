@@ -22,5 +22,6 @@ urlpatterns = [
     path('patterngraph1', views.patternGraph1, name='patterngraph1'),
     path('diffcommitdata/', views.diffCommitData, name='diffcommitdata'),
     path('getfile/', views.getFile, name='getfile'),
+    path('githubbot/', views.githubBot, name='githubbot'),
 ]
 
