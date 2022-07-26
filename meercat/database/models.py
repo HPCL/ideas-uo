@@ -9,9 +9,10 @@ class EventLog(models.Model):
         FEATURE = 'FEAT', _('Feature used')
         ERROR = 'ERR', _('Error')
         NOTIFICATION = 'NOTIFICATION', _('Notification sent')
+        NO_NOTIFICATION = 'NO_NOTIFICATION', _('No notification sent')
         NOTIFICATION_FAIL = 'NOTIFICATION_FAIL', _('Failed to send notification')
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     uri = models.CharField(max_length=500, blank=True)
     view_name = models.CharField(max_length=200, blank=True)
     view_args = models.JSONField(blank=True, default=list)
@@ -20,6 +21,7 @@ class EventLog(models.Model):
     event_type = models.CharField(max_length=25, choices=EventTypeChoices.choices)
     log = models.TextField(blank=True)
     json = models.JSONField(blank=True, default=dict)
+    pull_request = models.ForeignKey('PullRequest', on_delete=models.CASCADE, blank=True, null=True)
 
     def __str__(self):
         return str(self.datetime) + ':' + self.get_event_type_display()
