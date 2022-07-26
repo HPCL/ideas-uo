@@ -965,11 +965,18 @@ def diffCommitData(request):
 
     docstring_results = first_responder_function(pr.project, pr)
 
+    linter_results = []
+    for filename in filenames:
+        if filename.endswith('.py'): 
+            output = os.popen('export PYTHONPATH=${PYTHONPATH}:'+os.path.abspath('../'+pr.project.name)+' ; cd ../'+pr.project.name+' ; pylint --output-format=json '+filename).read()
+            linter_results.append( {'filename': filename, 'results':json.loads(output)} )
+
     
     resultdata = {
         'diffcommits':diffcommits,
         'prcommits':prcommits,
         'docstring_results':docstring_results,
+        'linter_results':linter_results,
         'source_url':pr.project.source_url[0:-4]
     }
 
@@ -1007,26 +1014,25 @@ def getFile(request):
 
     # If python file or fortran file, get linter results
     linter_results = []
-    docstring_results = []
+    #docstring_results = []
 
     if filename.endswith('.py'): 
         output = os.popen('export PYTHONPATH=${PYTHONPATH}:'+os.path.abspath('../'+pr.project.name)+' ; cd ../'+pr.project.name+' ; pylint --output-format=json '+filename).read()
         linter_results = json.loads(output)
-        docstring_results = first_responder_function(pr.project, pr)
+        #docstring_results = first_responder_function(pr.project, pr)
 
     if filename.endswith('.F90'): 
         output = os.popen('fortran-linter ../'+pr.project.name+'/'+filename+' --syntax-only').read()
         linter_results = json.loads(output.split('../'+pr.project.name+'/'+filename))
 
     #print("LINTER RESULTS: "+str(linter_results))
-    print("DOC CHECKER RESULTS: "+str(docstring_results))
+    #print("DOC CHECKER RESULTS: "+str(docstring_results))
 
 
 
     resultdata = {
         'filecontents': ''.join(lines),
-        'linter_results': linter_results,
-        'docstring_results': docstring_results
+        'linter_results': linter_results
     }
 
     return HttpResponse(

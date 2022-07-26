@@ -17,6 +17,8 @@ console.log("The PR id...");
 console.log($("#pr"));
 console.log(pr);
 var filename = "";
+var docstring_results = [];
+
 var popupNode = document.createElement("div");
 popupNode.style.border = '2px solid grey'
 popupNode.style.padding = '5px'
@@ -71,14 +73,14 @@ function showDocEditor(docfilename, difftext) {
             //    editor.markText({ line: result['linter_results'][i].line-1, ch: result['linter_results'][i].column }, { line: result['linter_results'][i].line-1, ch: 100 }, { className: "styled-background" });
             //}
 
-            for(var i=0; i<result['docstring_results'][1].length; i++){
+            for(var i=0; i<docstring_results[1].length; i++){
 
-                if( result['docstring_results'][1][i][0] == filename ){
-                    for(var j=0; j<result['docstring_results'][1][i][1].length; j++){
+                if( docstring_results[1][i][0] == filename ){
+                    for(var j=0; j<docstring_results[1][i][1].length; j++){
 
-                        if( result['docstring_results'][1][i][1][j].result.length > 0 ){  
-                            console.log("MARK LINE: " + result['docstring_results'][1][i][1][j].result[0][1] );                      
-                            editor.markText({ line: result['docstring_results'][1][i][1][j].result[0][1], ch: 0 }, { line: result['docstring_results'][1][i][1][j].result[0][1], ch: 100 }, { className: "styled-background" });
+                        if( docstring_results[1][i][1][j].result.length > 0 ){  
+                            console.log("MARK LINE: " + docstring_results[1][i][1][j].result[0][1] );                      
+                            editor.markText({ line: docstring_results[1][i][1][j].result[0][1], ch: 0 }, { line: docstring_results[1][i][1][j].result[0][1], ch: 100 }, { className: "styled-background" });
                         }
                     }
                 }
@@ -102,15 +104,15 @@ function showDocEditor(docfilename, difftext) {
                     popupNode.remove();
                 }*/
 
-                for(var i=0; i<result['docstring_results'][1].length; i++){
+                for(var i=0; i<docstring_results[1].length; i++){
 
-                    if( result['docstring_results'][1][i][0] == filename ){
-                        for(var j=0; j<result['docstring_results'][1][i][1].length; j++){
+                    if( docstring_results[1][i][0] == filename ){
+                        for(var j=0; j<docstring_results[1][i][1].length; j++){
 
-                            if( result['docstring_results'][1][i][1][j].result.length > 0 ){                        
+                            if( docstring_results[1][i][1][j].result.length > 0 ){                        
 
-                                if (cursor.line == result['docstring_results'][1][i][1][j].result[0][1] ) {
-                                    var text = document.createTextNode(result['docstring_results'][1][i][1][j].result[0][0]);
+                                if (cursor.line == docstring_results[1][i][1][j].result[0][1] ) {
+                                    var text = document.createTextNode(docstring_results[1][i][1][j].result[0][0]);
                                     popupNode.innerHTML = '';
                                     popupNode.appendChild(text);
                                     editor.addWidget({ line: cursor.line, ch: 9 }, popupNode, true);
@@ -301,7 +303,8 @@ $.ajax({
             var docbuttons = "";
             var cqbuttons = "";
             var alinks = "";
-            var issues = 0;
+            var docissues = 0;
+            var cqissues = 0;
 
             for (var j = 0; j < result['diffcommits'][i]['commits'].length; j++) {
 
@@ -332,16 +335,28 @@ $.ajax({
             }
 
             //see if there are docstring issues
+            docstring_results = result['docstring_results'];
             for (var k = 0; k < result['docstring_results'][1].length; k++) {
                 if (result['diffcommits'][i]['filename'] == result['docstring_results'][1][k][0]) {
                     for (var m = 0; m < result['docstring_results'][1][k][1].length; m++) {
                         if( result['docstring_results'][1][k][1][m].result.length > 0 ){
-                            issues++;
+                            docissues++;
                             //issues = result['docstring_results'][1][k][1].length;
                         }
                     }
                 }
             }
+
+            for (var k = 0; k < result['linter_results'].length; k++) {
+                if (result['diffcommits'][i]['filename'] == result['linter_results'][k]['filename']) {
+                    //for (var m = 0; m < result['docstring_results'][1][k][1].length; m++) {
+                        //if( result['docstring_results'][1][k][1][m].result.length > 0 ){
+                            cqissues = result['linter_results'][k]['results'].length;
+                        //}
+                    //}
+                }
+            }
+
 
 
             table.append("<tr><td>" +
@@ -355,7 +370,7 @@ $.ajax({
             doctable.append("<tr><td>" +
                     "<a href='/dashboard/pr/"+pr+"'>"+result['diffcommits'][i]['filename'] +"</a>"+
                 "</td><td>" +
-                    issues +
+                    docissues +
                 "</td><td>" +
                     docbuttons +
                 "</td></tr>");
@@ -363,7 +378,7 @@ $.ajax({
             cqtable.append("<tr><td>"+
                     "<a href='/dashboard/pr/"+pr+"'>"+result['diffcommits'][i]['filename'] +"</a>"+
                 "</td><td>"+
-                    "N/A"+
+                    cqissues+
                 "</td><td>"+
                     cqbuttons+
                 "</td></tr>");
