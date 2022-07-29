@@ -117,3 +117,45 @@
     background-size: 48px 48px;
     padding: 12px 20px;
 }
+
+
+.drop-targets {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    margin: 20px 0;
+}
+
+.box {
+    height: 300px;
+    width: 170px;
+    border: solid 3px #ccc;
+    margin: 10px;
+
+    /* align items in the box */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: start;
+
+}
+
+.drag-over {
+    border: dashed 3px red;
+}
+
+.item {
+    height: 35px;
+    width: 120px;
+    margin-top:20px;
+    background-color: #F0DB4F;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10pt;
+}
+
+.hide {
+    display: none;
+}

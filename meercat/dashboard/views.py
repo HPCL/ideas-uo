@@ -22,6 +22,7 @@ sys.path.insert(1, '../src')
 from gitutils.github_api import GitHubAPIClient
 
 from database.models import Project, ProjectRole, Commit, Diff, Issue, PullRequest, PullRequestIssue, Comment, EventPayload, CommitTag
+from database.utilities import comment_pullrequest
 
 import subprocess
 import os, warnings
@@ -1054,7 +1055,25 @@ def githubBot(request):
     print( "Pull Request Number: " + str(payload['number']) )
     print( "Repository: " + str(payload['repository']['clone_url']) )
 
+    project = list(Project.objects.all().filter(source_url=str(payload['repository']['clone_url'])).all())[0]
+    pull_request = list(PullRequest.objects.all().filter(project=prid, number=int(str(payload['number']))).all())[0]
 
+    if pull_request:
+
+        comment = first_responder_function(pull_request.project, pull_request)[0]
+        print("------------")
+        if comment:
+            comment_pullrequest(pull_request, comment)
+            print("commented")
+        else:
+            event = EventLog(
+                event_type=EventLog.EventTypeChoices.NO_NOTIFICATION,
+                pull_request=pull_request,
+                datetime=datetime.today()            
+            )
+            print("don't bug me")
+
+        print("------------")
 
 
     return HttpResponse(
