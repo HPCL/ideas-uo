@@ -19,15 +19,17 @@ class EventMiddleware:
             return None
 
         uri = request.build_absolute_uri()
-        view_name = resolve(request.path_info).url_name
-        user = request.user
+        if request.user.is_anonymous:
+            user = None
+        else:
+            user = request.user
 
         eventLog = EventLog(
-            uri=uri, 
-            view_name=view_name, 
-            view_args=view_args, 
-            view_kwargs=view_kwargs, 
-            user=user, 
+            uri=uri,
+            view_name=request.resolver_match.view_name,
+            view_args=view_args,
+            view_kwargs=view_kwargs,
+            user=user,
             event_type=EventLog.EventTypeChoices.FEATURE,
             datetime=datetime.today()
         )

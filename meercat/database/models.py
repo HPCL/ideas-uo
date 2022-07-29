@@ -6,6 +6,7 @@ from django.utils.translation import gettext_lazy as _
 class EventLog(models.Model):
     
     class EventTypeChoices(models.TextChoices):
+        DEBUGGING = 'DEBUGGING', _('Debugging log')
         FEATURE = 'FEAT', _('Feature used')
         ERROR = 'ERR', _('Error')
         NOTIFICATION = 'NOTIFICATION', _('Notification sent')
