@@ -86,6 +86,10 @@ function showDocEditor(docfilename, difftext) {
                 }
             }
 
+            /* JUST FOR DEMO 
+            editor.markText({ line: 15, ch: 0 }, { line: 16, ch: 100 }, { className: "styled-background" });
+            */
+
             popupNode.remove();
 
             editor.on("cursorActivity", function () {
@@ -122,6 +126,12 @@ function showDocEditor(docfilename, difftext) {
                     }
                 }
 
+                /* JUST FOR DEMO 
+                var text = document.createTextNode("Parameter not in function definition.");
+                popupNode.innerHTML = '';
+                popupNode.appendChild(text);
+                editor.addWidget({ line: cursor.line, ch: 9 }, popupNode, true);
+                */
 
             });
 
@@ -439,3 +449,79 @@ $.ajax({
 
     }
 });
+
+
+/*
+ 
+ Testing drag and drop
+
+*/
+
+/* draggable element */
+const items = document.querySelectorAll('.item');
+
+items.forEach(item => {
+    item.addEventListener('dragstart', dragStart);
+    item.addEventListener('dragend', dragEnd);
+});
+
+function dragStart(e) {
+    console.log("dragStart");
+    e.dataTransfer.setData('text/plain', e.target.id);
+    setTimeout(() => {
+        e.target.classList.add('hide');
+    }, 0);
+}
+
+function dragEnd(e) {
+    console.log("dragEnd");
+    //setTimeout(() => {
+        e.target.classList.remove('hide');
+    //}, 0);
+}
+
+
+/* drop targets */
+const boxes = document.querySelectorAll('.box');
+
+boxes.forEach(box => {
+    box.addEventListener('dragenter', dragEnter)
+    box.addEventListener('dragover', dragOver);
+    box.addEventListener('dragleave', dragLeave);
+    box.addEventListener('drop', drop);
+});
+
+
+function dragEnter(e) {
+    e.preventDefault();
+    e.target.classList.add('drag-over');
+}
+
+function dragOver(e) {
+    e.preventDefault();
+    e.target.classList.add('drag-over');
+}
+
+function dragLeave(e) {
+    e.target.classList.remove('drag-over');
+}
+
+function drop(e) {
+    console.log("drop");
+    console.log(e.target);
+
+    // can as if box or item.  If item, glue items together?
+    // but then how to separate items?
+
+    e.target.classList.remove('drag-over');
+
+    // get the draggable element
+    const id = e.dataTransfer.getData('text/plain');
+    const draggable = document.getElementById(id);
+
+    // add it to the drop target
+    e.target.appendChild(draggable);
+
+    // display the draggable element
+    draggable.classList.remove('hide');
+}
