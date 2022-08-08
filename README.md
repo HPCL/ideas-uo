@@ -2,7 +2,8 @@
 
 The collection of packages in this repository are developed as part of the 
 DOE [IDEAS-ECP](https://ideas-productivity.org/) project on high-performance software 
-development productivity. 
+development productivity. The GremCat set of tools is part of the larger 
+[CAT-SDK](https://github.com/CAT-SDK) collection of git and related mining and analysis software infrastructure.
 
 The `code` subdirectory includes various utilities for git repository data acquisition 
 and database client code with examples. 
