@@ -14,6 +14,11 @@ by Plurasight on "20 patterns to watch for in your engineering team".
 
 ## Getting started
 
+### Notebooks on Google Colab
+
+You can take a look at the [notebooks](notebooks) to explore the data and the current mining functionality.
+Some of them have been made available through Google Colab, so you don't have to install anything locally to try them out.
+
 ### Install
 
 It is best to set up a new python3 environment first; complete instructions can be 
@@ -26,10 +31,7 @@ a MySQL client library installed on your system before installing the requiremen
 This requires that you install the mysql client library on your system first. On
 Ubuntu 20.04, for example, you can accomplish this with `sudo apt install python3.9-dev libmysqlclient-dev`.
 
-### Notebooks
-
-You can take a look at the [notebooks](notebooks) to try out and learn what you can do with this tool. 
-Some of them have been made available through Google Colab, so you don't have to install anything to try them out.
+### Local Notebooks
 
 Note that this set of tools is still under very active development, so at any point 
 some functionality may not work as expected. The basic requirements are Python 3
