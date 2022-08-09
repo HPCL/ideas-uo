@@ -2,16 +2,29 @@
 {% load static %}
 
 
+{% block stylesheets %}
+    <link rel="stylesheet" href="{% static 'css/select2.min.css' %}">
+{% endblock stylesheets %}
+
 {% block content %}
 <h2>Subscriptions</i></h2>
 <p>Select the files or directories in which you are interested. You will get notified about their changes.</p>
 
 <section id="path-selector" class="border rounded">
-    <div class="mb-3 p-3">
-        <label for="project-select" class="form-label">Project</label>
-        <select id="project-select" class="form-select">
-            <option selected>Select a project</option>
-        </select>  
+    <div class="p-3">
+        <div class="mb-3">
+            <label for="project-select" class="form-label">Project</label>
+            <select id="project-select" class="form-select">
+                <option selected>Select a project</option>
+            </select>  
+        </div>
+        <div class="mb-3">
+            <label for="file-select" class="form-label">File or directory</label>
+            <select id="file-select" class="form-select">
+                <option selected>Select a file or directory</option>
+            </select>
+        </div>
+        <a href="#" class="btn btn-primary">Add</a>
     </div>
 </section>
 
@@ -20,5 +33,6 @@
 
 
 {% block script %}
-<script src="{% static 'js/whitelist.js' %}"></script>
+<script src="{% static 'js/select2.min.js' %}"></script>
+<script src="{% static 'js/subscriptions.js' %}"></script>
 {% endblock script %}   
