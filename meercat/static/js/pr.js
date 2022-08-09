@@ -86,9 +86,9 @@ function showDocEditor(docfilename, difftext) {
                 }
             }
 
-            /* JUST FOR DEMO 
-            editor.markText({ line: 15, ch: 0 }, { line: 16, ch: 100 }, { className: "styled-background" });
-            */
+            /* JUST FOR DEMO */
+            //editor.markText({ line: 6, ch: 0 }, { line: 7, ch: 100 }, { className: "styled-background" });
+            /* */
 
             popupNode.remove();
 
@@ -119,6 +119,17 @@ function showDocEditor(docfilename, difftext) {
                                     var text = document.createTextNode(docstring_results[1][i][1][j].result[0][0]);
                                     popupNode.innerHTML = '';
                                     popupNode.appendChild(text);
+
+                                    if( docstring_results[1][i][1][j].result[0][0].indexOf("No docstring") >= 0 ){
+                                        var button = document.createElement('button');
+                                        button.setAttribute('onclick', 'insertTemplate('+cursor.line+', \'  \"\"\"\\n  Template will go here.\\n  \"\"\"\')');
+                                        button.classList.add('btn');
+                                        button.classList.add('btn-sm');
+                                        button.classList.add('btn-primary');
+                                        button.style['margin-left'] = "10px"
+                                        button.innerHTML = 'Insert docstring template'
+                                        popupNode.appendChild(button);
+                                    }
                                     editor.addWidget({ line: cursor.line, ch: 9 }, popupNode, true);
                                 }
                             }
@@ -126,12 +137,12 @@ function showDocEditor(docfilename, difftext) {
                     }
                 }
 
-                /* JUST FOR DEMO 
-                var text = document.createTextNode("Parameter not in function definition.");
-                popupNode.innerHTML = '';
-                popupNode.appendChild(text);
-                editor.addWidget({ line: cursor.line, ch: 9 }, popupNode, true);
-                */
+                /* JUST FOR DEMO */
+                //var text = document.createTextNode("Test cases no longer valid.");
+                //popupNode.innerHTML = '';
+                //popupNode.appendChild(text);
+                //editor.addWidget({ line: cursor.line, ch: 9 }, popupNode, true);
+                /* */
 
             });
 
@@ -146,6 +157,13 @@ function showDocEditor(docfilename, difftext) {
 
 }
 
+
+function insertTemplate(linenumber, text){
+
+    editor.replaceRange('\n'+text, CodeMirror.Pos(linenumber));
+    popupNode.remove();
+    
+}
 
 
 function showCqEditor(docfilename, difftext) {
@@ -494,12 +512,14 @@ boxes.forEach(box => {
 
 function dragEnter(e) {
     e.preventDefault();
-    e.target.classList.add('drag-over');
+    if( e.target.classList.contains('box') )
+        e.target.classList.add('drag-over');
 }
 
 function dragOver(e) {
     e.preventDefault();
-    e.target.classList.add('drag-over');
+    if( e.target.classList.contains('box') )
+        e.target.classList.add('drag-over');
 }
 
 function dragLeave(e) {
@@ -513,15 +533,18 @@ function drop(e) {
     // can as if box or item.  If item, glue items together?
     // but then how to separate items?
 
-    e.target.classList.remove('drag-over');
+    if( e.target.classList.contains('box') ){
 
-    // get the draggable element
-    const id = e.dataTransfer.getData('text/plain');
-    const draggable = document.getElementById(id);
+        e.target.classList.remove('drag-over');
 
-    // add it to the drop target
-    e.target.appendChild(draggable);
+        // get the draggable element
+        const id = e.dataTransfer.getData('text/plain');
+        const draggable = document.getElementById(id);
 
-    // display the draggable element
-    draggable.classList.remove('hide');
+        // add it to the drop target
+        e.target.appendChild(draggable);
+
+        // display the draggable element
+        draggable.classList.remove('hide');
+    }
 }

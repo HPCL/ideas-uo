@@ -1058,6 +1058,8 @@ def githubBot(request):
     project = list(Project.objects.all().filter(source_url=str(payload['repository']['clone_url'])).all())[0]
     pull_request = list(PullRequest.objects.all().filter(project=prid, number=int(str(payload['number']))).all())[0]
 
+    #TODO: eventually only do this for new PRs (check payload for action type I think)
+
     if pull_request:
 
         comment = first_responder_function(pull_request.project, pull_request)[0]
