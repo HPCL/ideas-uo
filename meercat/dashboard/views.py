@@ -32,15 +32,9 @@ from patterns.visualizer import Visualizer
 def not_authorized(request):
     return render(request, 'dashboard/not_authorized.html')
 
-
 # Index view - should list all projects
 @login_required
 def index(request):
-    print("INDEX")
-
-    pid = 30
-    if request.GET.get('pid'):
-        pid = int(request.GET.get('pid'))
 
     if request.user.is_staff:
         return redirect('staff_index')
@@ -57,16 +51,16 @@ def index(request):
 
 @login_required
 def staff_index(request):
-    print("STAFF INDEX")
-
-    pid = 30
-    if request.GET.get('pid'):
-        pid = int(request.GET.get('pid'))
 
     projects = list(Project.objects.all())
     projects = sorted(projects, key=lambda d: d.name, reverse=False)
 
     return render(request, 'dashboard/staff_index.html', {'projects': projects})
+
+@login_required
+def subscriptions(request):
+    return render(request, 'dashboard/subscriptions.html')
+
 
 @login_required
 def whitelist(request, *args, **kwargs):

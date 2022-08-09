@@ -1,0 +1,24 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+
+{% block content %}
+<h2>Subscriptions</i></h2>
+<p>Select the files or directories in which you are interested. You will get notified about their changes.</p>
+
+<section id="path-selector" class="border rounded">
+    <div class="mb-3 p-3">
+        <label for="project-select" class="form-label">Project</label>
+        <select id="project-select" class="form-select">
+            <option selected>Select a project</option>
+        </select>  
+    </div>
+</section>
+
+
+{% endblock content %}
+
+
+{% block script %}
+<script src="{% static 'js/whitelist.js' %}"></script>
+{% endblock script %}   
