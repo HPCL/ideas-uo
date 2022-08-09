@@ -1616,7 +1616,7 @@ def first_responder_function(proj_object, pr_object):
 
     ## We have suggestions for adding more people to the discussion.
 
-    [Please see the Pull-Request Assistant page for more detail.](http://meercat.org)
+    [Please see the Pull-Request Assistant page for more detail.](http://sansa.cs.uoregon.edu:8888/dashboard/pr/{pr_object.id})
     '''
     else:
         message = f'''# The MeerCat Pull-Request Assistant has information for you
@@ -1627,7 +1627,7 @@ def first_responder_function(proj_object, pr_object):
 
     ## We have suggestions for adding more people to the discussion.
 
-    [Please see the Pull-Request Assistant page for more detail.](http://meercat.org)
+    [Please see the Pull-Request Assistant page for more detail.](http://sansa.cs.uoregon.edu:8888/dashboard/pr/{pr_object.id})
     '''
     return [message, all_files]
 
