@@ -2,7 +2,8 @@
 
 The collection of packages in this repository are developed as part of the 
 DOE [IDEAS-ECP](https://ideas-productivity.org/) project on high-performance software 
-development productivity. 
+development productivity. The GremCat set of tools is part of the larger 
+[CAT-SDK](https://github.com/CAT-SDK) collection of git and related mining and analysis software infrastructure.
 
 The `code` subdirectory includes various utilities for git repository data acquisition 
 and database client code with examples. 
@@ -13,6 +14,11 @@ short [book](https://www.pluralsight.com/content/dam/pluralsight2/landing-pages/
 by Plurasight on "20 patterns to watch for in your engineering team".
 
 ## Getting started
+
+### Notebooks on Google Colab
+
+You can take a look at the [notebooks](notebooks) to explore the data and the current mining functionality.
+Some of them have been made available through Google Colab, so you don't have to install anything locally to try them out.
 
 ### Install
 
@@ -26,10 +32,7 @@ a MySQL client library installed on your system before installing the requiremen
 This requires that you install the mysql client library on your system first. On
 Ubuntu 20.04, for example, you can accomplish this with `sudo apt install python3.9-dev libmysqlclient-dev`.
 
-### Notebooks
-
-You can take a look at the [notebooks](notebooks) to try out and learn what you can do with this tool. 
-Some of them have been made available through Google Colab, so you don't have to install anything to try them out.
+### Local Notebooks
 
 Note that this set of tools is still under very active development, so at any point 
 some functionality may not work as expected. The basic requirements are Python 3

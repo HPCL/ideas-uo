@@ -10,6 +10,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import redirect, render
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
+from django.views.decorators.csrf import csrf_exempt
 
 import pandas as pd
 
@@ -21,6 +22,7 @@ sys.path.insert(1, '../src')
 from gitutils.github_api import GitHubAPIClient
 
 from database.models import Project, ProjectRole, Commit, Diff, Issue, PullRequest, PullRequestIssue, Comment, EventPayload, CommitTag
+from database.utilities import comment_pullrequest
 
 import subprocess
 import os, warnings
@@ -961,10 +963,21 @@ def diffCommitData(request):
     prcommits = []
     for commit in commits:
         prcommits.append({'hash':commit.hash})
+
+    docstring_results = first_responder_function(pr.project, pr)
+
+    linter_results = []
+    for filename in filenames:
+        if filename.endswith('.py'): 
+            output = os.popen('export PYTHONPATH=${PYTHONPATH}:'+os.path.abspath('../'+pr.project.name)+' ; cd ../'+pr.project.name+' ; pylint --output-format=json '+filename).read()
+            linter_results.append( {'filename': filename, 'results':json.loads(output)} )
+
     
     resultdata = {
         'diffcommits':diffcommits,
         'prcommits':prcommits,
+        'docstring_results':docstring_results,
+        'linter_results':linter_results,
         'source_url':pr.project.source_url[0:-4]
     }
 
@@ -1002,15 +1015,21 @@ def getFile(request):
 
     # If python file or fortran file, get linter results
     linter_results = []
+    #docstring_results = []
+
     if filename.endswith('.py'): 
         output = os.popen('export PYTHONPATH=${PYTHONPATH}:'+os.path.abspath('../'+pr.project.name)+' ; cd ../'+pr.project.name+' ; pylint --output-format=json '+filename).read()
         linter_results = json.loads(output)
+        #docstring_results = first_responder_function(pr.project, pr)
 
     if filename.endswith('.F90'): 
         output = os.popen('fortran-linter ../'+pr.project.name+'/'+filename+' --syntax-only').read()
         linter_results = json.loads(output.split('../'+pr.project.name+'/'+filename))
 
-    #print("LINTER RESULTS: "+str(linter_results))    
+    #print("LINTER RESULTS: "+str(linter_results))
+    #print("DOC CHECKER RESULTS: "+str(docstring_results))
+
+
 
     resultdata = {
         'filecontents': ''.join(lines),
@@ -1019,6 +1038,48 @@ def getFile(request):
 
     return HttpResponse(
         json.dumps(resultdata),
+        content_type='application/json'
+    )
+
+
+@csrf_exempt
+def githubBot(request):
+
+    print("Callback from webhook bot on github")
+
+    payload = json.loads(request.body)
+
+    #print( str(payload) )
+
+    print( "Action Type: " + str(payload['action']) )
+    print( "Pull Request Number: " + str(payload['number']) )
+    print( "Repository: " + str(payload['repository']['clone_url']) )
+
+    project = list(Project.objects.all().filter(source_url=str(payload['repository']['clone_url'])).all())[0]
+    pull_request = list(PullRequest.objects.all().filter(project=prid, number=int(str(payload['number']))).all())[0]
+
+    #TODO: eventually only do this for new PRs (check payload for action type I think)
+
+    if pull_request:
+
+        comment = first_responder_function(pull_request.project, pull_request)[0]
+        print("------------")
+        if comment:
+            comment_pullrequest(pull_request, comment)
+            print("commented")
+        else:
+            event = EventLog(
+                event_type=EventLog.EventTypeChoices.NO_NOTIFICATION,
+                pull_request=pull_request,
+                datetime=datetime.today()            
+            )
+            print("don't bug me")
+
+        print("------------")
+
+
+    return HttpResponse(
+        json.dumps({'results':'success'}),
         content_type='application/json'
     )
 

@@ -17,6 +17,8 @@ console.log("The PR id...");
 console.log($("#pr"));
 console.log(pr);
 var filename = "";
+var docstring_results = [];
+
 var popupNode = document.createElement("div");
 popupNode.style.border = '2px solid grey'
 popupNode.style.padding = '5px'
@@ -35,6 +37,14 @@ var editor = CodeMirror.fromTextArea(document.getElementById("dochelper"), {
     styleSelectedText: true
 });
 
+var cqeditor = CodeMirror.fromTextArea(document.getElementById("cqhelper"), {
+    lineNumbers: true,
+    mode: "text/x-python", //"text/x-c++src", //"text/html",
+    matchBrackets: true,
+    spellcheck: true,
+    autocorrect: true,
+    styleSelectedText: true
+});
 
 function showDocEditor(docfilename, difftext) {
 
@@ -59,10 +69,28 @@ function showDocEditor(docfilename, difftext) {
             //editor.markText({ line: 6, ch: 12 }, { line: 6, ch: 22 }, { className: "styled-background" });
             //editor.markText({ line: 4, ch: 2 }, { line: 4, ch: 6 }, { className: "styled-background" });
 
-            for(var i=0; i<result['linter_results'].length; i++){
-                editor.markText({ line: result['linter_results'][i].line-1, ch: result['linter_results'][i].column }, { line: result['linter_results'][i].line-1, ch: 100 }, { className: "styled-background" });
+            //for(var i=0; i<result['linter_results'].length; i++){
+            //    editor.markText({ line: result['linter_results'][i].line-1, ch: result['linter_results'][i].column }, { line: result['linter_results'][i].line-1, ch: 100 }, { className: "styled-background" });
+            //}
+
+            for(var i=0; i<docstring_results[1].length; i++){
+
+                if( docstring_results[1][i][0] == filename ){
+                    for(var j=0; j<docstring_results[1][i][1].length; j++){
+
+                        if( docstring_results[1][i][1][j].result.length > 0 ){  
+                            console.log("MARK LINE: " + docstring_results[1][i][1][j].result[0][1] );                      
+                            editor.markText({ line: docstring_results[1][i][1][j].result[0][1], ch: 0 }, { line: docstring_results[1][i][1][j].result[0][1], ch: 100 }, { className: "styled-background" });
+                        }
+                    }
+                }
             }
 
+            /* JUST FOR DEMO */
+            //editor.markText({ line: 6, ch: 0 }, { line: 7, ch: 100 }, { className: "styled-background" });
+            /* */
+
+            popupNode.remove();
 
             editor.on("cursorActivity", function () {
 
@@ -80,15 +108,42 @@ function showDocEditor(docfilename, difftext) {
                     popupNode.remove();
                 }*/
 
-                for(var i=0; i<result['linter_results'].length; i++){
+                for(var i=0; i<docstring_results[1].length; i++){
 
-                    if (cursor.line == result['linter_results'][i].line-1 && cursor.ch >= result['linter_results'][i].column) {
-                        var text = document.createTextNode(result['linter_results'][i].type +": "+ result['linter_results'][i].message);
-                        popupNode.innerHTML = '';
-                        popupNode.appendChild(text);
-                        editor.addWidget({ line: cursor.line, ch: 9 }, popupNode, true);
+                    if( docstring_results[1][i][0] == filename ){
+                        for(var j=0; j<docstring_results[1][i][1].length; j++){
+
+                            if( docstring_results[1][i][1][j].result.length > 0 ){                        
+
+                                if (cursor.line == docstring_results[1][i][1][j].result[0][1] ) {
+                                    var text = document.createTextNode(docstring_results[1][i][1][j].result[0][0]);
+                                    popupNode.innerHTML = '';
+                                    popupNode.appendChild(text);
+
+                                    if( docstring_results[1][i][1][j].result[0][0].indexOf("No docstring") >= 0 ){
+                                        var button = document.createElement('button');
+                                        button.setAttribute('onclick', 'insertTemplate('+cursor.line+', \'  \"\"\"\\n  Template will go here.\\n  \"\"\"\')');
+                                        button.classList.add('btn');
+                                        button.classList.add('btn-sm');
+                                        button.classList.add('btn-primary');
+                                        button.style['margin-left'] = "10px"
+                                        button.innerHTML = 'Insert docstring template'
+                                        popupNode.appendChild(button);
+                                    }
+                                    editor.addWidget({ line: cursor.line, ch: 9 }, popupNode, true);
+                                }
+                            }
+                        }
                     }
                 }
+
+                /* JUST FOR DEMO */
+                //var text = document.createTextNode("Test cases no longer valid.");
+                //popupNode.innerHTML = '';
+                //popupNode.appendChild(text);
+                //editor.addWidget({ line: cursor.line, ch: 9 }, popupNode, true);
+                /* */
+
             });
 
 
@@ -103,6 +158,71 @@ function showDocEditor(docfilename, difftext) {
 }
 
 
+function insertTemplate(linenumber, text){
+
+    editor.replaceRange('\n'+text, CodeMirror.Pos(linenumber));
+    popupNode.remove();
+    
+}
+
+
+function showCqEditor(docfilename, difftext) {
+
+    console.log("CQ TEST");
+    console.log(difftext);
+
+    filename = docfilename;
+
+    $('#cqhelpertitle').html(filename);
+
+    //$('#dochelper').empty();
+
+    $.ajax({
+        url: '/dashboard/getfile/', type: 'POST', data: { 'pr': pr, 'filename': filename }, success: function (result) {
+            console.log("get file contents");
+            console.log(result);
+
+            cqeditor.setValue(result['filecontents']);
+
+            //editor.markText({ line: 3, ch: 0 }, { line: 3, ch: 13 }, { className: "styled-background" });
+            //editor.markText({ line: 6, ch: 12 }, { line: 6, ch: 22 }, { className: "styled-background" });
+            //editor.markText({ line: 4, ch: 2 }, { line: 4, ch: 6 }, { className: "styled-background" });
+
+            for(var i=0; i<result['linter_results'].length; i++){
+                cqeditor.markText({ line: result['linter_results'][i].line-1, ch: result['linter_results'][i].column }, { line: result['linter_results'][i].line-1, ch: 100 }, { className: "styled-background" });
+            }
+
+            popupNode.remove();
+
+            cqeditor.on("cursorActivity", function () {
+
+                var cursor = cqeditor.getCursor();
+
+                popupNode.remove();
+
+                for(var i=0; i<result['linter_results'].length; i++){
+
+                    if (cursor.line == result['linter_results'][i].line-1 && cursor.ch >= result['linter_results'][i].column) {
+                        var text = document.createTextNode(result['linter_results'][i].type +": "+ result['linter_results'][i].message);
+                        popupNode.innerHTML = '';
+                        popupNode.appendChild(text);
+                        cqeditor.addWidget({ line: cursor.line, ch: 9 }, popupNode, true);
+                    }
+                }
+            });
+
+
+            setTimeout(function () {
+                cqeditor.refresh();
+            }, 1);
+
+            $('#codeQualityModal').modal('show');
+        }
+    });
+
+}
+
+
 function patchFile() {
 
     console.log(editor.getValue());
@@ -110,6 +230,33 @@ function patchFile() {
 
     $.ajax({
         url: '/dashboard/createpatch/', type: 'POST', data: { 'pr': pr, 'filename': filename, 'filecontents': editor.getValue() }, success: function (result) {
+
+            console.log("success ajax");
+            console.log(result);
+
+            var element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(result.patch));
+            element.setAttribute('download', result.filename);
+
+            element.style.display = 'none';
+            document.body.appendChild(element);
+
+            element.click();
+
+            document.body.removeChild(element);
+        }
+    });
+
+}
+
+
+function cqPatchFile() {
+
+    console.log(cqeditor.getValue());
+
+
+    $.ajax({
+        url: '/dashboard/createpatch/', type: 'POST', data: { 'pr': pr, 'filename': filename, 'filecontents': cqeditor.getValue() }, success: function (result) {
 
             console.log("success ajax");
             console.log(result);
@@ -181,8 +328,12 @@ $.ajax({
             var commits = "";
             var diffs = "";
             var doccommits = "";
-            var docdiffs = "";
+            var docbuttons = "";
+            var cqbuttons = "";
             var alinks = "";
+            var docissues = 0;
+            var cqissues = 0;
+
             for (var j = 0; j < result['diffcommits'][i]['commits'].length; j++) {
 
                 var diff = result['diffcommits'][i]['commits'][j]['diff'];
@@ -202,13 +353,39 @@ $.ajax({
                 for (var k = 0; k < result['prcommits'].length; k++) {
                     if (result['diffcommits'][i]['commits'][j]['commit'] == result['prcommits'][k]['hash']) {
                         doccommits += "<a target='_blank' href='" + result['source_url'] + "/commit/" + result['diffcommits'][i]['commits'][j]['commit'] + "'>" + result['diffcommits'][i]['commits'][j]['commit'].substring(0, 7) + "</a><br/>";
-                        docdiffs += "<button class='btn btn-sm btn-primary' onclick='showDocEditor(\"" + result['diffcommits'][i]['filename'] + "\",\"" + "DIFF STUFF TO GO HERE" + "\");'>View Docs</button><br/>";
+                        docbuttons += "<button class='btn btn-sm btn-primary' onclick='showDocEditor(\"" + result['diffcommits'][i]['filename'] + "\",\"" + "DIFF STUFF TO GO HERE" + "\");'>View File in Editor</button><br/>";
+                        cqbuttons += "<button class='btn btn-sm btn-primary' onclick='showCqEditor(\"" + result['diffcommits'][i]['filename'] + "\",\"" + "DIFF STUFF TO GO HERE" + "\");'>View File in Editor</button><br/>";
                         alinks += "<a class='btn btn-sm btn-primary' href='/dashboard/archeology/" + pr + "?filename=" +result['diffcommits'][i]['filename']+ "'>View Archeology</a><br/>";
 
                     }
                 }
 
             }
+
+            //see if there are docstring issues
+            docstring_results = result['docstring_results'];
+            for (var k = 0; k < result['docstring_results'][1].length; k++) {
+                if (result['diffcommits'][i]['filename'] == result['docstring_results'][1][k][0]) {
+                    for (var m = 0; m < result['docstring_results'][1][k][1].length; m++) {
+                        if( result['docstring_results'][1][k][1][m].result.length > 0 ){
+                            docissues++;
+                            //issues = result['docstring_results'][1][k][1].length;
+                        }
+                    }
+                }
+            }
+
+            for (var k = 0; k < result['linter_results'].length; k++) {
+                if (result['diffcommits'][i]['filename'] == result['linter_results'][k]['filename']) {
+                    //for (var m = 0; m < result['docstring_results'][1][k][1].length; m++) {
+                        //if( result['docstring_results'][1][k][1][m].result.length > 0 ){
+                            cqissues = result['linter_results'][k]['results'].length;
+                        //}
+                    //}
+                }
+            }
+
+
 
             table.append("<tr><td>" +
                 result['diffcommits'][i]['filename'] +
@@ -219,20 +396,20 @@ $.ajax({
                 "</td></tr>");
 
             doctable.append("<tr><td>" +
-                result['diffcommits'][i]['filename'] +
+                    "<a href='/dashboard/pr/"+pr+"'>"+result['diffcommits'][i]['filename'] +"</a>"+
                 "</td><td>" +
-                doccommits +
+                    docissues +
                 "</td><td>" +
-                docdiffs +
+                    docbuttons +
                 "</td></tr>");
 
             cqtable.append("<tr><td>"+
-                    result['diffcommits'][i]['filename']+
-                    "</td><td>"+
-                            doccommits+
-                    "</td><td>"+
-                            docdiffs+
-                    "</td></tr>");
+                    "<a href='/dashboard/pr/"+pr+"'>"+result['diffcommits'][i]['filename'] +"</a>"+
+                "</td><td>"+
+                    cqissues+
+                "</td><td>"+
+                    cqbuttons+
+                "</td></tr>");
 
             atable.append("<tr><td>"+
                     result['diffcommits'][i]['filename']+
@@ -290,3 +467,84 @@ $.ajax({
 
     }
 });
+
+
+/*
+ 
+ Testing drag and drop
+
+*/
+
+/* draggable element */
+const items = document.querySelectorAll('.item');
+
+items.forEach(item => {
+    item.addEventListener('dragstart', dragStart);
+    item.addEventListener('dragend', dragEnd);
+});
+
+function dragStart(e) {
+    console.log("dragStart");
+    e.dataTransfer.setData('text/plain', e.target.id);
+    setTimeout(() => {
+        e.target.classList.add('hide');
+    }, 0);
+}
+
+function dragEnd(e) {
+    console.log("dragEnd");
+    //setTimeout(() => {
+        e.target.classList.remove('hide');
+    //}, 0);
+}
+
+
+/* drop targets */
+const boxes = document.querySelectorAll('.box');
+
+boxes.forEach(box => {
+    box.addEventListener('dragenter', dragEnter)
+    box.addEventListener('dragover', dragOver);
+    box.addEventListener('dragleave', dragLeave);
+    box.addEventListener('drop', drop);
+});
+
+
+function dragEnter(e) {
+    e.preventDefault();
+    if( e.target.classList.contains('box') )
+        e.target.classList.add('drag-over');
+}
+
+function dragOver(e) {
+    e.preventDefault();
+    if( e.target.classList.contains('box') )
+        e.target.classList.add('drag-over');
+}
+
+function dragLeave(e) {
+    e.target.classList.remove('drag-over');
+}
+
+function drop(e) {
+    console.log("drop");
+    console.log(e.target);
+
+    // can as if box or item.  If item, glue items together?
+    // but then how to separate items?
+
+    if( e.target.classList.contains('box') ){
+
+        e.target.classList.remove('drag-over');
+
+        // get the draggable element
+        const id = e.dataTransfer.getData('text/plain');
+        const draggable = document.getElementById(id);
+
+        // add it to the drop target
+        e.target.appendChild(draggable);
+
+        // display the draggable element
+        draggable.classList.remove('hide');
+    }
+}

@@ -1,0 +1,604 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block content %}
+{% csrf_token %}
+<!--h2>MeerCAT - Merge Code Analysis Toolkit</h2><br/-->
+
+<h4>Pull Request for <i>{{pr.project.name}}</i></h4><br/>
+
+<div style="margin-left:15px; margin-top:8px;">
+
+    <div class="accordion" id="accordionExample10">
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingFive">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+            <strong>Information</strong> &nbsp;&nbsp; <i class="bi bi-exclamation-triangle-fill" style="color:red; font-size:16pt;"></i>
+        </button>
+        </h2>
+        <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive" data-bs-parent="#accordionExample10">
+        <div class="accordion-body">
+            
+            {% if not closed_issue %}	
+                <div class="alert alert-danger" role="alert">
+                    Warning: This PR is not linked to any issues!
+                </div>
+            {% endif %}
+
+            <div class="row" style="margin-top:6px;">
+                <div class="col-sm-1"><u>Title</u>:</div> 
+                <div class="col-sm-11">{{pr.title}}</div>
+            </div>
+            <div class="row" style="margin-top:6px;">
+                <div class="col-sm-1"><u>Date</u>: </div>
+                <div class="col-sm-11">{{pr.created_at}}</div>
+            </div>
+            <div class="row" style="margin-top:6px;">
+                <div class="col-sm-1"><u>Desc</u>: </div>
+                <div class="col-sm-11"><p style="white-space:pre-wrap;">{{pr.description}}</p></div>
+            </div>
+            <div class="row" style="margin-top:6px;">
+                <div class="col-sm-1"><u>Branch</u>: </div>
+                <div class="col-sm-11">{{commits.0.branch}}</div>
+            </div>
+            <div class="row" style="margin-top:6px; margin-bottom:8px;">
+                <div class="col-sm-1"><u>URL</u>: </div>
+                <div class="col-sm-11"><a target="_blank" href="{{pr.url}}">{{pr.url}}</a></div>
+            </div>
+
+
+            <button id="showcommitsbutton" class="btn btn-sm btn-secondary" onclick="$('#hidediscussionbutton').hide(); $('#showdiscussionbutton').show(); $('#hideissuesbutton').hide(); $('#showissuesbutton').show(); $('#showcommitsbutton').hide(); $('#hidecommitsbutton').show(); $('#discussiondiv').hide(); $('#issuesdiv').hide(); $('#commitsdiv').show();">Show Commits</button><button id="hidecommitsbutton" class="btn btn-sm btn-primary" onclick="$('#hidecommitsbutton').hide(); $('#showcommitsbutton').show(); $('#commitsdiv').hide();" style="display:none;">Hide Commits</button> 
+            
+            <button id="showissuesbutton" class="btn btn-sm btn-secondary" onclick="$('#hidediscussionbutton').hide(); $('#showdiscussionbutton').show(); $('#hidecommitsbutton').hide(); $('#showcommitsbutton').show(); $('#showissuesbutton').hide(); $('#hideissuesbutton').show(); $('#discussiondiv').hide(); $('#commitsdiv').hide(); $('#issuesdiv').show();">Show Issues</button><button id="hideissuesbutton" class="btn btn-sm btn-primary" onclick="$('#hideissuesbutton').hide(); $('#showissuesbutton').show(); $('#issuesdiv').hide();" style="display:none;">Hide Issues</button> 
+
+            <br/>
+
+            <div id="commitsdiv" style="display:none; border:1px solid grey; margin:10px; padding:10px;">
+                <b>Commits:</b>
+                <table class="table">
+                    {% for commit in commits %}
+                    <tr>
+                        <td><a href="{{pr.project.source_url|slice:"0:-4"}}/commit/{{commit.hash}}">{{commit.hash|slice:"0:7"}}</a></td>
+                        <td>{{commit.datetime|date:'Y-m-d'}}</td>
+                        <td>{{commit.message}}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+
+            <div id="issuesdiv" style="display:none; border:1px solid grey; margin:10px; padding:10px;">
+                <b>Issue closed by this PR:</b>
+                {% if closed_issue %}	
+                    <table class="table">
+                        <tr>
+                            <td>{{closed_issue.title}}</td>
+                            <td>{{closed_issue.description}}</td>
+                            <td>{{closed_issue.url}}</td>
+                        </tr>
+                    </table>				
+                {% else %}
+                    <table class="table">
+                        <tr>
+                            <td>None</td>
+                        </tr>
+                    </table>				
+                {% endif %}
+                <br/>
+                <br/>
+
+                <b>Other Issues:</b>
+                <table class="table">
+                    {% if issues|length < 1 %}	
+                        <tr><td>None</td></tr>
+                    {% endif %}
+
+                    {% for issue in issues %}
+                    <tr>
+                        <td>{{issue.title}}</td>
+                        <td>{{issue.description}}</td>
+                        <td>{{issue.url}}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+
+        </div>
+        </div>
+    </div>
+    </div>
+
+    <br/>
+
+    <div class="accordion" id="accordionExample9">
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingFour">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+            <strong>Commentary</strong> &nbsp;&nbsp; <span><strong>(6)</strong></span>
+        </button>
+        </h2>
+        <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#accordionExample">
+        <div class="accordion-body">
+            
+            <b>Comments from PR:</b>
+            <table class="table">
+                {% if comments|length < 1 %}	
+                    <tr><td>None</td></tr>
+                {% endif %}
+
+                {% for comment in comments %}
+                <tr>
+                    <td style="min-width:110px;">{{comment.created_at|date:'Y-m-d'}}</td>
+                    <td>{{comment.author.username}}</td>
+                    <td>{{comment.body}}</td>
+                </tr>
+                {% endfor %}
+            </table>
+
+            <br/>
+
+            <b>Out-of-band Conversation:</b>
+
+            <br/>
+            <div style="margin-left:12px; margin-top:6px;">
+
+                <i><u>Slack</u>:</i><br/>
+
+                <table class="table">
+                    <tr>
+                        <th>Date</th>
+                        <th>People</th>
+                        <th>Conversation</th>
+                    </tr>
+                    <tr>
+                        <td style="min-width:110px;">2021-12-08</td>
+                        <td>Frank, Violet</td>
+                        <td>Discussed something</td>
+                    </tr>
+                    <tr>
+                        <td style="min-width:110px;">2021-12-07</td>
+                        <td>Violet, Sam, Joe</td>
+                        <td>Discussed something else</td>
+                    </tr>
+                </table>
+                <i><u>Email</u>:</i><br/>
+
+                <table class="table">
+                    <tr>
+                        <th>Date</th>
+                        <th>People</th>
+                        <th>Conversation</th>
+                    </tr>
+                    <tr>
+                        <td style="min-width:110px;">2021-12-03</td>
+                        <td>Julie, Reagan</td>
+                        <td>Discussed something</td>
+                    </tr>
+                    <tr>
+                        <td style="min-width:110px;">2021-12-01</td>
+                        <td>Julie, Sam, Mark</td>
+                        <td>Discussed something else</td>
+                    </tr>
+                </table>
+
+                <i><u>In-person</u>:</i><br/>
+
+                <table class="table">
+                    <tr>
+                        <th>Date</th>
+                        <th>People</th>
+                        <th>Conversation</th>
+                    </tr>
+                    <tr>
+                        <td style="min-width:110px;">2021-12-12</td>
+                        <td>Sam, Violet</td>
+                        <td>Discussed something</td>
+                    </tr>
+                    <tr>
+                        <td style="min-width:110px;">2021-12-07</td>
+                        <td>Violet, Mark, Joe</td>
+                        <td>Discussed something else</td>
+                    </tr>
+                </table>
+
+                <div style="margin-top:6px;">	
+                    <b><i>Record new conversation:</i></b>
+                    <div style="width:600px; margin-left:15px;">							
+                        
+                        <div style="width:600px; margin-top:10px;">
+                            Type:<br/>
+                            <select>
+                                <option>Slack</option>
+                                <option>Email</option>
+                                <option>In-person</option>
+                            </select><br/>
+                            People:<br/> 
+                            <input type="text" style="width:100%; border: 2px solid #74637f;"/><br/>
+                            Conversation:<br/>
+                            <textArea rows="2" style="z-index: 0; position: relative; margin-left:0px; height:60; width:100%"></textArea>
+                            <button class="btn btn-sm btn-primary" style="float:right; margin-top:10px;">Submit</button> 
+                            <br/><br/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+    </div>
+</div>
+<br/>
+<b><i>Potential follow on:</i></b> <span></span>
+<br/>
+
+<div style="margin-left:15px; margin-top:8px;">
+    <div class="accordion" id="accordionExample">
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingOne">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+            <strong>Documentation</strong> &nbsp;&nbsp; <i class="bi bi-exclamation-triangle-fill" style="color:red; font-size:16pt;"></i>
+        </button>
+        </h2>
+        <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+        <div class="accordion-body">
+        
+
+
+            <div id="docfilenamesdiv" style="border:1px solid grey; margin:10px; padding:10px;">
+            <b>Files modified in this PR:</b>
+            <table class="table" id="docdiffcommittable" style="font-size:10pt;">
+                <thead>
+                    <tr>
+                        <th>File</th>
+                        <th>Commits (last 8 weeks)</th>
+                        <th>Documentation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td colspan="3">Loading...</td></tr>
+                </tbody>
+            </table>
+            </div>
+
+
+            <b>Does this PR affect user documentation?</b><br/>
+            <div class="btn-group btn-group-sm" role="group">
+            <button type="button" class="btn btn-primary">Yes</button> <button type="button" class="btn btn-secondary">No</button>
+            </div>
+            <div style="margin-left:30px;">
+                <i>Please identify the chapter:</i><br/>
+                <div>
+                    &emsp;<input type="checkbox"/> Chapter 1 - Introduction<br/>
+                    <b>Part I Getting Started</b><br/>
+                    &emsp;<input type="checkbox"/> Chapter 2 - Quick Start<br/>
+                    <b>Part II The Flash-X Software System</b><br/>
+                    &emsp;<input type="checkbox"/> Chapter 3 - Overview of Flash-X architecture<br/>
+                    &emsp;<input type="checkbox"/> Chapter 4 - The Flash-X configuration script (setup)<br/>
+                    &emsp;<input type="checkbox"/> Chapter 5 - The Flash.h file<br/>
+                    <b>Part III Driver Unit</b><br/>
+                    &emsp;<input type="checkbox"/> Chapter 6 - Driver Unit<br/>
+                    <b>Part IV Infrastructure Units</b><br/>
+                    &emsp;<input type="checkbox"/> Chapter 7 - Grid Unit<br/>
+                    &emsp;<input type="checkbox"/> Chapter 8 - IO Unit<br/>
+                    &emsp;<input type="checkbox"/> Chapter 9 - Runtime Parameters Unit<br/>
+                    &emsp;<input type="checkbox"/> Chapter 10 - Multispecies Unit<br/>
+                    &emsp;<input type="checkbox"/> Chapter 11 - Physical Constants Unit<br/>
+                    <b>Part V Physics Units</b><br/>
+                    &emsp;<input type="checkbox"/> Chapter 12 - Hydrodynamics Units<br/>
+                    &emsp;<input type="checkbox"/> Chapter 13 - Incompressible Navier-Stokes Unit<br/>
+                    &emsp;<input type="checkbox"/> Chapter 14 - Equation of State Unit<br/>
+                    &emsp;<input type="checkbox"/> Chapter 15 - Local Source Terms<br/>
+                    &emsp;<input type="checkbox"/> Chapter 16 - Gravity Unit<br/>
+                    &emsp;<input type="checkbox"/> Chapter 17 - Particles Unit<br/>
+                    <b>Part VI Monitor Units</b><br/>
+                    &emsp;<input type="checkbox"/> Chapter 18 - Logfile Unit<br/>
+                    &emsp;<input type="checkbox"/> Chapter 19 - Timer and Profiler Units<br/>
+                    <b>Part VII Tools</b><br/>
+                    &emsp;<input type="checkbox"/> Chapter 20 - VisIt<br/>
+                    &emsp;<input type="checkbox"/> Chapter 21 - Serial Flash-X Output Comparison Utility (sfocu)<br/>
+                    &emsp;<input type="checkbox"/> Chapter 22 - Drift<br/>
+                </div>
+            </div>
+            <br/>
+
+            <b>Analysis</b><br/>
+            <div style="margin-left:30px;">
+                Here are some things you should mention in the PR:
+                <ul>
+                <li>TODO</li>
+                <li>TODO</li>
+                <li>TODO</li>
+                </ul>
+            </div>
+        </div>
+        </div>
+    </div>
+    </div>
+
+    <br/>
+
+    <div class="accordion" id="accordionExample6">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingTwo">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                <strong>Testing</strong>
+            </button>
+            </h2>
+            <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+            <div class="accordion-body">
+                
+                <b>Does this PR require new or modified test cases?</b><br/>
+                <div class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn btn-primary">Yes</button> <button type="button" class="btn btn-secondary">No</button>
+                </div>
+                <div style="margin-left:30px;">
+                    Please identify code packages<br/>
+                    <div>
+                        <input type="checkbox"/> Package 1<br/>
+                        <input type="checkbox"/> Package 2<br/>
+                        <input type="checkbox"/> Package 3<br/>
+                    </div>
+                </div>
+                <br/>
+
+                <b>Analysis</b><br/>
+                <div style="margin-left:30px;">
+                    Here are some things you should mention in the PR:
+                    <ul>
+                    <li>Something</li>
+                    <li>Someone</li>
+                    <li>Things and dodads</li>
+                    </ul>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <br/>
+
+    <div class="accordion" id="accordionExample8">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingSix">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSix" aria-expanded="false" aria-controls="collapseSix">
+                  <strong>Code Quality</strong> &nbsp;&nbsp; <i class="bi bi-exclamation-triangle-fill" style="color:red; font-size:16pt;"></i>
+                  <!-- <i class="bi bi-exclamation-triangle"></i> -->
+                </button>
+            </h2>
+            <div id="collapseSix" class="accordion-collapse collapse" aria-labelledby="headingSix" data-bs-parent="#accordionExample8">
+                <div class="accordion-body">
+                
+                    <div id="cqfilenamesdiv" style="border:1px solid grey; margin:10px; padding:10px;">
+                        <b>Files modified in this PR:</b>
+                        <table class="table" id="cqdiffcommittable" style="font-size:10pt;">
+                            <thead>
+                                <tr>
+                                    <th>File</th>
+                                    <th>Commits (last 8 weeks)</th>
+                                    <th>Results</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td colspan="3">Loading...</td></tr>
+                                <!--{% for file in filenames %}
+                                <tr>
+                                    <td>{{file}}</td>
+                                </tr>
+                                {% endfor %}-->
+
+                                <!--{% for key,value in diffcommits.items %}
+                                <tr>
+                                    <td>{{key}}</td>
+                                    <td>
+                                        {% for commit in value %}
+                                            {{commit}}
+                                        {% endfor %}
+                                    </td>
+                                </tr>
+                                {% endfor %}-->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <br/>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <br/>
+
+    <div class="accordion" id="accordionExample9">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingSeven">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSeven" aria-expanded="false" aria-controls="collapseSeven">
+                  <strong>Archeology</strong> &nbsp;&nbsp; <i class="bi bi-exclamation-triangle-fill" style="color:red; font-size:16pt;"></i>
+                  <!-- <i class="bi bi-exclamation-triangle"></i> -->
+                </button>
+            </h2>
+            <div id="collapseSeven" class="accordion-collapse collapse" aria-labelledby="headingSeven" data-bs-parent="#accordionExample9">
+                <div class="accordion-body">
+                
+                    <div id="afilenamesdiv" style="border:1px solid grey; margin:10px; padding:10px;">
+                        <b>Files modified in this PR:</b>
+                        <table class="table" id="adiffcommittable" style="font-size:10pt;">
+                            <thead>
+                                <tr>
+                                    <th>File</th>
+                                    <th>Commits (last 8 weeks)</th>
+                                    <th>Results</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td colspan="3">Loading...</td></tr>
+                                <!--{% for file in filenames %}
+                                <tr>
+                                    <td>{{file}}</td>
+                                </tr>
+                                {% endfor %}-->
+
+                                <!--{% for key,value in diffcommits.items %}
+                                <tr>
+                                    <td>{{key}}</td>
+                                    <td>
+                                        {% for commit in value %}
+                                            {{commit}}
+                                        {% endfor %}
+                                    </td>
+                                </tr>
+                                {% endfor %}-->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <br/>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <br/>
+
+    <div class="accordion" id="accordionExample7">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingThree">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                <strong>Patterns</strong>
+            </button>
+            </h2>
+            <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
+            <div class="accordion-body">
+
+                <div>
+                <div class="row">
+                    <div class="col-sm-2" style="text-align:right; padding-top:5px;">Start Date:</div>
+                    <div class="col-sm-3" style="text-align:left;"><input class="form-control" type=date id="startdate"></div>
+
+                    <div class="col-sm-2" style="text-align:right; padding-top:5px;">End Date:</div>
+                    <div class="col-sm-3" style="text-align:left;"><input class="form-control" type=date id="enddate"></div>
+
+                    <div class="col-sm-2" style="text-align:left; padding-top:2px;"> 
+                        <button class="btn btn-sm btn-primary" onclick="loadPatternGraph();">Rerun graph</button> 
+                    </div>
+                </div>
+                <img id="patterngraph1" src="" style="display:none; width:720px;"/>
+                <span id="patternlabel1">Loading...<br/></span>
+                <br/>
+                </div>
+
+                <br/>
+
+                <div id="filenamesdiv" style="border:1px solid grey; margin:10px; padding:10px;">
+                <b>Files modified in this PR:</b>
+                <table class="table" id="diffcommittable" style="font-size:10pt;">
+                    <thead>
+                        <tr>
+                            <th>File</th>
+                            <th>Commits (last 8 weeks)</th>
+                            <th>Lines changed</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td colspan="3">Loading...</td></tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <br/>
+
+                <div id="eventsdiv" style="border:1px solid grey; margin:10px; padding:10px;">
+                <b>Events:</b>
+                <table class="table">
+                    {% for event in events %}
+                    <tr>
+                        <td>{{event.action}}</td>
+                        <td>{{event.master_branch}}</td>
+                        <td>{{event.description}}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+                </div>
+
+                <br/>  
+
+                <b>Does this PR meet any of these patterns?</b><br/>
+                <div style="margin-left:30px;">
+                    <div>
+                        <input type="checkbox"/> Code Churn - description<br/>
+                        <input type="checkbox"/> Pattern 2 - description<br/>
+                        <input type="checkbox"/> Pattern 3 - description<br/>
+                    </div>
+                </div>
+                <br/>
+
+                <b>Analysis</b><br/>
+                <div style="margin-left:30px;">
+                    Here are some things you should mention in the PR:
+                    <ul>
+                    <li>Something</li>
+                    <li>Someone</li>
+                    <li>Things and dodads</li>
+                    </ul>
+                </div>
+                <br/>
+                <div id='testdiv'>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+    <br/>
+</div>
+<br/>
+
+<br/>
+<table id='branches_table' class="table" style="display:none;">
+    <tbody>
+        <tr><th>Name</th><th>Author</th><th>Created</th><th>Deleted</th></tr>
+    </tbody>
+</table>
+
+<div id="docModal" class="modal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title">Documentation Helper</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+            
+            <p>Suggestions highlighted for file <b><i><span id="dochelpertitle">folder1/arithmetic.py</span></i></b></p>
+
+            <div class="" style="border:1px solid #ccc; margin-bottom:5px;">
+
+                <textarea id="dochelper"></textarea>
+            </div>
+            <div class="modal-footer">
+            <button id="patchbutton" class="btn btn-primary" onclick="patchFile();">
+                Download Patch
+            </button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input id="pr" type="hidden" value="{{ pr.pk }}"/>
+
+{% endblock content %}
+
+
+{% block script %}
+<script src="{% static 'codemirror/lib/codemirror.js' %}"></script>
+<script src="{% static 'codemirror/mode/clike/clike.js' %}"></script>
+<script src="{% static 'codemirror/mode/xml/xml.js' %}"></script>
+<script src="{% static 'codemirror/mode/python/python.js' %}"></script>
+<script src="{% static 'codemirror/mode/javascript/javascript.js' %}"></script>
+<script src="{% static 'codemirror/mode/css/css.js' %}"></script>
+<script src="{% static 'codemirror/mode/htmlmixed/htmlmixed.js' %}"></script>
+<script src="{% static 'codemirror/addon/edit/matchbrackets.js' %}"></script>
+<script src="{% static 'codemirror/addon/hint/show-hint.js' %}"></script>
+<script src="{% static 'codemirror/addon/selection/mark-selection.js' %}"></script>
+<script src="{% static 'js/pr.js' %}"></script>
+<script src="{% static 'js/branches.js' %}"></script>
+{% endblock script %}
