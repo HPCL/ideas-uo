@@ -421,6 +421,27 @@ $.ajax({
 
         }
 
+        
+        var devtable = $("#devtable > tbody");
+        devtable.empty();
+
+        for (var i = 0; i < result['dev_table'].length; i++) {
+
+           devtable.append("<tr><td>" +
+                result['dev_table'][i]['author'] +
+                "</td><td>" +
+                result['dev_table'][i]['number_commits'] +
+                "</td><td>" +
+                result['dev_table'][i]['lines'] +
+                "</td><td>" +
+                result['dev_table'][i]['most_recent_commit'] +
+                "</td><td>" +
+                "</td></tr>");
+
+        }
+
+
+
         $('.popover-dismiss').popover({ trigger: 'focus' });
 
         setTimeout(function () {
