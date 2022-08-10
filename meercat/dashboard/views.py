@@ -1464,7 +1464,6 @@ def first_responder_function(proj_object, pr_object):
     #Get just unique filenames
     filenames_set = set(filenames)
     filenames = list(filenames_set)
-
     file_lines = []
     for filename in filenames:
         name, extension = os.path.splitext(filename)
@@ -1472,14 +1471,14 @@ def first_responder_function(proj_object, pr_object):
             with open('../'+proj_name+'/'+filename, 'r') as f:
                 lines = f.readlines()
                 f.close()
-            file_lines.append((name,  extension, lines))
+            file_lines.append((filename, name,  extension, lines))
         else:
             print(f'Uncheckable currently: {filename}')
-            file_lines.append((name,  extension, None))
+            file_lines.append((filename, name,  extension, None))
 
     #Gather info on each file in file_lines
     all_files = []
-    for name, extension, lines in file_lines:
+    for path, name, extension, lines in file_lines:
 
         if not lines:
             continue  #no lines to check for file
@@ -1573,18 +1572,24 @@ def first_responder_function(proj_object, pr_object):
                 #is signature line - check for doc string
                 sig_end = i
                 doc, doc_start, doc_end, fields, doc_params, issues = get_py_doc_string(lines, sig_end)
+
+                test_info = find_pytest_files(proj_name, path, sig_name)  #move this function to repo and call from there
+
                 mandatories = project_info['docstring_mandatory']
                 param_issues = check_py_numpy_param_match(sig_params, doc_params, doc_start)
                 mandatory_issues  = check_py_numpy_mandatory(mandatories, fields, doc_start)
                 all_issues = issues + param_issues + mandatory_issues
-                function_info.append((sig_name, sig_params, (doc, doc_start, doc_end, fields, doc_params), all_issues))
+                function_info.append((sig_name, sig_params, (doc, doc_start, doc_end, fields, doc_params), test_info, all_issues))
+
+                #see if can find test files
 
                 i += 1  #move beyond docstring
 
             file_table = [{'signature_name': sig,
                           'signature_params':params,
                           'docstring': doc_info,
-                          'result': all_issues} for sig, params, doc_info, all_issues in function_info]
+                          'test_info': test_info,
+                          'result': all_issues} for sig, params, doc_info, test_info, all_issues in function_info]
 
             #done with py and numpy parsing case
         else:
@@ -1652,6 +1657,43 @@ def get_project_info(project_id):
             'extensions':['.py', '.F90']}     #anl_test_repo
     }
     return project_info[project_id] if project_id in project_info else None
+
+#call with, e.g., 'anl_test_repo', 'folder1/arithmetic.py', 'sub'
+def find_pytest_files(proj_name, file_path, function_name):
+    #for full pytest dir setup see https://docs.pytest.org/en/7.1.x/explanation/goodpractices.html#conventions-for-python-test-discovery
+    #here just assuming test files are in folder on file_path
+    import os
+    full_path = f'../{proj_name}/{file_path}'
+    found_asserts = []
+    while(True):
+        head,tail = os.path.split(full_path)  #head now has containing dir for file
+        if not head: break
+        if tail==proj_name: break  #don't check above the repo
+        all = os.listdir(head)  #files and folders
+        #look for pytest files in dir
+        for item in all:
+            if os.path.isdir(item): continue  #skip over dirs
+            name,extension = os.path.splitext(item)
+            if 'test' in name and extension=='.py':
+                print(f'found: {head}, {name}')
+                with open(head+'/'+name+extension, 'r') as f:
+                    lines = f.readlines()
+                    f.close()
+                i = 0
+                while i<len(lines):
+                    if lines[i].startswith('def test_'):
+                        i+=1
+                        while i<len(lines) and lines[i] != '\n':
+                            if lines[i].strip().startswith('assert') and f' {function_name}(' in lines[i]:
+                                j = head.find(f'{proj_name}/')
+                                path = head[j+len(proj_name)+1:]
+                                found_asserts.append((path, name+extension, i))
+                            i += 1
+                    i+=1
+        full_path = head
+    return found_asserts
+
+
 
 def get_callers(sig, file_name):
     project_callers[30] =  { #needs to be part of project profile
