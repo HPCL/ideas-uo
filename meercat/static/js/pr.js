@@ -436,6 +436,7 @@ $.ajax({
                 "</td><td>" +
                 result['dev_table'][i]['most_recent_commit'] +
                 "</td><td>" +
+                "<a href='" + result['source_url'] +"/"+ result['dev_table'][i]['commit_link'] + "'>View on GitHub</a>"+
                 "</td></tr>");
 
         }

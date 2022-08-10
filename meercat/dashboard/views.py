@@ -1015,7 +1015,7 @@ def diffCommitData(request):
     #see here for avoiding author alisases: https://towardsdatascience.com/string-matching-with-fuzzywuzzy-e982c61f8a84
     #combine counts for same author with different aliases.
 
-    dev_table = [{'author':author.email, 'number_commits': count, 'lines': loc, 'most_recent_commit':date.strftime('%Y-%m-%d, %H:%M %p'),'commit_link':link} for date, author, count, loc, link in new_info]
+    dev_table = [{'author':author.username+' - '+author.email, 'number_commits': count, 'lines': loc, 'most_recent_commit':date.strftime('%Y-%m-%d, %H:%M %p'),'commit_link':link} for date, author, count, loc, link in new_info]
 
 
     resultdata = {
