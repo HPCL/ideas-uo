@@ -832,7 +832,7 @@ def file_explorer(request, *args, **kwargs):
 
 
 
-# Refresh the GIT and GitHub data for a project (INTENTIONALLY ONLY WORKS FOR PROJECT ID 30)
+# Refresh the GIT and GitHub data for a project
 @login_required
 def refreshProject(request):
     print("REFRESH")
@@ -973,11 +973,57 @@ def diffCommitData(request):
             linter_results.append( {'filename': filename, 'results':json.loads(output)} )
 
     
+    #Build developer table
+    author_loc = {}
+
+    for d in diffs:
+        body = d.body
+        author = d.commit.author
+        loc_count = body.count('\n+') + body.count('\n-')
+        if author in author_loc:
+            author_loc[author] += loc_count 
+        else:
+            author_loc[author] = loc_count
+
+    # Get commits, authors for those (diffs)
+    info = [(d.commit.datetime, d.commit.author, d.commit.hash) for d in diffs]
+    commit_messages = [d.commit.message for d in diffs]
+    commit_hashes = [d.commit.hash for d in diffs]
+
+    #tags = CommitTag.objects.all().filter(sha__in=commit_hashes)
+    #prs = list(set(PullRequest.objects.all().filter(commits__in=tags)))  #all prs that go with file commits
+    #pr_messages = [(pr.number, pr.url, pr.title, pr.description) for pr in prs]
+    #pr_comments = list(Comment.objects.all().filter(pr__in=prs))
+
+    #issues = list(Issue.objects.all().filter(url__in=[pri.issue.url for pri in PullRequestIssue.objects.all().filter(pr__in=prs).all()]))
+    #print('issues', issues, '\n')
+
+    author_count = {}
+    for date, author, link in info:
+        if author in author_count:
+            author_count[author] += 1
+        else:
+            author_count[author] = 1
+
+    new_info = []
+    authors = []
+    for date, author, link in sorted(info, reverse=False):
+        if author in authors: continue
+        new_info.append((date, author, author_count[author], author_loc[author], link))
+        authors.append(author)
+
+    #see here for avoiding author alisases: https://towardsdatascience.com/string-matching-with-fuzzywuzzy-e982c61f8a84
+    #combine counts for same author with different aliases.
+
+    dev_table = [{'author':author.username+' - '+author.email, 'number_commits': count, 'lines': loc, 'most_recent_commit':date.strftime('%Y-%m-%d, %H:%M %p'),'commit_link':link} for date, author, count, loc, link in new_info]
+
+
     resultdata = {
         'diffcommits':diffcommits,
         'prcommits':prcommits,
         'docstring_results':docstring_results,
         'linter_results':linter_results,
+        'dev_table':dev_table,
         'source_url':pr.project.source_url[0:-4]
     }
 
@@ -1056,7 +1102,15 @@ def githubBot(request):
     print( "Repository: " + str(payload['repository']['clone_url']) )
 
     project = list(Project.objects.all().filter(source_url=str(payload['repository']['clone_url'])).all())[0]
-    pull_request = list(PullRequest.objects.all().filter(project=prid, number=int(str(payload['number']))).all())[0]
+
+    #Need to refresh the database before 
+    username = settings.DATABASES['default']['USER']
+    password = settings.DATABASES['default']['PASSWORD']
+    cmd = f'cd .. ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {project.id}'
+    os.system(cmd)
+    result = subprocess.check_output(cmd, shell=True)
+
+    pull_request = list(PullRequest.objects.all().filter(project=project.id, number=int(str(payload['number']))).all())[0]
 
     #TODO: eventually only do this for new PRs (check payload for action type I think)
 
@@ -1623,24 +1677,24 @@ def first_responder_function(proj_object, pr_object):
 
         message = f'''# The MeerCat Pull-Request Assistant has information for you
 
-    ## {k} out of {n} files in this PR were found to have issues.
+## {k} out of {n} files in this PR were found to have issues.
 
-    ## We have suggestions for adding tags.
+## We have suggestions for adding tags.
 
-    ## We have suggestions for adding more people to the discussion.
+## We have suggestions for adding more people to the discussion.
 
-    [Please see the Pull-Request Assistant page for more detail.](http://sansa.cs.uoregon.edu:8888/dashboard/pr/{pr_object.id})
+[Please see the Pull-Request Assistant page for more detail.](http://sansa.cs.uoregon.edu:8888/dashboard/pr/{pr_object.id})
     '''
     else:
         message = f'''# The MeerCat Pull-Request Assistant has information for you
 
-    ## No files in this PR were analyzed.
+## No files in this PR were analyzed.
 
-    ## We have suggestions for adding tags.
+## We have suggestions for adding tags.
 
-    ## We have suggestions for adding more people to the discussion.
+## We have suggestions for adding more people to the discussion.
 
-    [Please see the Pull-Request Assistant page for more detail.](http://sansa.cs.uoregon.edu:8888/dashboard/pr/{pr_object.id})
+[Please see the Pull-Request Assistant page for more detail.](http://sansa.cs.uoregon.edu:8888/dashboard/pr/{pr_object.id})
     '''
     return [message, all_files]
 
