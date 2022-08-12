@@ -521,6 +521,12 @@ $.ajax({
                             alinks+
                     "</td></tr>");
 
+            if( docissues > 0 )
+                $("#docwarning").show();
+
+            if( cqissues > 0 )
+                $("#cqwarning").show();
+
         }
 
 
