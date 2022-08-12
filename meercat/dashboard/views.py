@@ -976,6 +976,8 @@ def diffCommitData(request):
     #Build developer table
     author_loc = {}
 
+    diffs = Diff.objects.all().filter(commit__project=pr.project, file_path=filename).all()
+
     for d in diffs:
         body = d.body
         author = d.commit.author
@@ -989,14 +991,6 @@ def diffCommitData(request):
     info = [(d.commit.datetime, d.commit.author, d.commit.hash) for d in diffs]
     commit_messages = [d.commit.message for d in diffs]
     commit_hashes = [d.commit.hash for d in diffs]
-
-    #tags = CommitTag.objects.all().filter(sha__in=commit_hashes)
-    #prs = list(set(PullRequest.objects.all().filter(commits__in=tags)))  #all prs that go with file commits
-    #pr_messages = [(pr.number, pr.url, pr.title, pr.description) for pr in prs]
-    #pr_comments = list(Comment.objects.all().filter(pr__in=prs))
-
-    #issues = list(Issue.objects.all().filter(url__in=[pri.issue.url for pri in PullRequestIssue.objects.all().filter(pr__in=prs).all()]))
-    #print('issues', issues, '\n')
 
     author_count = {}
     for date, author, link in info:
@@ -1014,7 +1008,6 @@ def diffCommitData(request):
 
     #see here for avoiding author alisases: https://towardsdatascience.com/string-matching-with-fuzzywuzzy-e982c61f8a84
     #combine counts for same author with different aliases.
-
     dev_table = [{'author':author.username+' - '+author.email, 'number_commits': count, 'lines': loc, 'most_recent_commit':date.strftime('%Y-%m-%d, %H:%M %p'),'commit_link':link} for date, author, count, loc, link in new_info]
 
 
@@ -1101,35 +1094,37 @@ def githubBot(request):
     print( "Pull Request Number: " + str(payload['number']) )
     print( "Repository: " + str(payload['repository']['clone_url']) )
 
-    project = list(Project.objects.all().filter(source_url=str(payload['repository']['clone_url'])).all())[0]
+    if str(payload['action']) == 'opened':
 
-    #Need to refresh the database before 
-    username = settings.DATABASES['default']['USER']
-    password = settings.DATABASES['default']['PASSWORD']
-    cmd = f'cd .. ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {project.id}'
-    os.system(cmd)
-    result = subprocess.check_output(cmd, shell=True)
+        project = list(Project.objects.all().filter(source_url=str(payload['repository']['clone_url'])).all())[0]
 
-    pull_request = list(PullRequest.objects.all().filter(project=project.id, number=int(str(payload['number']))).all())[0]
+        #Need to refresh the database before 
+        username = settings.DATABASES['default']['USER']
+        password = settings.DATABASES['default']['PASSWORD']
+        cmd = f'cd .. ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {project.id}'
+        os.system(cmd)
+        result = subprocess.check_output(cmd, shell=True)
 
-    #TODO: eventually only do this for new PRs (check payload for action type I think)
+        pull_request = list(PullRequest.objects.all().filter(project=project.id, number=int(str(payload['number']))).all())[0]
 
-    if pull_request:
+        #TODO: eventually only do this for new PRs (check payload for action type I think)
 
-        comment = first_responder_function(pull_request.project, pull_request)[0]
-        print("------------")
-        if comment:
-            comment_pullrequest(pull_request, comment)
-            print("commented")
-        else:
-            event = EventLog(
-                event_type=EventLog.EventTypeChoices.NO_NOTIFICATION,
-                pull_request=pull_request,
-                datetime=datetime.today()            
-            )
-            print("don't bug me")
+        if pull_request:
 
-        print("------------")
+            comment = first_responder_function(pull_request.project, pull_request)[0]
+            print("------------")
+            if comment:
+                comment_pullrequest(pull_request, comment)
+                print("commented")
+            else:
+                event = EventLog(
+                    event_type=EventLog.EventTypeChoices.NO_NOTIFICATION,
+                    pull_request=pull_request,
+                    datetime=datetime.today()            
+                )
+                print("don't bug me")
+
+            print("------------")
 
 
     return HttpResponse(

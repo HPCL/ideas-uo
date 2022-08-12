@@ -556,6 +556,9 @@ $.ajax({
         testmap.forEach((value,key)=>{
             console.log(key + " - " + value);
 
+            if( value > 0 )
+                $("#testwarning").show();
+
             testtable.append("<tr><td>" +
                 "<a href='/dashboard/pr/"+pr+"'>"+key +"</a>"+
                 "</td><td>" +
