@@ -196,7 +196,7 @@ def pr(request, *args, **kwargs):
 
     pr = list(PullRequest.objects.all().filter(id=prid).all())[0]
 
-    commits = list(Commit.objects.all().filter(hash__in=[committag.sha for committag in pr.commits.all()]))
+    commits = list(Commit.objects.all().filter(hash__in=[committag.sha for committag in set(pr.commits.all())]))
 
     issues = list(Issue.objects.all().filter(url__in=[pri.issue.url for pri in PullRequestIssue.objects.all().filter(pr=pr).all()]))
 
@@ -941,7 +941,7 @@ def diffCommitData(request):
     pr = list(PullRequest.objects.all().filter(id=prid).all())[0]
 
     #Find all changed files related to the PR by getting all diffs from all commits in PR    
-    commits = list(Commit.objects.all().filter(hash__in=[committag.sha for committag in pr.commits.all()]))
+    commits = list(Commit.objects.all().filter(hash__in=[committag.sha for committag in set(pr.commits.all())]))
 
     print("Commits: "+str(len(commits)))
 
