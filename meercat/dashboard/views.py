@@ -1622,20 +1622,28 @@ def first_responder_function(proj_object, pr_object):
                 if not sig_name:
                     i += 1  #move on and keep searching
                     continue
-
+                #print(f'found function: {sig_name}')
                 #is signature line - check for doc string
                 sig_end = i
-                doc, doc_start, doc_end, fields, doc_params, issues = get_py_doc_string(lines, sig_end)
+                doc, doc_start, doc_end, fields, doc_params, issues = get_py_doc_string(lines, sig_end+1)
+                #print(f'docstring result: {(doc, doc_start, doc_end, fields, doc_params, issues)}')
+                test_info = find_pytest_files(proj_name, path, sig_name)  #returns list of triples (path, file_name, i)
 
-                test_info = find_pytest_files(proj_name, path, sig_name)  #move this function to repo and call from there
+                #get ready to move test function to repo
+                #cd '..'
+                #proj_name in os.listdir()
+
+                #import importlib
+                #proj = importlib.import_module(proj_name, '')
+
+                #proj.bin.meercat_test_functions.find_pytest_files(proj_name, path, sig_name)
 
                 mandatories = project_info['docstring_mandatory']
-                param_issues = check_py_numpy_param_match(sig_params, doc_params, doc_start)
-                mandatory_issues  = check_py_numpy_mandatory(mandatories, fields, doc_start)
+                param_issues = check_py_numpy_param_match(sig_params, doc_params, doc_start) if doc else []
+                mandatory_issues  = check_py_numpy_mandatory(mandatories, fields, doc_start) if doc else []
                 all_issues = issues + param_issues + mandatory_issues
                 function_info.append((sig_name, sig_params, (doc, doc_start, doc_end, fields, doc_params), test_info, all_issues))
-
-                #see if can find test files
+                #print(f'function_info: {function_info}')
 
                 i += 1  #move beyond docstring
 

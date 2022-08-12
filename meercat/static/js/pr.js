@@ -46,6 +46,15 @@ var cqeditor = CodeMirror.fromTextArea(document.getElementById("cqhelper"), {
     styleSelectedText: true
 });
 
+var testeditor = CodeMirror.fromTextArea(document.getElementById("testhelper"), {
+    lineNumbers: true,
+    mode: "text/x-python", //"text/x-c++src", //"text/html",
+    matchBrackets: true,
+    spellcheck: true,
+    autocorrect: true,
+    styleSelectedText: true
+});
+
 function showDocEditor(docfilename, difftext) {
 
     console.log("TEST");
@@ -219,6 +228,45 @@ function showCqEditor(docfilename, difftext) {
             $('#codeQualityModal').modal('show');
         }
     });
+
+}
+
+
+function showTestEditor(docfilename, difftext) {
+
+    console.log("TEST");
+    console.log(difftext);
+
+    filename = docfilename;
+
+    $('#testhelpertitle').html(filename);
+
+
+    $.ajax({
+        url: '/dashboard/getfile/', type: 'POST', data: { 'pr': pr, 'filename': filename }, success: function (result) {
+            console.log("get file contents");
+            console.log(result);
+
+            testeditor.setValue(result['filecontents']);
+
+            //editor.markText({ line: 3, ch: 0 }, { line: 3, ch: 13 }, { className: "styled-background" });
+            //editor.markText({ line: 6, ch: 12 }, { line: 6, ch: 22 }, { className: "styled-background" });
+            //editor.markText({ line: 4, ch: 2 }, { line: 4, ch: 6 }, { className: "styled-background" });
+
+
+
+
+
+
+
+            setTimeout(function () {
+                testeditor.refresh();
+            }, 1);
+
+            $('#testModal').modal('show');
+        }
+    });
+
 
 }
 
@@ -420,6 +468,50 @@ $.ajax({
                     "</td></tr>");
 
         }
+
+
+        var testtable = $("#testtable > tbody");
+        testtable.empty();
+
+        var testmap = new Map();
+
+        for (var k = 0; k < result['docstring_results'][1].length; k++) {
+            //if (result['diffcommits'][i]['filename'] == result['docstring_results'][1][k][0]) {
+                for (var m = 0; m < result['docstring_results'][1][k][1].length; m++) {
+                    if( result['docstring_results'][1][k][1][m].test_info.length > 0 ){
+                        for (var n = 0; n < result['docstring_results'][1][k][1][m].test_info.length; n++) {
+                        
+                            result['docstring_results'][1][k][1][m].test_info[n][0] //folder
+                            result['docstring_results'][1][k][1][m].test_info[n][1] //test filename
+                            result['docstring_results'][1][k][1][m].test_info[n][2] //line number
+
+                            var fullfilename = result['docstring_results'][1][k][1][m].test_info[n][0]+"/"+result['docstring_results'][1][k][1][m].test_info[n][1];
+
+                            if( !testmap.has(fullfilename) ){
+                                testmap.set(fullfilename,0);
+                            }
+
+                            testmap.set(fullfilename,testmap.get(fullfilename)+1);
+
+                        }
+                    }
+                }
+            //}
+        }
+
+        testmap.forEach((value,key)=>{
+            console.log(key + " - " + value);
+
+            testtable.append("<tr><td>" +
+                "<a href='/dashboard/pr/"+pr+"'>"+key +"</a>"+
+                "</td><td>" +
+                value +
+                "</td><td>" +
+                "<button class='btn btn-sm btn-primary' onclick='showTestEditor(\"" + key + "\",\"" + "TEST STUFF TO GO HERE" + "\");'>View File in Editor</button>"+
+                "</td></tr>");
+        });
+
+
 
         
         var devtable = $("#devtable > tbody");
