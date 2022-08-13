@@ -87,9 +87,12 @@ function showDocEditor(docfilename, difftext) {
                 if( docstring_results[1][i][0] == filename ){
                     for(var j=0; j<docstring_results[1][i][1].length; j++){
 
-                        if( docstring_results[1][i][1][j].result.length > 0 ){  
-                            console.log("MARK LINE: " + docstring_results[1][i][1][j].result[0][1] );                      
-                            editor.markText({ line: docstring_results[1][i][1][j].result[0][1], ch: 0 }, { line: docstring_results[1][i][1][j].result[0][1], ch: 100 }, { className: "styled-background" });
+                        if( docstring_results[1][i][1][j].result.length > 0 ){ 
+
+                            for(var k=0; k<docstring_results[1][i][1][j].result.length; k++){ 
+                                console.log("MARK LINE: " + docstring_results[1][i][1][j].result[k][1] );                      
+                                editor.markText({ line: docstring_results[1][i][1][j].result[k][1]-1, ch: 0 }, { line: docstring_results[1][i][1][j].result[k][1]-1, ch: 100 }, { className: "styled-background" });
+                            }
                         }
                     }
                 }
@@ -124,10 +127,19 @@ function showDocEditor(docfilename, difftext) {
 
                             if( docstring_results[1][i][1][j].result.length > 0 ){                        
 
-                                if (cursor.line == docstring_results[1][i][1][j].result[0][1] ) {
-                                    var text = document.createTextNode(docstring_results[1][i][1][j].result[0][0]);
+                                if (cursor.line == docstring_results[1][i][1][j].result[0][1]-1 ) {
+                                    
                                     popupNode.innerHTML = '';
-                                    popupNode.appendChild(text);
+                                    for(var k=0; k<docstring_results[1][i][1][j].result.length; k++){
+                                        var text = document.createTextNode(docstring_results[1][i][1][j].result[k][0]);
+                                        popupNode.appendChild(text);
+                                        if( k < docstring_results[1][i][1][j].result.length-1 ){
+                                            var br = document.createElement('br');
+                                            popupNode.appendChild(br);
+                                        }
+                                    }
+
+                                    
 
                                     if( docstring_results[1][i][1][j].result[0][0].indexOf("No docstring") >= 0 ){
                                         var button = document.createElement('button');
@@ -246,6 +258,7 @@ function showTestEditor(docfilename, difftext) {
         url: '/dashboard/getfile/', type: 'POST', data: { 'pr': pr, 'filename': filename }, success: function (result) {
             console.log("get file contents");
             console.log(result);
+            console.log(filename);
 
             testeditor.setValue(result['filecontents']);
 
@@ -253,10 +266,51 @@ function showTestEditor(docfilename, difftext) {
             //editor.markText({ line: 6, ch: 12 }, { line: 6, ch: 22 }, { className: "styled-background" });
             //editor.markText({ line: 4, ch: 2 }, { line: 4, ch: 6 }, { className: "styled-background" });
 
+            for(var i=0; i<docstring_results[1].length; i++){
+
+                for(var j=0; j<docstring_results[1][i][1].length; j++){
+
+                    for(var k=0; k<docstring_results[1][i][1][j].test_info.length; k++){ 
+
+                        console.log(docstring_results[1][i][1][j].test_info[k][0]+'/'+docstring_results[1][i][1][j].test_info[k][1]);
+
+                        if( docstring_results[1][i][1][j].test_info[k][0]+'/'+docstring_results[1][i][1][j].test_info[k][1] == filename ){
+
+                            console.log("TEST MARK LINE: " + docstring_results[1][i][1][j].test_info[k][2] );                      
+                            testeditor.markText({ line: docstring_results[1][i][1][j].test_info[k][2], ch: 0 }, { line: docstring_results[1][i][1][j].test_info[k][2], ch: 100 }, { className: "styled-background" });
+                        }
+                    }   
+                }
+            }
 
 
+            popupNode.remove();
 
+            testeditor.on("cursorActivity", function () {
 
+                var cursor = testeditor.getCursor();
+
+                popupNode.remove();
+
+                for(var i=0; i<docstring_results[1].length; i++){
+
+                    for(var j=0; j<docstring_results[1][i][1].length; j++){
+
+                        for(var k=0; k<docstring_results[1][i][1][j].test_info.length; k++){ 
+
+                            if( docstring_results[1][i][1][j].test_info[k][0]+'/'+docstring_results[1][i][1][j].test_info[k][1] == filename ){
+
+                                if( cursor.line == docstring_results[1][i][1][j].test_info[k][2] ){
+                                    var text = document.createTextNode("Please check this test for correctness.");
+                                    popupNode.innerHTML = '';
+                                    popupNode.appendChild(text);
+                                    testeditor.addWidget({ line: cursor.line, ch: 9 }, popupNode, true);
+                                }
+                            }
+                        }   
+                    }
+                }
+            });
 
 
             setTimeout(function () {
@@ -416,7 +470,7 @@ $.ajax({
                 if (result['diffcommits'][i]['filename'] == result['docstring_results'][1][k][0]) {
                     for (var m = 0; m < result['docstring_results'][1][k][1].length; m++) {
                         if( result['docstring_results'][1][k][1][m].result.length > 0 ){
-                            docissues++;
+                            docissues += result['docstring_results'][1][k][1][m].result.length;
                             //issues = result['docstring_results'][1][k][1].length;
                         }
                     }
@@ -467,6 +521,12 @@ $.ajax({
                             alinks+
                     "</td></tr>");
 
+            if( docissues > 0 )
+                $("#docwarning").show();
+
+            if( cqissues > 0 )
+                $("#cqwarning").show();
+
         }
 
 
@@ -501,6 +561,9 @@ $.ajax({
 
         testmap.forEach((value,key)=>{
             console.log(key + " - " + value);
+
+            if( value > 0 )
+                $("#testwarning").show();
 
             testtable.append("<tr><td>" +
                 "<a href='/dashboard/pr/"+pr+"'>"+key +"</a>"+

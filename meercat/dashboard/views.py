@@ -196,7 +196,7 @@ def pr(request, *args, **kwargs):
 
     pr = list(PullRequest.objects.all().filter(id=prid).all())[0]
 
-    commits = list(Commit.objects.all().filter(hash__in=[committag.sha for committag in pr.commits.all()]))
+    commits = list(Commit.objects.all().filter(hash__in=[committag.sha for committag in set(pr.commits.all())]))
 
     issues = list(Issue.objects.all().filter(url__in=[pri.issue.url for pri in PullRequestIssue.objects.all().filter(pr=pr).all()]))
 
@@ -832,7 +832,7 @@ def file_explorer(request, *args, **kwargs):
 
 
 
-# Refresh the GIT and GitHub data for a project
+# Refresh the GIT and GitHub data for a project (INTENTIONALLY ONLY WORKS FOR PROJECT ID 30)
 @login_required
 def refreshProject(request):
     print("REFRESH")
@@ -941,7 +941,7 @@ def diffCommitData(request):
     pr = list(PullRequest.objects.all().filter(id=prid).all())[0]
 
     #Find all changed files related to the PR by getting all diffs from all commits in PR    
-    commits = list(Commit.objects.all().filter(hash__in=[committag.sha for committag in pr.commits.all()]))
+    commits = list(Commit.objects.all().filter(hash__in=[committag.sha for committag in set(pr.commits.all())]))
 
     print("Commits: "+str(len(commits)))
 
@@ -976,6 +976,8 @@ def diffCommitData(request):
     #Build developer table
     author_loc = {}
 
+    diffs = Diff.objects.all().filter(commit__project=pr.project, file_path=filename).all()
+
     for d in diffs:
         body = d.body
         author = d.commit.author
@@ -989,14 +991,6 @@ def diffCommitData(request):
     info = [(d.commit.datetime, d.commit.author, d.commit.hash) for d in diffs]
     commit_messages = [d.commit.message for d in diffs]
     commit_hashes = [d.commit.hash for d in diffs]
-
-    #tags = CommitTag.objects.all().filter(sha__in=commit_hashes)
-    #prs = list(set(PullRequest.objects.all().filter(commits__in=tags)))  #all prs that go with file commits
-    #pr_messages = [(pr.number, pr.url, pr.title, pr.description) for pr in prs]
-    #pr_comments = list(Comment.objects.all().filter(pr__in=prs))
-
-    #issues = list(Issue.objects.all().filter(url__in=[pri.issue.url for pri in PullRequestIssue.objects.all().filter(pr__in=prs).all()]))
-    #print('issues', issues, '\n')
 
     author_count = {}
     for date, author, link in info:
@@ -1014,16 +1008,13 @@ def diffCommitData(request):
 
     #see here for avoiding author alisases: https://towardsdatascience.com/string-matching-with-fuzzywuzzy-e982c61f8a84
     #combine counts for same author with different aliases.
-
     dev_table = [{'author':author.username+' - '+author.email, 'number_commits': count, 'lines': loc, 'most_recent_commit':date.strftime('%Y-%m-%d, %H:%M %p'),'commit_link':link} for date, author, count, loc, link in new_info]
-
 
     resultdata = {
         'diffcommits':diffcommits,
         'prcommits':prcommits,
         'docstring_results':docstring_results,
         'linter_results':linter_results,
-        'dev_table':dev_table,
         'source_url':pr.project.source_url[0:-4]
     }
 
@@ -1101,35 +1092,37 @@ def githubBot(request):
     print( "Pull Request Number: " + str(payload['number']) )
     print( "Repository: " + str(payload['repository']['clone_url']) )
 
-    project = list(Project.objects.all().filter(source_url=str(payload['repository']['clone_url'])).all())[0]
+    if str(payload['action']) == 'opened':
 
-    #Need to refresh the database before 
-    username = settings.DATABASES['default']['USER']
-    password = settings.DATABASES['default']['PASSWORD']
-    cmd = f'cd .. ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {project.id}'
-    os.system(cmd)
-    result = subprocess.check_output(cmd, shell=True)
+        project = list(Project.objects.all().filter(source_url=str(payload['repository']['clone_url'])).all())[0]
 
-    pull_request = list(PullRequest.objects.all().filter(project=project.id, number=int(str(payload['number']))).all())[0]
+        #Need to refresh the database before 
+        username = settings.DATABASES['default']['USER']
+        password = settings.DATABASES['default']['PASSWORD']
+        cmd = f'cd .. ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {project.id}'
+        os.system(cmd)
+        result = subprocess.check_output(cmd, shell=True)
 
-    #TODO: eventually only do this for new PRs (check payload for action type I think)
+        pull_request = list(PullRequest.objects.all().filter(project=project.id, number=int(str(payload['number']))).all())[0]
 
-    if pull_request:
+        #TODO: eventually only do this for new PRs (check payload for action type I think)
 
-        comment = first_responder_function(pull_request.project, pull_request)[0]
-        print("------------")
-        if comment:
-            comment_pullrequest(pull_request, comment)
-            print("commented")
-        else:
-            event = EventLog(
-                event_type=EventLog.EventTypeChoices.NO_NOTIFICATION,
-                pull_request=pull_request,
-                datetime=datetime.today()            
-            )
-            print("don't bug me")
+        if pull_request:
 
-        print("------------")
+            comment = first_responder_function(pull_request.project, pull_request)[0]
+            print("------------")
+            if comment:
+                comment_pullrequest(pull_request, comment)
+                print("commented")
+            else:
+                event = EventLog(
+                    event_type=EventLog.EventTypeChoices.NO_NOTIFICATION,
+                    pull_request=pull_request,
+                    datetime=datetime.today()            
+                )
+                print("don't bug me")
+
+            print("------------")
 
 
     return HttpResponse(
@@ -1612,7 +1605,7 @@ def first_responder_function(proj_object, pr_object):
 
 
         elif proj_id==30:  #anl_test_repo
-            function_info = []
+            function_info = []  #find all the functions in the file and record info on each of them
             i = 0
 
             #find function signature then look for docstring following
@@ -1626,7 +1619,8 @@ def first_responder_function(proj_object, pr_object):
                 #is signature line - check for doc string
                 sig_end = i
                 doc, doc_start, doc_end, fields, doc_params, issues = get_py_doc_string(lines, sig_end+1)
-                #print(f'docstring result: {(doc, doc_start, doc_end, fields, doc_params, issues)}')
+                
+                #after demo, pass in sig_params to check. test_info will have to expand.
                 test_info = find_pytest_files(proj_name, path, sig_name)  #returns list of triples (path, file_name, i)
 
                 #get ready to move test function to repo
@@ -1677,24 +1671,24 @@ def first_responder_function(proj_object, pr_object):
 
         message = f'''# The MeerCat Pull-Request Assistant has information for you
 
-## {k} out of {n} files in this PR were found to have issues.
+    ## {k} out of {n} files in this PR were found to have issues.
 
-## We have suggestions for adding tags.
+    ## We have suggestions for adding tags.
 
-## We have suggestions for adding more people to the discussion.
+    ## We have suggestions for adding more people to the discussion.
 
-[Please see the Pull-Request Assistant page for more detail.](http://sansa.cs.uoregon.edu:8888/dashboard/pr/{pr_object.id})
+    [Please see the Pull-Request Assistant page for more detail.](http://sansa.cs.uoregon.edu:8888/dashboard/pr/{pr_object.id})
     '''
     else:
         message = f'''# The MeerCat Pull-Request Assistant has information for you
 
-## No files in this PR were analyzed.
+    ## No files in this PR were analyzed.
 
-## We have suggestions for adding tags.
+    ## We have suggestions for adding tags.
 
-## We have suggestions for adding more people to the discussion.
+    ## We have suggestions for adding more people to the discussion.
 
-[Please see the Pull-Request Assistant page for more detail.](http://sansa.cs.uoregon.edu:8888/dashboard/pr/{pr_object.id})
+    [Please see the Pull-Request Assistant page for more detail.](http://sansa.cs.uoregon.edu:8888/dashboard/pr/{pr_object.id})
     '''
     return [message, all_files]
 
@@ -1837,22 +1831,29 @@ def get_py_doc_string(lines, i):
             #check for Parameters field in particular
             if field == 'Parameters':
                 while i<len(lines):
-                    if ':' in lines[i]:
-                        param = lines[i].strip()[:lines[i].find(':')].strip()
-                        params.append(param)
-                        i += 1
-                        continue
-                    elif lines[i].strip().isalnum() and lines[i].strip()[0].isalpha():
-                        param = lines[i].strip()
-                        params.append(param)
-                        i += 1
-                        continue
-                    elif lines[i].strip() in numpy_fields and i+1 < len(lines) and all([c=='-' for c in lines[i+1].strip()]):
+
+                    if lines[i].strip() in numpy_fields and i+1 < len(lines) and all([c=='-' for c in lines[i+1].strip()]):
                         break  #found next field
-                    elif lines[i].strip() in ["'''", '"""']:
+
+                    if lines[i].strip() in ["'''", '"""']:
                         break  #found end
-                    else:
-                        i += 1  #keep looking
+
+                    if ':' in lines[i]:
+                        param = lines[i].strip()[:lines[i].find(':')].replace(':','').strip()
+                        params.append(param)
+                        print(f': appending param {param}')
+                        i += 1
+                        continue
+
+                    if lines[i].strip().isalnum() and lines[i].strip()[0].isalpha():
+                        param = lines[i].strip()
+                        print(f'naked appending param {param}')
+                        params.append(param)
+                        i += 1
+                        continue
+
+                    i += 1  #keep looking
+
                 if i>=len(lines):
                     issues.append([f'Missing end to docstring', doc_start])
                     doc = lines[doc_start:]
@@ -1874,8 +1875,9 @@ def get_py_doc_string(lines, i):
 def check_py_numpy_param_match(sig_args, doc_args, doc_start):
     issue = []
     #check if 2 lists match up
-    residue1 = set(doc_args)  - set(sig_args)  #more params than arg names?
-    residue2 = set(sig_args) - set(doc_args)
+    residue1 = [x for x in doc_args if x not in sig_args]  #more params than arg names?
+    residue2 = [x for x in sig_args if x not in doc_args]  #more args than param names?
+    print((sig_args, doc_args, residue1, residue2))
     if residue1:
         issue.append([f'doc arguments missing actual arguments: {residue1}', doc_start])
     if residue2:
