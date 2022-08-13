@@ -28,7 +28,7 @@ author_counts['degree'] = author_counts['commit_counts'] / author_counts['total_
 print("Degree of authorship based on commits:")
 print(author_counts.sort_values(by=['degree'], ascending=False))
 
-print('Number of authors with >= 0.75 degree of authorship:', len(author_counts[author_counts['degree'] > 0.5]))
+print('\nNumber of authors with DOA>0.75 per file:')
 doa_df = author_counts[author_counts['degree']>=0.75].groupby('filepath').agg({'unique_author': 'count'}).sort_values(by=['unique_author'], ascending=False)
 doa_df.reset_index()
 print(doa_df)
