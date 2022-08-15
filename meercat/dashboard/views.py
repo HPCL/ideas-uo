@@ -1,5 +1,6 @@
 import datetime
 import json
+import requests
 
 import configparser
 
@@ -22,7 +23,7 @@ sys.path.insert(1, '../src')
 from gitutils.github_api import GitHubAPIClient
 
 from database.models import Project, ProjectRole, Commit, Diff, Issue, PullRequest, PullRequestIssue, Comment, EventPayload, CommitTag
-from database.utilities import comment_pullrequest
+from database.utilities import comment_pullrequest, get_repo_owner
 
 import subprocess
 import os, warnings
@@ -1015,6 +1016,7 @@ def diffCommitData(request):
         'prcommits':prcommits,
         'docstring_results':docstring_results,
         'linter_results':linter_results,
+        'dev_table':dev_table,
         'source_url':pr.project.source_url[0:-4]
     }
 
@@ -1092,9 +1094,25 @@ def githubBot(request):
     print( "Pull Request Number: " + str(payload['number']) )
     print( "Repository: " + str(payload['repository']['clone_url']) )
 
+    prnumber = str(payload['number'])
+
     if str(payload['action']) == 'opened':
 
         project = list(Project.objects.all().filter(source_url=str(payload['repository']['clone_url'])).all())[0]
+
+
+        try:
+            repo_name = project.name
+            repo_owner = get_repo_owner(project)
+            url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues/{prnumber}/comments"
+            payload = { "body": "## MeerCat is working on this PR.  Please stay tuned." }
+            headers = {
+                "Accept": "application/vnd.github+json",
+                "Authorization" : "token " + os.environ.get('MEERCAT_USER_TOKEN')
+            }
+            result = requests.post(url, headers=headers, data=json.dumps(payload))
+        except:
+            pass 
 
         #Need to refresh the database before 
         username = settings.DATABASES['default']['USER']
@@ -1103,7 +1121,7 @@ def githubBot(request):
         os.system(cmd)
         result = subprocess.check_output(cmd, shell=True)
 
-        pull_request = list(PullRequest.objects.all().filter(project=project.id, number=int(str(payload['number']))).all())[0]
+        pull_request = list(PullRequest.objects.all().filter(project=project.id, number=int(prnumber)).all())[0]
 
         #TODO: eventually only do this for new PRs (check payload for action type I think)
 
@@ -1671,24 +1689,24 @@ def first_responder_function(proj_object, pr_object):
 
         message = f'''# The MeerCat Pull-Request Assistant has information for you
 
-    ## {k} out of {n} files in this PR were found to have issues.
+## {k} out of {n} files in this PR were found to have issues.
 
-    ## We have suggestions for adding tags.
+## We have suggestions for adding tags.
 
-    ## We have suggestions for adding more people to the discussion.
+## We have suggestions for adding more people to the discussion.
 
-    [Please see the Pull-Request Assistant page for more detail.](http://sansa.cs.uoregon.edu:8888/dashboard/pr/{pr_object.id})
+[Please see the Pull-Request Assistant page for more detail.](http://sansa.cs.uoregon.edu:8888/dashboard/pr/{pr_object.id})
     '''
     else:
         message = f'''# The MeerCat Pull-Request Assistant has information for you
 
-    ## No files in this PR were analyzed.
+## No files in this PR were analyzed.
 
-    ## We have suggestions for adding tags.
+## We have suggestions for adding tags.
 
-    ## We have suggestions for adding more people to the discussion.
+## We have suggestions for adding more people to the discussion.
 
-    [Please see the Pull-Request Assistant page for more detail.](http://sansa.cs.uoregon.edu:8888/dashboard/pr/{pr_object.id})
+[Please see the Pull-Request Assistant page for more detail.](http://sansa.cs.uoregon.edu:8888/dashboard/pr/{pr_object.id})
     '''
     return [message, all_files]
 

@@ -183,6 +183,22 @@ function insertTemplate(linenumber, text){
 
     editor.replaceRange('\n'+text, CodeMirror.Pos(linenumber));
     popupNode.remove();
+
+    console.log ("Insert at template at: "+linenumber);
+
+    //Bump the line numbers by 3 if after linenumber (this is currenlty only looking at first item in results)
+    for(var i=0; i<docstring_results[1].length; i++){
+        if( docstring_results[1][i][0] == filename ){
+            for(var j=0; j<docstring_results[1][i][1].length; j++){
+                if( docstring_results[1][i][1][j].result.length > 0 ){     
+                    console.log("checking... "+docstring_results[1][i][1][j].result[0][1]);                   
+                    if( linenumber < docstring_results[1][i][1][j].result[0][1]-1 ){
+                        docstring_results[1][i][1][j].result[0][1] += 3;
+                    }
+                }
+            }
+        }
+    }
     
 }
 
@@ -591,7 +607,7 @@ $.ajax({
                 "</td><td>" +
                 result['dev_table'][i]['most_recent_commit'] +
                 "</td><td>" +
-                "<a href='" + result['source_url'] +"/"+ result['dev_table'][i]['commit_link'] + "'>View on GitHub</a>"+
+                "<a href='" + result['source_url'] +"/commit/"+ result['dev_table'][i]['commit_link'] + "'>View on GitHub</a>"+
                 "</td></tr>");
 
         }
