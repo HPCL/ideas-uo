@@ -34,7 +34,8 @@ python3 -m venv env-gremcat
 source ./env-gremcat/bin/activate
 ```
 
-Once you have created and activated the environment, you can install prerequisites with  `pip install -r requirements.txt`.
+Once you have created and activated the environment, you can install prerequisites with  
+```pip install -r requirements.txt```
 
 ### Local Notebooks
 
