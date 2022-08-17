@@ -17,6 +17,7 @@ console.log("The PR id...");
 console.log($("#pr"));
 console.log(pr);
 var filename = "";
+var previousLines = 0;
 var docstring_results = [];
 
 var popupNode = document.createElement("div");
@@ -74,6 +75,8 @@ function showDocEditor(docfilename, difftext) {
 
             editor.setValue(result['filecontents']);
 
+            previousLines = editor.lineCount();
+
             //editor.markText({ line: 3, ch: 0 }, { line: 3, ch: 13 }, { className: "styled-background" });
             //editor.markText({ line: 6, ch: 12 }, { line: 6, ch: 22 }, { className: "styled-background" });
             //editor.markText({ line: 4, ch: 2 }, { line: 4, ch: 6 }, { className: "styled-background" });
@@ -107,7 +110,26 @@ function showDocEditor(docfilename, difftext) {
             editor.on("cursorActivity", function () {
 
                 var cursor = editor.getCursor();
-                //console.log(cursor);
+                var lines = editor.lineCount();
+                
+                console.log(previousLines + " now -> "+lines);
+
+                if( lines > previousLines ){
+
+                    //Bump the line numbers by 1 if after linenumber (this is currenlty only looking at first item in results)
+                    for(var i=0; i<docstring_results[1].length; i++){
+                        if( docstring_results[1][i][0] == filename ){
+                            for(var j=0; j<docstring_results[1][i][1].length; j++){
+                                if( docstring_results[1][i][1][j].result.length > 0 ){     
+                                    if( cursor.line < docstring_results[1][i][1][j].result[0][1]-1 ){
+                                        docstring_results[1][i][1][j].result[0][1] += 1;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    previousLines = lines;
+                }
 
                 popupNode.remove();
 
@@ -200,6 +222,13 @@ function insertTemplate(linenumber, text){
         }
     }
     
+}
+
+function lineAdded(){
+    var cursor = editor.getCursor();
+    console.log("line added");
+
+    return true;
 }
 
 
