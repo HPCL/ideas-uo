@@ -17,6 +17,7 @@ console.log("The PR id...");
 console.log($("#pr"));
 console.log(pr);
 var filename = "";
+var previousLines = 0;
 var docstring_results = [];
 
 var popupNode = document.createElement("div");
@@ -46,6 +47,15 @@ var cqeditor = CodeMirror.fromTextArea(document.getElementById("cqhelper"), {
     styleSelectedText: true
 });
 
+var testeditor = CodeMirror.fromTextArea(document.getElementById("testhelper"), {
+    lineNumbers: true,
+    mode: "text/x-python", //"text/x-c++src", //"text/html",
+    matchBrackets: true,
+    spellcheck: true,
+    autocorrect: true,
+    styleSelectedText: true
+});
+
 function showDocEditor(docfilename, difftext) {
 
     console.log("TEST");
@@ -65,6 +75,8 @@ function showDocEditor(docfilename, difftext) {
 
             editor.setValue(result['filecontents']);
 
+            previousLines = editor.lineCount();
+
             //editor.markText({ line: 3, ch: 0 }, { line: 3, ch: 13 }, { className: "styled-background" });
             //editor.markText({ line: 6, ch: 12 }, { line: 6, ch: 22 }, { className: "styled-background" });
             //editor.markText({ line: 4, ch: 2 }, { line: 4, ch: 6 }, { className: "styled-background" });
@@ -78,24 +90,46 @@ function showDocEditor(docfilename, difftext) {
                 if( docstring_results[1][i][0] == filename ){
                     for(var j=0; j<docstring_results[1][i][1].length; j++){
 
-                        if( docstring_results[1][i][1][j].result.length > 0 ){  
-                            console.log("MARK LINE: " + docstring_results[1][i][1][j].result[0][1] );                      
-                            editor.markText({ line: docstring_results[1][i][1][j].result[0][1], ch: 0 }, { line: docstring_results[1][i][1][j].result[0][1], ch: 100 }, { className: "styled-background" });
+                        if( docstring_results[1][i][1][j].result.length > 0 ){ 
+
+                            for(var k=0; k<docstring_results[1][i][1][j].result.length; k++){ 
+                                console.log("MARK LINE: " + docstring_results[1][i][1][j].result[k][1] );                      
+                                editor.markText({ line: docstring_results[1][i][1][j].result[k][1]-1, ch: 0 }, { line: docstring_results[1][i][1][j].result[k][1]-1, ch: 100 }, { className: "styled-background" });
+                            }
                         }
                     }
                 }
             }
 
-            /* JUST FOR DEMO 
-            editor.markText({ line: 15, ch: 0 }, { line: 16, ch: 100 }, { className: "styled-background" });
-            */
+            /* JUST FOR DEMO */
+            //editor.markText({ line: 6, ch: 0 }, { line: 7, ch: 100 }, { className: "styled-background" });
+            /* */
 
             popupNode.remove();
 
             editor.on("cursorActivity", function () {
 
                 var cursor = editor.getCursor();
-                //console.log(cursor);
+                var lines = editor.lineCount();
+                
+                console.log(previousLines + " now -> "+lines);
+
+                if( lines > previousLines ){
+
+                    //Bump the line numbers by 1 if after linenumber (this is currenlty only looking at first item in results)
+                    for(var i=0; i<docstring_results[1].length; i++){
+                        if( docstring_results[1][i][0] == filename ){
+                            for(var j=0; j<docstring_results[1][i][1].length; j++){
+                                if( docstring_results[1][i][1][j].result.length > 0 ){     
+                                    if( cursor.line < docstring_results[1][i][1][j].result[0][1]-1 ){
+                                        docstring_results[1][i][1][j].result[0][1] += 1;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    previousLines = lines;
+                }
 
                 popupNode.remove();
 
@@ -115,10 +149,30 @@ function showDocEditor(docfilename, difftext) {
 
                             if( docstring_results[1][i][1][j].result.length > 0 ){                        
 
-                                if (cursor.line == docstring_results[1][i][1][j].result[0][1] ) {
-                                    var text = document.createTextNode(docstring_results[1][i][1][j].result[0][0]);
+                                if (cursor.line == docstring_results[1][i][1][j].result[0][1]-1 ) {
+                                    
                                     popupNode.innerHTML = '';
-                                    popupNode.appendChild(text);
+                                    for(var k=0; k<docstring_results[1][i][1][j].result.length; k++){
+                                        var text = document.createTextNode(docstring_results[1][i][1][j].result[k][0]);
+                                        popupNode.appendChild(text);
+                                        if( k < docstring_results[1][i][1][j].result.length-1 ){
+                                            var br = document.createElement('br');
+                                            popupNode.appendChild(br);
+                                        }
+                                    }
+
+                                    
+
+                                    if( docstring_results[1][i][1][j].result[0][0].indexOf("No docstring") >= 0 ){
+                                        var button = document.createElement('button');
+                                        button.setAttribute('onclick', 'insertTemplate('+cursor.line+', \'  \"\"\"\\n  Template will go here.\\n  \"\"\"\')');
+                                        button.classList.add('btn');
+                                        button.classList.add('btn-sm');
+                                        button.classList.add('btn-primary');
+                                        button.style['margin-left'] = "10px"
+                                        button.innerHTML = 'Insert docstring template'
+                                        popupNode.appendChild(button);
+                                    }
                                     editor.addWidget({ line: cursor.line, ch: 9 }, popupNode, true);
                                 }
                             }
@@ -126,12 +180,12 @@ function showDocEditor(docfilename, difftext) {
                     }
                 }
 
-                /* JUST FOR DEMO 
-                var text = document.createTextNode("Parameter not in function definition.");
-                popupNode.innerHTML = '';
-                popupNode.appendChild(text);
-                editor.addWidget({ line: cursor.line, ch: 9 }, popupNode, true);
-                */
+                /* JUST FOR DEMO */
+                //var text = document.createTextNode("Test cases no longer valid.");
+                //popupNode.innerHTML = '';
+                //popupNode.appendChild(text);
+                //editor.addWidget({ line: cursor.line, ch: 9 }, popupNode, true);
+                /* */
 
             });
 
@@ -146,6 +200,36 @@ function showDocEditor(docfilename, difftext) {
 
 }
 
+
+function insertTemplate(linenumber, text){
+
+    editor.replaceRange('\n'+text, CodeMirror.Pos(linenumber));
+    popupNode.remove();
+
+    console.log ("Insert at template at: "+linenumber);
+
+    //Bump the line numbers by 3 if after linenumber (this is currenlty only looking at first item in results)
+    for(var i=0; i<docstring_results[1].length; i++){
+        if( docstring_results[1][i][0] == filename ){
+            for(var j=0; j<docstring_results[1][i][1].length; j++){
+                if( docstring_results[1][i][1][j].result.length > 0 ){     
+                    console.log("checking... "+docstring_results[1][i][1][j].result[0][1]);                   
+                    if( linenumber < docstring_results[1][i][1][j].result[0][1]-1 ){
+                        docstring_results[1][i][1][j].result[0][1] += 3;
+                    }
+                }
+            }
+        }
+    }
+    
+}
+
+function lineAdded(){
+    var cursor = editor.getCursor();
+    console.log("line added");
+
+    return true;
+}
 
 
 function showCqEditor(docfilename, difftext) {
@@ -201,6 +285,87 @@ function showCqEditor(docfilename, difftext) {
             $('#codeQualityModal').modal('show');
         }
     });
+
+}
+
+
+function showTestEditor(docfilename, difftext) {
+
+    console.log("TEST");
+    console.log(difftext);
+
+    filename = docfilename;
+
+    $('#testhelpertitle').html(filename);
+
+
+    $.ajax({
+        url: '/dashboard/getfile/', type: 'POST', data: { 'pr': pr, 'filename': filename }, success: function (result) {
+            console.log("get file contents");
+            console.log(result);
+            console.log(filename);
+
+            testeditor.setValue(result['filecontents']);
+
+            //editor.markText({ line: 3, ch: 0 }, { line: 3, ch: 13 }, { className: "styled-background" });
+            //editor.markText({ line: 6, ch: 12 }, { line: 6, ch: 22 }, { className: "styled-background" });
+            //editor.markText({ line: 4, ch: 2 }, { line: 4, ch: 6 }, { className: "styled-background" });
+
+            for(var i=0; i<docstring_results[1].length; i++){
+
+                for(var j=0; j<docstring_results[1][i][1].length; j++){
+
+                    for(var k=0; k<docstring_results[1][i][1][j].test_info.length; k++){ 
+
+                        console.log(docstring_results[1][i][1][j].test_info[k][0]+'/'+docstring_results[1][i][1][j].test_info[k][1]);
+
+                        if( docstring_results[1][i][1][j].test_info[k][0]+'/'+docstring_results[1][i][1][j].test_info[k][1] == filename ){
+
+                            console.log("TEST MARK LINE: " + docstring_results[1][i][1][j].test_info[k][2] );                      
+                            testeditor.markText({ line: docstring_results[1][i][1][j].test_info[k][2], ch: 0 }, { line: docstring_results[1][i][1][j].test_info[k][2], ch: 100 }, { className: "styled-background" });
+                        }
+                    }   
+                }
+            }
+
+
+            popupNode.remove();
+
+            testeditor.on("cursorActivity", function () {
+
+                var cursor = testeditor.getCursor();
+
+                popupNode.remove();
+
+                for(var i=0; i<docstring_results[1].length; i++){
+
+                    for(var j=0; j<docstring_results[1][i][1].length; j++){
+
+                        for(var k=0; k<docstring_results[1][i][1][j].test_info.length; k++){ 
+
+                            if( docstring_results[1][i][1][j].test_info[k][0]+'/'+docstring_results[1][i][1][j].test_info[k][1] == filename ){
+
+                                if( cursor.line == docstring_results[1][i][1][j].test_info[k][2] ){
+                                    var text = document.createTextNode("Please check this test for correctness.");
+                                    popupNode.innerHTML = '';
+                                    popupNode.appendChild(text);
+                                    testeditor.addWidget({ line: cursor.line, ch: 9 }, popupNode, true);
+                                }
+                            }
+                        }   
+                    }
+                }
+            });
+
+
+            setTimeout(function () {
+                testeditor.refresh();
+            }, 1);
+
+            $('#testModal').modal('show');
+        }
+    });
+
 
 }
 
@@ -350,7 +515,7 @@ $.ajax({
                 if (result['diffcommits'][i]['filename'] == result['docstring_results'][1][k][0]) {
                     for (var m = 0; m < result['docstring_results'][1][k][1].length; m++) {
                         if( result['docstring_results'][1][k][1][m].result.length > 0 ){
-                            docissues++;
+                            docissues += result['docstring_results'][1][k][1][m].result.length;
                             //issues = result['docstring_results'][1][k][1].length;
                         }
                     }
@@ -401,7 +566,82 @@ $.ajax({
                             alinks+
                     "</td></tr>");
 
+            if( docissues > 0 )
+                $("#docwarning").show();
+
+            if( cqissues > 0 )
+                $("#cqwarning").show();
+
         }
+
+
+        var testtable = $("#testtable > tbody");
+        testtable.empty();
+
+        var testmap = new Map();
+
+        for (var k = 0; k < result['docstring_results'][1].length; k++) {
+            //if (result['diffcommits'][i]['filename'] == result['docstring_results'][1][k][0]) {
+                for (var m = 0; m < result['docstring_results'][1][k][1].length; m++) {
+                    if( result['docstring_results'][1][k][1][m].test_info.length > 0 ){
+                        for (var n = 0; n < result['docstring_results'][1][k][1][m].test_info.length; n++) {
+                        
+                            result['docstring_results'][1][k][1][m].test_info[n][0] //folder
+                            result['docstring_results'][1][k][1][m].test_info[n][1] //test filename
+                            result['docstring_results'][1][k][1][m].test_info[n][2] //line number
+
+                            var fullfilename = result['docstring_results'][1][k][1][m].test_info[n][0]+"/"+result['docstring_results'][1][k][1][m].test_info[n][1];
+
+                            if( !testmap.has(fullfilename) ){
+                                testmap.set(fullfilename,0);
+                            }
+
+                            testmap.set(fullfilename,testmap.get(fullfilename)+1);
+
+                        }
+                    }
+                }
+            //}
+        }
+
+        testmap.forEach((value,key)=>{
+            console.log(key + " - " + value);
+
+            if( value > 0 )
+                $("#testwarning").show();
+
+            testtable.append("<tr><td>" +
+                "<a href='/dashboard/pr/"+pr+"'>"+key +"</a>"+
+                "</td><td>" +
+                value +
+                "</td><td>" +
+                "<button class='btn btn-sm btn-primary' onclick='showTestEditor(\"" + key + "\",\"" + "TEST STUFF TO GO HERE" + "\");'>View File in Editor</button>"+
+                "</td></tr>");
+        });
+
+
+
+        
+        var devtable = $("#devtable > tbody");
+        devtable.empty();
+
+        for (var i = 0; i < result['dev_table'].length; i++) {
+
+           devtable.append("<tr><td>" +
+                result['dev_table'][i]['author'] +
+                "</td><td>" +
+                result['dev_table'][i]['number_commits'] +
+                "</td><td>" +
+                result['dev_table'][i]['lines'] +
+                "</td><td>" +
+                result['dev_table'][i]['most_recent_commit'] +
+                "</td><td>" +
+                "<a href='" + result['source_url'] +"/commit/"+ result['dev_table'][i]['commit_link'] + "'>View on GitHub</a>"+
+                "</td></tr>");
+
+        }
+
+
 
         $('.popover-dismiss').popover({ trigger: 'focus' });
 
@@ -494,12 +734,14 @@ boxes.forEach(box => {
 
 function dragEnter(e) {
     e.preventDefault();
-    e.target.classList.add('drag-over');
+    if( e.target.classList.contains('box') )
+        e.target.classList.add('drag-over');
 }
 
 function dragOver(e) {
     e.preventDefault();
-    e.target.classList.add('drag-over');
+    if( e.target.classList.contains('box') )
+        e.target.classList.add('drag-over');
 }
 
 function dragLeave(e) {
@@ -513,15 +755,18 @@ function drop(e) {
     // can as if box or item.  If item, glue items together?
     // but then how to separate items?
 
-    e.target.classList.remove('drag-over');
+    if( e.target.classList.contains('box') ){
 
-    // get the draggable element
-    const id = e.dataTransfer.getData('text/plain');
-    const draggable = document.getElementById(id);
+        e.target.classList.remove('drag-over');
 
-    // add it to the drop target
-    e.target.appendChild(draggable);
+        // get the draggable element
+        const id = e.dataTransfer.getData('text/plain');
+        const draggable = document.getElementById(id);
 
-    // display the draggable element
-    draggable.classList.remove('hide');
+        // add it to the drop target
+        e.target.appendChild(draggable);
+
+        // display the draggable element
+        draggable.classList.remove('hide');
+    }
 }
