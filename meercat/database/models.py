@@ -27,27 +27,19 @@ class EventLog(models.Model):
     def __str__(self):
         return str(self.datetime) + ':' + self.get_event_type_display()
 
-class GitHubCredentials(models.Model):
-    login = models.CharField(max_length=200)
-    email = models.EmailField(max_length=200)
+class Profile(models.Model):
+    gh_login = models.CharField("GitHub login", max_length=200)
+    gh_email = models.EmailField("GitHub email", blank=True, max_length=200)
+    gl_username = models.CharField("GitLab username", blank=True, max_length=200)
+    gl_email = models.EmailField("GitLab email", blank=True, max_length=200)
+    subscriptions = models.JSONField(blank=True, default=dict)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
     class Meta:
-        verbose_name = 'GitHub Credentials'
+        verbose_name = 'Profile'
 
     def __str__(self):
-        return self.login
-
-class GitLabCredentials(models.Model):
-    username = models.CharField(max_length=200)
-    email = models.EmailField(max_length=200)
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-
-    class Meta:
-        verbose_name = 'GitLab Credentials'
-
-    def __str__(self):
-        return self.username
+        return str(self.user)
 
 class Author(models.Model):
     username = models.CharField(max_length=64, null=True, blank=True)
@@ -101,8 +93,8 @@ class ProjectRole(models.Model):
 
     id = models.AutoField(primary_key=True)
     role = models.CharField(max_length=3, choices=RoleChoices.choices)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='project_roles')
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='members')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='member')
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='project_role')
     whitelist = models.TextField(null=True)
 
     class Meta:
