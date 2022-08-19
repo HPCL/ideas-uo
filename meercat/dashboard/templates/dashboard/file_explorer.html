@@ -10,16 +10,38 @@
 
     <h3>Functions/Subroutines defined in file:</h3>
 
+        {% if not supports_callgraph %}
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+              The Call Graph feature is not supported for this project.
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+        {% endif %}
+
+        {% if not supports_test_hunt %}
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+              The Test Hunt feature is not supported for this project.
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+        {% endif %}
+
                 <table class="table" style="border:1px solid black;margin-left:auto;margin-right:auto;">
                   <thead style="text-align:center">
                     <tr>
                         <th>Signature</th>
                         <th>Doc String</th>
                         <th>Doc String Comments</th>
-                        <th>Calling functions (test in red)</th>
+                        <th>Call Graph</th>
+                        <th>Test Info</th>
                     </tr>
                   </thead>
                   <tbody>
+                    {% if not functions_supported %}
+                        <tr><td colspan='5' style="text-align:center">No functions/subroutines found in file</td></tr>
+                    {% else %}
                     {% for func in functions %}
                     <div id="myModal{{forloop.counter}}" class="modal" tabindex="-1">
     <div class="modal-dialog modal-xl">
@@ -44,30 +66,36 @@
     </div>
 </div>
                     <tr>
-                        <td><b>{{func.signature_name}}</b>{{func.signature_params}}</td>
+                        <td><b>{{func.full_signature}}</b></td>
                         <td style="text-align:center">{% if func.docstring %}<a href="#" onclick="$('#myModal{{forloop.counter}}').modal('show');">Yes</a>
-                            {% else %}
-                            
-                            {% endif %}
 
+                            
+                        {% endif %}
                         </td>
+
                         <td>{{func.result}}</td>
-                        <td>{% if func.supported %}
+                        
+                        <td>{% if supports_callgraph %}
                                 <!-- [('folder1/arithmetic.py', 'list_sub', 'code'), ('folder1/test_arithmetic.py', 'test_sub', 'test')] -->
                                 {% for caller_list in func.callers %}
                                     <a target='_blank' href="{{project.source_url|slice:"0:-4"}}/blob/{{branch}}/{{caller_list.0}}"
-                                     {% if caller_list.2 == 'test'%}
-                                        style='color:red'
-                                     {% endif %}
                                         >Go to {{caller_list.0}} to find <b><i>{{caller_list.1}}</i></b> on GitHub</a><br/>
 <br>
                                 {% endfor %}
-                            {% else %}
-                                Project not currently supported.
+                            {% endif %}
+                        </td>
+                        <td>{% if supports_test_hunt %}
+                                <!-- [('folder1/arithmetic.py', 'list_sub', 'code'), ('folder1/test_arithmetic.py', 'test_sub', 'test')] -->
+                                {% for caller_list in func.test_info %}
+                                    <a target='_blank' href="{{project.source_url|slice:"0:-4"}}/blob/{{branch}}/{{caller_list.0}}"
+                                        >Go to {{caller_list.0}} to find <b><i>{{caller_list.1}}</i></b> on GitHub</a><br/>
+<br>
+                                {% endfor %}
                             {% endif %}
                         </td>
                     </tr>
                     {% endfor %}
+                    {% endif %}
                   </tbody>
                 </table>
 
