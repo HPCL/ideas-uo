@@ -9,8 +9,9 @@
 <div style="margin-left:15px; margin-top:0px;">
 
     {% if not closed_issue %}   
-        <div class="alert alert-danger" role="alert">
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
             Warning: This PR is not linked to any issues!
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     {% endif %}
 
@@ -124,7 +125,7 @@
             <h2 class="accordion-header" id="headingOne">
             <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
                 <strong>Documentation</strong> &nbsp;&nbsp; 
-                <i class="bi bi-exclamation-triangle-fill" style="color:red; font-size:16pt;"></i>
+                <i id="docwarning" class="bi bi-exclamation-triangle-fill" style="display:none; color:red; font-size:16pt;"></i>
             </button>
             </h2>
             <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
@@ -159,7 +160,7 @@
             <h2 class="accordion-header" id="headingSix">
                 <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSix" aria-expanded="false" aria-controls="collapseSix">
                   <strong>Code Quality</strong> &nbsp;&nbsp; 
-                  <!--i class="bi bi-exclamation-triangle-fill" style="color:red; font-size:16pt;"></i-->
+                  <i id="cqwarning" class="bi bi-exclamation-triangle-fill" style="display:none; color:red; font-size:16pt;"></i>
                 </button>
             </h2>
             <div id="collapseSix" class="accordion-collapse collapse show" aria-labelledby="headingSix" data-bs-parent="#accordionExample8">
@@ -172,7 +173,7 @@
                                 <tr>
                                     <th>File</th>
                                     <th>Detected Issues</th>
-                                    <th>Results</th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -195,14 +196,31 @@
         <div class="accordion-item">
             <h2 class="accordion-header" id="headingTwo">
             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                <strong>Testing</strong>
+                <strong>Testing</strong> &nbsp;&nbsp;
+                <i id="testwarning" class="bi bi-exclamation-triangle-fill" style="display:none; color:red; font-size:16pt;"></i>
             </button>
             </h2>
             <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample6">
             <div class="accordion-body">
                 
-                <b>This section is still under development</b><br/>
-               
+                <div id="testdiv" style="border:1px solid grey; margin:10px; padding:10px;">
+                    <b>Test files affected by this PR:</b>
+                    <table class="table" id="testtable" style="font-size:10pt;">
+                        <thead>
+                            <tr>
+                                <th>Test File</th>
+                                <th>Detected Issues</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="3">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <br/> 
+
             </div>
             </div>
         </div>
@@ -344,7 +362,7 @@
         <div class="accordion-item">
             <h2 class="accordion-header" id="headingFive">
             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
-                <strong>Topics</strong>
+                <strong>Tags</strong>
             </button>
             </h2>
             <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive" data-bs-parent="#accordionExample5">
@@ -353,25 +371,27 @@
                 <div class="container">
                     <div class="drop-targets">
                         <div>
-                            <span style="margin-left:10px;">Category 1</span>
+                            <span style="margin-left:10px;">Potential Tags</span>
                             <div class="box">
-                                <div class="item" id="item1" draggable="true">Testing</div>
-                                <div class="item" id="item2" draggable="true">Documentation</div>
-                                <div class="item" id="item3" draggable="true">Bug Fixes</div>
-                                <div class="item" id="item4" draggable="true">Refactoring</div>
-                                <div class="item" id="item5" draggable="true">New Features</div>
+                                <div class="item" id="item1" draggable="true">Requirements Created/Updated</div>
+                                <div class="item" id="item2" draggable="true">Baseline Established/Updated</div>
+                                <div class="item" id="item3" draggable="true">Test Established/Updated</div>
+                                <div class="item" id="item4" draggable="true">New Feature</div>
+                                <div class="item" id="item5" draggable="true">Bug Fixes</div>
+                                <div class="item" id="item6" draggable="true"><input type="text" style="text-align:center; width:200px;" placeholder="Other"/></div>
+                                <div class="item" id="item7" draggable="true"><input type="text" style="text-align:center; width:200px;" placeholder="Other"/></div>
                             </div>
                         </div>
-                        <div>
+                        <!--div>
                             <span style="margin-left:10px;">Category 2</span>
                             <div class="box">
                                 <div class="item" id="item6" draggable="true">Component</div>
                                 <div class="item" id="item7" draggable="true">Package</div>
                                 <div class="item" id="item8" draggable="true">Design</div>
                             </div>
-                        </div>
+                        </div-->
                         <div>
-                            <span style="margin-left:10px;">PR's Topics</span>
+                            <span style="margin-left:10px;">PR's Tags</span>
                             <div class="box"></div>
                         </div>
                     </div>
@@ -625,6 +645,32 @@
     </div>
 </div>
 
+
+<div id="testModal" class="modal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Test File Helper</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                
+                <p>Suggestions for test file <b><i><span id="testhelpertitle">folder1/arithmetic.py</span></i></b></p>
+
+                <div class="" style="border:1px solid #ccc; margin-bottom:5px;">
+
+                    <textarea id="testhelper"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="patchbutton3" class="btn btn-primary" onclick="testPatchFile();">
+                    Download Patch
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 

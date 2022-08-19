@@ -111,3 +111,6 @@ machine_learning/doc_generation/parser/*/parselog.txt
 
 # credentials
 credentials.ini
+.db-cache/.ideas-uo.pickle
+# venv files
+env-gremcat/

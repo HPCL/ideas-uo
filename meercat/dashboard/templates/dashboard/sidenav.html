@@ -3,7 +3,7 @@
     <a id="" href="#" onclick="" style="color:white; pointer-events: none; cursor: default; margin-left:-10px;">
         <img src="{% static 'images/meercat_logo_reverse.png' %}" width="36px"/> MeerCAT
     </a>
-    <p class="text-white">logged in as <br/> <b>{{ user.githubcredentials.login }}</b></p>
+    <p class="text-white">logged in as <br/> <b>{{ user.profile.gh_login }}</b></p>
 
 
     <br/>
@@ -12,6 +12,7 @@
     <a id="" href="." onclick="">Branches</a>
     <a id="" href="." onclick="">PR Assistant</a>
     <a id="" href="." onclick="">About</a>
+    <a href="{% url 'subscriptions' %}">Subscriptions</a>
 
     <br/>
 

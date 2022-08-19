@@ -1,6 +1,5 @@
 import datetime
 import json
-import requests
 
 import configparser
 
@@ -23,7 +22,7 @@ sys.path.insert(1, '../src')
 from gitutils.github_api import GitHubAPIClient
 
 from database.models import Project, ProjectRole, Commit, Diff, Issue, PullRequest, PullRequestIssue, Comment, EventPayload, CommitTag
-from database.utilities import comment_pullrequest, get_repo_owner
+from database.utilities import comment_pullrequest
 
 import subprocess
 import os, warnings
@@ -33,9 +32,15 @@ from patterns.visualizer import Visualizer
 def not_authorized(request):
     return render(request, 'dashboard/not_authorized.html')
 
+
 # Index view - should list all projects
 @login_required
 def index(request):
+    print("INDEX")
+
+    pid = 30
+    if request.GET.get('pid'):
+        pid = int(request.GET.get('pid'))
 
     if request.user.is_staff:
         return redirect('staff_index')
@@ -52,16 +57,16 @@ def index(request):
 
 @login_required
 def staff_index(request):
+    print("STAFF INDEX")
+
+    pid = 30
+    if request.GET.get('pid'):
+        pid = int(request.GET.get('pid'))
 
     projects = list(Project.objects.all())
     projects = sorted(projects, key=lambda d: d.name, reverse=False)
 
     return render(request, 'dashboard/staff_index.html', {'projects': projects})
-
-@login_required
-def subscriptions(request):
-    return render(request, 'dashboard/subscriptions.html')
-
 
 @login_required
 def whitelist(request, *args, **kwargs):
@@ -191,7 +196,7 @@ def pr(request, *args, **kwargs):
 
     pr = list(PullRequest.objects.all().filter(id=prid).all())[0]
 
-    commits = list(Commit.objects.all().filter(hash__in=[committag.sha for committag in set(pr.commits.all())]))
+    commits = list(Commit.objects.all().filter(hash__in=[committag.sha for committag in pr.commits.all()]))
 
     issues = list(Issue.objects.all().filter(url__in=[pri.issue.url for pri in PullRequestIssue.objects.all().filter(pr=pr).all()]))
 
@@ -374,7 +379,7 @@ def diffCommitData(request):
     pr = list(PullRequest.objects.all().filter(id=prid).all())[0]
 
     #Find all changed files related to the PR by getting all diffs from all commits in PR    
-    commits = list(Commit.objects.all().filter(hash__in=[committag.sha for committag in set(pr.commits.all())]))
+    commits = list(Commit.objects.all().filter(hash__in=[committag.sha for committag in pr.commits.all()]))
 
     print("Commits: "+str(len(commits)))
 
@@ -406,49 +411,11 @@ def diffCommitData(request):
             linter_results.append( {'filename': filename, 'results':json.loads(output)} )
 
     
-    #Build developer table
-    author_loc = {}
-
-    diffs = Diff.objects.all().filter(commit__project=pr.project, file_path=filename).all()
-
-    for d in diffs:
-        body = d.body
-        author = d.commit.author
-        loc_count = body.count('\n+') + body.count('\n-')
-        if author in author_loc:
-            author_loc[author] += loc_count 
-        else:
-            author_loc[author] = loc_count
-
-    # Get commits, authors for those (diffs)
-    info = [(d.commit.datetime, d.commit.author, d.commit.hash) for d in diffs]
-    commit_messages = [d.commit.message for d in diffs]
-    commit_hashes = [d.commit.hash for d in diffs]
-
-    author_count = {}
-    for date, author, link in info:
-        if author in author_count:
-            author_count[author] += 1
-        else:
-            author_count[author] = 1
-
-    new_info = []
-    authors = []
-    for date, author, link in sorted(info, reverse=False):
-        if author in authors: continue
-        new_info.append((date, author, author_count[author], author_loc[author], link))
-        authors.append(author)
-
-    #see here for avoiding author alisases: https://towardsdatascience.com/string-matching-with-fuzzywuzzy-e982c61f8a84
-    #combine counts for same author with different aliases.
-    dev_table = [{'author':author.username+' - '+author.email, 'number_commits': count, 'lines': loc, 'most_recent_commit':date.strftime('%Y-%m-%d, %H:%M %p'),'commit_link':link} for date, author, count, loc, link in new_info]
-
     resultdata = {
         'diffcommits':diffcommits,
         'prcommits':prcommits,
         'docstring_results':docstring_results,
         'linter_results':linter_results,
-        'dev_table':dev_table,
         'source_url':pr.project.source_url[0:-4]
     }
 
@@ -526,53 +493,27 @@ def githubBot(request):
     print( "Pull Request Number: " + str(payload['number']) )
     print( "Repository: " + str(payload['repository']['clone_url']) )
 
-    prnumber = str(payload['number'])
+    project = list(Project.objects.all().filter(source_url=str(payload['repository']['clone_url'])).all())[0]
+    pull_request = list(PullRequest.objects.all().filter(project=prid, number=int(str(payload['number']))).all())[0]
 
-    if str(payload['action']) == 'opened':
+    #TODO: eventually only do this for new PRs (check payload for action type I think)
 
-        project = list(Project.objects.all().filter(source_url=str(payload['repository']['clone_url'])).all())[0]
+    if pull_request:
 
+        comment = first_responder_function(pull_request.project, pull_request)[0]
+        print("------------")
+        if comment:
+            comment_pullrequest(pull_request, comment)
+            print("commented")
+        else:
+            event = EventLog(
+                event_type=EventLog.EventTypeChoices.NO_NOTIFICATION,
+                pull_request=pull_request,
+                datetime=datetime.today()            
+            )
+            print("don't bug me")
 
-        try:
-            repo_name = project.name
-            repo_owner = get_repo_owner(project)
-            url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues/{prnumber}/comments"
-            payload = { "body": "## MeerCat is working on this PR.  Please stay tuned." }
-            headers = {
-                "Accept": "application/vnd.github+json",
-                "Authorization" : "token " + os.environ.get('MEERCAT_USER_TOKEN')
-            }
-            result = requests.post(url, headers=headers, data=json.dumps(payload))
-        except:
-            pass 
-
-        #Need to refresh the database before 
-        username = settings.DATABASES['default']['USER']
-        password = settings.DATABASES['default']['PASSWORD']
-        cmd = f'cd .. ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {project.id}'
-        os.system(cmd)
-        result = subprocess.check_output(cmd, shell=True)
-
-        pull_request = list(PullRequest.objects.all().filter(project=project.id, number=int(prnumber)).all())[0]
-
-        #TODO: eventually only do this for new PRs (check payload for action type I think)
-
-        if pull_request:
-
-            comment = first_responder_function(pull_request.project, pull_request)[0]
-            print("------------")
-            if comment:
-                comment_pullrequest(pull_request, comment)
-                print("commented")
-            else:
-                event = EventLog(
-                    event_type=EventLog.EventTypeChoices.NO_NOTIFICATION,
-                    pull_request=pull_request,
-                    datetime=datetime.today()            
-                )
-                print("don't bug me")
-
-            print("------------")
+        print("------------")
 
 
     return HttpResponse(
@@ -955,6 +896,7 @@ def first_responder_function(proj_object, pr_object):
     #Get just unique filenames
     filenames_set = set(filenames)
     filenames = list(filenames_set)
+    print(filenames[0])
     file_lines = []
     assert 'filenames' in project_info, f'filenames missing from project_info {proj_id}'
     assert 'extensions' in project_info, f'extensions missing from project_info {proj_id}'
@@ -979,6 +921,10 @@ def first_responder_function(proj_object, pr_object):
         #check by project - does not scale well :(
 
         if proj_id==26 or proj_id==35:  #Flash5 or Flash-X
+
+            #check if non-code file first
+
+
 
             #Fortran, C, C++ all have comments preceding subroutine.
 
@@ -1144,24 +1090,24 @@ def first_responder_function(proj_object, pr_object):
 
         message = f'''## The MeerCat Pull-Request Assistant has information for you
 
-## {k} out of {n} files in this PR were found to have issues.
+    ### {k} out of {n} files in this PR were found to have issues.
 
-## We have suggestions for adding tags.
+    ### We have suggestions for adding tags.
 
-## We have suggestions for adding more people to the discussion.
+    ### We have suggestions for adding more people to the discussion.
 
-[Please see the Pull-Request Assistant page for more detail.](http://sansa.cs.uoregon.edu:8888/dashboard/pr/{pr_object.id})
+    [Please see the Pull-Request Assistant page for more detail.](http://sansa.cs.uoregon.edu:8888/dashboard/pr/{pr_object.id})
     '''
     else:
         message = f'''## The MeerCat Pull-Request Assistant has information for you
 
-## No files in this PR were analyzed.
+    ### No files in this PR were analyzed.
 
-## We have suggestions for adding tags.
+    ### We have suggestions for adding tags.
 
-## We have suggestions for adding more people to the discussion.
+    ### We have suggestions for adding more people to the discussion.
 
-[Please see the Pull-Request Assistant page for more detail.](http://sansa.cs.uoregon.edu:8888/dashboard/pr/{pr_object.id})
+    [Please see the Pull-Request Assistant page for more detail.](http://sansa.cs.uoregon.edu:8888/dashboard/pr/{pr_object.id})
     '''
     return [message, all_files]
 
@@ -1185,11 +1131,11 @@ def get_project_info(project_id):
              'docstring_mandatory': [],
             'testing_kind': 'custom',
              'main':'master',
-            'filenames':[],
+            'filenames':['test'],
             'code_quality': '',
             'supports_callgraph': False,
             'supports_test_hunt': False,
-            'extensions':['.F90']},  #flash-x
+            'extensions':['.F90', 'toml']},  #flash-x
 
         32: {'docstring_kind': 'robodoc',
              'docstring_mandatory': [],
