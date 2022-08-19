@@ -128,8 +128,8 @@
 }
 
 .box {
-    height: 300px;
-    width: 170px;
+    height: 430px;
+    width: 270px;
     border: solid 3px #ccc;
     margin: 10px;
 
@@ -146,8 +146,8 @@
 }
 
 .item {
-    height: 35px;
-    width: 120px;
+    height: 38px;
+    width: 220px;
     margin-top:20px;
     background-color: #F0DB4F;
     display: flex;
