@@ -9,8 +9,9 @@
 <div style="margin-left:15px; margin-top:0px;">
 
     {% if not closed_issue %}   
-        <div class="alert alert-danger" role="alert">
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
             Warning: This PR is not linked to any issues!
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     {% endif %}
 
@@ -370,25 +371,27 @@
                 <div class="container">
                     <div class="drop-targets">
                         <div>
-                            <span style="margin-left:10px;">Category 1</span>
+                            <span style="margin-left:10px;">Potential Tags</span>
                             <div class="box">
-                                <div class="item" id="item1" draggable="true">Testing</div>
-                                <div class="item" id="item2" draggable="true">Documentation</div>
-                                <div class="item" id="item3" draggable="true">Bug Fixes</div>
-                                <div class="item" id="item4" draggable="true">Refactoring</div>
-                                <div class="item" id="item5" draggable="true">New Features</div>
+                                <div class="item" id="item1" draggable="true">Requirements Created/Updated</div>
+                                <div class="item" id="item2" draggable="true">Baseline Established/Updated</div>
+                                <div class="item" id="item3" draggable="true">Test Established/Updated</div>
+                                <div class="item" id="item4" draggable="true">New Feature</div>
+                                <div class="item" id="item5" draggable="true">Bug Fixes</div>
+                                <div class="item" id="item6" draggable="true"><input type="text" style="text-align:center; width:200px;" placeholder="Other"/></div>
+                                <div class="item" id="item7" draggable="true"><input type="text" style="text-align:center; width:200px;" placeholder="Other"/></div>
                             </div>
                         </div>
-                        <div>
+                        <!--div>
                             <span style="margin-left:10px;">Category 2</span>
                             <div class="box">
                                 <div class="item" id="item6" draggable="true">Component</div>
                                 <div class="item" id="item7" draggable="true">Package</div>
                                 <div class="item" id="item8" draggable="true">Design</div>
                             </div>
-                        </div>
+                        </div-->
                         <div>
-                            <span style="margin-left:10px;">PR's Topics</span>
+                            <span style="margin-left:10px;">PR's Tags</span>
                             <div class="box"></div>
                         </div>
                     </div>
