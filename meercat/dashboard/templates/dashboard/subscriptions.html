@@ -15,24 +15,27 @@
         <div class="mb-3">
             <label for="project-select" class="form-label">Project</label>
             <select id="project-select" class="form-select">
-                <option selected>Select a project</option>
+                <option disabled selected value>Select a project</option>
+                {% for project_name in project_names %}
+                    <option value="{{ project_name }}">{{ project_name }}</option>
+                {% endfor %}
             </select>  
         </div>
-        <div class="mb-3">
-            <label for="file-select" class="form-label">File or directory</label>
-            <select id="file-select" class="form-select">
-                <option selected>Select a file or directory</option>
-            </select>
-        </div>
-        <a href="#" class="btn btn-primary">Add</a>
+        <div id="tree-view" class="mb-3"></div>
+        <form action="{% url 'subscriptions' %}" method="POST">
+            {% csrf_token %}
+            <input type="text" name="subscriptions" id="subscriptions-input" hidden />
+            <button class="btn btn-primary" type="submit">Save</button>
+        </form>
     </div>
 </section>
 
-
+{{ files|json_script:"files" }}
+{{ subscriptions|json_script:"subscriptions" }}
 {% endblock content %}
 
 
 {% block script %}
-<script src="{% static 'js/select2.min.js' %}"></script>
+<script src="{% static 'js/tree.min.js' %}"></script>
 <script src="{% static 'js/subscriptions.js' %}"></script>
 {% endblock script %}   
