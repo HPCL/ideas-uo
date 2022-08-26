@@ -24,6 +24,7 @@ from gitutils.github_api import GitHubAPIClient
 
 from database.models import Project, ProjectRole, Commit, Diff, Issue, PullRequest, PullRequestIssue, Comment, EventPayload, CommitTag
 from database.utilities import comment_pullrequest, get_repo_owner
+from dashboard.utilities import list_project_files
 
 import subprocess
 import os, warnings
@@ -40,10 +41,10 @@ def index(request):
     if request.user.is_staff:
         return redirect('staff_index')
 
-    devProjects = getUserProjectsByRole(request.user, 'DEV') 
+    devProjects =  Project.objects.filter(project_role__user=request.user, project_role__role='DEV')
     devProjects = sorted(devProjects, key=lambda d: d.name, reverse=False)
     
-    PMProjects = getUserProjectsByRole(request.user, 'PM')
+    PMProjects = Project.objects.filter(project_role__user=request.user, project_role__role='PM')
     PMProjects = sorted(PMProjects, key=lambda d: d.name, reverse=False)
     
     context = {'devProjects': devProjects, 'PMProjects': PMProjects}
@@ -60,7 +61,29 @@ def staff_index(request):
 
 @login_required
 def subscriptions(request):
-    return render(request, 'dashboard/subscriptions.html')
+
+    if request.method == 'POST':
+        request.user.profile.subscriptions = json.loads(request.POST['subscriptions'] or "{}")
+        print(request.user.profile.subscriptions)
+        request.user.profile.save()
+
+    projects = Project.objects.filter(project_role__user=request.user)
+    
+    files = {}
+    project_names = []
+    for project in projects:
+        project_names.append(project.name)
+        files[project.name] = list_project_files(project)
+
+    subscriptions = request.user.profile.subscriptions
+
+    context = {
+        'files': files,
+        'project_names': project_names,
+        'subscriptions': subscriptions,
+    }
+
+    return render(request, 'dashboard/subscriptions.html', context)
 
 
 @login_required
@@ -1437,13 +1460,6 @@ def countfiles(start, files=0, header=True, begin_start=None):
                 files = countfiles(thing, files, header=False, begin_start=start)
 
     return files
-
-def getUserProjectsByRole(user, role):
-    projectRoles = list(ProjectRole.objects.filter(user__id=user.id, role=role))
-    projectIds = [role.project.id for role in projectRoles]
-    projects = [Project.objects.get(id=projectId) for projectId in projectIds]
-
-    return projects
 
 
 def hasAccessToProject(user, project_id):

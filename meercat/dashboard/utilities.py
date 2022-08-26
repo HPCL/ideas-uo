@@ -1,8 +1,13 @@
+import os
+import json
 import requests
+from subprocess import check_output
+from datetime import datetime
+from pathlib import Path
 
+from django.conf import settings
 from database.models import EventLog
 from database.utilities import get_repo_owner
-from datetime import datetime
 
 
 def save_debug_event(log, json='', pull_request=None, request=None):
@@ -59,3 +64,44 @@ def get_branches_with_status(project): # only works with public repos for now
             branches_with_status.append({'branch': branch_name, 'status': 'No Pull Request'})
 
     return branches_with_status
+
+
+def get_file_dirs(file_path):
+    dirs = []
+    aux_dir = ''
+
+    for directory in file_path.split('/')[:-1]:
+        aux_dir += directory + '/'
+        dirs.append(aux_dir)
+    
+    return dirs
+
+
+def list_project_files(project):
+    project_directory = settings.BASE_DIR.parent / project.name
+    project_path = Path(project_directory)
+    output_bytes = check_output(["git", "ls-files"], cwd=project_path)
+
+    file_paths = output_bytes.decode('utf-8').split('\n')[:-1]
+    return file_paths
+
+
+def list_project_files_directories(project_files):
+    project_directories = []
+
+    for file_path in project_files:
+        file_dirs = get_file_dirs(file_path)
+        for directory in file_dirs:
+            if directory not in project_directories:
+                project_directories.append(directory)
+    
+    return project_directories
+            
+
+def get_git_index(project):
+
+    files = list_project_files(project)
+    directories = list_project_directories(files)
+
+    return {"directories": directories, "files": files}
+    
