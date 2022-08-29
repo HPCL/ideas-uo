@@ -478,8 +478,9 @@ $.ajax({
             var docbuttons = "";
             var cqbuttons = "";
             var alinks = "";
-            var docissues = 0;
-            var cqissues = 0;
+            var docissues = -1;
+
+            var cqissues = -1;
 
             for (var j = 0; j < result['diffcommits'][i]['commits'].length; j++) {
 
@@ -500,19 +501,23 @@ $.ajax({
                 for (var k = 0; k < result['prcommits'].length; k++) {
                     if (result['diffcommits'][i]['commits'][j]['commit'] == result['prcommits'][k]['hash']) {
                         doccommits += "<a target='_blank' href='" + result['source_url'] + "/commit/" + result['diffcommits'][i]['commits'][j]['commit'] + "'>" + result['diffcommits'][i]['commits'][j]['commit'].substring(0, 7) + "</a><br/>";
-                        docbuttons += "<button class='btn btn-sm btn-primary' onclick='showDocEditor(\"" + result['diffcommits'][i]['filename'] + "\",\"" + "DIFF STUFF TO GO HERE" + "\");'>View File in Editor</button><br/>";
-                        cqbuttons += "<button class='btn btn-sm btn-primary' onclick='showCqEditor(\"" + result['diffcommits'][i]['filename'] + "\",\"" + "DIFF STUFF TO GO HERE" + "\");'>View File in Editor</button><br/>";
+                        //docbuttons += "<button class='btn btn-sm btn-primary' onclick='showDocEditor(\"" + result['diffcommits'][i]['filename'] + "\",\"" + "DIFF STUFF TO GO HERE" + "\");'>View File in Editor</button><br/>";
+                        //cqbuttons += "<button class='btn btn-sm btn-primary' onclick='showCqEditor(\"" + result['diffcommits'][i]['filename'] + "\",\"" + "DIFF STUFF TO GO HERE" + "\");'>View File in Editor</button><br/>";
                         alinks += "<a class='btn btn-sm btn-primary' href='/dashboard/archeology/" + pr + "?filename=" +result['diffcommits'][i]['filename']+ "'>View Archeology</a><br/>";
-
                     }
                 }
 
             }
 
+            docbuttons += "<button class='btn btn-sm btn-primary' onclick='showDocEditor(\"" + result['diffcommits'][i]['filename'] + "\",\"" + "DIFF STUFF TO GO HERE" + "\");'>View File in Editor</button><br/>";
+            cqbuttons += "<button class='btn btn-sm btn-primary' onclick='showCqEditor(\"" + result['diffcommits'][i]['filename'] + "\",\"" + "DIFF STUFF TO GO HERE" + "\");'>View File in Editor</button><br/>";
+ 
+
             //see if there are docstring issues
             docstring_results = result['docstring_results'];
             for (var k = 0; k < result['docstring_results'][1].length; k++) {
                 if (result['diffcommits'][i]['filename'] == result['docstring_results'][1][k][0]) {
+                    docissues = 0;
                     for (var m = 0; m < result['docstring_results'][1][k][1].length; m++) {
                         if( result['docstring_results'][1][k][1][m].result.length > 0 ){
                             docissues += result['docstring_results'][1][k][1][m].result.length;
@@ -545,7 +550,7 @@ $.ajax({
             doctable.append("<tr><td>" +
                     "<a href='/dashboard/pr/"+pr+"'>"+result['diffcommits'][i]['filename'] +"</a>"+
                 "</td><td>" +
-                    docissues +
+                    (docissues < 0 ? '-' : docissues) +
                 "</td><td>" +
                     docbuttons +
                 "</td></tr>");
@@ -553,7 +558,7 @@ $.ajax({
             cqtable.append("<tr><td>"+
                     "<a href='/dashboard/pr/"+pr+"'>"+result['diffcommits'][i]['filename'] +"</a>"+
                 "</td><td>"+
-                    cqissues+
+                    (cqissues < 0 ? '-' : cqissues) +
                 "</td><td>"+
                     cqbuttons+
                 "</td></tr>");
@@ -583,7 +588,7 @@ $.ajax({
         for (var k = 0; k < result['docstring_results'][1].length; k++) {
             //if (result['diffcommits'][i]['filename'] == result['docstring_results'][1][k][0]) {
                 for (var m = 0; m < result['docstring_results'][1][k][1].length; m++) {
-                    if( result['docstring_results'][1][k][1][m].test_info.length > 0 ){
+                    if( result['docstring_results'][1][k][1][m].test_info && result['docstring_results'][1][k][1][m].test_info.length > 0 ){
                         for (var n = 0; n < result['docstring_results'][1][k][1][m].test_info.length; n++) {
                         
                             result['docstring_results'][1][k][1][m].test_info[n][0] //folder

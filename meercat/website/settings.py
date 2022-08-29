@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'database.apps.DatabaseConfig',
     'dashboard.apps.DashboardConfig',
     'oauth.apps.OauthConfig',
+    'mainsite.apps.MainsiteConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

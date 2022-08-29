@@ -191,6 +191,7 @@ def pr(request, *args, **kwargs):
 
     issues = list(Issue.objects.all().filter(url__in=[pri.issue.url for pri in PullRequestIssue.objects.all().filter(pr=pr).all()]))
 
+    labels = pr.labels.all()
 
     #Find any issue that this PR closed
     closed_issue = None
@@ -217,10 +218,21 @@ def pr(request, *args, **kwargs):
 
     comments = list(Comment.objects.all().filter(pr=pr))
 
-    
+    #switch local repo to the branch for this PR
+    if len(commits) > 0:
+        branch = commits[0].branch.split()[-1]
+        print("PRA Switch branches to: "+branch)
+        proj_name = pr.project.name
+        cmd = f'cd ../{proj_name} ; git checkout {branch}'
+        print(cmd)
+        try:
+            os.system(cmd)
+            result = subprocess.check_output(cmd, shell=True)
+            print(result)
+        except:
+            return ['', [f'Failure to checkout branch {cmd}']]
 
-
-    context = {'pr':pr, 'commits':commits, 'issues':issues, 'filenames':filenames, 'events':events, 'comments':comments,'closed_issue':closed_issue}
+    context = {'pr':pr, 'commits':commits, 'issues':issues, 'filenames':filenames, 'events':events, 'comments':comments,'closed_issue':closed_issue, 'labels':labels}
 
     return HttpResponse(template.render(context, request))
 
@@ -945,9 +957,13 @@ def diffCommitData(request):
     #Now find all commits and diffs for the changed files in the past 60 days
     #date = datetime.datetime.now() - datetime.timedelta(days=60)
     date = pr.created_at - datetime.timedelta(days=60)
+    enddate = pr.created_at + datetime.timedelta(days=1)
     diffcommits = []
 
-    filtereddiffs = Diff.objects.all().filter(commit__project=pr.project, commit__datetime__gte=date, commit__datetime__lte=pr.created_at)
+    print(pr.created_at)
+    print(date)
+
+    filtereddiffs = Diff.objects.all().filter(commit__project=pr.project, commit__datetime__gte=date, commit__datetime__lte=enddate)
     for filename in filenames:
         diffcommits.append( {'filename': filename, 'commits':[{'commit':d.commit.hash, 'diff':d.body} for d in filtereddiffs.filter(file_path=filename)]} )
 
@@ -967,7 +983,7 @@ def diffCommitData(request):
     #Build developer table
     author_loc = {}
 
-    diffs = Diff.objects.all().filter(commit__project=pr.project, file_path=filename).all()
+    diffs = Diff.objects.all().filter(commit__project=pr.project, file_path__in=filenames).all()
 
     for d in diffs:
         body = d.body
@@ -1083,6 +1099,7 @@ def githubBot(request):
     print( "Action Type: " + str(payload['action']) )
     print( "Pull Request Number: " + str(payload['number']) )
     print( "Repository: " + str(payload['repository']['clone_url']) )
+    print( "Draft: " + str(payload['pull_request']['draft']) )
 
     prnumber = str(payload['number'])
 
@@ -1090,19 +1107,20 @@ def githubBot(request):
 
         project = list(Project.objects.all().filter(source_url=str(payload['repository']['clone_url'])).all())[0]
 
-
-        try:
-            repo_name = project.name
-            repo_owner = get_repo_owner(project)
-            url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues/{prnumber}/comments"
-            payload = { "body": "## MeerCat is working on this PR.  Please stay tuned." }
-            headers = {
-                "Accept": "application/vnd.github+json",
-                "Authorization" : "token " + os.environ.get('MEERCAT_USER_TOKEN')
-            }
-            result = requests.post(url, headers=headers, data=json.dumps(payload))
-        except:
-            pass 
+        # Only post comments for anl_test_repo and FLASH5
+        if project.id == 30 or project.id == 26:
+            try:
+                repo_name = project.name
+                repo_owner = get_repo_owner(project)
+                url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues/{prnumber}/comments"
+                payload = { "body": "## MeerCat is working on this PR.  Please stay tuned." }
+                headers = {
+                    "Accept": "application/vnd.github+json",
+                    "Authorization" : "token " + os.environ.get('MEERCAT_USER_TOKEN')
+                }
+                result = requests.post(url, headers=headers, data=json.dumps(payload))
+            except:
+                pass 
 
         #Need to refresh the database before 
         username = settings.DATABASES['default']['USER']
@@ -1120,8 +1138,17 @@ def githubBot(request):
             comment = first_responder_function(pull_request.project, pull_request)[0]
             print("------------")
             if comment:
-                comment_pullrequest(pull_request, comment)
-                print("commented")
+                # Only post comments for anl_test_repo and FLASH5
+                if project.id == 30 or project.id == 26:
+                    comment_pullrequest(pull_request, comment)
+                    print("commented")
+                else:
+                    event = EventLog(
+                        event_type=EventLog.EventTypeChoices.NOTIFICATION,
+                        log=comment,
+                        pull_request=pull_request,
+                        datetime=datetime.today()
+                    )
             else:
                 event = EventLog(
                     event_type=EventLog.EventTypeChoices.NO_NOTIFICATION,
