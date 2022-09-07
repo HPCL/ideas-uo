@@ -1,8 +1,81 @@
 {% extends 'mainsite/base.html' %} 
 
 {% block content %}
+{% load static %}
 <div class="container">
-  <h1 class="my-5">Homepage will go here</h1>
-
+  <div style="min-height:72px; position: relative; vertical-align:top; margin-bottom:8px;">
+  	<img src="{% static 'images/meercat_logo.png' %}" width="72px">
+  	<span style="font-size:30pt; position:absolute; bottom:-6px;">
+  		MeerCat, <i style="font-size:24pt;"">an IDEAS-ECP project</i> 
+  	</span>
+  </div>
+  <a href='http://ideas-productivity.org/ideas-ecp/'><img src='http://ideas-productivity.org/wordpress/wp-content/uploads/2015/01/IDEAS_logo_small2.png' height="64px"></a>
+  <p>
+  
+  <p>
+  <span class="body_text">MeerCat houses a set of tools to support users, developers, and managers of ECP code repositories on GitHub.</span>
+  <p>
+  <span class="body_text">It is one component of the larger <a href='https://github.com/CAT-SDK/GremCat'>UO-IDEAS project (GremCat)</a>.</span>
+  <p>
+<h2>MeerCat's Focus is on a GitHub Pull Request</h2>
+  <p>
+  <span class="body_text">As a repo changes over time, there is a need for diligence that a change will not cause a misalignment with documentation, tests or the general code base. Typically this falls on a conversation between a Pull Request (PR) author and reviewer to hash out potential problems. Also, typically, there are Continuous Integration (CI) tools to support the PR process including automated running of tests (unit and regression) and code quality checkers. MeerCat is a complement to these CI tools as they relate to Pull Requests. It monitors GitHub events and goes into action when it sees the creation of a Pull Request.
+  </span>
+  <p>
+<h2>MeerCat Pull Request Support</h2>
+  <p>
+  <span class="body_text">MeerCat has grown ground-up, talking to developers involved with ECP projects about their needs. While we are interested in supporting both PR authors and reviewers, it is reviewers that we have tended to focus on. As one might expect, their ideal is to see a final PR that has been well designed and thought out by the author. Thus, MeerCat's rationale is that by supporting the author, we meet our end goal of supporting the reviewer. Before we list the author tools we provide, there is a big caveat: we have found that most ECP projects have their own unique requirements and workflow: there is no one size that fits all. Hence, we allow a project to turn on or off features of MeerCat as they see the need.
+  </span>
+    <p>
+  <ul>
+  <li><h3>Code documentation support</h3>
+    <p>
+    <span class="body_text">If a project uses formatted comments in code to help both document the code but to also auto-generate user documentation, MeerCat can help.
+      It can scan all the files of a PR, looking for either missing or incomplete formatted comments or comments that are misaligned with the code. This currently includes formats such as Doxygen, Robodoc, Numpy, Google and Doc++. MeerCat provides an editor that is smart about these formats and can help an author edit
+      their files to bring code documentation into alignment with both the code and project requirements.
+    </span>
+  <li><h3>Project documentation support</h3>
+    <p>
+    <span class="body_text">Typically a project maintains (manually) types of overview and user guides in markdown-style documents. While MeerCat does not currently attempt to automatically find misalignment from a code change to one of these documents, it may be able to remind an author that a changed code file appearing in
+      a PR could likely require a change to a documentation file, and that file does not appear in the PR. In essence, MeerCat keeps a mapping between certain code files and certain document files that are linked.
+    </span>
+  <li><h3>Project testing support</h3>
+    <p>
+    <span class="body_text">In some cases, a change to code will lead to a problem with existing tests. The most obvious symptom is that one or more test cases fail given the new change. The problem is that it may take hours to see failure. MeerCat may be able to point the PR author to testing files that may need to change to avoid failure.
+<p>
+      In some cases, particularly when new features are added, it may be that new test cases are needed as well; while current test cases cause no problem they also do not cover the new feature. MeerCat may be able to alert the user to test files that need to be augmented to account for new features.
+<p>
+  One caveat to this MeerCat feature is that many (most) projects have their own idiosyncratic way of writing and organizing tests. In some simple cases, e.g., Pytest, Meercat can search a repo for relevant test files. In other projects, e.g., Flash-X, a test-to-file mapping is created during testing and can be cached to supply MeerCat with what it needs. From our perspective, we would like a project to supply MeerCat with file-to-test API that we can call to help identify
+  relevant test files. But the form of this API, and whether it is even possible, is still under exploration.
+    </span>
+<p>
+  <li><h3>Pull Request Recommender</h3>
+    <p>
+    <span class="body_text">Our conjecture is that some files typically appear together in a PR. One example is a config file and a documentation file that
+      provides guidance on using configurations. MeerCat looks for missing siblings in a PR, e.g., a change to a config file but no change to documentation. It will recommend considering missing files that appear closely related (by prior history).
+    </span>
+    <p>
+  <li><h3>Pull Request Discussion</h3>
+    <p>
+    <span class="body_text">For a Pull Request that involves a significant change to the project, e.g., adding new modules, changing a core implementation approach, a robust discussion may be needed. MeerCat can help identify other developers on the project team, other than the author, reviewer and those with a mention, that may have useful input. It does so in an active fashion by supplying the names of all the developers who have worked on files in the PR in the past. The author may select one or more people from this list with an invite to join the discussion.
+<p>
+      MeerCat also provides a passive feature that allows any developer to "subscribe" to changes to one or more files. If any of those files appear in a future PR, the developer is notified by email. They can then choose whether to join the discussion.
+    </span>
+      </ul>
+<p>
+<h2>MeerCat is unobtrusive</h2>
+  <p>
+  <span class="body_text">The features of MeerCat are made available through the (this) MeerCat website. You have the option of getting a brief feedback comment on GitHub 
+    from MeerCat, when a PR is created, which provides the link to the full analysis. It is up to author and reviewer to choose to use this analysis or not.
+    In particular, unlike some CI tools, MeerCat makes no attempt to block or fail a PR.
+    <p>
+    MeerCat's analysis can be applied to any PR, open or closed, from the MeerCat website.
+  </span>
+  <p>
+<h2>If you are interested</h2>
+  <p>
+  <span class="body_text">If you are interested in adding your project to MeerCat, please contact the project lead, Stephen Fickas (stephenfickas@gmail.com).
+  </span>
+  <p>
 </div>
 {% endblock content %}
