@@ -86,34 +86,7 @@ def subscriptions(request):
 
     return render(request, 'dashboard/subscriptions.html', context)
 
-
-@login_required
-def whitelist(request, *args, **kwargs):
-    pid = 30
-    if kwargs['pk']:
-        pid = int(kwargs['pk'])
-
-    if not hasAccessToProject(request.user, pid):
-        return redirect('not_authorized')
-
-    project = Project.objects.get(id=pid)
-
-    if ProjectRole.objects.filter(project=project, user=request.user).exists():
-        project_role = ProjectRole.objects.get(project=project, user=request.user)
-    else:
-        messages.error('Sorry, we could not get your whitelist')
-        return redirect('project', pk=pid)
-
-    project_owner = project.source_url.split('/')[-2] #Owner always has index -2. HTTPS urls are of the form https://github.com/owner/repo.git
-    whitelist = project_role.whitelist 
-
-    if whitelist is None:
-        whitelist = ""
-
-    context = {'project_owner': project_owner, 'project': project, 'whitelist': whitelist}
-
-    return render(request, 'dashboard/whitelist.html', context)
-
+    
 # Project view - should list general project info
 def project(request, *args, **kwargs):
     print("PROJECT")

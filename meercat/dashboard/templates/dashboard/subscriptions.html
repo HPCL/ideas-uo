@@ -21,6 +21,10 @@
                 {% endfor %}
             </select>  
         </div>
+        <div class="mb-3">
+            <label for="file-filter" class="form-label">Filter by text:</label>
+            <input type="text" name="file-filter" class="form-control" id="file-filter" />
+        </div>
         <div id="tree-view" class="mb-3"></div>
         <form action="{% url 'subscriptions' %}" method="POST">
             {% csrf_token %}
