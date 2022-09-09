@@ -630,18 +630,18 @@ $.ajax({
         var devtable = $("#devtable > tbody");
         devtable.empty();
 
-        for (var i = 0; i < result['dev_table'].length; i++) {
+        for (var i = 0; i < result['merged_dev_table'].length; i++) {
 
            devtable.append("<tr><td>" +
-                result['dev_table'][i]['author'] +
+                result['merged_dev_table'][i]['author'] +
                 "</td><td>" +
-                result['dev_table'][i]['number_commits'] +
+                result['merged_dev_table'][i]['number_commits'] +
                 "</td><td>" +
-                result['dev_table'][i]['lines'] +
+                result['merged_dev_table'][i]['lines'] +
                 "</td><td>" +
-                result['dev_table'][i]['most_recent_commit'] +
+                result['merged_dev_table'][i]['most_recent_commit'] +
                 "</td><td>" +
-                "<a href='" + result['source_url'] +"/commit/"+ result['dev_table'][i]['commit_link'] + "'>View on GitHub</a>"+
+                "<a href='" + result['source_url'] +"/commit/"+ result['merged_dev_table'][i]['commit_link'] + "'>View on GitHub</a>"+
                 "</td></tr>");
 
         }

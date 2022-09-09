@@ -25,6 +25,7 @@ from gitutils.github_api import GitHubAPIClient
 from database.models import Project, ProjectRole, Commit, Diff, Issue, PullRequest, PullRequestIssue, Comment, EventPayload, CommitTag
 from database.utilities import comment_pullrequest, get_repo_owner
 from dashboard.utilities import list_project_files
+from dashboard.author_merger_tool import AuthorMergerTool
 
 import subprocess
 import os, warnings
@@ -1044,12 +1045,35 @@ def diffCommitData(request):
     #combine counts for same author with different aliases.
     dev_table = [{'author':author.username+' - '+author.email, 'number_commits': count, 'lines': loc, 'most_recent_commit':date.strftime('%Y-%m-%d, %H:%M %p'),'commit_link':link} for date, author, count, loc, link in new_info]
 
+    #merge authors
+    combined_authors = AuthorMergerTool._get_unique_authors([author.username for date, author, count, loc, link in new_info])
+    all_authors = combined_authors['author'].to_list()
+    combined_authors = combined_authors['unique_author'].to_list()
+    merged_dev_table = []
+    for date, author, count, loc, link in new_info:
+        for idx, the_author in enumerate(all_authors):
+            if author.username == the_author and the_author == combined_authors[idx]:
+                merged_dev_table.append({'username':author.username, 'author':author.username+' - '+author.email, 'number_commits': count, 'lines': loc, 'most_recent_commit':date.strftime('%Y-%m-%d, %H:%M %p'),'commit_link':link})
+
+    for date, author, count, loc, link in new_info:
+        for idx, the_author in enumerate(all_authors):
+            if author.username == the_author and the_author != combined_authors[idx]:
+                for i in range(0, len(merged_dev_table)):
+                    if merged_dev_table[i]['username'] == combined_authors[idx]:
+                        merged_dev_table[i]['number_commits'] += count
+                        merged_dev_table[i]['lines'] += loc
+                        if merged_dev_table[i]['most_recent_commit'] < date.strftime('%Y-%m-%d, %H:%M %p'):
+                            merged_dev_table[i]['most_recent_commit'] = date.strftime('%Y-%m-%d, %H:%M %p')
+                            merged_dev_table[i]['commit_link'] = link
+
+
     resultdata = {
         'diffcommits':diffcommits,
         'prcommits':prcommits,
         'docstring_results':docstring_results,
         'linter_results':linter_results,
         'dev_table':dev_table,
+        'merged_dev_table':merged_dev_table,
         'source_url':pr.project.source_url[0:-4]
     }
 
