@@ -63,7 +63,7 @@ def gitlab_callback(request):
         return redirect('login')
     except Exception as ex:
         print(ex)
-        messages.error(request, 'There was an error during GitHub authorization. Please contact the meercat team and try again later.')
+        messages.error(request, 'There was an error during GitLab authorization. Please contact the meercat team and try again later.')
         return redirect('login')
 
     request.session['gl_access_token'] = token['access_token']
@@ -73,7 +73,7 @@ def gitlab_callback(request):
     if autheitcation_success:
         return redirect('index')
     else:
-        messages.warning(request, 'Your GitHub account has not been registered in our site. Please register to continue.')
+        messages.warning(request, 'Your GitLab account has not been registered in our site. Please register to continue.')
         return redirect('register')
 
 
@@ -112,6 +112,8 @@ def github_callback(request):
         return redirect('index')
     else:
         messages.warning(request, 'Your GitHub account has not been registered in our site. Please register to continue.')
+        print(gh_user)
+        request.session['gh_user'] = gh_user
         return redirect('register')
 
 
@@ -121,9 +123,19 @@ def login(request):
 
 def register(request):
 
+    gh_user = request.session.get('gh_user', False)
+    if gh_user:
+        initial_data = {
+            'username': gh_user['login'],
+            'email': gh_user['email'],
+        }
+        del request.session['gh_user']
+    else:
+        initial_data = {}
+
     if request.method == 'POST':
 
-        form = RegistrationForm(request.POST)
+        form = RegistrationForm(request.POST, initial=initial_data)
         if form.is_valid():
             name = request.POST['name']
             email = request.POST['personal_email']
@@ -142,6 +154,6 @@ def register(request):
                 return render(request, 'oauth/success.html', {'name': name, 'email': email})
 
     else:
-        form = RegistrationForm()
+        form = RegistrationForm(initial=initial_data)
 
     return render(request, 'oauth/registration.html', {'form': form})
