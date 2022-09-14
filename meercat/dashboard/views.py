@@ -25,6 +25,7 @@ from gitutils.github_api import GitHubAPIClient
 from database.models import Project, ProjectRole, Commit, Diff, Issue, PullRequest, PullRequestIssue, Comment, EventPayload, CommitTag
 from database.utilities import comment_pullrequest, get_repo_owner
 from dashboard.utilities import list_project_files
+from dashboard.author_merger_tool import AuthorMergerTool
 
 import subprocess
 import os, warnings
@@ -85,34 +86,7 @@ def subscriptions(request):
 
     return render(request, 'dashboard/subscriptions.html', context)
 
-
-@login_required
-def whitelist(request, *args, **kwargs):
-    pid = 30
-    if kwargs['pk']:
-        pid = int(kwargs['pk'])
-
-    if not hasAccessToProject(request.user, pid):
-        return redirect('not_authorized')
-
-    project = Project.objects.get(id=pid)
-
-    if ProjectRole.objects.filter(project=project, user=request.user).exists():
-        project_role = ProjectRole.objects.get(project=project, user=request.user)
-    else:
-        messages.error('Sorry, we could not get your whitelist')
-        return redirect('project', pk=pid)
-
-    project_owner = project.source_url.split('/')[-2] #Owner always has index -2. HTTPS urls are of the form https://github.com/owner/repo.git
-    whitelist = project_role.whitelist 
-
-    if whitelist is None:
-        whitelist = ""
-
-    context = {'project_owner': project_owner, 'project': project, 'whitelist': whitelist}
-
-    return render(request, 'dashboard/whitelist.html', context)
-
+    
 # Project view - should list general project info
 def project(request, *args, **kwargs):
     print("PROJECT")
@@ -219,6 +193,29 @@ def pr(request, *args, **kwargs):
     issues = list(Issue.objects.all().filter(url__in=[pri.issue.url for pri in PullRequestIssue.objects.all().filter(pr=pr).all()]))
 
     labels = pr.labels.all()
+
+
+    #TESTING
+    if pr.title == 'Devj Test2':
+        repo_name = pr.project.name
+        repo_owner = get_repo_owner(pr.project)
+        url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues/{pr.number}/labels"
+        payload = { "labels": ['bug', 'enhancement'] }
+        headers = {
+            "Accept": "application/vnd.github+json",
+            "Authorization" : "token " + os.environ.get('MEERCAT_USER_TOKEN')
+        }
+
+        #use put to set labels instead of add new ones
+        #use delete to clear all labels
+        result = requests.post(url, headers=headers, data=json.dumps(payload))
+
+        #do a GET to get all labels for repo
+        url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/labels"
+
+
+
+
 
     #Find any issue that this PR closed
     closed_issue = None
@@ -482,12 +479,35 @@ def diffCommitData(request):
     #combine counts for same author with different aliases.
     dev_table = [{'author':author.username+' - '+author.email, 'number_commits': count, 'lines': loc, 'most_recent_commit':date.strftime('%Y-%m-%d, %H:%M %p'),'commit_link':link} for date, author, count, loc, link in new_info]
 
+    #merge authors
+    combined_authors = AuthorMergerTool._get_unique_authors([author.username for date, author, count, loc, link in new_info])
+    all_authors = combined_authors['author'].to_list()
+    combined_authors = combined_authors['unique_author'].to_list()
+    merged_dev_table = []
+    for date, author, count, loc, link in new_info:
+        for idx, the_author in enumerate(all_authors):
+            if author.username == the_author and the_author == combined_authors[idx]:
+                merged_dev_table.append({'username':author.username, 'author':author.username+' - '+author.email, 'number_commits': count, 'lines': loc, 'most_recent_commit':date.strftime('%Y-%m-%d, %H:%M %p'),'commit_link':link})
+
+    for date, author, count, loc, link in new_info:
+        for idx, the_author in enumerate(all_authors):
+            if author.username == the_author and the_author != combined_authors[idx]:
+                for i in range(0, len(merged_dev_table)):
+                    if merged_dev_table[i]['username'] == combined_authors[idx]:
+                        merged_dev_table[i]['number_commits'] += count
+                        merged_dev_table[i]['lines'] += loc
+                        if merged_dev_table[i]['most_recent_commit'] < date.strftime('%Y-%m-%d, %H:%M %p'):
+                            merged_dev_table[i]['most_recent_commit'] = date.strftime('%Y-%m-%d, %H:%M %p')
+                            merged_dev_table[i]['commit_link'] = link
+
+
     resultdata = {
         'diffcommits':diffcommits,
         'prcommits':prcommits,
         'docstring_results':docstring_results,
         'linter_results':linter_results,
         'dev_table':dev_table,
+        'merged_dev_table':merged_dev_table,
         'source_url':pr.project.source_url[0:-4]
     }
 

@@ -44,7 +44,10 @@ class EventMiddleware:
         log = str(exception)
         # To record a traceback use following line instead (uncomment traceback import)
         #log = ''.join(traceback.format_exception(exception))
-        user = request.user
+        if request.user.is_anonymous:
+            user = None
+        else:
+            user = request.user
 
         eventLog = EventLog(
             uri=uri,
