@@ -29,7 +29,7 @@
     </div>
     <div class="row" style="margin-top:6px;">
         <div class="col-sm-1"><u>Branch</u>: </div>
-        <div class="col-sm-11">{{commits.0.branch}}</div>
+        <div class="col-sm-11">{{branch}}</div>
     </div>
         <div class="row" style="margin-top:6px;">
         <div class="col-sm-1"><u>Issues</u>: </div>
@@ -681,6 +681,8 @@
 
 
 <input id="pr" type="hidden" value="{{ pr.pk }}"/>
+<input id="project" type="hidden" value="{{ pr.project.pk }}"/>
+<input id="branch" type="hidden" value="{{ branch }}"/>
 
 {% endblock content %}
 

@@ -13,6 +13,8 @@ enddate.val(date.toISOString().substr(0, 10));
 var queryString = window.location.search;
 var urlParams = new URLSearchParams(queryString);
 var pr = $("#pr").val(); //urlParams.get('pr') //{{ pr.pk }}
+var project = $("#project").val();
+var branch = $("#branch").val();
 console.log("The PR id...");
 console.log($("#pr"));
 console.log(pr);
@@ -548,7 +550,7 @@ $.ajax({
                 "</td></tr>");
 
             doctable.append("<tr><td>" +
-                    "<a href='/dashboard/pr/"+pr+"'>"+result['diffcommits'][i]['filename'] +"</a>"+
+                    "<a href='/dashboard/filex/"+project+"?filename="+result['diffcommits'][i]['filename']+"&branch="+branch+"'>"+result['diffcommits'][i]['filename'] +"</a>"+
                 "</td><td>" +
                     (docissues < 0 ? '-' : docissues) +
                 "</td><td>" +
@@ -556,7 +558,7 @@ $.ajax({
                 "</td></tr>");
 
             cqtable.append("<tr><td>"+
-                    "<a href='/dashboard/pr/"+pr+"'>"+result['diffcommits'][i]['filename'] +"</a>"+
+                    "<a href='/dashboard/filex/"+project+"?filename="+result['diffcommits'][i]['filename']+"&branch="+branch+"'>"+result['diffcommits'][i]['filename'] +"</a>"+
                 "</td><td>"+
                     (cqissues < 0 ? '-' : cqissues) +
                 "</td><td>"+
@@ -616,7 +618,7 @@ $.ajax({
                 $("#testwarning").show();
 
             testtable.append("<tr><td>" +
-                "<a href='/dashboard/pr/"+pr+"'>"+key +"</a>"+
+                "<a href='/dashboard/filex/"+project+"?filename="+key+"&branch="+branch+"'>"+key +"</a>"+
                 "</td><td>" +
                 value +
                 "</td><td>" +

@@ -243,6 +243,7 @@ def pr(request, *args, **kwargs):
     comments = list(Comment.objects.all().filter(pr=pr))
 
     #switch local repo to the branch for this PR
+    branch = "main"
     if len(commits) > 0:
         branch = commits[0].branch.split()[-1]
         print("PRA Switch branches to: "+branch)
@@ -256,7 +257,7 @@ def pr(request, *args, **kwargs):
         except:
             return ['', [f'Failure to checkout branch {cmd}']]
 
-    context = {'pr':pr, 'commits':commits, 'issues':issues, 'filenames':filenames, 'events':events, 'comments':comments,'closed_issue':closed_issue, 'labels':labels}
+    context = {'pr':pr, 'branch':branch, 'commits':commits, 'issues':issues, 'filenames':filenames, 'events':events, 'comments':comments,'closed_issue':closed_issue, 'labels':labels}
 
     return HttpResponse(template.render(context, request))
 
