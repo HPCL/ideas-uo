@@ -929,7 +929,6 @@ def firstresponder(request, *args, **kwargs):
         )
 
 def first_responder_function(proj_object, pr_object):
-
     proj_name = proj_object.name  #get project name
     proj_id = proj_object.id
     project_info = get_project_info(proj_id)  #see functions at end
@@ -945,6 +944,7 @@ def first_responder_function(proj_object, pr_object):
     branch = commits_list[0].branch
     cmd = f'cd ../{proj_name} ; git checkout {branch}'
     try:
+        import os
         os.system(cmd)
     except:
         assert False, f'Failure to checkout branch {cmd}'
@@ -955,175 +955,17 @@ def first_responder_function(proj_object, pr_object):
     #Get just unique filenames
     filenames_set = set(filenames)
     filenames = list(filenames_set)
-    file_lines = []
-    assert 'filenames' in project_info, f'filenames missing from project_info {proj_id}'
-    assert 'extensions' in project_info, f'extensions missing from project_info {proj_id}'
-    for filename in filenames:
-        name, extension = os.path.splitext(filename)
-        if (extension and extension in project_info['extensions']) or (not extension and filename in project_info['filenames']):
-            with open('../'+proj_name+'/'+filename, 'r') as f:
-                lines = f.readlines()
-                f.close()
-            file_lines.append((filename, name,  extension, lines))
-        else:
-            print(f'Uncheckable currently: {filename}')
-            file_lines.append((filename, name,  extension, None))
 
-    #Gather info on each file in file_lines
-    all_files = []
-    for path, name, extension, lines in file_lines:
-
-        if not lines:
-            continue  #no lines to check for file
-
-        #check by project - does not scale well :(
-
-        if proj_id==26 or proj_id==35:  #Flash5 or Flash-X
-
-            #Fortran, C, C++ all have comments preceding subroutine.
-
-            function_info = []
-            i = 0  #start at top of file
-            while i<len(lines):
-                #compute values for sig_name, sig_params, (doc, doc_start, doc_end, fields, doc_params), test_info, all_issues
-
-                #look for robodoc docstring  (*if* says internal)
-                if lines[i].startswith('!!****f*') or lines[i].startswith('!!****if*'):
-                    doc_start = i
-                    i, sig_name, sig_params, doc, doc_start, doc_end, fields, doc_params, params_start, issues = get_f90_robodoc_string_plus_sig(lines, i)  #parses out both docstring and signature, i last line of doc
-                    function_info.append((sig_name, sig_params, doc, doc_start, doc_end, fields, doc_params, params_start, issues))
-
-                #look for doxygen. Not so easy. We cannot tell if doxygen comment is for subroutine or something else. robodoc actually flags it in header.
-                #So search past comment to see if find subroutine. If not, ignore the comment (for now).
-                elif lines[i].startswith('!>'):
-                    doc_start = i
-                    #check if comment goes with subroutine
-                    while i<len(lines) and (lines[i].startswith('!') or lines[i].strip()==''):
-                        i+=1
-
-                    if i>=len(lines):
-                        break  #done with file
-
-                    #we ran into a line that not comment or blank that follows the doxygen comment. See if subroutine.
-                    if not lines[i].startswith('subroutine '):
-                        i+=1
-                        continue  #comment is for something other than subroutine
-
-                    #found comment and subroutine
-                    i, sig_name, sig_params, doc, doc_start, doc_end, fields, doc_params, params_start, issues = get_f90_doxygen_string_plus_sig(lines, doc_start)  #parses out both docstring and signature, i last line of doc
-                    function_info.append((sig_name, sig_params, doc, doc_start, doc_end, fields, doc_params, params_start, issues))
-                    
-                #look for subroutine with missing docstring
-                elif lines[i].startswith('subroutine '):
-                    doc_params = []
-                    params_start = 0
-                    doc_lines = []
-                    doc_fields = []
-                    doc_start = 0
-                    doc_end = 0
-                    #found subroutine while looking for docstring - so missing docstring
-                    sub_start = i
-                    nodoc_issue = [[f'No docstring for subroutine', sub_start]]
-
-                    #deal with multi-line signature - uses & as line continuation
-                    while lines[i].find(')') == -1:
-                        i += 1
-                        if i >= len(lines):
-                            i -= 1
-                            lines[i] += ')'  #bit of kludge - adding missing closing paren
-                            break
-
-                    #looks good!
-                    raw_sig = ' '.join(lines[sub_start:i+1]).strip('\n').replace('&', ' ')[10:]
-                    sig_name = raw_sig[:raw_sig.find('(')].strip()
-                    sig_params = raw_sig[raw_sig.find('(')+1:raw_sig.find(')')].strip().split(',')
-                    function_info.append((sig_name, sig_params, doc_lines, doc_start, doc_end, doc_fields, doc_params, params_start, nodoc_issue))  #no doc string
-
-                i+=1  #keep looking through file
-
-            #done looking for docstrings and subroutines in file. Now work on docstring alignment and mandatory fields
-
-            extended_info = []
-            for sig_name, sig_params, doc, doc_start, doc_end, doc_fields, doc_params, params_start, issues in function_info:
-
-                #if no doc no reason to check matching
-                if not doc:
-                    extended_info.append((sig_name, sig_params, doc, doc_start, doc_end, doc_fields, doc_params, params_start, issues))  #no doc string found
-                    continue
-
-                #found docstring
-                mandatories = project_info['docstring_mandatory']
-                param_issues = check_param_match(sig_params, doc_params, params_start)
-                mandatory_issues  = check_mandatory(mandatories, doc_fields, doc_start)
-                all_issues = issues + param_issues + mandatory_issues
-                print(f'all_issues: {all_issues}')
-                extended_info.append((sig_name, sig_params, doc, doc_start, doc_end, doc_fields, doc_params, params_start, all_issues))  #add in new issues
-
-            file_table = [{'signature_name': sig_name,
-                          'signature_params': sig_params,
-                          'docstring': ''.join(doc),
-                          'doc_fields': doc_fields,
-                          'doc_start': doc_start,
-                          'params_start': params_start,
-                          'test_info': [],
-                          'result': issues} for sig_name, sig_params, doc, doc_start, doc_end, doc_fields, doc_params, params_start, issues in extended_info]
-
-
-        elif proj_id==30:  #anl_test_repo
-            function_info = []  #find all the functions in the file and record info on each of them
-            i = 0
-
-            #Python uses dostring that follows function. There is an alternative with doxygen where the comments
-            #can precede, but it is frowned upon. Not handling Doxygen preceding comments currently.
-
-            #find function signature then look for docstring following
-            while i<len(lines):
-                sig_start = i
-                i, sig_name, sig_params = get_py_signature(lines,i)
-                if not sig_name:
-                    i += 1  #move on and keep searching
-                    continue
-
-                #is signature line - check for doc string currently only in numpy format. Adding Google style on todo list. Ditto Doxygen as docstring.
-                sig_end = i
-                doc, doc_start, doc_end, fields, doc_params, params_start, issues = get_py_doc_string(lines, sig_end+1)
-                
-                #after demo, pass in sig_params to check. test_info will have to expand.
-                test_info = find_pytest_files(proj_name, path, sig_name)  #returns list of triples (path, file_name, i)
-
-                #get ready to move test function to repo
-                #cd '..'
-                #proj_name in os.listdir()
-
-                #import importlib
-                #proj = importlib.import_module(proj_name, '')
-
-                #proj.bin.meercat_test_functions.find_pytest_files(proj_name, path, sig_name)
-
-                mandatories = project_info['docstring_mandatory']
-                param_issues = check_param_match(sig_params, doc_params, params_start) if doc else []
-                mandatory_issues  = check_mandatory(mandatories, fields, doc_start) if doc else []
-                all_issues = issues + param_issues + mandatory_issues
-                function_info.append((sig_name, sig_params, doc, doc_start, doc_end, fields, doc_params, params_start, test_info, all_issues))
-                #print(f'function_info: {function_info}')
-
-                i += 1  #move beyond docstring
-
-            #done with py and numpy parsing case
-        else:
-            print(f'failed on {docstring_kind} and {extension}')
-            file_table.append(dict())  #can't handle project yet
-
-        file_table = [{'signature_name': sig_name,
-                          'signature_params': sig_params,
-                          'docstring': ''.join(doc),
-                          'doc_fields': doc_fields,
-                          'doc_start': doc_start,
-                          'params_start': params_start,
-                          'test_info': test_info,
-                          'result': issues} for sig_name, sig_params, doc, doc_start, doc_end, doc_fields, doc_params, params_start, test_info, issues in function_info]
-
-        all_files.append((name+extension, file_table))
+    if proj_id==26 or proj_id==35:
+        all_files = handle_flash(proj_object, filenames, project_info)
+    elif proj_id==30:
+        all_files = handle_anl_test_repo(proj_object, filenames, project_info)
+    elif proj_id==32:
+        all_files = handle_hypre(proj_object, filenames, project_info)
+    elif proj_id==38:
+        all_files = handle_warpx(proj_object, filenames, project_info)
+    else:
+        all_files = []
 
     #finished with all files in PR
 
@@ -1152,7 +994,9 @@ def first_responder_function(proj_object, pr_object):
 
 [Please see the Pull-Request Assistant page for more detail.](http://sansa.cs.uoregon.edu:8888/dashboard/pr/{pr_object.id})
     '''
+
     else:
+
         message = f'''## The MeerCat Pull-Request Assistant has information for you
 
 ## No files in this PR were analyzed.
@@ -1163,7 +1007,440 @@ def first_responder_function(proj_object, pr_object):
 
 [Please see the Pull-Request Assistant page for more detail.](http://sansa.cs.uoregon.edu:8888/dashboard/pr/{pr_object.id})
     '''
+
+    #pr_file_intersection = comute_pr_file_intersection(proj_object, filenames)
+    #return [message, all_files, pr_file_intersection]
     return [message, all_files]
+
+def handle_hypre(proj_object, filenames, project_info):
+    proj_id = proj_object.id     #proj_id==26 or proj_id==35:  #Flash5 or Flash-X
+    assert 'filenames' in project_info, f'filenames missing from project_info {proj_id}'
+    assert 'extensions' in project_info, f'extensions missing from project_info {proj_id}'
+
+    #hypre uses Doxygen with no predefined fields. Everything is open prose.
+    #it is expected the prototype files are ones carrying comments.
+    #it "appears" that prototype files only appear in .h files.
+    #so only thing to check is for a prototype without a preceding Doxygen comment
+
+    #All the user interfaces appear in header files that have the upper-case form ‘HYPRE_*.h’
+    #The user interface functions all start with the upper-case prefix ‘HYPRE_’
+
+    def check_hypre_prototype(lines, i):
+        line = lines[i]
+        s = line.find(' ')
+        if s==-1:
+            return ('',[], i)
+        j = line[s:].find('HYPRE_')  #per Rob's instructions for public functions
+        if j==-1:
+            return ('',[], i)
+        k = line[s:].find('(')
+        if k == -1:
+            return ('',[], i)
+        name = line[s+1:line.find('(')].strip()
+
+        #looks like found target prototype. Now get args. Can be multi-line.
+        '''
+        HYPRE_Int HYPRE_IJMatrixCreate(MPI_Comm        comm,
+                    HYPRE_BigInt    ilower,
+                    HYPRE_BigInt    iupper,
+                    HYPRE_BigInt    jlower,
+                    HYPRE_BigInt    jupper,
+                    HYPRE_IJMatrix *matrix);
+        '''
+
+
+        args = line[line.find('(')+1:]
+        while not args.strip().endswith(');'):  # ; signals this is prototype - only thing we are looking for
+            i+=1
+            if i>=len(lines):
+                assert False, f'Malformed prototype {path},{name}'
+            args += lines[i].strip()
+        args = args.strip()[:-2]
+        arg_list = args.split(',')
+        just_args = [arg[arg.rfind(' '):].strip().replace('*','')    for arg in arg_list]
+        print(f'args: {arg_list}, {just_args}')
+        return name, just_args, i
+
+    def find_missing_hypre_params(doc_string, sig_params):
+        e_pattern = "\e "
+        missing_params = []
+        missing_e = []
+        doc_string = doc_string.replace('\n', ' ').replace('.', ' ').replace(',', ' ').replace('*', ' ')
+        for param in sig_params:
+            j = doc_string.find(f' {param} ')
+            if j==-1:
+                missing_params.append(param)
+            else:
+                if doc_string[j-2] == e_pattern[0] and doc_string[j-1] == e_pattern[1] and doc_string[j] == e_pattern[2]:
+                    print(f'param has e: {param}')
+                else:
+                    missing_e.append(param)
+        return missing_params, missing_e
+
+    proj_name = proj_object.name
+    file_lines = []
+    for path in filenames:
+        full_filename = os.path.basename(path)
+        name, extension = os.path.splitext(full_filename)
+
+        print(path, full_filename, extension, name)
+        if extension=='.h' and name.startswith('HYPRE_'):  #per Rob's instructions
+            with open('../'+proj_name+'/'+path, 'r') as f:
+                lines = f.readlines()
+                f.close()
+            file_lines.append((path, name,  extension, lines))
+        else:
+            print(f'Uncheckable currently: {filename}')
+            file_lines.append((path, name,  extension, None))
+
+
+
+
+
+    #Gather info on each file in file_lines
+    all_files = []
+
+    for path, name, extension, lines in file_lines:
+
+        if not lines:
+            all_files.append((path, []))
+            continue  #no lines to check for file
+
+        function_info = []
+        i = 0  #start at top of file
+        while i<len(lines):
+
+            #look for doxygen. Not so easy. We cannot tell if doxygen comment is for subroutine or something else. robodoc actually flags it in header.
+            #So search past comment to see if find subroutine. If not, ignore the comment (for now).
+            if lines[i].startswith('/**'):
+                doc_start = i
+                while i<len(lines) and not lines[i].strip().startswith('**/'):
+                    i+=1
+                #found doc++ comment. Does it go with prototype?
+
+                if i>=len(lines):
+                    break  #done with file
+                doc_end = i
+
+                doc_string = ''
+                for line in lines[doc_start:doc_end+1]:
+                    doc_string += line
+                i += 1 #move to line after doc
+                #skip over white space
+                while i<len(lines) and lines[i].strip()=='':
+                    print(f'skipping line {i}')
+                    i+=1
+                if i>=len(lines):
+                    break  #done with file
+                #we ran into a line that not comment or blank that follows the doxygen comment. See if prototype.
+                sig_name, sig_params, i = check_hypre_prototype(lines,i)
+                if not sig_name:
+                    i+=1  #skip over whatever it is and keep looking
+                    continue  #comment is for something other than prototype
+
+                #found comment and prototype
+                backslash = "\\"
+                missing_params, missing_e = find_missing_hypre_params(doc_string, sig_params)
+                issues = [[f'Parameters not mentioned in comments: {missing_params}', doc_start]] if missing_params else []
+                issues = issues + [[f'Parameters missing \\e comments: {missing_e}', doc_start]] if missing_e else issues
+                fields = []  #for now - can look for them at some point
+                doc_params = []  #might look at \e foo as naming param and see if really is
+                params_start = 0
+                function_info.append((sig_name, sig_params, doc_string, doc_start, doc_end, fields, doc_params, params_start, issues))
+                i += 1
+                continue
+                
+            #look for prototype with missing docstring
+            sig_name, sig_params, i = check_hypre_prototype(lines,i)
+            if sig_name:
+                doc_params = []
+                params_start = 0
+                doc_lines = []
+                doc_fields = []
+                doc_start = 0
+                doc_end = 0
+                issues = [[f'Prototype missing Doxygen comment: {sig_name}', i]]
+
+                function_info.append((sig_name, sig_params, doc_lines, doc_start, doc_end, doc_fields, doc_params, params_start, issues))  #no doc string
+
+            i+=1  #keep looking through file
+
+        #done looking for docstrings and subroutines in file. Now work on docstring alignment and mandatory fields
+
+        extended_info = []
+        for sig_name, sig_params, doc, doc_start, doc_end, doc_fields, doc_params, params_start, issues in function_info:
+
+            #if no doc no reason to check matching
+            if not doc:
+                extended_info.append((sig_name, sig_params, doc, doc_start, doc_end, doc_fields, doc_params, params_start, issues))  #no doc string found
+                continue
+
+            #found docstring
+            mandatories = project_info['docstring_mandatory']
+            mandatory_issues  = check_mandatory(mandatories, doc_fields, doc_start)
+            all_issues = issues  + mandatory_issues
+            extended_info.append((sig_name, sig_params, doc, doc_start, doc_end, doc_fields, doc_params, params_start, all_issues))  #add in new issues
+
+        file_table = [{'signature_name': sig_name,
+                      'signature_params': sig_params,
+                      'full_signature': sig_name+'('+', '.join(sig_params)+')',
+                      'docstring': ''.join(doc),
+                      'doc_fields': doc_fields,
+                      'doc_start': doc_start,
+                      'params_start': params_start,
+                      'test_info': [],
+                      'result': issues} for sig_name, sig_params, doc, doc_start, doc_end, doc_fields, doc_params, params_start, issues in extended_info]
+        all_files.append((name+extension, file_table))
+
+    return all_files
+
+def handle_anl_test_repo(proj_object, filenames, project_info):
+    proj_id = proj_object.id
+    assert 'filenames' in project_info, f'filenames missing from project_info {proj_id}'
+    assert 'extensions' in project_info, f'extensions missing from project_info {proj_id}'
+
+    proj_name = proj_object.name
+    file_lines = []
+    for filename in filenames:
+        name, extension = os.path.splitext(filename)
+        if (extension and extension in project_info['extensions']) or (not extension and filename in project_info['filenames']):
+            with open('../'+proj_name+'/'+filename, 'r') as f:
+                lines = f.readlines()
+                f.close()
+            file_lines.append((filename, name,  extension, lines))
+        else:
+            print(f'Uncheckable currently: {filename}')
+            file_lines.append((filename, name,  extension, None))
+
+    #Gather info on each file in file_lines
+    all_files = []
+
+    for path, name, extension, lines in file_lines:
+
+        if not lines:
+            all_files.append((name+extension, []))
+            continue  #no lines to check for file
+
+        function_info = []  #find all the functions in the file and record info on each of them
+        i = 0
+
+        #Python uses dostring that follows function. There is an alternative with doxygen where the comments
+        #can precede, but it is frowned upon. Not handling Doxygen preceding comments currently.
+
+        #find function signature then look for docstring following
+        while i<len(lines):
+            sig_start = i
+            i, sig_name, sig_params = get_py_signature(lines,i)
+            if not sig_name:
+                i += 1  #move on and keep searching
+                continue
+
+            #is signature line - check for doc string currently only in numpy format. Adding Google style on todo list. Ditto Doxygen as docstring.
+            sig_end = i
+            doc, doc_start, doc_end, fields, doc_params, params_start, issues = get_py_doc_string(lines, sig_end+1)
+            
+            #after demo, pass in sig_params to check. test_info will have to expand.
+            test_info = find_pytest_files(proj_name, path, sig_name)  #returns list of triples (path, file_name, i)
+
+            #get ready to move test function to repo
+            #cd '..'
+            #proj_name in os.listdir()
+
+            #import importlib
+            #proj = importlib.import_module(proj_name, '')
+
+            #proj.bin.meercat_test_functions.find_pytest_files(proj_name, path, sig_name)
+
+            mandatories = project_info['docstring_mandatory']
+            param_issues = check_param_match(sig_params, doc_params, params_start) if doc else []
+            mandatory_issues  = check_mandatory(mandatories, fields, doc_start) if doc else []
+            all_issues = issues + param_issues + mandatory_issues
+            function_info.append((sig_name, sig_params, doc, doc_start, doc_end, fields, doc_params, params_start, test_info, all_issues))
+            #print(f'function_info: {function_info}')
+
+            i += 1  #move beyond docstring
+
+        file_table = [{'signature_name': sig_name,
+                          'signature_params': sig_params,
+                          'full_signature': sig_name+'('+', '.join(sig_params)+')',
+                          'subtype': tuple(),
+                          'docstring': ''.join(doc),
+                          'doc_fields': doc_fields,
+                          'doc_start': doc_start,
+                          'params_start': params_start,
+                          'test_info': test_info,
+                          'result': issues} for sig_name, sig_params, doc, doc_start, doc_end, doc_fields, doc_params, params_start, test_info, issues in function_info]
+
+        all_files.append((name+extension, file_table))
+
+    return all_files
+
+def handle_flash(proj_object, filenames, project_info):
+    proj_id = proj_object.id     #proj_id==26 or proj_id==35:  #Flash5 or Flash-X
+    assert 'filenames' in project_info, f'filenames missing from project_info {proj_id}'
+    assert 'extensions' in project_info, f'extensions missing from project_info {proj_id}'
+
+    proj_name = proj_object.name
+    file_lines = []
+    for filename in filenames:
+        name, extension = os.path.splitext(filename)
+        if (extension and extension in project_info['extensions']) or (not extension and filename in project_info['filenames']):
+            with open('../'+proj_name+'/'+filename, 'r') as f:
+                lines = f.readlines()
+                f.close()
+            file_lines.append((filename, name,  extension, lines))
+        else:
+            print(f'Uncheckable currently: {filename}')
+            file_lines.append((filename, name,  extension, None))
+
+    #below is really idiosyncratic to Flash.
+    #a) expect changes to test.toml files to include changes to associated readme.md in same folder
+    #b) subroutines come in 3 flavors: public stub, implementation of stub, private. Documentation will vary
+    #depending on type. stubs show up in top level Unit folder. Implementations show up in UnitMain folder (or below).
+    test_toml_files = []
+    readme_files = []
+    units = ['Driver', 'Grid', 'Multispecies', 'Particles', 'PhysicalConstants', 'RuntimeParameters', 'Simulation']
+
+    #Gather info on each file in file_lines
+    all_files = []
+
+    for path, name, extension, lines in file_lines:
+
+        if not lines:
+            all_files.append((name+extension, []))
+            continue  #no lines to check for file
+
+        if name=='test' and extension=='.toml':
+            test_toml_files.append(path)
+            continue
+
+        if name=='readme' and extension=='.md':
+            readme_files.append(path)
+            continue
+
+        #special to flash - stubs under unit folder (e.g., Grid), implementations under unitMain folder (e.g., GridMain).
+        #However, stub implementations must have same name as stub otherwise private.
+        subtype = tuple()
+
+        if extension=='.F90':
+            #need to figure out which of 3 types: stub, stub implementation, private
+            the_file = os.path.basename(path)
+            the_header = os.path.dirname(path)
+            unit_name = [u for u in units if the_header.endswith(u)]
+            if unit_name:
+                subtype = (unit_name[0], 'stub')  #directly under unit folder so stub
+            else:
+                #check if implementation of stub
+                unit_name = [u for u in units if u+'Main' in the_header]
+                if unit_name:
+                    #we know an implementation. But of stub or private? If stub will have same name.
+                    unit_path = f'../{proj_name}/source/{unit_name[0]}'
+                    contents = os.listdir(unit_path)
+                    print(unit_path, contents, the_file)
+                    if the_file in contents:
+                        subtype = (unit_name[0], 'implementation')
+                    else:
+                        subtype = (unit_name[0], 'private')
+
+        print(the_file, the_header, subtype)
+        #Fortran, C, C++ all have comments preceding subroutine.
+
+        function_info = []
+        i = 0  #start at top of file
+        while i<len(lines):
+            #compute values for sig_name, sig_params, (doc, doc_start, doc_end, fields, doc_params), test_info, all_issues
+
+            #look for robodoc docstring  (*if* says internal)
+            if lines[i].startswith('!!****f*') or lines[i].startswith('!!****if*'):
+                doc_start = i
+                i, sig_name, sig_params, doc, doc_start, doc_end, fields, doc_params, params_start, issues = get_f90_robodoc_string_plus_sig(lines, i)  #parses out both docstring and signature, i last line of doc
+                function_info.append((sig_name, sig_params, doc, doc_start, doc_end, fields, doc_params, params_start, issues, subtype))
+
+            #look for doxygen. Not so easy. We cannot tell if doxygen comment is for subroutine or something else. robodoc actually flags it in header.
+            #So search past comment to see if find subroutine. If not, ignore the comment (for now).
+            elif lines[i].startswith('!>'):
+                doc_start = i
+                #check if comment goes with subroutine
+                while i<len(lines) and (lines[i].startswith('!') or lines[i].strip()==''):
+                    i+=1
+
+                if i>=len(lines):
+                    break  #done with file
+
+                #we ran into a line that not comment or blank that follows the doxygen comment. See if subroutine.
+                if not lines[i].startswith('subroutine '):
+                    i+=1
+                    continue  #comment is for something other than subroutine
+
+                #found comment and subroutine
+                i, sig_name, sig_params, doc, doc_start, doc_end, fields, doc_params, params_start, issues = get_f90_doxygen_string_plus_sig(lines, doc_start)  #parses out both docstring and signature, i last line of doc
+                function_info.append((sig_name, sig_params, doc, doc_start, doc_end, fields, doc_params, params_start, issues, subtype))
+                
+            #look for subroutine with missing docstring
+            elif lines[i].startswith('subroutine '):
+                doc_params = []
+                params_start = 0
+                doc_lines = []
+                doc_fields = []
+                doc_start = 0
+                doc_end = 0
+                #found subroutine while looking for docstring - so missing docstring
+                sub_start = i
+                nodoc_issue = [[f'No docstring for subroutine', sub_start]]
+
+                #deal with multi-line signature - uses & as line continuation
+                while lines[i].find(')') == -1:
+                    i += 1
+                    if i >= len(lines):
+                        i -= 1
+                        lines[i] += ')'  #bit of kludge - adding missing closing paren
+                        break
+
+                #looks good!
+                raw_sig = ' '.join(lines[sub_start:i+1]).strip('\n').replace('&', ' ')[10:]
+                sig_name = raw_sig[:raw_sig.find('(')].strip()
+                sig_params = raw_sig[raw_sig.find('(')+1:raw_sig.find(')')].strip().split(',')
+                sig_params = [sp.strip() for sp in sig_params]
+
+                function_info.append((sig_name, sig_params, doc_lines, doc_start, doc_end, doc_fields, doc_params, params_start, nodoc_issue, subtype))  #no doc string
+
+            i+=1  #keep looking through file
+
+        #done looking for docstrings and subroutines in file. Now work on docstring alignment and mandatory fields
+
+        extended_info = []
+        for sig_name, sig_params, doc, doc_start, doc_end, doc_fields, doc_params, params_start, issues, subtype in function_info:
+
+            #if no doc no reason to check matching
+            if not doc:
+                extended_info.append((sig_name, sig_params, doc, doc_start, doc_end, doc_fields, doc_params, params_start, issues, subtype))  #no doc string found
+                continue
+
+            #if stub implementation no reason to check matching
+            if subtype and subtype[1]=='implementation':
+                extended_info.append((sig_name, sig_params, doc, doc_start, doc_end, doc_fields, doc_params, params_start, issues, subtype))  #no doc string found
+                continue
+
+            #found docstring for either stub or private
+            mandatories = project_info['docstring_mandatory']
+            param_issues = check_param_match(sig_params, doc_params, params_start)
+            mandatory_issues  = check_mandatory(mandatories, doc_fields, doc_start)
+            all_issues = issues + param_issues + mandatory_issues
+            extended_info.append((sig_name, sig_params, doc, doc_start, doc_end, doc_fields, doc_params, params_start, all_issues, subtype))  #add in new issues
+
+        file_table = [{'signature_name': sig_name,
+                      'signature_params': sig_params,
+                      'full_signature': sig_name+'('+', '.join(sig_params)+')',
+                      'subtype': subtype,
+                      'docstring': ''.join(doc),
+                      'doc_fields': doc_fields,
+                      'doc_start': doc_start,
+                      'params_start': params_start,
+                      'test_info': [],
+                      'result': issues} for sig_name, sig_params, doc, doc_start, doc_end, doc_fields, doc_params, params_start, issues, subtype in extended_info]
+        all_files.append((name+extension, file_table))
+
+    return all_files
 
 
 #### Simulating global data about projects
@@ -1191,7 +1468,7 @@ def get_project_info(project_id):
             'supports_test_hunt': False,
             'extensions':['.F90']},  #flash-x
 
-        32: {'docstring_kind': 'robodoc',
+        32: {'docstring_kind': 'doc++',
              'docstring_mandatory': [],
             'testing_kind': 'custom',
              'main':'master',
@@ -1199,7 +1476,7 @@ def get_project_info(project_id):
             'code_quality': '',
             'supports_callgraph': False,
             'supports_test_hunt': False,
-            'extensions':['.F90']},  #hypre
+            'extensions':['.h']},  #hypre
 
         30: {'docstring_kind': 'numpy',
              'docstring_mandatory':['Parameters', 'Returns', 'Raises'],
@@ -1281,177 +1558,55 @@ def file_explorer(request, *args, **kwargs):
     return HttpResponse(template.render(context, request))
 
 def file_explorer_function(proj_id, project_object, project_info, branch, filename):
-
+    import os
     proj_name = project_object.name
     name, extension = os.path.splitext(filename)
-    if (extension and extension in project_info['extensions']) or (not extension and filename in project_info['filenames']):
-            with open('../'+proj_name+'/'+filename, 'r') as f:
-                lines = f.readlines()
-                f.close()
+    cmd = f'cd ../{proj_name} ; git checkout {branch}'
+    try:
+        import os
+        os.system(cmd)
+    except:
+        assert False, f'Failure to checkout branch {cmd}'
+
+    if proj_id==32:
+        #customize file finding for Hypre
+        all_files = handle_hypre(project_object, [filename], project_info)
     else:
-        print(f'Uncheckable currently: {filename}')
-        lines = []
-
-    if lines:
-
-        if proj_id==26 or proj_id==35:  #Flash5 or Flash-X
-
-            #Fortran, C, C++ all have comments preceding subroutine.
-
-            function_info = []
-            i = 0  #start at top of file
-            while i<len(lines):
-                #compute values for sig_name, sig_params, (doc, doc_start, doc_end, fields, doc_params), test_info, all_issues
-
-                #look for robodoc docstring  (*if* says internal)
-                if lines[i].startswith('!!****f*') or lines[i].startswith('!!****if*'):
-                    doc_start = i
-                    i, sig_name, sig_params, doc, doc_start, doc_end, fields, doc_params, params_start, issues = get_f90_robodoc_string_plus_sig(lines, i)  #parses out both docstring and signature, i last line of doc
-                    function_info.append((sig_name, sig_params, doc, doc_start, doc_end, fields, doc_params, params_start, issues))
-
-                #look for doxygen. Not so easy. We cannot tell if doxygen comment is for subroutine or something else. robodoc actually flags it in header.
-                #So search past comment to see if find subroutine. If not, ignore the comment (for now).
-                elif lines[i].startswith('!>'):
-                    doc_start = i
-                    #check if comment goes with subroutine
-                    while i<len(lines) and (lines[i].startswith('!') or lines[i].strip()==''):
-                        i+=1
-
-                    if i>=len(lines):
-                        break  #done with file
-
-                    #we ran into a line that not comment or blank that follows the doxygen comment. See if subroutine.
-                    if not lines[i].startswith('subroutine '):
-                        i+=1
-                        continue  #comment is for something other than subroutine
-
-                    #found comment and subroutine
-                    i, sig_name, sig_params, doc, doc_start, doc_end, fields, doc_params, params_start, issues = get_f90_doxygen_string_plus_sig(lines, doc_start)  #parses out both docstring and signature, i last line of doc
-                    
-                    callers =  get_callers(proj_id, sig_name, filename)
-
-                    function_info.append((sig_name, sig_params, doc, doc_start, doc_end, fields, doc_params, params_start, callers, [], issues))
-                    
-                #look for subroutine with missing docstring
-                elif lines[i].startswith('subroutine '):
-                    doc_params = []
-                    params_start = 0
-                    doc_lines = []
-                    doc_fields = []
-                    doc_start = 0
-                    doc_end = 0
-                    #found subroutine while looking for docstring - so missing docstring
-                    sub_start = i
-                    nodoc_issue = [[f'No docstring for subroutine', sub_start]]
-
-                    #deal with multi-line signature - uses & as line continuation
-                    while lines[i].find(')') == -1:
-                        i += 1
-                        if i >= len(lines):
-                            i -= 1
-                            lines[i] += ')'  #bit of kludge - adding missing closing paren
-                            break
-
-                    #looks good!
-                    raw_sig = ' '.join(lines[sub_start:i+1]).strip('\n').replace('&', ' ')[10:]
-                    sig_name = raw_sig[:raw_sig.find('(')].strip()
-                    sig_params = raw_sig[raw_sig.find('(')+1:raw_sig.find(')')].strip().split(',')
-
-                    callers =  get_callers(proj_id, sig_name, filename)
-
-                    function_info.append((sig_name, sig_params, doc_lines, doc_start, doc_end, doc_fields, doc_params, params_start, callers, [], nodoc_issue))  #no doc string
-
-                i+=1  #keep looking through file
-
-            #done looking for docstrings and subroutines in file. Now work on docstring alignment and mandatory fields
-
-            extended_info = []
-            for sig_name, sig_params, doc, doc_start, doc_end, doc_fields, doc_params, params_start, callers, test_info, issues in function_info:
-
-                #if no doc no reason to check matching
-                if not doc:
-                    extended_info.append((sig_name, sig_params, doc, doc_start, doc_end, doc_fields, doc_params, params_start, callers, test_info, issues))  #no doc string found
-                    continue
-
-                #found docstring
-                mandatories = project_info['docstring_mandatory']
-                param_issues = check_param_match(sig_params, doc_params, params_start)
-                mandatory_issues  = check_mandatory(mandatories, doc_fields, doc_start)
-                all_issues = issues + param_issues + mandatory_issues
-                #print(f'all_issues: {all_issues}')
-                extended_info.append((sig_name, sig_params, doc, doc_start, doc_end, doc_fields, doc_params, params_start, callers, [], all_issues))  #add in new issues
-
-            file_table = [{'signature_name': sig_name,
-                          'signature_params': sig_params,
-                          'full_signature': f"{sig_name}({','.join(sig_params)})",
-                          'docstring': ''.join(doc),
-                          'doc_fields': doc_fields,
-                          'doc_start': doc_start,
-                          'params_start': params_start,
-                          'test_info': test_info,
-                          'callers': callers,
-                          'result': issues} for sig_name, sig_params, doc, doc_start, doc_end, doc_fields, doc_params, params_start, callers, test_info, issues in extended_info]
-
-
-        elif proj_id==30:  #anl_test_repo
-            function_info = []  #find all the functions in the file and record info on each of them
-            i = 0
-
-            #Python uses dostring that follows function. There is an alternative with doxygen where the comments
-            #can precede, but it is frowned upon. Not handling Doxygen preceding comments currently.
-
-            #find function signature then look for docstring following
-            while i<len(lines):
-                sig_start = i
-                i, sig_name, sig_params = get_py_signature(lines,i)
-                if not sig_name:
-                    i += 1  #move on and keep searching
-                    continue
-
-                #is signature line - check for doc string currently only in numpy format. Adding Google style on todo list. Ditto Doxygen as docstring.
-                sig_end = i
-                doc, doc_start, doc_end, fields, doc_params, params_start, issues = get_py_doc_string(lines, sig_end+1)
-                
-                #after demo, pass in sig_params to check. test_info will have to expand.
-                test_info = find_pytest_files(proj_name, filename, sig_name)  if project_info['supports_test_hunt'] else [] #returns list of triples (path, file_name, i)
-
-                mandatories = project_info['docstring_mandatory']
-                param_issues = check_param_match(sig_params, doc_params, params_start) if doc else []
-                mandatory_issues  = check_mandatory(mandatories, fields, doc_start) if doc else []
-                all_issues = issues + param_issues + mandatory_issues
-
-                callers =  get_callers(proj_id, sig_name, filename) if project_info['supports_callgraph'] else []
-
-                function_info.append((sig_name, sig_params, doc, doc_start, doc_end, fields, doc_params, params_start, callers, test_info, all_issues))
-                #print(f'function_info: {function_info}')
-
-                i += 1  #move beyond docstring
-
-            file_table = [{'signature_name': sig_name,
-                          'signature_params': sig_params,
-                          'full_signature': f"{sig_name}({','.join(sig_params)})",
-                          'docstring': ''.join(doc),
-                          'doc_fields': doc_fields,
-                          'doc_start': doc_start,
-                          'params_start': params_start,
-                          'test_info': test_info,
-                          'callers': callers,
-                          'result': issues} for sig_name, sig_params, doc, doc_start, doc_end, doc_fields, doc_params, params_start, callers, test_info, issues in function_info]
+        if (extension and extension in project_info['extensions']) or (not extension and filename in project_info['filenames']):
+                with open('../'+proj_name+'/'+filename, 'r') as f:
+                    lines = f.readlines()
+                    f.close()
         else:
-            print(f'Project has no parser yet: {proj_id}')
-            file_table = []  #can't handle file yet
-    else:
-        print(f'failed on {docstring_kind} and {extension}')
-        file_table = []  #can't handle file yet
-    print('====================')
-    for d in file_table:
-        print(d['signature_name'], d['test_info'], d['callers'])
-        print()
+            print(f'Uncheckable currently: {filename}')
+            lines = []
+
+        if not lines:
+            all_files = []
+        else:
+            if proj_id==26 or proj_id==35:
+                all_files = handle_flash(project_object, [filename], project_info)
+            elif proj_id==30:
+                all_files = handle_anl_test_repo(project_object, [filename], project_info)
+            elif proj_id==38:
+                all_files = handle_warpx(project_object, [filename], project_info)
+            else:
+                all_files = []
+
+
+
+        #finished with all files in PR
+
+        #all_files:
+        #   name, file_table
+        #       {'signature_name': sig, 'signature_params':params, 'docstring': doc_info, 'result': all_issues}
+        #       {'signature_name': sig, 'signature_params':params, 'docstring': doc_info, 'result': all_issues}
+        #       ...
+        #       where doc_info = (doc, doc_start, doc_end, fields, doc_params)
+            
+
     # Build developer table
 
     diffs = Diff.objects.all().filter(commit__project=project_object, file_path=filename).all()
-
-    #print(diffs)
     author_loc = {}
 
     for d in diffs:
@@ -1484,8 +1639,6 @@ def file_explorer_function(proj_id, project_object, project_info, branch, filena
     pr_comments = list(Comment.objects.all().filter(pr__in=prs))
 
     #print('comments','\n')
-    for com in pr_comments:
-        print(com.author, ' ', com.body, '\n')
 
     issues = list(Issue.objects.all().filter(url__in=[pri.issue.url for pri in PullRequestIssue.objects.all().filter(pr__in=prs).all()]))
 
@@ -1557,7 +1710,7 @@ def file_explorer_function(proj_id, project_object, project_info, branch, filena
 
     prs_table = sorted([{'number':pr.number, 'url':pr.url, 'issue_url': compute_issue_url(pr), 'notes': ["WiP"], 'notes_kind':'WiP' } for pr in prs], key=lambda d: d['number'])
 
-
+    file_table = all_files[0][1] if all_files else []
     context = {'file':filename,
                  'project': project_object,
                  'branch':branch,
@@ -1750,28 +1903,31 @@ def get_f90_robodoc_string_plus_sig(lines, i):
     fields = []
     params = []
     params_start = doc_start
+    all_headers = ['NAME','SYNOPSIS','DESCRIPTION','RESULT','EXAMPLE','SIDE EFFECTS', 'NOTES','SEE ALSO']
     while not lines[i].startswith('!!**') and lines[i].startswith('!!') and i < len(lines):
         line = lines[i][2:].strip()
-        if not line.isalpha() and not line.isupper(): continue
+        if not line.isalpha() and not line.isupper():
+            i+=1
+            continue
         #found field
         fields.append(line)
 
         if line=='ARGUMENTS':
             params_start = i
             #found ARGUMENTS section - now get arguments
-            all_headers = ['NAME','SYNOPSIS','DESCRIPTION','RESULT','EXAMPLE','SIDE EFFECTS', 'NOTES','SEE ALSO']
+
             i += 1  #move beyond ARGUMENTS line
             while i<len(lines):
-
                 #check if ends by a non-comment line
                 if not lines[i].startswith('!!'):
                     doc_end = i-1
                     break
 
                 #check if get to new section (so end of ARGUMENTS)
-                line = doc_lines[j][2:].strip()  #remove !! and padding
+                line = lines[i][2:].strip()  #remove !! and padding
                 if line in all_headers:
                     fields.append(line)
+                    i+=1
                     break
 
                 #check if - or : in line. If so, argument name is defined
@@ -1786,25 +1942,27 @@ def get_f90_robodoc_string_plus_sig(lines, i):
                 #record arg name(s) found
                 arg_name = line[:index].strip()
                 for aname in arg_name.split(','):  #can have more than one name preceding hyphen
-                    params.append(aname)
+                    params.append(aname.strip())
                 i += 1
+            #end inner while
 
             #figure out how dropped out of while loop collecting args
-
-            if i>=len(lines):
-                #did not find closing of doc string
-                return i, '', [], lines[doc_start:i], doc_start, 0, fields, params, params_start, [[f'No end found for docstring starting at {doc_start}', doc_start]]
+            if not lines[i].startswith('!!'):
+                #ready to look for subroutine
+                break
 
             if line in all_headers:
                 #got to next section - keep going
                 i += 1
 
-            if not lines[i].startswith('!!'):
-                #ready to look for subroutine
-                break
+            if i>=len(lines):
+                #did not find closing of doc string
+                return i, '', [], lines[doc_start:i], doc_start, 0, fields, params, params_start, [[f'No end found for docstring starting at {doc_start}', doc_start]]
+        else:
+            i+=1  #Not ARGUMENTS - keep going
+    #end outer while
 
-
-
+    fields = list(set(fields))  #remove duplicates
     #found non comment line - assume ending
     doc_end = i-1
     doc = lines[doc_start:i]
@@ -1825,6 +1983,7 @@ def get_f90_robodoc_string_plus_sig(lines, i):
     raw_sig = ' '.join(lines[j:i+1]).strip('\n').replace('&', ' ')[10:]
     sig_name = raw_sig[:raw_sig.find('(')].strip()
     sig_params = raw_sig[raw_sig.find('(')+1:raw_sig.find(')')].strip().split(',')
+    sig_params = [sp.strip() for sp in sig_params]
 
     return i+1, sig_name, sig_params, doc, doc_start, doc_end, fields, params, params_start, []
 
@@ -1923,9 +2082,58 @@ def parse_f90_subroutine(lines, i):
     raw_sig = ' '.join(lines[j:i+1]).strip('\n').replace('&', ' ')[10:]
     sig_name = raw_sig[:raw_sig.find('(')].strip()
     sig_params = raw_sig[raw_sig.find('(')+1:raw_sig.find(')')].strip().split(',')
+
 def write_pr_info_to_file(proj_id):
     return []
 
+def comute_pr_file_intersection(proj_object, filenames):
+    proj_id = proj_object.id
+    all_prs = []
+    for file in filenames:
+        prs = find_prs_with_file(proj_id, file)
+        all_prs += prs  #concat
+
+    pr_info = []
+    for pr in list(set(all_prs)):
+        files = find_files_with_pr(proj_object, pr)
+        file_info = []
+        for file in files:
+            if file in filenames:
+                file_info.append((file, True))
+            else:
+                file_info.append((file, False))
+        assert any([b for f,b in file_info])
+        pr_info.append((pr.number, file_info))
+
+    return pr_info
+
+
+def find_prs_with_file(proj_id, filename):
+
+    diffs = Diff.objects.all().filter(commit__project=proj_id, file_path=filename).all()
+    commit_hashes = [d.commit.hash for d in diffs]
+    tags = CommitTag.objects.all().filter(sha__in=commit_hashes)
+    prs = list(set(PullRequest.objects.all().filter(commits__in=tags)))  #all prs that go with file commits
+
+    return prs
+
+def find_files_with_pr(proj_object, pr_object):
+
+    proj_name = proj_object.name  #get project name
+    proj_id = proj_object.id
+
+    #get set up on right feature branch
+    commits_list = list(Commit.objects.all().filter(hash__in=[committag.sha for committag in pr_object.commits.all()]))
+    assert commits_list, f'No commits found for {proj_id}'
+
+    #get all files in PR
+    diffs = list(Diff.objects.all().filter(commit__in=[c for c in commits_list]))
+    filenames = [d.file_path for d in diffs]
+    #Get just unique filenames
+    filenames_set = set(filenames)
+    filenames = list(filenames_set)
+
+    return filenames
 
 
 

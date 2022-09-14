@@ -4,7 +4,7 @@
 {% csrf_token %}
 <h2>File Explorer</h2><br/>
 
-<b><i>File name:</i></b> {{file}} - <a href="{{project.source_url|slice:"0:-4"}}/blob/{{branch}}/{{file}}">Go to file on GitHub</a><br/>
+<b><i>File name:</i></b> {{file}} - <a href="{{project.source_url|slice:"0:-4"}}/blob/{{branch}}/{{file}}" target="_blank">Go to file on GitHub</a><br/>
 
 <div style="margin-left:15px; margin-top:8px;">
 
@@ -73,8 +73,14 @@
                         {% endif %}
                         </td>
 
-                        <td>{{func.result}}</td>
-                        
+                        <td>{{func.subtype}}
+                            {% for errors in func.result %}
+                                {{errors.0}} ({{errors.1}})<br>
+                            {% endfor %}
+                        </td>
+
+
+
                         <td>{% if supports_callgraph %}
                                 <!-- [('folder1/arithmetic.py', 'list_sub', 'code'), ('folder1/test_arithmetic.py', 'test_sub', 'test')] -->
                                 {% for caller_list in func.callers %}
