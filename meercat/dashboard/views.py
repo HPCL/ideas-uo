@@ -194,6 +194,29 @@ def pr(request, *args, **kwargs):
 
     labels = pr.labels.all()
 
+
+    #TESTING
+    if pr.title == 'Devj Test2':
+        repo_name = pr.project.name
+        repo_owner = get_repo_owner(pr.project)
+        url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues/{pr.number}/labels"
+        payload = { "labels": ['bug', 'enhancement'] }
+        headers = {
+            "Accept": "application/vnd.github+json",
+            "Authorization" : "token " + os.environ.get('MEERCAT_USER_TOKEN')
+        }
+
+        #use put to set labels instead of add new ones
+        #use delete to clear all labels
+        result = requests.post(url, headers=headers, data=json.dumps(payload))
+
+        #do a GET to get all labels for repo
+        url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/labels"
+
+
+
+
+
     #Find any issue that this PR closed
     closed_issue = None
     issue_number = re.search(r'#\d+', pr.description)
