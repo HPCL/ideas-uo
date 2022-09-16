@@ -482,17 +482,25 @@ def diffCommitData(request):
 
     #merge authors
     combined_authors = AuthorMergerTool._get_unique_authors([author.username for date, author, count, loc, link in new_info])
+    #print("----------------------------")
+    #print(combined_authors)
+    #print("----------------------------")
     all_authors = combined_authors['author'].to_list()
     combined_authors = combined_authors['unique_author'].to_list()
     merged_dev_table = []
     for date, author, count, loc, link in new_info:
         for idx, the_author in enumerate(all_authors):
-            if author.username == the_author and the_author == combined_authors[idx]:
-                merged_dev_table.append({'username':author.username, 'author':author.username+' - '+author.email, 'number_commits': count, 'lines': loc, 'most_recent_commit':date.strftime('%Y-%m-%d, %H:%M %p'),'commit_link':link})
+            if author.username == the_author and the_author == combined_authors[idx] and [author['username'] for author in merged_dev_table].count(the_author) < 1:
+                merged_dev_table.append({'username':author.username, 'author':author.username+' - '+author.email, 'number_commits': 0, 'lines': 0, 'most_recent_commit':date.strftime('%Y-%m-%d, %H:%M %p'),'commit_link':link})
+
+    #print("----------------------------")
+    #print(merged_dev_table)
+    #print([author['username'] for author in merged_dev_table])
+    #print([author['username'] for author in merged_dev_table].count('Ruipeng Li'))
 
     for date, author, count, loc, link in new_info:
         for idx, the_author in enumerate(all_authors):
-            if author.username == the_author and the_author != combined_authors[idx]:
+            if author.username == the_author:  #and the_author != combined_authors[idx]:
                 for i in range(0, len(merged_dev_table)):
                     if merged_dev_table[i]['username'] == combined_authors[idx]:
                         merged_dev_table[i]['number_commits'] += count
@@ -1154,7 +1162,7 @@ def handle_hypre(proj_object, filenames, project_info):
                 f.close()
             file_lines.append((path, name,  extension, lines))
         else:
-            print(f'Uncheckable currently: {filename}')
+            print(f'Uncheckable currently: {full_filename}')
             file_lines.append((path, name,  extension, None))
 
 
@@ -1254,7 +1262,7 @@ def handle_hypre(proj_object, filenames, project_info):
                       'params_start': params_start,
                       'test_info': [],
                       'result': issues} for sig_name, sig_params, doc, doc_start, doc_end, doc_fields, doc_params, params_start, issues in extended_info]
-        all_files.append((name+extension, file_table))
+        all_files.append((path, file_table))
 
     return all_files
 

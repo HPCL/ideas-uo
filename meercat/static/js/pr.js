@@ -20,6 +20,7 @@ console.log($("#pr"));
 console.log(pr);
 var filename = "";
 var previousLines = 0;
+var ignoreLineChanges = true;
 var docstring_results = [];
 
 var popupNode = document.createElement("div");
@@ -66,6 +67,8 @@ function showDocEditor(docfilename, difftext) {
     filename = docfilename;
 
     $('#dochelpertitle').html(filename);
+    previousLines = 0;
+    ignoreLineChanges = true;
 
     //$('#dochelper').empty();
 
@@ -74,10 +77,10 @@ function showDocEditor(docfilename, difftext) {
             console.log("get file contents");
             console.log(result);
 
-
             editor.setValue(result['filecontents']);
 
             previousLines = editor.lineCount();
+            ignoreLineChanges = false;
 
             //editor.markText({ line: 3, ch: 0 }, { line: 3, ch: 13 }, { className: "styled-background" });
             //editor.markText({ line: 6, ch: 12 }, { line: 6, ch: 22 }, { className: "styled-background" });
@@ -96,7 +99,7 @@ function showDocEditor(docfilename, difftext) {
 
                             for(var k=0; k<docstring_results[1][i][1][j].result.length; k++){ 
                                 console.log("MARK LINE: " + docstring_results[1][i][1][j].result[k][1] );                      
-                                editor.markText({ line: docstring_results[1][i][1][j].result[k][1]-1, ch: 0 }, { line: docstring_results[1][i][1][j].result[k][1]-1, ch: 100 }, { className: "styled-background" });
+                                editor.markText({ line: docstring_results[1][i][1][j].result[k][1], ch: 0 }, { line: docstring_results[1][i][1][j].result[k][1], ch: 100 }, { className: "styled-background" });
                             }
                         }
                     }
@@ -115,15 +118,16 @@ function showDocEditor(docfilename, difftext) {
                 var lines = editor.lineCount();
                 
                 console.log(previousLines + " now -> "+lines);
+                console.log("ignore: "+ignoreLineChanges);
 
-                if( lines > previousLines ){
+                if( !ignoreLineChanges && lines > previousLines ){
 
                     //Bump the line numbers by 1 if after linenumber (this is currenlty only looking at first item in results)
                     for(var i=0; i<docstring_results[1].length; i++){
                         if( docstring_results[1][i][0] == filename ){
                             for(var j=0; j<docstring_results[1][i][1].length; j++){
                                 if( docstring_results[1][i][1][j].result.length > 0 ){     
-                                    if( cursor.line < docstring_results[1][i][1][j].result[0][1]-1 ){
+                                    if( cursor.line < docstring_results[1][i][1][j].result[0][1] ){
                                         docstring_results[1][i][1][j].result[0][1] += 1;
                                     }
                                 }
@@ -151,7 +155,7 @@ function showDocEditor(docfilename, difftext) {
 
                             if( docstring_results[1][i][1][j].result.length > 0 ){                        
 
-                                if (cursor.line == docstring_results[1][i][1][j].result[0][1]-1 ) {
+                                if (cursor.line == docstring_results[1][i][1][j].result[0][1] ) {
                                     
                                     popupNode.innerHTML = '';
                                     for(var k=0; k<docstring_results[1][i][1][j].result.length; k++){
@@ -167,7 +171,7 @@ function showDocEditor(docfilename, difftext) {
 
                                     if( docstring_results[1][i][1][j].result[0][0].indexOf("No docstring") >= 0 ){
                                         var button = document.createElement('button');
-                                        button.setAttribute('onclick', 'insertTemplate('+cursor.line+', \'  \"\"\"\\n  Template will go here.\\n  \"\"\"\')');
+                                        button.setAttribute('onclick', 'insertTemplate('+(cursor.line+1)+', \'  \"\"\"\\n  Template will go here.\\n  \"\"\"\')');
                                         button.classList.add('btn');
                                         button.classList.add('btn-sm');
                                         button.classList.add('btn-primary');
