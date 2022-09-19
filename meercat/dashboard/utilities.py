@@ -1,5 +1,5 @@
-import os
-import json
+import ast
+import re
 import requests
 from subprocess import check_output
 from datetime import datetime
@@ -105,3 +105,82 @@ def get_git_index(project):
 
     return {"directories": directories, "files": files}
     
+
+python_doxygen_base_template = """\"\"\"!
+    @brief Starts a paragraph that serves as a brief description.
+    A brief description ends when a blank line or another sectioning command is encountered.
+
+    @details A longer description.
+
+    @author name
+
+    @callgraph
+    
+"""
+
+    
+def get_type_hints(tree):
+    arguments = []
+    return_type = ""
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef):
+            for argument in node.args.args:
+                arguments.append({ 'name': argument.arg, 'type': argument.annotation.id if argument.annotation else '-'})
+            return_type = node.returns.id if node.returns else '-'
+    
+    return arguments, return_type
+
+
+def python_doxygen_template(function_definition):
+    pass_str = " pass" if function_definition[-1] == ':' else ': pass'
+    tree = ast.parse(function_definition + pass_str, type_comments=True)
+    arguments, return_type = get_type_hints(tree)
+    template = python_doxygen_base_template
+    
+    for argument in arguments:
+        template += f"    @param {argument['name']} [{argument['type']}] Description of parameter.\n"
+        
+    template += f"\n    @return [{return_type}] Description of returned value.\n\"\"\""
+    
+    return template
+
+
+fortran_doxygen_base_template = """
+!> @copyright Copyright 2022 UChicago Argonne, LLC and contributors
+!!
+!! @licenseblock
+!! Licensed under the Apache License, Version 2.0 (the "License");
+!! you may not use this file except in compliance with the License.
+!!
+!! Unless required by applicable law or agreed to in writing, software
+!! distributed under the License is distributed on an "AS IS" BASIS,
+!! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+!! See the License for the specific language governing permissions and
+!! limitations under the License.
+!! @endlicenseblock
+!!
+!! @brief brief description.
+!!
+!! @details longer description
+!!
+"""
+
+def get_parameters(subroutine:str) -> list:
+    params = []
+    m = re.match("subroutine (?P<subroutine>[a-zA-Z]\w{0,30})\((?P<params>[\s\S]*?)\)", subroutine)
+    for param in m.group('params').split(','):
+      param = param.replace('&', '');
+      params.append(param.strip())
+    
+    return params
+
+
+def fortran_doxygen_template(subroutine):
+    template = fortran_doxygen_base_template
+    parameters = get_parameters(subroutine)
+
+    for parameter in parameters:        
+        template += f"!! @param {parameter} Descirption\n"
+            
+    template += '!!\n'
+    return template
