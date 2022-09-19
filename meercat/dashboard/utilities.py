@@ -169,7 +169,7 @@ def get_parameters(subroutine:str) -> list:
     params = []
     m = re.match("subroutine (?P<subroutine>[a-zA-Z]\w{0,30})\((?P<params>[\s\S]*?)\)", subroutine)
     for param in m.group('params').split(','):
-      param = param.replace('&', '');
+      param = param.replace('&', '')
       params.append(param.strip())
     
     return params
