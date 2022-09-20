@@ -1,6 +1,5 @@
 import ast
 import os
-from msilib.schema import Error
 import re
 import requests
 from subprocess import check_output
