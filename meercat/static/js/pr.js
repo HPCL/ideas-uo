@@ -214,8 +214,11 @@ function showDocEditor(docfilename, difftext) {
 function insertTemplate(linenumber, text){
 
     console.log("get template");
+    var cursor = editor.getCursor();
+    console.log( editor.getLine(cursor.line) );
+
     $.ajax({
-        url: '/dashboard/getdoctemplate/', type: 'POST', data: { 'pr': pr, 'filename': filename }, success: function (result) {
+        url: '/dashboard/getdoctemplate/', type: 'POST', data: { 'pr': pr, 'filename': filename, 'signature': editor.getLine(cursor.line) }, success: function (result) {
             console.log("got template");
             console.log(result);
 
@@ -224,6 +227,9 @@ function insertTemplate(linenumber, text){
 
             editor.replaceRange('\n'+result.template, CodeMirror.Pos(linenumber));
             popupNode.remove();
+
+            var lines = (result.template.match(/\n/g) || []).length + 1;
+            console.log("Lines: "+lines);
 
             console.log ("Insert at template at: "+linenumber);
 
@@ -234,13 +240,13 @@ function insertTemplate(linenumber, text){
                         if( docstring_results[1][i][1][j].result.length > 0 ){     
                             console.log("checking... "+docstring_results[1][i][1][j].result[0][1]);                   
                             if( linenumber < docstring_results[1][i][1][j].result[0][1]-1 ){
-                                docstring_results[1][i][1][j].result[0][1] += 3;
+                                docstring_results[1][i][1][j].result[0][1] += lines;
                             }
                         }
                     }
                 }
             }
-            previousLines += 3;
+            previousLines += lines;
 
         }
     });

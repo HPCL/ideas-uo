@@ -24,7 +24,7 @@ from gitutils.github_api import GitHubAPIClient
 
 from database.models import Project, ProjectRole, Commit, Diff, Issue, PullRequest, PullRequestIssue, Comment, EventPayload, CommitTag
 from database.utilities import comment_pullrequest, get_repo_owner
-from dashboard.utilities import list_project_files
+from dashboard.utilities import list_project_files, python_doxygen_template
 from dashboard.author_merger_tool import AuthorMergerTool
 
 import subprocess
@@ -598,12 +598,13 @@ def getDocTemplate(request):
         filename = request.POST.get('filename')
 
 
+    template = '  \"\"\"\\n  Template will go here.\\n  \"\"\"'
 
+    if filename.endswith('.py'): 
+        template = python_doxygen_template(request.POST.get('signature'))
 
-
-    #  \"\"\"\\n  Template will go here.\\n  \"\"\"\
     resultdata = {
-        'template': '  \"\"\"\\n  Template will go here.\\n  \"\"\"',
+        'template': template,
     }
 
     return HttpResponse(
