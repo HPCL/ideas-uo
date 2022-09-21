@@ -98,7 +98,11 @@ function showDocEditor(docfilename, difftext) {
                         if( docstring_results[1][i][1][j].result.length > 0 ){ 
 
                             for(var k=0; k<docstring_results[1][i][1][j].result.length; k++){ 
-                                console.log("MARK LINE: " + docstring_results[1][i][1][j].result[k][1] );                      
+                                
+                                if( docstring_results[1][i][1][j].result[k][0].indexOf("No docstring") >= 0 ){
+                                    docstring_results[1][i][1][j].result[k][1] -= 1;
+                                }
+                                console.log("MARK LINE: " + docstring_results[1][i][1][j].result[k][1] ); 
                                 editor.markText({ line: docstring_results[1][i][1][j].result[k][1], ch: 0 }, { line: docstring_results[1][i][1][j].result[k][1], ch: 100 }, { className: "styled-background" });
                             }
                         }
@@ -127,7 +131,7 @@ function showDocEditor(docfilename, difftext) {
                         if( docstring_results[1][i][0] == filename ){
                             for(var j=0; j<docstring_results[1][i][1].length; j++){
                                 if( docstring_results[1][i][1][j].result.length > 0 ){     
-                                    if( cursor.line < docstring_results[1][i][1][j].result[0][1] ){
+                                    if( cursor.line <= docstring_results[1][i][1][j].result[0][1] ){
                                         docstring_results[1][i][1][j].result[0][1] += 1;
                                     }
                                 }
@@ -171,7 +175,7 @@ function showDocEditor(docfilename, difftext) {
 
                                     if( docstring_results[1][i][1][j].result[0][0].indexOf("No docstring") >= 0 ){
                                         var button = document.createElement('button');
-                                        button.setAttribute('onclick', 'insertTemplate('+(cursor.line+1)+', \'  \"\"\"\\n  Template will go here.\\n  \"\"\"\')');
+                                        button.setAttribute('onclick', 'insertTemplate('+(cursor.line)+', \'  \"\"\"\\n  Template will go here.\\n  \"\"\"\')');
                                         button.classList.add('btn');
                                         button.classList.add('btn-sm');
                                         button.classList.add('btn-primary');
@@ -215,6 +219,9 @@ function insertTemplate(linenumber, text){
             console.log("got template");
             console.log(result);
 
+            result.template = result.template.replaceAll('\\n','\n')
+            console.log(result);
+
             editor.replaceRange('\n'+result.template, CodeMirror.Pos(linenumber));
             popupNode.remove();
 
@@ -233,6 +240,7 @@ function insertTemplate(linenumber, text){
                     }
                 }
             }
+            previousLines += 3;
 
         }
     });
@@ -477,9 +485,6 @@ $.ajax({
         var table = $("#diffcommittable > tbody");
         table.empty();
 
-        var doctable = $("#docdiffcommittable > tbody");
-        doctable.empty();
-
         var cqtable = $("#cqdiffcommittable > tbody");
         cqtable.empty();
 
@@ -490,10 +495,8 @@ $.ajax({
             var commits = "";
             var diffs = "";
             var doccommits = "";
-            var docbuttons = "";
             var cqbuttons = "";
             var alinks = "";
-            var docissues = -1;
 
             var cqissues = -1;
 
@@ -524,24 +527,8 @@ $.ajax({
 
             }
 
-            docbuttons += "<button class='btn btn-sm btn-primary' onclick='showDocEditor(\"" + result['diffcommits'][i]['filename'] + "\",\"" + "DIFF STUFF TO GO HERE" + "\");'>View File in Editor</button><br/>";
             cqbuttons += "<button class='btn btn-sm btn-primary' onclick='showCqEditor(\"" + result['diffcommits'][i]['filename'] + "\",\"" + "DIFF STUFF TO GO HERE" + "\");'>View File in Editor</button><br/>";
  
-
-            //see if there are docstring issues
-            docstring_results = result['docstring_results'];
-            for (var k = 0; k < result['docstring_results'][1].length; k++) {
-                if (result['diffcommits'][i]['filename'] == result['docstring_results'][1][k][0]) {
-                    docissues = 0;
-                    for (var m = 0; m < result['docstring_results'][1][k][1].length; m++) {
-                        if( result['docstring_results'][1][k][1][m].result.length > 0 ){
-                            docissues += result['docstring_results'][1][k][1][m].result.length;
-                            //issues = result['docstring_results'][1][k][1].length;
-                        }
-                    }
-                }
-            }
-
             for (var k = 0; k < result['linter_results'].length; k++) {
                 if (result['diffcommits'][i]['filename'] == result['linter_results'][k]['filename']) {
                     //for (var m = 0; m < result['docstring_results'][1][k][1].length; m++) {
@@ -562,21 +549,16 @@ $.ajax({
                 diffs +
                 "</td></tr>");
 
-            doctable.append("<tr><td>" +
-                    "<a href='/dashboard/filex/"+project+"?filename="+result['diffcommits'][i]['filename']+"&branch="+branch+"'>"+result['diffcommits'][i]['filename'] +"</a>"+
-                "</td><td>" +
-                    (docissues < 0 ? '-' : docissues) +
-                "</td><td>" +
-                    docbuttons +
-                "</td></tr>");
 
-            cqtable.append("<tr><td>"+
-                    "<a href='/dashboard/filex/"+project+"?filename="+result['diffcommits'][i]['filename']+"&branch="+branch+"'>"+result['diffcommits'][i]['filename'] +"</a>"+
-                "</td><td>"+
-                    (cqissues < 0 ? '-' : cqissues) +
-                "</td><td>"+
-                    cqbuttons+
-                "</td></tr>");
+            if( project == 30 || project == 26 || project == 35 ){
+                cqtable.append("<tr><td>"+
+                        "<a href='/dashboard/filex/"+project+"?filename="+result['diffcommits'][i]['filename']+"&branch="+branch+"'>"+result['diffcommits'][i]['filename'] +"</a>"+
+                    "</td><td>"+
+                        (cqissues < 0 ? '-' : cqissues) +
+                    "</td><td>"+
+                        cqbuttons+
+                    "</td></tr>");
+            }
 
             atable.append("<tr><td>"+
                     result['diffcommits'][i]['filename']+
@@ -592,6 +574,68 @@ $.ajax({
             if( cqissues > 0 )
                 $("#cqwarning").show();
 
+        }
+
+
+        if( !(project == 30 || project == 26 || project == 35) ){
+            cqtable.append("<tr><td colspan='3'>"+
+                    "<i>This project is not supported yet.</i>"+
+                "</td></tr>");
+        }
+
+
+        docstring_results = result['docstring_results'];
+        var doctable = $("#docdiffcommittable > tbody");
+        doctable.empty();
+
+        for (var k = 0; k < result['docstring_results'][1].length; k++) {
+            var docbuttons = "";
+            var docissues = -1;
+            docbuttons += "<button class='btn btn-sm btn-primary' onclick='showDocEditor(\"" + result['docstring_results'][1][k][0] + "\",\"" + "DIFF STUFF TO GO HERE" + "\");'>View File in Editor</button><br/>";
+ 
+
+            //see if there are docstring issues
+            //for (var k = 0; k < result['docstring_results'][1].length; k++) {
+            //    if (result['diffcommits'][i]['filename'] == result['docstring_results'][1][k][0]) {
+            if( result['docstring_results'][1][k][2] == 'checked' ){
+                docissues = 0;
+                for (var m = 0; m < result['docstring_results'][1][k][1].length; m++) {
+                    if( result['docstring_results'][1][k][1][m].result.length > 0 ){
+                        docissues += result['docstring_results'][1][k][1][m].result.length;
+                    }
+                }
+
+                doctable.append("<tr><td>" +
+                    "<a href='/dashboard/filex/"+project+"?filename="+result['docstring_results'][1][k][0]+"&branch="+branch+"'>"+result['docstring_results'][1][k][0] +"</a>"+
+                    "</td><td>" +
+                        (docissues < 0 ? '-' : docissues) +
+                    "</td><td>" +
+                        docbuttons +
+                    "</td></tr>");
+            }
+            
+        }
+        for (var k = 0; k < result['docstring_results'][1].length; k++) {
+            var docbuttons = "";
+            docbuttons += "<button class='btn btn-sm btn-primary' onclick='showDocEditor(\"" + result['docstring_results'][1][k][0] + "\",\"" + "DIFF STUFF TO GO HERE" + "\");'>View File in Editor</button><br/>";
+ 
+            if( result['docstring_results'][1][k][2] != 'checked' ){
+                docissues = 0;
+                for (var m = 0; m < result['docstring_results'][1][k][1].length; m++) {
+                    if( result['docstring_results'][1][k][1][m].result.length > 0 ){
+                        docissues += result['docstring_results'][1][k][1][m].result.length;
+                    }
+                }
+
+                doctable.append("<tr><td>" +
+                    "<a href='/dashboard/filex/"+project+"?filename="+result['docstring_results'][1][k][0]+"&branch="+branch+"'>"+result['docstring_results'][1][k][0] +"</a>"+
+                    "</td><td>" +
+                        result['docstring_results'][1][k][2] +
+                    "</td><td>" +
+                        docbuttons +
+                    "</td></tr>");
+            }
+            
         }
 
 
@@ -622,6 +666,13 @@ $.ajax({
                     }
                 }
             //}
+        }
+
+
+        if( testmap.size < 1 ){
+            testtable.append("<tr><td colspan='3'>"+
+                    "<i>This project is not supported yet.</i>"+
+                "</td></tr>");
         }
 
         testmap.forEach((value,key)=>{
