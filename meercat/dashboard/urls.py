@@ -24,5 +24,6 @@ urlpatterns = [
     path('getfile/', views.getFile, name='getfile'),
     path('githubbot/', views.githubBot, name='githubbot'),
     path('getdoctemplate/', views.getDocTemplate, name='getdoctemplate'),
+    path('sendinvite/', views.sendInvite, name='sendinvite'),
 ]
 

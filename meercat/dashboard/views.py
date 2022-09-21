@@ -24,7 +24,7 @@ from gitutils.github_api import GitHubAPIClient
 
 from database.models import Project, ProjectRole, Commit, Diff, Issue, PullRequest, PullRequestIssue, Comment, EventPayload, CommitTag
 from database.utilities import comment_pullrequest, get_repo_owner
-from dashboard.utilities import list_project_files, python_doxygen_template
+from dashboard.utilities import list_project_files, python_doxygen_template, gmail_send_message
 from dashboard.author_merger_tool import AuthorMergerTool
 
 import subprocess
@@ -605,6 +605,35 @@ def getDocTemplate(request):
 
     resultdata = {
         'template': template,
+    }
+
+    return HttpResponse(
+        json.dumps(resultdata),
+        content_type='application/json'
+    )
+
+@login_required
+def sendInvite(request):
+
+    print("Send Invite Email")
+
+    prid = 2250
+    if request.POST.get('pr'):
+        prid = int(request.POST.get('pr'))
+
+    if not hasAccessToPR(request.user, prid):
+        return redirect('not_authorized')
+
+    email = 'jprideau@cs.uoregon.edu'
+    if request.POST.get('email'):
+        email = request.POST.get('email')
+
+    print(email)
+    gmail_send_message(subject='MeerCat Invitation', body='You\'ve been invited to review a pull request: http://sansa.cs.uoregon.edu:8888/dashboard/pr/'+str(prid), receiver=email)
+
+
+    resultdata = {
+        'result': 'success',
     }
 
     return HttpResponse(

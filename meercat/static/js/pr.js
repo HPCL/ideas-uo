@@ -253,9 +253,16 @@ function insertTemplate(linenumber, text){
     
 }
 
-function lineAdded(){
-    var cursor = editor.getCursor();
-    console.log("line added");
+function sendInvite(email){
+
+    $.ajax({
+        url: '/dashboard/sendinvite/', type: 'POST', data: { 'pr': pr, 'email': email }, success: function (result) {
+            console.log("got invite response");
+            console.log(result);
+
+            alert('Invite sent to developer.');
+        }
+    });
 
     return true;
 }
@@ -706,6 +713,8 @@ $.ajax({
 
            devtable.append("<tr><td>" +
                 result['merged_dev_table'][i]['author'] +
+                "</td><td>" +
+                "<button class='btn btn-xs btn-success' onclick='sendInvite(\"" + result['merged_dev_table'][i]['author'].substring(result['merged_dev_table'][i]['author'].indexOf(" - ")+3) + "\");'>Send&nbsp;Invite</button>"+
                 "</td><td>" +
                 result['merged_dev_table'][i]['number_commits'] +
                 "</td><td>" +
