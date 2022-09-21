@@ -5,6 +5,7 @@ import requests
 from subprocess import check_output
 from datetime import datetime
 from pathlib import Path
+from google.oauth2.credentials import Credentials
 
 from django.conf import settings
 from database.models import EventLog
@@ -167,7 +168,7 @@ SCOPES = [
     'https://www.googleapis.com/auth/gmail.compose',
     'https://www.googleapis.com/auth/gmail.modify',
 ]
-def gmail_send_message(subject, body, receiver='uomeercat@gmail.com', sender='uomeercat@gmail.com'):
+def gmail_send_message(subject, body, sender='uomeercat@gmail.com', recipient_list=['uomeercat@gmail.com']):
     """Create and send an email message
     Print the returned  message id
     Returns: Message object, including message id
@@ -186,8 +187,6 @@ def gmail_send_message(subject, body, receiver='uomeercat@gmail.com', sender='uo
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
-        else:
-            raise Exception('invalid credentials. Please run quickstart.py again.')
         # Save the credentials for the next run
         with open('token.json', 'w') as token:
             token.write(creds.to_json())
@@ -198,7 +197,7 @@ def gmail_send_message(subject, body, receiver='uomeercat@gmail.com', sender='uo
 
         message.set_content(body)
 
-        message['To'] = receiver
+        message['To'] = ', '.join(recipient_list)
         message['From'] = sender
         message['Subject'] = subject
 
@@ -208,9 +207,7 @@ def gmail_send_message(subject, body, receiver='uomeercat@gmail.com', sender='uo
         create_message = {
             'raw': encoded_message
         }
-        # pylint: disable=E1101
-        send_message = (service.users().messages().send
-                        (userId="me", body=create_message).execute())
+        send_message = service.users().messages().send(userId="me", body=create_message).execute()
         print(F'Message Id: {send_message["id"]}')
     except HttpError as error:
         print(F'An error occurred: {error}')
