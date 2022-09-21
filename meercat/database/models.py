@@ -298,7 +298,7 @@ class Notification(models.Model):
     pending = models.BooleanField(default=True)
 
     def __str__(self):
-        return f'pr {self.pull_request.number}: notification for {user} ({"pending" if self.pending else "sent"})'
+        return f'pr {self.pull_request.number}: notification for {self.user} ({"pending" if self.pending else "sent"})'
 
 
 class Milestone(models.Model):
