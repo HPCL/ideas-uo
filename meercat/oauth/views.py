@@ -7,6 +7,7 @@ from django.core.mail import send_mail
 
 from .utils import gh_authenticate, gl_authenticate
 from .forms import RegistrationForm
+from dashboard.utilities import gmail_send_message
 
 import os
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1' # This is set so requests-oauthlib does not throw an error over HTTP
@@ -144,10 +145,10 @@ def register(request):
 
             subject = 'MeerCAT user registration'
             message = f'Hi,\n\n{name} would like to register for MeerCAT as {username} with the email {email} and has the following message:\n\n{message}'
-            recipient_list = ['jpfloresd.97@gmail.com']
+            recipient_list = ['uomeercat@gmail.com', 'jpfloresd.97@gmail.com']
 
-            sent = send_mail(subject, message, from_email=None, recipient_list=recipient_list)
-            if sent == 0:
+            sent = gmail_send_message(subject, message, sender='uomeercat@gmail.com', recipient_list=recipient_list)
+            if sent is None:
                 form.add_error(field=None, error='Failed to send message')
                 return render(request, 'oauth/registration.html', {'form': form})
             else:
