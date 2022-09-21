@@ -39,10 +39,12 @@
                     </tr>
                   </thead>
                   <tbody>
-                    {% if not functions_supported %}
+                    {% if functions.1 != 'checked' %}
+                        <tr><td colspan='5' style="text-align:center">File {{functions.1}}. No analysis done.</td></tr>
+                    {% elif not functions_supported %}
                         <tr><td colspan='5' style="text-align:center">No functions/subroutines found in file</td></tr>
                     {% else %}
-                    {% for func in functions %}
+                    {% for func in functions.0 %}
                     <div id="myModal{{forloop.counter}}" class="modal" tabindex="-1">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
@@ -74,9 +76,13 @@
                         </td>
 
                         <td>{{func.subtype}}
-                            {% for errors in func.result %}
-                                {{errors.0}} ({{errors.1}})<br>
-                            {% endfor %}
+                            {% if functions.1 == 'checked' %}
+                                {% for errors in func.result %}
+                                    {{errors.0}} ({{errors.1}})<br>
+                                {% endfor %}
+                            {% else %}
+                                {{functions.1}}
+                            {% endif %}
                         </td>
 
 

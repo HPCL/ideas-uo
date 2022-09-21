@@ -581,6 +581,37 @@ def getFile(request):
     )
 
 
+@login_required
+def getDocTemplate(request):
+
+    print("Get TEMPLATE")
+
+    prid = 2250
+    if request.POST.get('pr'):
+        prid = int(request.POST.get('pr'))
+
+    if not hasAccessToPR(request.user, prid):
+        return redirect('not_authorized')
+
+    filename = 'folder1/arithmetic.py'
+    if request.POST.get('filename'):
+        filename = request.POST.get('filename')
+
+
+
+
+
+    #  \"\"\"\\n  Template will go here.\\n  \"\"\"\
+    resultdata = {
+        'template': '  \"\"\"\\n  Template will go here.\\n  \"\"\"',
+    }
+
+    return HttpResponse(
+        json.dumps(resultdata),
+        content_type='application/json'
+    )
+
+
 @csrf_exempt
 def githubBot(request):
 
@@ -1047,10 +1078,12 @@ def first_responder_function(proj_object, pr_object):
     #       {'signature_name': sig, 'signature_params':params, 'docstring': doc_info, 'result': all_issues}
     #       ...
     #       where doc_info = (doc, doc_start, doc_end, fields, doc_params)
+    #    'status' i.e., 'checked', 'ignored', 'currently unalyzable'
     if all_files:
         k = 0
         n = len(all_files)
-        for name,ft in all_files:
+        for name,ft,status in all_files:
+            if status != 'checked': continue
             for sig_dict in ft:
                 if sig_dict['result']:
                     k += 1
@@ -1175,7 +1208,7 @@ def handle_hypre(proj_object, filenames, project_info):
     for path, name, extension, lines in file_lines:
 
         if not lines:
-            all_files.append((path, []))
+            all_files.append((path, [], 'ignored'))
             continue  #no lines to check for file
 
         function_info = []
@@ -1262,7 +1295,7 @@ def handle_hypre(proj_object, filenames, project_info):
                       'params_start': params_start,
                       'test_info': [],
                       'result': issues} for sig_name, sig_params, doc, doc_start, doc_end, doc_fields, doc_params, params_start, issues in extended_info]
-        all_files.append((path, file_table))
+        all_files.append((path, file_table, 'checked'))
 
     return all_files
 
@@ -1290,7 +1323,7 @@ def handle_anl_test_repo(proj_object, filenames, project_info):
     for path, name, extension, lines in file_lines:
 
         if not lines:
-            all_files.append((name+extension, []))
+            all_files.append((name+extension, [], 'currently uncheckable'))
             continue  #no lines to check for file
 
         function_info = []  #find all the functions in the file and record info on each of them
@@ -1343,7 +1376,7 @@ def handle_anl_test_repo(proj_object, filenames, project_info):
                           'test_info': test_info,
                           'result': issues} for sig_name, sig_params, doc, doc_start, doc_end, doc_fields, doc_params, params_start, test_info, issues in function_info]
 
-        all_files.append((name+extension, file_table))
+        all_files.append((name+extension, file_table, 'checked'))
 
     return all_files
 
@@ -1379,15 +1412,17 @@ def handle_flash(proj_object, filenames, project_info):
     for path, name, extension, lines in file_lines:
 
         if not lines:
-            all_files.append((name+extension, []))
+            all_files.append((name+extension, [], 'currently uncheckable'))
             continue  #no lines to check for file
 
         if name=='test' and extension=='.toml':
             test_toml_files.append(path)
+            all_files.append((name+extension, [], 'currently uncheckable'))
             continue
 
         if name=='readme' and extension=='.md':
             readme_files.append(path)
+            all_files.append((name+extension, [], 'currently uncheckable'))
             continue
 
         #special to flash - stubs under unit folder (e.g., Grid), implementations under unitMain folder (e.g., GridMain).
@@ -1414,7 +1449,6 @@ def handle_flash(proj_object, filenames, project_info):
                     else:
                         subtype = (unit_name[0], 'private')
 
-        print(the_file, the_header, subtype)
         #Fortran, C, C++ all have comments preceding subroutine.
 
         function_info = []
@@ -1510,7 +1544,7 @@ def handle_flash(proj_object, filenames, project_info):
                       'params_start': params_start,
                       'test_info': [],
                       'result': issues} for sig_name, sig_params, doc, doc_start, doc_end, doc_fields, doc_params, params_start, issues, subtype in extended_info]
-        all_files.append((name+extension, file_table))
+        all_files.append((name+extension, file_table, 'checked'))
 
     return all_files
 
@@ -1653,16 +1687,16 @@ def file_explorer_function(proj_id, project_object, project_info, branch, filena
             lines = []
 
         if not lines:
-            all_files = []
+            all_files = [[filename, [], 'ignored']]
         else:
             if proj_id==26 or proj_id==35:
                 all_files = handle_flash(project_object, [filename], project_info)
             elif proj_id==30:
                 all_files = handle_anl_test_repo(project_object, [filename], project_info)
-            elif proj_id==38:
-                all_files = handle_warpx(project_object, [filename], project_info)
+            #elif proj_id==38:
+                #all_files = handle_warpx(project_object, [filename], project_info)
             else:
-                all_files = []
+                assert False, f'Unanalyzable project {(proj_name,proj_id)}'
 
 
 
@@ -1674,6 +1708,7 @@ def file_explorer_function(proj_id, project_object, project_info, branch, filena
         #       {'signature_name': sig, 'signature_params':params, 'docstring': doc_info, 'result': all_issues}
         #       ...
         #       where doc_info = (doc, doc_start, doc_end, fields, doc_params)
+        #   status
             
 
     # Build developer table
@@ -1782,16 +1817,16 @@ def file_explorer_function(proj_id, project_object, project_info, branch, filena
 
     prs_table = sorted([{'number':pr.number, 'url':pr.url, 'issue_url': compute_issue_url(pr), 'notes': ["WiP"], 'notes_kind':'WiP' } for pr in prs], key=lambda d: d['number'])
 
-    file_table = all_files[0][1] if all_files else []
+    file_table = all_files[0][1:] if all_files else []
     context = {'file':filename,
                  'project': project_object,
                  'branch':branch,
                  'authors':dev_table,
                  'authors_len': len(dev_table),
-                 'functions_supported': True if file_table else False,
+                 'functions_supported': True if file_table[0] else False,
                  'supports_callgraph': project_info['supports_callgraph'],
                  'supports_test_hunt': project_info['supports_test_hunt'],
-                 'functions':file_table,
+                 'functions':file_table,  #[[all sigs], status]
                  'prs':prs_table
                  }
     return context

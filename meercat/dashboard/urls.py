@@ -23,5 +23,6 @@ urlpatterns = [
     path('diffcommitdata/', views.diffCommitData, name='diffcommitdata'),
     path('getfile/', views.getFile, name='getfile'),
     path('githubbot/', views.githubBot, name='githubbot'),
+    path('getdoctemplate/', views.getDocTemplate, name='getdoctemplate'),
 ]
 
