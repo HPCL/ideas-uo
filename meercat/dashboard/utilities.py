@@ -1,6 +1,5 @@
 import ast
 import os
-from msilib.schema import Error
 import re
 import requests
 from subprocess import check_output
@@ -8,8 +7,8 @@ from datetime import datetime
 from pathlib import Path
 
 from django.conf import settings
-# from database.models import EventLog
-# from database.utilities import get_repo_owner
+from database.models import EventLog
+from database.utilities import get_repo_owner
 
 
 def save_debug_event(log, json='', pull_request=None, request=None):
