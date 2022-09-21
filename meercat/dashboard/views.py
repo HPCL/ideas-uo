@@ -581,6 +581,37 @@ def getFile(request):
     )
 
 
+@login_required
+def getDocTemplate(request):
+
+    print("Get TEMPLATE")
+
+    prid = 2250
+    if request.POST.get('pr'):
+        prid = int(request.POST.get('pr'))
+
+    if not hasAccessToPR(request.user, prid):
+        return redirect('not_authorized')
+
+    filename = 'folder1/arithmetic.py'
+    if request.POST.get('filename'):
+        filename = request.POST.get('filename')
+
+
+
+
+
+    #  \"\"\"\\n  Template will go here.\\n  \"\"\"\
+    resultdata = {
+        'template': '  \"\"\"\\n  Template will go here.\\n  \"\"\"',
+    }
+
+    return HttpResponse(
+        json.dumps(resultdata),
+        content_type='application/json'
+    )
+
+
 @csrf_exempt
 def githubBot(request):
 

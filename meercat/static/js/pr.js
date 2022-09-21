@@ -209,24 +209,33 @@ function showDocEditor(docfilename, difftext) {
 
 function insertTemplate(linenumber, text){
 
-    editor.replaceRange('\n'+text, CodeMirror.Pos(linenumber));
-    popupNode.remove();
+    console.log("get template");
+    $.ajax({
+        url: '/dashboard/getdoctemplate/', type: 'POST', data: { 'pr': pr, 'filename': filename }, success: function (result) {
+            console.log("got template");
+            console.log(result);
 
-    console.log ("Insert at template at: "+linenumber);
+            editor.replaceRange('\n'+result.template, CodeMirror.Pos(linenumber));
+            popupNode.remove();
 
-    //Bump the line numbers by 3 if after linenumber (this is currenlty only looking at first item in results)
-    for(var i=0; i<docstring_results[1].length; i++){
-        if( docstring_results[1][i][0] == filename ){
-            for(var j=0; j<docstring_results[1][i][1].length; j++){
-                if( docstring_results[1][i][1][j].result.length > 0 ){     
-                    console.log("checking... "+docstring_results[1][i][1][j].result[0][1]);                   
-                    if( linenumber < docstring_results[1][i][1][j].result[0][1]-1 ){
-                        docstring_results[1][i][1][j].result[0][1] += 3;
+            console.log ("Insert at template at: "+linenumber);
+
+            //Bump the line numbers by 3 if after linenumber (this is currenlty only looking at first item in results)
+            for(var i=0; i<docstring_results[1].length; i++){
+                if( docstring_results[1][i][0] == filename ){
+                    for(var j=0; j<docstring_results[1][i][1].length; j++){
+                        if( docstring_results[1][i][1][j].result.length > 0 ){     
+                            console.log("checking... "+docstring_results[1][i][1][j].result[0][1]);                   
+                            if( linenumber < docstring_results[1][i][1][j].result[0][1]-1 ){
+                                docstring_results[1][i][1][j].result[0][1] += 3;
+                            }
+                        }
                     }
                 }
             }
+
         }
-    }
+    });
     
 }
 
