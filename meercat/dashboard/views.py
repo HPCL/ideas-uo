@@ -441,8 +441,13 @@ def diffCommitData(request):
         if filename.endswith('.py'): 
             output = os.popen('export PYTHONPATH=${PYTHONPATH}:'+os.path.abspath('../'+pr.project.name)+' ; cd ../'+pr.project.name+' ; pylint --output-format=json '+filename).read()
             linter_results.append( {'filename': filename, 'results':json.loads(output)} )
+        if filename.endswith('.F90'): 
+            output = os.popen('fortran-linter ../'+pr.project.name+'/'+filename+' --syntax-only').read()
+            linter_results.append( {'filename': filename, 'results':output.split('../'+pr.project.name+'/'+filename)} )
+        if filename.endswith('.c'): 
+            output = os.popen('cpplint ../'+pr.project.name+'/'+filename+' 2>&1').read()
+            linter_results.append( {'filename': filename, 'results':output.split('../'+pr.project.name+'/'+filename)} )
 
-    
     #Build developer table
     author_loc = {}
 
@@ -563,7 +568,11 @@ def getFile(request):
 
     if filename.endswith('.F90'): 
         output = os.popen('fortran-linter ../'+pr.project.name+'/'+filename+' --syntax-only').read()
-        linter_results = json.loads(output.split('../'+pr.project.name+'/'+filename))
+        linter_results = output.split('../'+pr.project.name+'/'+filename)
+
+    if filename.endswith('.c'): 
+        output = os.popen('cpplint ../'+pr.project.name+'/'+filename+' 2>&1').read()
+        linter_results = output.split('../'+pr.project.name+'/'+filename)
 
     #print("LINTER RESULTS: "+str(linter_results))
     #print("DOC CHECKER RESULTS: "+str(docstring_results))
@@ -629,7 +638,7 @@ def sendInvite(request):
         email = request.POST.get('email')
 
     print(email)
-    gmail_send_message(subject='MeerCat Invitation', body='You\'ve been invited to review a pull request: http://sansa.cs.uoregon.edu:8888/dashboard/pr/'+str(prid), receiver=email)
+    gmail_send_message(subject='MeerCat Invitation', body='You\'ve been invited to review a pull request: http://sansa.cs.uoregon.edu:8888/dashboard/pr/'+str(prid), recipient_list=[email])
 
 
     resultdata = {

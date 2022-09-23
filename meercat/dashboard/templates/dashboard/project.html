@@ -15,7 +15,9 @@
         </button>
         
         {% if show_whitelist %}
+        {% comment "whitelist is not found" %}
             <a class="btn btn-sm btn-primary" href="{% url 'whitelist' pk=project.id %}" role="button">whitelist</a>
+        {% endcomment %}
         {% endif %}
             
     </div>

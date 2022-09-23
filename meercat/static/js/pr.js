@@ -563,7 +563,7 @@ $.ajax({
                 "</td></tr>");
 
 
-            if( project == 30 || project == 26 || project == 35 ){
+            if( project == 30 || project == 26 || project == 35 || project == 32 ){
                 cqtable.append("<tr><td>"+
                         "<a href='/dashboard/filex/"+project+"?filename="+result['diffcommits'][i]['filename']+"&branch="+branch+"'>"+result['diffcommits'][i]['filename'] +"</a>"+
                     "</td><td>"+
@@ -590,7 +590,7 @@ $.ajax({
         }
 
 
-        if( !(project == 30 || project == 26 || project == 35) ){
+        if( !(project == 30 || project == 26 || project == 35 || project == 32 ) ){
             cqtable.append("<tr><td colspan='3'>"+
                     "<i>This project is not supported yet.</i>"+
                 "</td></tr>");
