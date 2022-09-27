@@ -4,8 +4,7 @@
         <img src="{% static 'images/meercat_logo_reverse.png' %}" width="36px"/> MeerCat
     </a>
 
-    <!-- TODO: Show login button/link if not logged in -->
-
+    {% if user.is_authenticated %}
         <p class="text-white">Logged in as <br/> 
             {% if user.profile.gh_login %}
                 {{ user.profile.gh_login }}
@@ -13,6 +12,7 @@
                 <span style="font-size:11pt">{{ user.username }}</span>
             {% endif %}
         </p>
+    {% endif %}
 
     <br/>
 
@@ -20,11 +20,11 @@
     <a id="" href="." onclick="">About</a>
     <!--a id="" href="." onclick="">Branches</a-->
 
-    <!-- TODO: These should only show if user is logged in -->
+    {% if user.is_authenticated %}
+        <a id="" href="/dashboard/" onclick="">PR Assistant</a>
+        <a href="{% url 'subscriptions' %}">Subscriptions</a>
+    {% endif %}
     
-    <a id="" href="/dashboard/" onclick="">PR Assistant</a>
-    <a href="{% url 'subscriptions' %}">Subscriptions</a>
-
     <br/>
 
     <div class="dashboard_hiding_for_now" style="display:none;">
@@ -34,7 +34,10 @@
         <a id="button4" href="#">Display Commits</a>
     </div>
 
-    <!-- TODO: Only show logout if user is logged in -->
-
-    <a href="{% url 'logout' %}" class="mt-5 d-inline-box">Log out</a>
+    {% if user.is_authenticated %}
+        <a href="{% url 'logout' %}" class="mt-5 d-inline-box">Log out</a>
+    {% else %}
+        <a href="{% url 'login' %}" class="mt-5 d-inline-box">Log in</a>
+    {% endif %}
+    
 </div>
