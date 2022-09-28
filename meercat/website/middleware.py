@@ -1,7 +1,5 @@
-from django.urls import resolve
 from database.models import EventLog
 
-import json
 from datetime import datetime
 #import traceback
 
