@@ -1,8 +1,21 @@
+from random import choices
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 
 # Create your models here.
+class SupportSubmission(models.Model):
+
+    class SupportTypeChoices(models.TextChoices):
+        BUG = 'BUG', _('Encountered bug')
+        FEEDBACK = 'FEEDBACK', _('User feedback')
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    datetime = models.DateTimeField(auto_now=True)
+    supportType = models.CharField(max_length=64, choices=SupportTypeChoices.choices)
+    relatedURL = models.URLField('Related URL')
+    description = models.TextField()
+
 class EventLog(models.Model):
     
     class EventTypeChoices(models.TextChoices):

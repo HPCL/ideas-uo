@@ -1,0 +1,34 @@
+{% extends 'dashboard/base.html' %}
+
+{% block content %}
+
+<h2 class="mb-4">MeerCAT Support</h2>
+
+<p class="fw-bold">We are interested in your experience with MeerCAT.</p> 
+<p class="fw-bold">If you encountered a site error, or would like to give us feedback, please fill the details below.</p>
+
+
+<form action="{% url 'support' %}" method="POST">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div class="form-group mb-3">
+        <label for="{{ form.supportType.id_for_label }}" class="form-label">Type of support needed:</label>
+        {{ form.supportType }}
+        {{ form.supportType.erros }}
+    </div>
+    <div class="form-group mb-3">
+        <label for="{{ form.relatedURL.id_for_label }}" class="form-label">Feedback or bug URL:</label>
+        {{ form.relatedURL }}
+        {{ form.relatedURL.errors }}
+    </div>
+    <div class="form-group mb-3">
+        <label for="{{ form.description.id_for_label }}" class="form-label">Description:</label>
+        {{ form.description }}
+        {{ form.description.erros }}
+    </div>
+    <div class="form-group">
+        <button class="btn btn-primary mb-5">Send</button>
+    </div>
+</form>
+
+{% endblock content %}

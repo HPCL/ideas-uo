@@ -22,9 +22,10 @@ sys.path.insert(1, '/shared/soft/ideas_db/ideas-uo/src')
 sys.path.insert(1, '../src')
 from gitutils.github_api import GitHubAPIClient
 
-from database.models import Project, ProjectRole, Commit, Diff, Issue, PullRequest, PullRequestIssue, Comment, EventPayload, CommitTag
+from database.models import SupportSubmission, Project, ProjectRole, Commit, Diff, Issue, PullRequest, PullRequestIssue, Comment, EventPayload, CommitTag
 from database.utilities import comment_pullrequest, get_repo_owner
-from dashboard.utilities import list_project_files, python_doxygen_template, gmail_send_message
+from dashboard.forms import SupportSubmissionForm
+from dashboard.utilities import list_project_files, python_doxygen_template, gmail_send_message, save_debug_event
 from dashboard.author_merger_tool import AuthorMergerTool
 
 import subprocess
@@ -51,6 +52,25 @@ def index(request):
     context = {'devProjects': devProjects, 'PMProjects': PMProjects}
  
     return render(request, 'dashboard/index.html', context)
+
+@login_required
+def support(request):
+
+    if request.method == 'POST':
+        incompleteForm = SupportSubmissionForm(request.POST)
+        if incompleteForm.is_valid():
+            form = incompleteForm.save(commit=False)
+            form.user = request.user
+            form.datetime = datetime.datetime.now()
+            form.save()
+            messages.success(request, 'Thank you, we received your feedback.')
+            return redirect('index')
+        else:
+            messages.error(request, 'Something failed. Please try again later or contact the MeerCAT team.')
+            save_debug_event('Support form could not submit invalid data', request=request)
+
+    form = SupportSubmissionForm()
+    return render(request, 'dashboard/support.html', {'form': form})
 
 @login_required
 def staff_index(request):
