@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
 
-from .models import Profile, EventLog, Author, Project, ProjectAuthor, Commit, Diff, Issue, PullRequest, Comment, ProjectRole
+from .models import SupportSubmission, Profile, EventLog, Author, Project, ProjectAuthor, Commit, Diff, Issue, PullRequest, Comment, ProjectRole
  
 # Register your models here.
 class ProfileInline(admin.StackedInline):
@@ -19,6 +19,10 @@ admin.site.register(User, UserAdmin)
 @admin.register(Author)
 class AuthorAdmin(admin.ModelAdmin):
     list_display = ('id', 'username', 'email')
+
+@admin.register(SupportSubmission)
+class SupportAdmin(admin.ModelAdmin):
+    list_display = ('user', 'datetime', 'supportType', 'relatedURL', 'description')
 
 @admin.register(EventLog)
 class EventLogAdmin(admin.ModelAdmin):
