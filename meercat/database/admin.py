@@ -22,7 +22,7 @@ class AuthorAdmin(admin.ModelAdmin):
 
 @admin.register(SupportSubmission)
 class SupportAdmin(admin.ModelAdmin):
-    list_display = ('user', 'datetime', 'supportType', 'relatedURL', 'description')
+    list_display = ('user', 'datetime', 'supportType', 'feature', 'description')
 
 @admin.register(EventLog)
 class EventLogAdmin(admin.ModelAdmin):

@@ -8,7 +8,7 @@
 <p class="fw-bold">If you encountered a site error, or would like to give us feedback, please fill the details below.</p>
 
 
-<form action="{% url 'support' %}" method="POST">
+<form action="{% url 'support' %}" method="POST" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.non_field_errors }}
     <div class="form-group mb-3">
@@ -17,14 +17,19 @@
         {{ form.supportType.erros }}
     </div>
     <div class="form-group mb-3">
-        <label for="{{ form.relatedURL.id_for_label }}" class="form-label">Feedback or bug URL:</label>
-        {{ form.relatedURL }}
-        {{ form.relatedURL.errors }}
+        <label for="{{ form.feature.id_for_label }}" class="form-label">Site feature used:</label>
+        {{ form.feature }}
+        {{ form.feature.errors }}
     </div>
     <div class="form-group mb-3">
         <label for="{{ form.description.id_for_label }}" class="form-label">Description:</label>
         {{ form.description }}
         {{ form.description.erros }}
+    </div>
+    <div class="form-group mb-3">
+        <label for="{{ form.image.id_for_label }}" class="form-label">Image of the problem or feedback (optional):</label>
+        {{ form.image }}
+        {{ form.image.erros }}
     </div>
     <div class="form-group">
         <button class="btn btn-primary mb-5">Send</button>
