@@ -466,7 +466,22 @@ def diffCommitData(request):
             linter_results.append( {'filename': filename, 'results':output.split('../'+pr.project.name+'/'+filename)} )
         if filename.endswith('.c'): 
             output = os.popen('cpplint ../'+pr.project.name+'/'+filename+' 2>&1').read()
-            linter_results.append( {'filename': filename, 'results':output.split('../'+pr.project.name+'/'+filename)} )
+            #linter_results.append( {'filename': filename, 'results':output.split('../'+pr.project.name+'/'+filename+':')} )
+
+            results = []
+            for result in output.split('../'+pr.project.name+'/'+filename+':'):
+                if result and len(result) > 0:
+                    try:
+                        results.append( {'column':0, 'line':int(result.split(":")[0]), 'message':result.split(":")[1].split("  [")[0].strip(), 'type': result.split(":")[1].split("  [")[1].split("] ")[0]})
+                    except:
+                        pass
+            linter_results.append( {'filename': filename, 'results':results} )
+
+
+
+    # TODO: Need to parse the fortran and cpp linter results.
+    # Needs to look like: {column:0, line:1, messsage:'test', type: 'test'}
+
 
     #Build developer table
     author_loc = {}
@@ -592,7 +607,15 @@ def getFile(request):
 
     if filename.endswith('.c'): 
         output = os.popen('cpplint ../'+pr.project.name+'/'+filename+' 2>&1').read()
-        linter_results = output.split('../'+pr.project.name+'/'+filename)
+        #linter_results = output.split('../'+pr.project.name+'/'+filename)
+        results = []
+        for result in output.split('../'+pr.project.name+'/'+filename+':'):
+            if result and len(result) > 0:
+                try:
+                    results.append( {'column':0, 'line':int(result.split(":")[0]), 'message':result.split(":")[1].split("  [")[0].strip(), 'type': result.split(":")[1].split("  [")[1].split("] ")[0]})
+                except:
+                    pass
+        linter_results = results
 
     #print("LINTER RESULTS: "+str(linter_results))
     #print("DOC CHECKER RESULTS: "+str(docstring_results))
