@@ -165,8 +165,7 @@ from email.message import EmailMessage
 import base64
 
 SCOPES = [
-    'https://www.googleapis.com/auth/gmail.compose',
-    'https://www.googleapis.com/auth/gmail.modify',
+    'https://www.googleapis.com/auth/gmail.send',
 ]
 def gmail_send_message(subject, body, sender='uomeercat@gmail.com', recipient_list=['uomeercat@gmail.com']):
     """Create and send an email message
@@ -183,10 +182,16 @@ def gmail_send_message(subject, body, sender='uomeercat@gmail.com', recipient_li
     # time.
     if os.path.exists('token.json'):
         creds = Credentials.from_authorized_user_file('token.json', SCOPES)
-    # If there are no (valid) credentials available, let the user log in.
+    else:
+        raise Exception('Token file not found')
+
     if not creds or not creds.valid:
+        print('Creds not valid, will try to refresh creds')
         if creds and creds.expired and creds.refresh_token:
+            print('Expired creds found with refresh token')
             creds.refresh(Request())
+        else:
+            raise Exception('Token could not be refreshed')
         # Save the credentials for the next run
         with open('token.json', 'w') as token:
             token.write(creds.to_json())
