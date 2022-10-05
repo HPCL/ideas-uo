@@ -222,10 +222,28 @@ def gmail_send_message(subject, body, image=None, sender='uomeercat@gmail.com', 
             'raw': encoded_message
         }
         send_message = service.users().messages().send(userId="me", body=create_message).execute()
+        
+        # Save email event
+        email_event = EventLog(
+            event_type=EventLog.EventTypeChoices.EMAIL,
+            datetime=datetime.today(),
+            log=str(message),
+        )
+        email_event.save()
         print(F'Message Id: {send_message["id"]}')
     except HttpError as error:
         print(F'An error occurred: {error}')
+
+        # Save failed email event
+        failed_email_event = EventLog(
+            event_type=EventLog.EventTypeChoices.EMAIL_FAIL,
+            datetime=datetime.today(),
+            log=str(error)
+        )
+        failed_email_event.save()
+
         send_message = None
+
     return send_message
 
 

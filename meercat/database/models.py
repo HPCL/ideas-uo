@@ -31,6 +31,8 @@ class EventLog(models.Model):
         DEBUGGING = 'DEBUGGING', _('Debugging log')
         FEATURE = 'FEAT', _('Feature used')
         ERROR = 'ERR', _('Error')
+        EMAIL = 'EMAIL', _('Email sent')
+        EMAIL_FAIL = 'EMAIL_FAIL', _('Failed to send email')
         NOTIFICATION = 'NOTIFICATION', _('Notification sent')
         NO_NOTIFICATION = 'NO_NOTIFICATION', _('No notification sent')
         NOTIFICATION_FAIL = 'NOTIFICATION_FAIL', _('Failed to send notification')
