@@ -28,6 +28,10 @@
         <div class="col-sm-11">{{pr.created_at}}</div>
     </div>
     <div class="row" style="margin-top:6px;">
+        <div class="col-sm-1"><u>Author</u>: </div>
+        <div class="col-sm-11">{{pr.author.username}} {% if pr.author.email %}- {{pr.author.email}}{% endif %}</div>
+    </div>
+    <div class="row" style="margin-top:6px;">
         <div class="col-sm-1"><u>Branch</u>: </div>
         <div class="col-sm-11">{{branch}}</div>
     </div>
@@ -277,54 +281,54 @@
 
                     <b>This section is still under development</b><br/>
 
-                    <div>
-                    <div class="row">
-                        <div class="col-sm-2" style="text-align:right; padding-top:5px;">Start Date:</div>
-                        <div class="col-sm-3" style="text-align:left;"><input class="form-control" type=date id="startdate"></div>
+                    <!--div>
+                        <div class="row">
+                            <div class="col-sm-2" style="text-align:right; padding-top:5px;">Start Date:</div>
+                            <div class="col-sm-3" style="text-align:left;"><input class="form-control" type=date id="startdate"></div>
 
-                        <div class="col-sm-2" style="text-align:right; padding-top:5px;">End Date:</div>
-                        <div class="col-sm-3" style="text-align:left;"><input class="form-control" type=date id="enddate"></div>
+                            <div class="col-sm-2" style="text-align:right; padding-top:5px;">End Date:</div>
+                            <div class="col-sm-3" style="text-align:left;"><input class="form-control" type=date id="enddate"></div>
 
-                        <div class="col-sm-2" style="text-align:left; padding-top:2px;"> 
-                            <button class="btn btn-sm btn-primary" onclick="loadPatternGraph();">Rerun graph</button> 
+                            <div class="col-sm-2" style="text-align:left; padding-top:2px;"> 
+                                <button class="btn btn-sm btn-primary" onclick="loadPatternGraph();">Rerun graph</button> 
+                            </div>
                         </div>
-                    </div>
-                    <img id="patterngraph1" src="" style="display:none; width:720px;"/>
-                    <span id="patternlabel1">Loading...<br/></span>
-                    <br/>
+                        <img id="patterngraph1" src="" style="display:none; width:720px;"/>
+                        <span id="patternlabel1">Loading...<br/></span>
+                        <br/>
                     </div>
 
                     <br/>
 
                     <div id="filenamesdiv" style="border:1px solid grey; margin:10px; padding:10px;">
-                    <b>Files modified in this PR:</b>
-                    <table class="table" id="diffcommittable" style="font-size:10pt;">
-                        <thead>
-                            <tr>
-                                <th>File</th>
-                                <th>Commits (last 8 weeks)</th>
-                                <th>Lines changed</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td colspan="3">Loading...</td></tr>
-                        </tbody>
-                    </table>
+                        <b>Files modified in this PR:</b>
+                        <table class="table" id="diffcommittable" style="font-size:10pt;">
+                            <thead>
+                                <tr>
+                                    <th>File</th>
+                                    <th>Commits (last 8 weeks)</th>
+                                    <th>Lines changed</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td colspan="3">Loading...</td></tr>
+                            </tbody>
+                        </table>
                     </div>
 
                     <br/>
 
                     <div id="eventsdiv" style="border:1px solid grey; margin:10px; padding:10px;">
-                    <b>Events:</b>
-                    <table class="table">
-                        {% for event in events %}
-                        <tr>
-                            <td>{{event.action}}</td>
-                            <td>{{event.master_branch}}</td>
-                            <td>{{event.description}}</td>
-                        </tr>
-                        {% endfor %}
-                    </table>
+                        <b>Events:</b>
+                        <table class="table">
+                            {% for event in events %}
+                            <tr>
+                                <td>{{event.action}}</td>
+                                <td>{{event.master_branch}}</td>
+                                <td>{{event.description}}</td>
+                            </tr>
+                            {% endfor %}
+                        </table>
                     </div>
 
                     <br/>  
@@ -350,7 +354,7 @@
                     </div>
                     <br/>
                     <div id='testdiv'>
-                    </div>
+                    </div-->
                 </div>
             </div>
         </div>
@@ -367,6 +371,8 @@
             </h2>
             <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive" data-bs-parent="#accordionExample5">
             <div class="accordion-body">
+
+                <b>Drag a <i>Potential Tag</i> to the <i>PR's Tags</i> to add it to the PR.</b><br/>
                 
                 <div class="container">
                     <div class="drop-targets">
