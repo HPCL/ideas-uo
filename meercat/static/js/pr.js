@@ -585,9 +585,6 @@ $.ajax({
                             alinks+
                     "</td></tr>");
 
-            if( docissues > 0 )
-                $("#docwarning").show();
-
             if( cqissues > 0 )
                 $("#cqwarning").show();
 
@@ -630,6 +627,9 @@ $.ajax({
                         docbuttons +
                     "</td></tr>");
             }
+
+            if( docissues > 0 )
+                $("#docwarning").show();
             
         }
         for (var k = 0; k < result['docstring_results'][1].length; k++) {
