@@ -1,4 +1,5 @@
 import ast
+import mimetypes
 import os
 import re
 import requests
@@ -167,7 +168,7 @@ import base64
 SCOPES = [
     'https://www.googleapis.com/auth/gmail.send',
 ]
-def gmail_send_message(subject, body, sender='uomeercat@gmail.com', recipient_list=['uomeercat@gmail.com']):
+def gmail_send_message(subject, body, image=None, sender='uomeercat@gmail.com', recipient_list=['uomeercat@gmail.com']):
     """Create and send an email message
     Print the returned  message id
     Returns: Message object, including message id
@@ -200,11 +201,19 @@ def gmail_send_message(subject, body, sender='uomeercat@gmail.com', recipient_li
         service = build('gmail', 'v1', credentials=creds)
         message = EmailMessage()
 
-        message.set_content(body)
-
         message['To'] = ', '.join(recipient_list)
         message['From'] = sender
         message['Subject'] = subject
+        
+        message.set_content(body)
+
+        if image is not None:
+            # Guessing the MIME type
+            type_subtype, _ = mimetypes.guess_type(image.name)
+            maintype, subtype = type_subtype.split('/')
+
+            image_content = image.read()
+            message.add_attachment(image_content, maintype, subtype)
 
         # encoded message
         encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
