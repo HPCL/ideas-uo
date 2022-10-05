@@ -253,10 +253,14 @@ function insertTemplate(linenumber, text){
     
 }
 
-function sendInvite(email){
+function sendInvite(email, filenames){
+
+    console.log("Send Invite");
+    console.log(email);
+    console.log(filenames);
 
     $.ajax({
-        url: '/dashboard/sendinvite/', type: 'POST', data: { 'pr': pr, 'email': email }, success: function (result) {
+        url: '/dashboard/sendinvite/', type: 'POST', data: { 'pr': pr, 'email': email, 'filenames': filenames}, success: function (result) {
             console.log("got invite response");
             console.log(result);
 
@@ -714,7 +718,7 @@ $.ajax({
            devtable.append("<tr><td>" +
                 result['merged_dev_table'][i]['author'] +
                 "</td><td>" +
-                "<button class='btn btn-xs btn-success' onclick='sendInvite(\"" + result['merged_dev_table'][i]['author'].substring(result['merged_dev_table'][i]['author'].indexOf(" - ")+3) + "\");'>Send&nbsp;Invite</button>"+
+                "<button class='btn btn-xs btn-success' onclick='sendInvite(\"" + result['merged_dev_table'][i]['author'].substring(result['merged_dev_table'][i]['author'].indexOf(" - ")+3) + "\", \"" + result['merged_dev_table'][i]['filenames'].join(' ') + "\");'>Send&nbsp;Invite</button>"+
                 "</td><td>" +
                 result['merged_dev_table'][i]['number_commits'] +
                 "</td><td>" +

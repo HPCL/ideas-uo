@@ -485,7 +485,7 @@ def diffCommitData(request):
 
     #Build developer table
     author_loc = {}
-
+    author_filenames = {}
     diffs = Diff.objects.all().filter(commit__project=pr.project, file_path__in=filenames).all()
 
     for d in diffs:
@@ -494,8 +494,10 @@ def diffCommitData(request):
         loc_count = body.count('\n+') + body.count('\n-')
         if author in author_loc:
             author_loc[author] += loc_count 
+            author_filenames[author].append(d.file_path)
         else:
             author_loc[author] = loc_count
+            author_filenames[author] = [d.file_path]
 
     # Get commits, authors for those (diffs)
     info = [(d.commit.datetime, d.commit.author, d.commit.hash) for d in diffs]
@@ -518,7 +520,7 @@ def diffCommitData(request):
 
     #see here for avoiding author alisases: https://towardsdatascience.com/string-matching-with-fuzzywuzzy-e982c61f8a84
     #combine counts for same author with different aliases.
-    dev_table = [{'author':author.username+' - '+author.email, 'number_commits': count, 'lines': loc, 'most_recent_commit':date.strftime('%Y-%m-%d, %H:%M %p'),'commit_link':link} for date, author, count, loc, link in new_info]
+    dev_table = [{'author':author.username+' - '+author.email, 'number_commits': count, 'filenames': author_filenames[author], 'lines': loc, 'most_recent_commit':date.strftime('%Y-%m-%d, %H:%M %p'),'commit_link':link} for date, author, count, loc, link in new_info]
 
     #merge authors
     combined_authors = AuthorMergerTool._get_unique_authors([author.username for date, author, count, loc, link in new_info])
@@ -531,7 +533,7 @@ def diffCommitData(request):
     for date, author, count, loc, link in new_info:
         for idx, the_author in enumerate(all_authors):
             if author.username == the_author and the_author == combined_authors[idx] and [author['username'] for author in merged_dev_table].count(the_author) < 1:
-                merged_dev_table.append({'username':author.username, 'author':author.username+' - '+author.email, 'number_commits': 0, 'lines': 0, 'most_recent_commit':date.strftime('%Y-%m-%d, %H:%M %p'),'commit_link':link})
+                merged_dev_table.append({'username':author.username, 'author':author.username+' - '+author.email, 'filenames': [], 'number_commits': 0, 'lines': 0, 'most_recent_commit':date.strftime('%Y-%m-%d, %H:%M %p'),'commit_link':link})
 
     #print("----------------------------")
     #print(merged_dev_table)
@@ -545,6 +547,7 @@ def diffCommitData(request):
                     if merged_dev_table[i]['username'] == combined_authors[idx]:
                         merged_dev_table[i]['number_commits'] += count
                         merged_dev_table[i]['lines'] += loc
+                        merged_dev_table[i]['filenames'].extend(author_filenames[author])
                         if merged_dev_table[i]['most_recent_commit'] < date.strftime('%Y-%m-%d, %H:%M %p'):
                             merged_dev_table[i]['most_recent_commit'] = date.strftime('%Y-%m-%d, %H:%M %p')
                             merged_dev_table[i]['commit_link'] = link
