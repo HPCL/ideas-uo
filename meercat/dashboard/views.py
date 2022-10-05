@@ -57,7 +57,7 @@ def index(request):
 def support(request):
 
     if request.method == 'POST':
-        incompleteForm = SupportSubmissionForm(request.POST)
+        incompleteForm = SupportSubmissionForm(request.POST, request.FILES)
         if incompleteForm.is_valid():
             form = incompleteForm.save(commit=False)
             form.user = request.user

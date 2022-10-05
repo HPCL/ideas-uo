@@ -10,11 +10,20 @@ class SupportSubmission(models.Model):
         BUG = 'BUG', _('Encountered bug')
         FEEDBACK = 'FEEDBACK', _('User feedback')
 
+    class SiteFeatureChoices(models.TextChoices):
+        GENERAL = 'GENERAL', _('General issue or feedback')
+        LOGIN = 'LOGIN', _('Logging in to MeerCAT')
+        LOGOUT = 'LOGOUT', _('Logging out of MeerCAT')
+        PRA = 'PRA', _('Pull request assitant')
+        HOME = 'HOME', _('Home page')
+        SUPPORT = 'SUPPORT', _('Support page')
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     datetime = models.DateTimeField(auto_now=True)
     supportType = models.CharField(max_length=64, choices=SupportTypeChoices.choices)
-    relatedURL = models.URLField('Related URL')
+    feature = models.CharField('Site feature', max_length=64, choices=SiteFeatureChoices.choices)
     description = models.TextField()
+    image = models.ImageField(null=True, blank=True, upload_to='support/')
 
 class EventLog(models.Model):
     
