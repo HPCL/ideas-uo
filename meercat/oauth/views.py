@@ -144,7 +144,7 @@ def register(request):
             username = request.POST['username']
 
             subject = 'MeerCAT user registration'
-            message = f'Hi,\n\n{name} would like to register for MeerCAT as {username} with the email {email} and has the following message:\n\n{message}'
+            message = f'Hello, Admin,\n\n{name} would like to register for MeerCAT as {username} with the email {email} and has the following message:\n\n{message}'
             recipient_list = ['uomeercat@gmail.com', 'jpfloresd.97@gmail.com']
 
             sent = gmail_send_message(subject, message, sender='uomeercat@gmail.com', recipient_list=recipient_list)

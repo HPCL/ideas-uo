@@ -19,7 +19,7 @@ class SupportSubmission(models.Model):
         SUPPORT = 'SUPPORT', _('Support page')
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    datetime = models.DateTimeField(auto_now=True)
+    datetime = models.DateTimeField()
     supportType = models.CharField(max_length=64, choices=SupportTypeChoices.choices)
     feature = models.CharField('Site feature', max_length=64, choices=SiteFeatureChoices.choices)
     description = models.TextField()

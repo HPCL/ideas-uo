@@ -59,15 +59,27 @@ def support(request):
     if request.method == 'POST':
         incompleteForm = SupportSubmissionForm(request.POST, request.FILES)
         if incompleteForm.is_valid():
+            # Complete form data and save
             form = incompleteForm.save(commit=False)
             form.user = request.user
-            form.datetime = datetime.datetime.now()
+            form.datetime = datetime.datetime.today()
             form.save()
+            
+            # Send email message
+            # Get human-readable form for supportType and feature
+            supportType = SupportSubmission.SupportTypeChoices(request.POST["supportType"]).label
+            feature = SupportSubmission.SiteFeatureChoices(request.POST["feature"]).label
+            body = f'Hello, Admin,\n\n{request.user.profile.gh_login} submitted a supoprt request via MeerCAT. Here is the submitted data:\n\n'
+            body += f'Support type: {supportType}\n'
+            body += f'Feature being used: {feature}\n'
+            body += f'Description: {request.POST["description"]}\n'
+            gmail_send_message(subject='Support request submitted', body=body, image=request.FILES.get('image', None))
+            
             messages.success(request, 'Thank you, we received your feedback.')
-            return redirect('index')
+            return redirect('support')
         else:
             messages.error(request, 'Something failed. Please try again later or contact the MeerCAT team.')
-            save_debug_event('Support form could not submit invalid data', request=request)
+            save_debug_event('Support form could not submit invalid data', json=incompleteForm.errors.as_json(), request=request)
 
     form = SupportSubmissionForm()
     return render(request, 'dashboard/support.html', {'form': form})
