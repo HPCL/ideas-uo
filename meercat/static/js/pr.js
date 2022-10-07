@@ -77,6 +77,16 @@ function showDocEditor(docfilename, difftext) {
             console.log("get file contents");
             console.log(result);
 
+            if( filename.indexOf(".h") >= 0 || filename.indexOf(".c") ){
+                editor.setOption("mode", "text/x-c++src");
+            }else if( filename.indexOf(".py") >= 0 ){
+                editor.setOption("mode", "text/x-python");
+            }else if( filename.indexOf(".F90") >= 0 ){
+                editor.setOption("mode", "text/x-fortran");
+            }else{
+                editor.setOption("mode", "text/html");
+            }
+
             editor.setValue(result['filecontents']);
 
             previousLines = editor.lineCount();
@@ -288,6 +298,16 @@ function showCqEditor(docfilename, difftext) {
             console.log("get file contents");
             console.log(result);
 
+            if( filename.indexOf(".h") >= 0 || filename.indexOf(".c") ){
+                cqeditor.setOption("mode", "text/x-c++src");
+            }else if( filename.indexOf(".py") >= 0 ){
+                cqeditor.setOption("mode", "text/x-python");
+            }else if( filename.indexOf(".F90") >= 0 ){
+                cqeditor.setOption("mode", "text/x-fortran");
+            }else{
+                cqeditor.setOption("mode", "text/html");
+            }
+
             cqeditor.setValue(result['filecontents']);
 
             //editor.markText({ line: 3, ch: 0 }, { line: 3, ch: 13 }, { className: "styled-background" });
@@ -344,6 +364,16 @@ function showTestEditor(docfilename, difftext) {
             console.log("get file contents");
             console.log(result);
             console.log(filename);
+
+            if( filename.indexOf(".h") >= 0 || filename.indexOf(".c") ){
+                testeditor.setOption("mode", "text/x-c++src");
+            }else if( filename.indexOf(".py") >= 0 ){
+                testeditor.setOption("mode", "text/x-python");
+            }else if( filename.indexOf(".F90") >= 0 ){
+                testeditor.setOption("mode", "text/x-fortran");
+            }else{
+                testeditor.setOption("mode", "text/html");
+            }
 
             testeditor.setValue(result['filecontents']);
 
