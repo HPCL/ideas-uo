@@ -25,7 +25,7 @@ from gitutils.github_api import GitHubAPIClient
 from database.models import SupportSubmission, Project, ProjectRole, Commit, Diff, Issue, PullRequest, PullRequestIssue, Comment, EventPayload, CommitTag
 from database.utilities import comment_pullrequest, get_repo_owner
 from dashboard.forms import SupportSubmissionForm
-from dashboard.utilities import list_project_files, python_doxygen_template, gmail_send_message, save_debug_event
+from dashboard.utilities import list_project_files, python_doxygen_template, fortran_doxygen_template, gmail_send_message, save_debug_event
 from dashboard.author_merger_tool import AuthorMergerTool
 
 import subprocess
@@ -670,6 +670,9 @@ def getDocTemplate(request):
 
     if filename.endswith('.py'): 
         template = python_doxygen_template(request.POST.get('signature'))
+
+    if filename.endswith('.F90'): 
+        template = fortran_doxygen_template(request.POST.get('signature'))
 
     resultdata = {
         'template': template,
