@@ -227,7 +227,14 @@ def pr(request, *args, **kwargs):
     labels = pr.labels.all()
 
 
-    #TESTING
+    #TODO: If commits are empty, try to download commits
+    if len(commits) <= 0:
+        for committag in pr.commits.all():
+            print(committag.sha)
+
+
+
+    #TESTING LABEL API
     if pr.title == 'Devj Test2':
         repo_name = pr.project.name
         repo_owner = get_repo_owner(pr.project)
@@ -275,7 +282,7 @@ def pr(request, *args, **kwargs):
     comments = list(Comment.objects.all().filter(pr=pr))
 
     #switch local repo to the branch for this PR
-    branch = "main"
+    branch = "Unable to access branch for this PR"
     if len(commits) > 0:
         branch = commits[0].branch.split()[-1]
         print("PRA Switch branches to: "+branch)
@@ -477,13 +484,14 @@ def diffCommitData(request):
             output = os.popen('fortran-linter ../'+pr.project.name+'/'+filename+' --syntax-only').read()
             linter_results.append( {'filename': filename, 'results':output.split('../'+pr.project.name+'/'+filename)} )
         if filename.endswith('.c'): 
-            output = os.popen('cpplint ../'+pr.project.name+'/'+filename+' 2>&1').read()
+            output = os.popen('cpplint --filter=-whitespace ../'+pr.project.name+'/'+filename+' 2>&1').read()
             #linter_results.append( {'filename': filename, 'results':output.split('../'+pr.project.name+'/'+filename+':')} )
 
             results = []
             for result in output.split('../'+pr.project.name+'/'+filename+':'):
                 if result and len(result) > 0:
                     try:
+                        #if result.split(":")[1].split("  [")[1].split("] ")[0].startswith('whitespace') == False:
                         results.append( {'column':0, 'line':int(result.split(":")[0]), 'message':result.split(":")[1].split("  [")[0].strip(), 'type': result.split(":")[1].split("  [")[1].split("] ")[0]})
                     except:
                         pass
