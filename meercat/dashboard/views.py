@@ -22,7 +22,7 @@ sys.path.insert(1, '/shared/soft/ideas_db/ideas-uo/src')
 sys.path.insert(1, '../src')
 from gitutils.github_api import GitHubAPIClient
 
-from database.models import SupportSubmission, Project, ProjectRole, Commit, Diff, Issue, PullRequest, PullRequestIssue, Comment, EventPayload, CommitTag
+from database.models import SupportSubmission, Project, ProjectRole, Commit, Diff, Issue, PullRequest, PullRequestIssue, Comment, EventPayload, CommitTag, PullRequestLabel, Label
 from database.utilities import comment_pullrequest, get_repo_owner
 from dashboard.forms import SupportSubmissionForm
 from dashboard.utilities import list_project_files, python_doxygen_template, fortran_doxygen_template, gmail_send_message, save_debug_event
@@ -630,7 +630,7 @@ def getFile(request):
         linter_results = output.split('../'+pr.project.name+'/'+filename)
 
     if filename.endswith('.c'): 
-        output = os.popen('cpplint ../'+pr.project.name+'/'+filename+' 2>&1').read()
+        output = os.popen('cpplint --filter=-whitespace ../'+pr.project.name+'/'+filename+' 2>&1').read()
         #linter_results = output.split('../'+pr.project.name+'/'+filename)
         results = []
         for result in output.split('../'+pr.project.name+'/'+filename+':'):
@@ -744,6 +744,51 @@ def sendInvite(request):
         content_type='application/json'
     )
 
+
+@login_required
+def updateTags(request):
+
+    print("Update Tags")
+
+    prid = 2250
+    if request.POST.get('pr'):
+        prid = int(request.POST.get('pr'))
+
+    pr = list(PullRequest.objects.all().filter(id=prid).all())[0]  
+   
+    if not hasAccessToPR(request.user, prid):
+        return redirect('not_authorized')
+
+
+    print(request.POST.get('tags'))
+    tags = []
+    if request.POST.get('tags'):
+        tags = request.POST.get('tags').split(',')
+
+    print("Tags: "+str(len(tags)))
+
+    #loop through tags and add to PR (if not in PR)
+    labels = [label.name for label in pr.labels.all()]
+    for tag in tags:
+        if tag not in labels:
+            print("missing!!!")
+            label = Label.objects.create(name=tag)
+            PullRequestLabel.objects.create(pr=pr, label=label)
+
+    for label in pr.labels.all():
+        if label.name not in tags:
+            print("delete label")
+            label.delete()
+
+
+    resultdata = {
+        'result': 'success',
+    }
+
+    return HttpResponse(
+        json.dumps(resultdata),
+        content_type='application/json'
+    )
 
 @csrf_exempt
 def githubBot(request):

@@ -888,5 +888,45 @@ function drop(e) {
 
         // display the draggable element
         draggable.classList.remove('hide');
+
+        // If dropped into PR's tags, then upload the change
+        if( e.target.id == 'prtags' ){
+            var tags = [];
+            for(child of e.target.children ){
+                if( child.innerHTML.indexOf('<input') >= 0 )
+                    tags.push(child.firstChild.value);
+                else    
+                    tags.push(child.innerHTML);
+            }
+        
+            console.log(tags);
+            saveTags(tags);
+        }else{
+            var tags = [];
+            for(child of document.getElementById('prtags').children )
+                tags.push(child.innerHTML);
+        
+            console.log(tags);
+            saveTags(tags);
+        }
+
+
     }
+}
+
+function saveTags(tags){
+
+    console.log("Save PR Tags");
+    console.log(tags);
+
+    $.ajax({
+        url: '/dashboard/updatetags/', type: 'POST', data: { 'pr': pr, 'tags': tags.toString()}, success: function (result) {
+            console.log("got tags response");
+            console.log(result);
+
+            //alert('Invite sent to developer.');
+        }
+    });
+
+    return true;
 }
