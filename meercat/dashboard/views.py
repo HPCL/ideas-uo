@@ -233,29 +233,6 @@ def pr(request, *args, **kwargs):
             print(committag.sha)
 
 
-
-    #TESTING LABEL API
-    if pr.title == 'Devj Test2':
-        repo_name = pr.project.name
-        repo_owner = get_repo_owner(pr.project)
-        url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues/{pr.number}/labels"
-        payload = { "labels": ['bug', 'enhancement'] }
-        headers = {
-            "Accept": "application/vnd.github+json",
-            "Authorization" : "token " + os.environ.get('MEERCAT_USER_TOKEN')
-        }
-
-        #use put to set labels instead of add new ones
-        #use delete to clear all labels
-        result = requests.post(url, headers=headers, data=json.dumps(payload))
-
-        #do a GET to get all labels for repo
-        url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/labels"
-
-
-
-
-
     #Find any issue that this PR closed
     closed_issue = None
     issue_number = re.search(r'#\d+', pr.description)
@@ -767,6 +744,7 @@ def updateTags(request):
 
     print("Tags: "+str(len(tags)))
 
+
     #loop through tags and add to PR (if not in PR)
     labels = [label.name for label in pr.labels.all()]
     for tag in tags:
@@ -779,6 +757,28 @@ def updateTags(request):
         if label.name not in tags:
             print("delete label")
             label.delete()
+
+
+    # Update github with updated list of labels.
+    try:
+        repo_name = pr.project.name
+        repo_owner = get_repo_owner(pr.project)
+        url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues/{pr.number}/labels"
+        payload = { "labels": tags }
+        headers = {
+            "Accept": "application/vnd.github+json",
+            "Authorization" : "token " + os.environ.get('MEERCAT_USER_TOKEN')
+        }
+
+        # Use put to set labels instead of add new ones
+        # Use delete to clear all labels
+        #result = requests.post(url, headers=headers, data=json.dumps(payload))
+        result = requests.put(url, headers=headers, data=json.dumps(payload))
+
+        # Do a GET to get all labels for repo
+        #url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/labels"
+    except:
+        pass
 
 
     resultdata = {
