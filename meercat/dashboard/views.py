@@ -476,10 +476,6 @@ def diffCommitData(request):
 
 
 
-    # TODO: Need to parse the fortran and cpp linter results.
-    # Needs to look like: {column:0, line:1, messsage:'test', type: 'test'}
-
-
     #Build developer table
     author_loc = {}
     author_filenames = {}
@@ -520,6 +516,7 @@ def diffCommitData(request):
     dev_table = [{'author':author.username+' - '+author.email, 'number_commits': count, 'filenames': author_filenames[author], 'lines': loc, 'most_recent_commit':date.strftime('%Y-%m-%d, %H:%M %p'),'commit_link':link} for date, author, count, loc, link in new_info]
 
     #merge authors
+    comments = list(Comment.objects.all().filter(pr=pr)) #use this for excluding
     combined_authors = AuthorMergerTool._get_unique_authors([author.username for date, author, count, loc, link in new_info])
     #print("----------------------------")
     #print(combined_authors)
@@ -529,8 +526,15 @@ def diffCommitData(request):
     merged_dev_table = []
     for date, author, count, loc, link in new_info:
         for idx, the_author in enumerate(all_authors):
+            # Don't add PR author to the list
+            # And don't add people who have already commented
             if author.username != pr.author.username and author.username == the_author and the_author == combined_authors[idx] and [author['username'] for author in merged_dev_table].count(the_author) < 1:
-                merged_dev_table.append({'username':author.username, 'author':author.username+' - '+author.email, 'filenames': [], 'number_commits': 0, 'lines': 0, 'most_recent_commit':date.strftime('%Y-%m-%d, %H:%M %p'),'commit_link':link})
+                foundauthor = False
+                for comment in comments:
+                    if comment.author.username == author.username:
+                        foundauthro = True
+                if not foundauthor:        
+                    merged_dev_table.append({'username':author.username, 'author':author.username+' - '+author.email, 'filenames': [], 'number_commits': 0, 'lines': 0, 'most_recent_commit':date.strftime('%Y-%m-%d, %H:%M %p'),'commit_link':link})
 
     #print("----------------------------")
     #print(merged_dev_table)
