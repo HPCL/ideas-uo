@@ -32,6 +32,15 @@ popupNode.style.zIndex = '9999';
 
 let csrf_token = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
+$.ajaxSetup({
+    beforeSend: function (xhr, settings) {
+        xhr.setRequestHeader("X-CSRFToken", csrf_token);
+    }
+});
+
+console.log("PR");
+console.log(pr);
+
 var editor = CodeMirror.fromTextArea(document.getElementById("dochelper"), {
     lineNumbers: true,
     mode: "text/x-python", //"text/x-c++src", //"text/html",
@@ -61,8 +70,10 @@ var testeditor = CodeMirror.fromTextArea(document.getElementById("testhelper"), 
 
 function showDocEditor(docfilename, difftext) {
 
-    console.log("TEST");
-    console.log(difftext);
+    console.log("------- TEST --------");
+    console.log(docfilename);
+    console.log(pr);
+    console.log(csrf_token);
 
     filename = docfilename;
 
@@ -515,14 +526,6 @@ function loadPatternGraph() {
 }
 
 
-$.ajaxSetup({
-    beforeSend: function (xhr, settings) {
-        xhr.setRequestHeader("X-CSRFToken", csrf_token);
-    }
-})
-
-console.log("PR");
-console.log(pr);
 
 $.ajax({
     url: '/dashboard/diffcommitdata/', type: 'POST', data: { 'pr': pr }, success: function (result) {

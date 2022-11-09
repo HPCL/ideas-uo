@@ -1997,7 +1997,7 @@ def file_explorer_function(proj_id, project_object, project_info, branch, filena
                 pass
         return 'None found'
 
-    prs_table = sorted([{'number':pr.number, 'url':pr.url, 'issue_url': compute_issue_url(pr), 'notes': ["WiP"], 'notes_kind':'WiP' } for pr in prs], key=lambda d: d['number'])
+    prs_table = sorted([{'id':pr.pk, 'number':pr.number, 'url':pr.url, 'issue_url': compute_issue_url(pr), 'notes': ["WiP"], 'notes_kind':'WiP' } for pr in prs], key=lambda d: d['number'])
 
     file_table = all_files[0][1:] if all_files else []
     context = {'file':filename,
