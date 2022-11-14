@@ -416,3 +416,7 @@ class Visualizer(Patterns):
         print("Primary Developers: ", prim_devs)
         print("Secondary Developers: ", secon_devs)
         print("Bus Factor: ", bus_factor)
+
+    def get_unique_authors(self):
+        authors_data = self.set_unique_authors()
+        return authors_data
