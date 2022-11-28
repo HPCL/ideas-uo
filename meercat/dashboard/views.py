@@ -156,23 +156,24 @@ def project(request, *args, **kwargs):
 
     # TODO: these are super slow for some projects (spack)
 
-    pythonloc = countlinespython(settings.REPOS_DIR+project.name)
+    pythonloc = countlinespython(str(settings.REPOS_DIR)+'/'+project.name)
     print(".")
-    fortranloc = countlinesfortran(settings.REPOS_DIR+project.name)
+    fortranloc = countlinesfortran(str(settings.REPOS_DIR)+'/'+project.name)
     print("..")
-    cloc = countlinesc(settings.REPOS_DIR+project.name)
+    cloc = countlinesc(str(settings.REPOS_DIR)+'/'+project.name)
     print("...")
-    files = countfiles(settings.REPOS_DIR+project.name)
+    files = countfiles(str(settings.REPOS_DIR)+'/'+project.name)
     print("....")
 
 
     #TODO: should be able to remove this
-    with open(settings.REPOS_DIR+'anl_test_repo/folder1/arithmetic.py', 'r') as f:
+    '''with open(settings.REPOS_DIR+'anl_test_repo/folder1/arithmetic.py', 'r') as f:
         lines = f.readlines()
         f.close()
+    '''
 
-
-    context = {'show_whitelist': show_whitelist, 'project':project,'prs':prs, 'commits':commits, 'issues':issues, 'pythonloc':pythonloc, 'fortranloc':fortranloc, 'cloc':cloc, 'files':files, 'file':''.join(lines).replace('\\','\\\\').replace('\n', '\\n').replace('\'','\\\'')}
+    context = {'show_whitelist': show_whitelist, 'project':project,'prs':prs, 'commits':commits, 'issues':issues, 'pythonloc':pythonloc, 'fortranloc':fortranloc, 'cloc':cloc, 'files':files}
+    #'file':''.join(lines).replace('\\','\\\\').replace('\n', '\\n').replace('\'','\\\'')
 
     return HttpResponse(template.render(context, request))
 
@@ -264,7 +265,7 @@ def pr(request, *args, **kwargs):
         branch = commits[0].branch.split()[-1]
         print("PRA Switch branches to: "+branch)
         proj_name = pr.project.name
-        cmd = f'cd {settings.REPOS_DIR}{proj_name} ; git checkout {branch}'
+        cmd = f'cd {settings.REPOS_DIR}/{proj_name} ; git checkout {branch}'
         print(cmd)
         try:
             os.system(cmd)
@@ -331,14 +332,20 @@ def refreshProject(request):
     username = settings.DATABASES['default']['USER']
     password = settings.DATABASES['default']['PASSWORD']
 
-    cmd = f'cd .. ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {pid}'
-    os.system(cmd)
-    result = subprocess.check_output(cmd, shell=True)
-    #print(result)
+    try:
+        #cmd = f'cd /shared/soft/ideas_db/ideas-uo/meercat/.. ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {pid}'
+        cmd = f'cd {settings.REPOS_DIR} ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {pid}'
+        os.system(cmd)
+        result = subprocess.check_output(cmd, shell=True)
+        #print(result)
     
-    resultdata = {
-        'status':'success'
-    }
+        resultdata = {
+            'status':'success'
+        }
+    except Exception as e:
+        resultdata = {
+            'status':str(e)
+        }
 
     return HttpResponse(
         json.dumps(resultdata),
@@ -374,23 +381,23 @@ def createPatch(request):
     #TODO pull name from request and project from pr id
 
     #with open('../ideas-uo/anl_test_repo/folder1/arithmetic.py', 'w') as f:
-    with open(settings.REPOS_DIR+pr.project.name+'/'+filename, 'w') as f:
+    with open(str(settings.REPOS_DIR)+'/'+pr.project.name+'/'+filename, 'w') as f:
         f.write(request.POST.get('filecontents'))
         f.close()
     
     #cmd = f'cd ../ideas-uo/anl_test_repo ; git diff folder1/arithmetic.py > arithmetic.py.patch'
-    cmd = f'cd '+settings.REPOS_DIR+pr.project.name+' ; git diff '+filename+' > '+filename[filename.rindex('/')+1:]+'.patch'
+    cmd = f'cd '+str(settings.REPOS_DIR)+'/'+pr.project.name+' ; git diff '+filename+' > '+filename[filename.rindex('/')+1:]+'.patch'
     os.system(cmd)
     #result = subprocess.check_output(cmd, shell=True)
 
     #with open('../ideas-uo/anl_test_repo/arithmetic.py.patch', 'r') as f:
-    with open(settings.REPOS_DIR+pr.project.name+'/'+filename[filename.rindex('/')+1:]+'.patch', 'r') as f:
+    with open(str(settings.REPOS_DIR)+'/'+pr.project.name+'/'+filename[filename.rindex('/')+1:]+'.patch', 'r') as f:
         lines = f.readlines()
         f.close()
-    os.remove(settings.REPOS_DIR+pr.project.name+'/'+filename[filename.rindex('/')+1:]+'.patch')    
+    os.remove(str(settings.REPOS_DIR)+'/'+pr.project.name+'/'+filename[filename.rindex('/')+1:]+'.patch')    
 
     #cmd = f'cd ../ideas-uo/anl_test_repo ; git checkout -- folder1/arithmetic.py'
-    cmd = f'cd '+settings.REPOS_DIR+pr.project.name+' ; git checkout -- '+filename
+    cmd = f'cd '+str(settings.REPOS_DIR)+'/'+pr.project.name+' ; git checkout -- '+filename
     os.system(cmd)
 
 
@@ -455,17 +462,24 @@ def diffCommitData(request):
     linter_results = []
     for filename in filenames:
         if filename.endswith('.py'): 
-            output = os.popen('export PYTHONPATH=${PYTHONPATH}:'+os.path.abspath(settings.REPOS_DIR+pr.project.name)+' ; cd '+settings.REPOS_DIR+pr.project.name+' ; pylint --output-format=json '+filename).read()
-            linter_results.append( {'filename': filename, 'results':json.loads(output)} )
+            try:
+                #output = os.popen('export PYTHONPATH=${PYTHONPATH}:'+os.path.abspath(str(settings.REPOS_DIR)+'/'+pr.project.name)+' ; cd '+str(settings.REPOS_DIR)+'/'+pr.project.name+' ; pylint --output-format=json '+filename).read()
+                output = os.popen('pip list').read()
+                #cmd = 'export PYTHONPATH=${PYTHONPATH}:'+os.path.abspath(str(settings.REPOS_DIR)+'/'+pr.project.name)+' ; cd '+str(settings.REPOS_DIR)+'/'+pr.project.name+' ; pylint --output-format=json '+filename
+                #os.system(cmd)
+                #output = subprocess.check_output(cmd, shell=True)
+                linter_results.append( {'filename': filename, 'results':str(output)} ) #json.loads(output)} )
+            except Exception as e:
+                linter_results.append( {'filename': filename, 'results':str(e)} )
         if filename.endswith('.F90'): 
-            output = os.popen('fortran-linter '+settings.REPOS_DIR+pr.project.name+'/'+filename+' --syntax-only').read()
-            linter_results.append( {'filename': filename, 'results':output.split(settings.REPOS_DIR+pr.project.name+'/'+filename)} )
+            output = os.popen('fortran-linter '+str(settings.REPOS_DIR)+'/'+pr.project.name+'/'+filename+' --syntax-only').read()
+            linter_results.append( {'filename': filename, 'results':output.split(str(settings.REPOS_DIR)+'/'+pr.project.name+'/'+filename)} )
         if filename.endswith('.c'): 
-            output = os.popen('cpplint --filter=-whitespace '+settings.REPOS_DIR+pr.project.name+'/'+filename+' 2>&1').read()
+            output = os.popen('cpplint --filter=-whitespace '+str(settings.REPOS_DIR)+'/'+pr.project.name+'/'+filename+' 2>&1').read()
             #linter_results.append( {'filename': filename, 'results':output.split('../'+pr.project.name+'/'+filename+':')} )
 
             results = []
-            for result in output.split(settings.REPOS_DIR+pr.project.name+'/'+filename+':'):
+            for result in output.split(str(settings.REPOS_DIR)+'/'+pr.project.name+'/'+filename+':'):
                 if result and len(result) > 0:
                     try:
                         #if result.split(":")[1].split("  [")[1].split("] ")[0].startswith('whitespace') == False:
@@ -473,7 +487,7 @@ def diffCommitData(request):
                     except:
                         pass
             linter_results.append( {'filename': filename, 'results':results} )
-
+    
 
 
     #Build developer table
@@ -593,7 +607,7 @@ def getFile(request):
 
 
     # Open and read the file
-    with open(settings.REPOS_DIR+pr.project.name+'/'+filename, 'r') as f:
+    with open(str(settings.REPOS_DIR)+'/'+pr.project.name+'/'+filename, 'r') as f:
         lines = f.readlines()
         f.close()
 
@@ -602,19 +616,19 @@ def getFile(request):
     #docstring_results = []
 
     if filename.endswith('.py'): 
-        output = os.popen('export PYTHONPATH=${PYTHONPATH}:'+os.path.abspath(settings.REPOS_DIR+pr.project.name)+' ; cd '+settings.REPOS_DIR+pr.project.name+' ; pylint --output-format=json '+filename).read()
+        output = os.popen('export PYTHONPATH=${PYTHONPATH}:'+os.path.abspath(str(settings.REPOS_DIR)+'/'+pr.project.name)+' ; cd '+str(settings.REPOS_DIR)+'/'+pr.project.name+' ; pylint --output-format=json '+filename).read()
         linter_results = json.loads(output)
         #docstring_results = first_responder_function(pr.project, pr)
 
     if filename.endswith('.F90'): 
-        output = os.popen('fortran-linter '+settings.REPOS_DIR+pr.project.name+'/'+filename+' --syntax-only').read()
-        linter_results = output.split(settings.REPOS_DIR+pr.project.name+'/'+filename)
+        output = os.popen('fortran-linter '+str(settings.REPOS_DIR)+'/'+pr.project.name+'/'+filename+' --syntax-only').read()
+        linter_results = output.split(str(settings.REPOS_DIR)+'/'+pr.project.name+'/'+filename)
 
     if filename.endswith('.c'): 
-        output = os.popen('cpplint --filter=-whitespace '+settings.REPOS_DIR+pr.project.name+'/'+filename+' 2>&1').read()
+        output = os.popen('cpplint --filter=-whitespace '+str(settings.REPOS_DIR)+'/'+pr.project.name+'/'+filename+' 2>&1').read()
         #linter_results = output.split('../'+pr.project.name+'/'+filename)
         results = []
-        for result in output.split(settings.REPOS_DIR+pr.project.name+'/'+filename+':'):
+        for result in output.split(str(settings.REPOS_DIR)+'/'+pr.project.name+'/'+filename+':'):
             if result and len(result) > 0:
                 try:
                     results.append( {'column':0, 'line':int(result.split(":")[0]), 'message':result.split(":")[1].split("  [")[0].strip(), 'type': result.split(":")[1].split("  [")[1].split("] ")[0]})
@@ -963,7 +977,7 @@ def branchData(request):
     print("BRANCHES DATA")
 
     config = configparser.ConfigParser()
-    config.read(settings.REPOS_DIR+'credentials.ini')
+    config.read(str(settings.REPOS_DIR)+'/credentials.ini')
 
     GitHubAPIClient.set_credentials(username=config['github']['login'], token=config['github']['token'])
 
@@ -1227,7 +1241,7 @@ def first_responder_function(proj_object, pr_object):
     commit_messages = [c.message for c in commits_list]
 
     branch = commits_list[0].branch
-    cmd = f'cd {settings.REPOS_DIR}{proj_name} ; git checkout {branch}'
+    cmd = f'cd {settings.REPOS_DIR}/{proj_name} ; git checkout {branch}'
     try:
         import os
         os.system(cmd)
@@ -1372,7 +1386,7 @@ def handle_hypre(proj_object, filenames, project_info):
 
         print(path, full_filename, extension, name)
         if extension=='.h' and name.startswith('HYPRE_'):  #per Rob's instructions
-            with open(settings.REPOS_DIR+proj_name+'/'+path, 'r') as f:
+            with open(str(settings.REPOS_DIR)+'/'+proj_name+'/'+path, 'r') as f:
                 lines = f.readlines()
                 f.close()
             file_lines.append((path, name,  extension, lines))
@@ -1491,7 +1505,7 @@ def handle_anl_test_repo(proj_object, filenames, project_info):
     for filename in filenames:
         name, extension = os.path.splitext(filename)
         if (extension and extension in project_info['extensions']) or (not extension and filename in project_info['filenames']):
-            with open(settings.REPOS_DIR+proj_name+'/'+filename, 'r') as f:
+            with open(str(settings.REPOS_DIR)+'/'+proj_name+'/'+filename, 'r') as f:
                 lines = f.readlines()
                 f.close()
             file_lines.append((filename, name,  extension, lines))
@@ -1572,7 +1586,7 @@ def handle_flash(proj_object, filenames, project_info):
     for filename in filenames:
         name, extension = os.path.splitext(filename)
         if (extension and extension in project_info['extensions']) or (not extension and filename in project_info['filenames']):
-            with open(settings.REPOS_DIR+proj_name+'/'+filename, 'r') as f:
+            with open(str(settings.REPOS_DIR)+'/'+proj_name+'/'+filename, 'r') as f:
                 lines = f.readlines()
                 f.close()
             file_lines.append((filename, name,  extension, lines))
@@ -1623,7 +1637,7 @@ def handle_flash(proj_object, filenames, project_info):
                 unit_name = [u for u in units if u+'Main' in the_header]
                 if unit_name:
                     #we know an implementation. But of stub or private? If stub will have same name.
-                    unit_path = f'{settings.REPOS_DIR}{proj_name}/source/{unit_name[0]}'
+                    unit_path = f'{settings.REPOS_DIR}/{proj_name}/source/{unit_name[0]}'
                     contents = os.listdir(unit_path)
                     print(unit_path, contents, the_file)
                     if the_file in contents:
@@ -1849,7 +1863,7 @@ def file_explorer_function(proj_id, project_object, project_info, branch, filena
     import os
     proj_name = project_object.name
     name, extension = os.path.splitext(filename)
-    cmd = f'cd {settings.REPOS_DIR}{proj_name} ; git checkout {branch}'
+    cmd = f'cd {settings.REPOS_DIR}/{proj_name} ; git checkout {branch}'
     try:
         import os
         os.system(cmd)
@@ -1861,7 +1875,7 @@ def file_explorer_function(proj_id, project_object, project_info, branch, filena
         all_files = handle_hypre(project_object, [filename], project_info)
     else:
         if (extension and extension in project_info['extensions']) or (not extension and filename in project_info['filenames']):
-                with open(settings.REPOS_DIR+proj_name+'/'+filename, 'r') as f:
+                with open(str(settings.REPOS_DIR)+'/'+proj_name+'/'+filename, 'r') as f:
                     lines = f.readlines()
                     f.close()
         else:
@@ -2019,7 +2033,7 @@ def find_pytest_files(proj_name, file_path, function_name):
     #for full pytest dir setup see https://docs.pytest.org/en/7.1.x/explanation/goodpractices.html#conventions-for-python-test-discovery
     #here just assuming test files are in folder on file_path
     import os
-    full_path = f'{settings.REPOS_DIR}{proj_name}/{file_path}'
+    full_path = f'{settings.REPOS_DIR}/{proj_name}/{file_path}'
     found_asserts = []
     while(True):
         head,tail = os.path.split(full_path)  #head now has containing dir for file

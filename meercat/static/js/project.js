@@ -98,7 +98,8 @@ function refreshProject() {
                 console.log(result);
 
                 //refresh the page here
-                location.reload();
+                if( result.status == 'success' )
+                  location.reload();
 
             }
         });
