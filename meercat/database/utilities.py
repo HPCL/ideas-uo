@@ -7,7 +7,8 @@ from dotenv import load_dotenv
 from database.models import EventLog
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(BASE_DIR / '.env')
+with open('/shared/soft/ideas_db/ideas-uo/meercat/meercat.config.json') as meercat_config:
+    config = json.load(meercat_config)
 
 def get_repo_owner(repo):
     return repo.source_url.split('/')[-2] # owner is always second to last when spliting url by /
@@ -19,7 +20,7 @@ def comment_pullrequest(pull_request, comment):
     payload = { "body": comment }
     headers = {
         "Accept": "application/vnd.github+json",
-        "Authorization" : "token " + os.environ.get('MEERCAT_USER_TOKEN')
+        "Authorization" : "token " + config['MEERCAT_USER_TOKEN']
     }
 
     result = requests.post(url, headers=headers, data=json.dumps(payload))

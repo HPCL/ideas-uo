@@ -12,28 +12,29 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 
 from pathlib import Path
 import os
-from dotenv import load_dotenv
+import json
 from django.contrib.messages import constants as messages
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Get environment variables from .env
-load_dotenv(BASE_DIR / '.env')
+# Load meercat configuration
+with open(BASE_DIR / 'meercat.config.json') as meercat_config:
+    config = json.load(meercat_config)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY')
+SECRET_KEY = config['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'sansa.cs.uoregon.edu',
-    '127.0.0.1',
+  'sansa.cs.uoregon.edu',
+  '127.0.0.1',
 ]
 
 # Messages constants, used for bootstrap styling
@@ -44,7 +45,6 @@ MESSAGE_TAGS = {
     messages.WARNING: 'alert-warning',
     messages.ERROR: 'alert-danger',
 }
-
 
 # Application definition
 
@@ -78,8 +78,8 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            BASE_DIR / 'website/templates'
-        ],
+            BASE_DIR / 'templates',
+	],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -140,9 +140,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
-#STATIC_URL = 'static/dist/'
-
 STATIC_URL = 'static/'
+
+STATIC_ROOT = BASE_DIR / 'admin-static/'
 
 STATICFILES_DIRS = [
     BASE_DIR / 'static'
@@ -152,10 +152,18 @@ MEDIA_URL = '/media/'
 
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# REPOS_DIR is the directory with the repositories that meercat will analyze
+REPOS_DIR = BASE_DIR / '..'
+
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
+# GitHub OAuth client ID. This is public information.
+GH_CLIENT_ID = 'e7c936f5c399dc9a9184'
+
 
 LOGIN_REDIRECT_URL = 'index'
 
@@ -163,13 +171,11 @@ LOGIN_URL = 'login'
 
 
 # Output sent emails to console. Use in development only.
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-# GitHub/GitLab OAuth client ID. This is public information.
-GH_CLIENT_ID = 'e7c936f5c399dc9a9184'
+#EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # GitHub OAuth development settings. If OAUTH_DEVELOPMENT is true, another OAuth App 
 # for development purposes will be used.
 OAUTH_DEVELOPMENT = True
 GH_CLIENT_ID_DEV = 'b44b1c4126f79ca90fb3'
 GL_CLIENT_ID_DEV = 'b29490c6207a6eb48fee63ac330b4f363c11c36bfc501dcd0cd0f85b83294554'
+

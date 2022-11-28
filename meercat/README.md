@@ -38,7 +38,12 @@
 		    }
 		}
 
-8. Install codemirror js/css files to meercat/static/codemirro/lib
+8. Update the following configurations in meercat/website/settings.py
+	1. The location of the json configuraion file for meercat when it is opened. The json file is currently called `meercat.config.json` and is in the BASE_DIR directory.
+
+	2. The REPOS_DIR setting. This setting is the directory awhere all repositories analyzed by meercat are located.
+
+9. Install codemirror js/css files to meercat/static/codemirro/lib
 
 	codemirror.js
 	codemirror.css
