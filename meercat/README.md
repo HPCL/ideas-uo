@@ -1,7 +1,7 @@
 # Website setup
 
 1. Create a python virtualenv virtual environment
-	1. Install virtualenv via pipx `pipx install virtualenv` (recommended by cirtualenv documentation) or via pip `python -m pip install --user virtualenv
+	1. Install virtualenv via pipx `pipx install virtualenv` (recommended by virtualenv documentation) or via pip `python -m pip install --user virtualenv
 	2. Create a virtual environment `virtualenv env`
 
 2. Activate it
