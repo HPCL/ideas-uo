@@ -334,7 +334,7 @@ def refreshProject(request):
 
     try:
         #cmd = f'cd /shared/soft/ideas_db/ideas-uo/meercat/.. ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {pid}'
-        cmd = f'cd {settings.REPOS_DIR} ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {pid}'
+        cmd = f'cd {settings.REPOS_DIR} ; . meercat/env/bin/activate ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {pid}'
         os.system(cmd)
         result = subprocess.check_output(cmd, shell=True)
         #print(result)
@@ -463,12 +463,9 @@ def diffCommitData(request):
     for filename in filenames:
         if filename.endswith('.py'): 
             try:
-                #output = os.popen('export PYTHONPATH=${PYTHONPATH}:'+os.path.abspath(str(settings.REPOS_DIR)+'/'+pr.project.name)+' ; cd '+str(settings.REPOS_DIR)+'/'+pr.project.name+' ; pylint --output-format=json '+filename).read()
-                output = os.popen('pip list').read()
-                #cmd = 'export PYTHONPATH=${PYTHONPATH}:'+os.path.abspath(str(settings.REPOS_DIR)+'/'+pr.project.name)+' ; cd '+str(settings.REPOS_DIR)+'/'+pr.project.name+' ; pylint --output-format=json '+filename
-                #os.system(cmd)
-                #output = subprocess.check_output(cmd, shell=True)
-                linter_results.append( {'filename': filename, 'results':str(output)} ) #json.loads(output)} )
+                #output = os.popen('export PYTHONPATH=${PYTHONPATH}:'+os.path.abspath(str(settings.REPOS_DIR)+'/'+pr.project.name)+' ; cd '+str(settings.REPOS_DIR)+'/'+pr.project.name+' ; '+str(settings.REPOS_DIR)+'/meercat/env/bin/pylint --output-format=json '+filename).read()
+                output = os.popen('export PYTHONPATH=${PYTHONPATH}:'+os.path.abspath(str(settings.REPOS_DIR)+'/'+pr.project.name)+' ; cd '+str(settings.REPOS_DIR)+'/'+pr.project.name+' ; . ../meercat/env/bin/activate ; pylint --output-format=json '+filename).read()
+                linter_results.append( {'filename': filename, 'results':json.loads(output)} )
             except Exception as e:
                 linter_results.append( {'filename': filename, 'results':str(e)} )
         if filename.endswith('.F90'): 
@@ -616,7 +613,8 @@ def getFile(request):
     #docstring_results = []
 
     if filename.endswith('.py'): 
-        output = os.popen('export PYTHONPATH=${PYTHONPATH}:'+os.path.abspath(str(settings.REPOS_DIR)+'/'+pr.project.name)+' ; cd '+str(settings.REPOS_DIR)+'/'+pr.project.name+' ; pylint --output-format=json '+filename).read()
+        #output = os.popen('export PYTHONPATH=${PYTHONPATH}:'+os.path.abspath(str(settings.REPOS_DIR)+'/'+pr.project.name)+' ; cd '+str(settings.REPOS_DIR)+'/'+pr.project.name+' ; pylint --output-format=json '+filename).read()
+        output = os.popen('export PYTHONPATH=${PYTHONPATH}:'+os.path.abspath(str(settings.REPOS_DIR)+'/'+pr.project.name)+' ; cd '+str(settings.REPOS_DIR)+'/'+pr.project.name+' ; . ../meercat/env/bin/activate ; pylint --output-format=json '+filename).read()
         linter_results = json.loads(output)
         #docstring_results = first_responder_function(pr.project, pr)
 
@@ -635,7 +633,7 @@ def getFile(request):
                 except:
                     pass
         linter_results = results
-
+    
     #print("LINTER RESULTS: "+str(linter_results))
     #print("DOC CHECKER RESULTS: "+str(docstring_results))
 
@@ -846,7 +844,8 @@ def githubBot(request):
         #Need to refresh the database before 
         username = settings.DATABASES['default']['USER']
         password = settings.DATABASES['default']['PASSWORD']
-        cmd = f'cd .. ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {project.id}'
+        #cmd = f'cd .. ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {project.id}'
+        cmd = f'cd {settings.REPOS_DIR} ; . meercat/env/bin/activate ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {project.id}'
         os.system(cmd)
         result = subprocess.check_output(cmd, shell=True)
 
