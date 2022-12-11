@@ -1,3 +1,4 @@
+[![Library](https://github.com/HPCL/ideas-uo/actions/workflows/library.yml/badge.svg)](https://github.com/HPCL/ideas-uo/actions/workflows/library.yml)
 # Git repository mining and analysis software
 
 The collection of packages in this repository are developed as part of the
