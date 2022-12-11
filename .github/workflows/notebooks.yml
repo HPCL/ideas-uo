@@ -2,18 +2,18 @@ name: Notebooks
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
     paths:
       - 'notebooks/**'
       - '!notebooks/README.md'
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
     paths:
       - 'notebooks/**'
       - '!notebooks/README.md'
   workflow_run:
     workflows: [ "Library" ]
-    branches: [ master ]
+    branches: [ main ]
     types:
       - completed
 
@@ -38,8 +38,8 @@ jobs:
 
       - name: Install dependencies with pipenv
         run: |
-          python3.9 -m pip install --upgrade pip
-          python3.9 -m pip install pipenv
+          python3 -m pip install --upgrade pip
+          python3 -m pip install pipenv
           touch Pipfile & pipenv install --deploy --dev
           if [ -f requirements.txt ]; then pipenv install -r requirements.txt; fi
           pipenv install jupyter
