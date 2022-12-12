@@ -1,4 +1,4 @@
-[![Library](https://github.com/HPCL/ideas-uo/actions/workflows/library.yml/badge.svg)](https://github.com/HPCL/ideas-uo/actions/workflows/library.yml)  <img src="images/GremCAT2.png" alt="drawing" width="150"/>
+[![Library](https://github.com/HPCL/ideas-uo/actions/workflows/library.yml/badge.svg)](https://github.com/HPCL/ideas-uo/actions/workflows/library.yml)  <img src="images/GremCAT2.png" align="right" alt="GReMCat Logo" width="100"/>
 
 # GReMCat: Git repository mining and analysis software
 
