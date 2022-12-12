@@ -41,8 +41,7 @@ Once you have created and activated the environment, you can install prerequisit
 ### Local Notebooks
 
 Note that this set of tools is still under very active development, so at any point
-some functionality may not work as expected. The basic requirements are Python 3
-.9 or newer and the `pip` package manager.
+some functionality may not work as expected. The basic requirements are Python 3.9 or newer and the `pip` package manager.
 
 If you wish to run the notebooks locally, you need to have jupyter (`pip install jupyter`)
 or jupyter-lab (`pip install jupyterlab`),
