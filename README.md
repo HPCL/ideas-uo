@@ -1,9 +1,10 @@
-[![Library](https://github.com/HPCL/ideas-uo/actions/workflows/library.yml/badge.svg)](https://github.com/HPCL/ideas-uo/actions/workflows/library.yml)
-# Git repository mining and analysis software
+[![Library](https://github.com/HPCL/ideas-uo/actions/workflows/library.yml/badge.svg)](https://github.com/HPCL/ideas-uo/actions/workflows/library.yml)  <img src="images/GremCAT2.png" alt="drawing" width="150"/>
+
+# GReMCat: Git repository mining and analysis software
 
 The collection of packages in this repository are developed as part of the
 DOE [IDEAS-ECP](https://ideas-productivity.org/) project on high-performance software
-development productivity. The GremCat set of tools is part of the larger
+development productivity. The GReMCat set of tools is part of the larger
 [CAT-SDK](https://github.com/CAT-SDK) collection of git and related mining and analysis software infrastructure.
 
 The `code` subdirectory includes various utilities for git repository data acquisition
