@@ -12,7 +12,7 @@ def test_convertTestPatternsNotebook(capsys,caplog):
         ("Unexpected exit code " + str(status))
 
 def test_runTestPatterns(capsys, caplog):
-    inputfile = os.path.join('notebooks','tests','PatternsTest.py')
+    inputfile = os.path.join('notebooks', 'PatternsTest.py')
     command = f'python {inputfile}'.split()
     print(command)
     status = execute(command)
