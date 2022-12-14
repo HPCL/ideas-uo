@@ -469,10 +469,10 @@ def diffCommitData(request):
             except Exception as e:
                 linter_results.append( {'filename': filename, 'results':str(e)} )
         if filename.endswith('.F90'): 
-            output = os.popen('fortran-linter '+str(settings.REPOS_DIR)+'/'+pr.project.name+'/'+filename+' --syntax-only').read()
+            output = os.popen('export PYTHONPATH=${PYTHONPATH}:'+os.path.abspath(str(settings.REPOS_DIR)+'/'+pr.project.name)+' ; cd '+str(settings.REPOS_DIR)+'/'+pr.project.name+' ; . ../meercat/env/bin/activate ; fortran-linter '+str(settings.REPOS_DIR)+'/'+pr.project.name+'/'+filename+' --syntax-only').read()
             linter_results.append( {'filename': filename, 'results':output.split(str(settings.REPOS_DIR)+'/'+pr.project.name+'/'+filename)} )
         if filename.endswith('.c'): 
-            output = os.popen('cpplint --filter=-whitespace '+str(settings.REPOS_DIR)+'/'+pr.project.name+'/'+filename+' 2>&1').read()
+            output = os.popen('export PYTHONPATH=${PYTHONPATH}:'+os.path.abspath(str(settings.REPOS_DIR)+'/'+pr.project.name)+' ; cd '+str(settings.REPOS_DIR)+'/'+pr.project.name+' ; . ../meercat/env/bin/activate ; cpplint --filter=-whitespace '+str(settings.REPOS_DIR)+'/'+pr.project.name+'/'+filename+' 2>&1').read()
             #linter_results.append( {'filename': filename, 'results':output.split('../'+pr.project.name+'/'+filename+':')} )
 
             results = []
@@ -619,11 +619,11 @@ def getFile(request):
         #docstring_results = first_responder_function(pr.project, pr)
 
     if filename.endswith('.F90'): 
-        output = os.popen('fortran-linter '+str(settings.REPOS_DIR)+'/'+pr.project.name+'/'+filename+' --syntax-only').read()
+        output = os.popen('export PYTHONPATH=${PYTHONPATH}:'+os.path.abspath(str(settings.REPOS_DIR)+'/'+pr.project.name)+' ; cd '+str(settings.REPOS_DIR)+'/'+pr.project.name+' ; . ../meercat/env/bin/activate ; fortran-linter '+str(settings.REPOS_DIR)+'/'+pr.project.name+'/'+filename+' --syntax-only').read()
         linter_results = output.split(str(settings.REPOS_DIR)+'/'+pr.project.name+'/'+filename)
 
     if filename.endswith('.c'): 
-        output = os.popen('cpplint --filter=-whitespace '+str(settings.REPOS_DIR)+'/'+pr.project.name+'/'+filename+' 2>&1').read()
+        output = os.popen('export PYTHONPATH=${PYTHONPATH}:'+os.path.abspath(str(settings.REPOS_DIR)+'/'+pr.project.name)+' ; cd '+str(settings.REPOS_DIR)+'/'+pr.project.name+' ; . ../meercat/env/bin/activate ; cpplint --filter=-whitespace '+str(settings.REPOS_DIR)+'/'+pr.project.name+'/'+filename+' 2>&1').read()
         #linter_results = output.split('../'+pr.project.name+'/'+filename)
         results = []
         for result in output.split(str(settings.REPOS_DIR)+'/'+pr.project.name+'/'+filename+':'):
@@ -1583,15 +1583,16 @@ def handle_flash(proj_object, filenames, project_info):
     proj_name = proj_object.name
     file_lines = []
     for filename in filenames:
-        name, extension = os.path.splitext(filename)
-        if (extension and extension in project_info['extensions']) or (not extension and filename in project_info['filenames']):
-            with open(str(settings.REPOS_DIR)+'/'+proj_name+'/'+filename, 'r') as f:
-                lines = f.readlines()
-                f.close()
-            file_lines.append((filename, name,  extension, lines))
-        else:
-            print(f'Uncheckable currently: {filename}')
-            file_lines.append((filename, name,  extension, None))
+        if os.path.isfile(str(settings.REPOS_DIR)+'/'+proj_name+'/'+filename):
+            name, extension = os.path.splitext(filename)
+            if (extension and extension in project_info['extensions']) or (not extension and filename in project_info['filenames']):
+                with open(str(settings.REPOS_DIR)+'/'+proj_name+'/'+filename, 'r') as f:
+                    lines = f.readlines()
+                    f.close()
+                file_lines.append((filename, name,  extension, lines))
+            else:
+                print(f'Uncheckable currently: {filename}')
+                file_lines.append((filename, name,  extension, None))
 
     #below is really idiosyncratic to Flash.
     #a) expect changes to test.toml files to include changes to associated readme.md in same folder
@@ -1652,7 +1653,8 @@ def handle_flash(proj_object, filenames, project_info):
             #compute values for sig_name, sig_params, (doc, doc_start, doc_end, fields, doc_params), test_info, all_issues
 
             #look for robodoc docstring  (*if* says internal)
-            if lines[i].startswith('!!****f*') or lines[i].startswith('!!****if*'):
+            # TODO: get_f90_robodoc_string_plus_sig is not defined anywhere!!!
+            '''if lines[i].startswith('!!****f*') or lines[i].startswith('!!****if*'):
                 doc_start = i
                 i, sig_name, sig_params, doc, doc_start, doc_end, fields, doc_params, params_start, issues = get_f90_robodoc_string_plus_sig(lines, i)  #parses out both docstring and signature, i last line of doc
                 function_info.append((sig_name, sig_params, doc, doc_start, doc_end, fields, doc_params, params_start, issues, subtype))
@@ -1678,7 +1680,8 @@ def handle_flash(proj_object, filenames, project_info):
                 function_info.append((sig_name, sig_params, doc, doc_start, doc_end, fields, doc_params, params_start, issues, subtype))
                 
             #look for subroutine with missing docstring
-            elif lines[i].startswith('subroutine '):
+            el'''
+            if lines[i].startswith('subroutine '):
                 doc_params = []
                 params_start = 0
                 doc_lines = []
