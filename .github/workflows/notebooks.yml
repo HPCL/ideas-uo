@@ -2,7 +2,7 @@ name: Notebooks
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, nb-gh-actions ]
     paths:
       - 'notebooks/**'
       - '!notebooks/README.md'
@@ -23,7 +23,7 @@ jobs:
   build_and_run:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Install linux packages
         run: |
@@ -32,7 +32,7 @@ jobs:
           sudo apt-get -yqq install libmysqlclient-dev
 
       - name: Setup Python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v4
         with:
             python-version: 3.9
 
