@@ -137,7 +137,7 @@ fortran_doxygen_base_template = """
 !!
 """
 
-def get_parameters(subroutine:str) -> list:
+def get_fortran_parameters(subroutine:str) -> list:
     params = []
     m = re.match("subroutine (?P<subroutine>[a-zA-Z]\w{0,30})\((?P<params>[\s\S]*?)\)", subroutine)
     for param in m.group('params').split(','):
@@ -149,12 +149,34 @@ def get_parameters(subroutine:str) -> list:
 
 def fortran_doxygen_template(subroutine):
     template = fortran_doxygen_base_template
-    parameters = get_parameters(subroutine)
+    parameters = get_fortran_parameters(subroutine)
 
     for parameter in parameters:        
         template += f"!! @param {parameter} Descirption\n"
             
     template += '!!\n'
+    return template
+
+
+c_doxygen_base_template = """/**
+  * @params """
+
+def get_c_parameters(subroutine:str) -> list:
+    params = []
+    m = re.search("(?P<subroutine>[a-zA-Z]\w{0,30})\((?P<params>[\s\S]*?)\)", subroutine)
+    for param in m.group('params').split(','):
+      param = param.replace('*', '')
+      params.append(param.strip().split()[1])
+
+    return params
+
+def c_doxygen_template(c_function_header):
+    template = c_doxygen_base_template
+    parameters = get_c_parameters(c_function_header)
+
+    template += ' '.join(parameters)
+    template += "\n  *\n  **/\n"
+
     return template
 
 

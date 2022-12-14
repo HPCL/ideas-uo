@@ -3,7 +3,7 @@ from oauthlib.oauth2.rfc6749.errors import AccessDeniedError
 from django.shortcuts import render, redirect
 from django.conf import settings
 from django.contrib import messages
-from django.core.mail import send_mail
+import json
 
 from .utils import gh_authenticate, gl_authenticate
 from .forms import RegistrationForm
@@ -11,6 +11,9 @@ from dashboard.utilities import gmail_send_message
 
 import os
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1' # This is set so requests-oauthlib does not throw an error over HTTP
+with open(settings.BASE_DIR / 'meercat.config.json') as meercat_config:
+    config = json.load(meercat_config)
+
 
 gl_redirect_uri='http://127.0.0.1:8000/oauth/gitlab_callback/'
 gl_scope = [
@@ -30,15 +33,15 @@ gl_scope = [
 if settings.OAUTH_DEVELOPMENT:
     # GitLab Development
     gl_client_id = settings.GL_CLIENT_ID_DEV
-    gl_client_secret = os.environ['GL_CLIENT_SECRET_DEV']
+    gl_client_secret = config['GL_CLIENT_SECRET_DEV']
 
     # GitHub Development
     gh_client_id = settings.GH_CLIENT_ID_DEV
-    gh_client_secret = os.environ['GH_CLIENT_SECRET_DEV']
+    gh_client_secret = config['GH_CLIENT_SECRET_DEV']
 
 else:
     gh_client_id = settings.GH_CLIENT_ID
-    gh_client_secret = os.environ['GH_CLIENT_SECRET']
+    gh_client_secret = config['GH_CLIENT_SECRET']
 
 
 def authorize_gitlab(request):

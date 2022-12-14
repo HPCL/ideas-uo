@@ -1,13 +1,12 @@
-import os
 import requests
 import json
 from datetime import datetime
 from pathlib import Path
-from dotenv import load_dotenv
 from database.models import EventLog
+from django.conf import settings
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-with open('/shared/soft/ideas_db/ideas-uo/meercat/meercat.config.json') as meercat_config:
+with open(settings.BASE_DIR / 'meercat.config.json') as meercat_config:
     config = json.load(meercat_config)
 
 def get_repo_owner(repo):

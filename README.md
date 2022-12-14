@@ -1,8 +1,10 @@
-# Git repository mining and analysis software
+[![Library](https://github.com/HPCL/ideas-uo/actions/workflows/library.yml/badge.svg)](https://github.com/HPCL/ideas-uo/actions/workflows/library.yml)  <img src="images/GremCAT2.png" align="right" alt="GReMCat Logo" width="120"/>
+
+# GReMCat: Git repository mining and analysis software
 
 The collection of packages in this repository are developed as part of the
 DOE [IDEAS-ECP](https://ideas-productivity.org/) project on high-performance software
-development productivity. The GremCat set of tools is part of the larger
+development productivity. The GReMCat set of tools is part of the larger
 [CAT-SDK](https://github.com/CAT-SDK) collection of git and related mining and analysis software infrastructure.
 
 The `code` subdirectory includes various utilities for git repository data acquisition
@@ -10,8 +12,7 @@ and database client code with examples.
 
 The `patterns` and `sandbox` directories include example analyses using git commits data,
 github or gitlab issues, and developer emails. Many of these were inspired by the
-short [book](https://www.pluralsight.com/content/dam/pluralsight2/landing-pages/offers/flow/pdf/Pluralsight_20Patterns_ebook.pdf)
-by Plurasight on "20 patterns to watch for in your engineering team".
+short [book](https://www.pluralsight.com/content/dam/pluralsight2/landing-pages/offers/flow/pdf/Pluralsight_20Patterns_ebook.pdf) by Plurasight on "20 patterns to watch for in your engineering team".
 
 ## Getting started
 
@@ -34,14 +35,13 @@ python3 -m venv env-gremcat
 source ./env-gremcat/bin/activate
 ```
 
-Once you have created and activated the environment, you can install prerequisites with  
-```pip install -r requirements.txt```
+Once you have created and activated the environment, you can install prerequisites with
+``pip install -r requirements.txt``
 
 ### Local Notebooks
 
 Note that this set of tools is still under very active development, so at any point
-some functionality may not work as expected. The basic requirements are Python 3
-.9 or newer and the `pip` package manager.
+some functionality may not work as expected. The basic requirements are Python 3.9 or newer and the `pip` package manager.
 
 If you wish to run the notebooks locally, you need to have jupyter (`pip install jupyter`)
 or jupyter-lab (`pip install jupyterlab`),
@@ -77,7 +77,7 @@ to instead bind the present working notebooks directory (and files you can make 
 that will persist) you can instead run the container as follows:
 
 ```bash
-$ docker run --rm -p 8888:8888 -v "${PWD}/notebooks":/home/jovyan/work/notebooks ideas-uo
+$ docker run --rm -p 8888:8888 -v "${PWD}/notebooks":/home/user/work/notebooks ideas-uo
 ```
 
 ## Testing
@@ -86,7 +86,7 @@ To run the provided tests, first ensure your python environment includes the pac
 in `requirements.txt`, then in the top-level repository directory `ideas-uo`, run
 
 ```
-python -m pytest -v
+python3 -m pytest -v
 ```
 
 To run the tests in a specific subdirectory, simply add the path to the above command.

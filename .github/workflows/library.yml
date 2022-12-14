@@ -2,11 +2,11 @@ name: Library
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
     paths:
       - 'src/**'
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
     paths:
       - 'src/**'
 
