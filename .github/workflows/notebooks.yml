@@ -46,6 +46,6 @@ jobs:
 
       - name: Test with pytest
         run: |
-          sed -ie "s|project_name='.*'|project_name='ideas-uo'|" notebooks/PatternsTest.ipynb
+          sed -ie "s|project_name='.*'|project_name='testrepo'|" notebooks/PatternsTest.ipynb
           PYTHONPATH=`pwd`/src pipenv run pytest -s --verbosity=3 notebooks
           echo Done!
