@@ -2,8 +2,9 @@ name: Notebooks
 
 on:
   push:
-    branches: [ main ]
     paths:
+      - '.github/**'
+      - 'src/**'
       - 'notebooks/**'
       - '!notebooks/README.md'
   pull_request:
