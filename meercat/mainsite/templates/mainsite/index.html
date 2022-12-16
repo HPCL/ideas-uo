@@ -41,6 +41,10 @@
     <span class="body_text">Typically a project maintains (manually) types of overview and user guides in markdown-style documents. While MeerCat does not currently attempt to automatically find misalignment from a code change to one of these documents, it may be able to remind an author that a changed code file appearing in
       a PR could likely require a change to a documentation file, and that file does not appear in the PR. In essence, MeerCat keeps a mapping between certain code files and certain document files that are linked.
     </span>
+  <li><h3>Code quality support</h3>
+    <p>
+    <span class="body_text">MeerCat has linters that will identify common code issues. MeerCat will highlight those pieces of code that have the linter warnings in its own editor, and allow a developer to make changes right there in Meercat.
+    </span>
   <li><h3>Project testing support</h3>
     <p>
     <span class="body_text">In some cases, a change to code will lead to a problem with existing tests. The most obvious symptom is that one or more test cases fail given the new change. The problem is that it may take hours to see failure. MeerCat may be able to point the PR author to testing files that may need to change to avoid failure.
