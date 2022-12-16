@@ -27,10 +27,6 @@
         </div>
     {% endif %}
 
-    <!--div style="text-align:right; margin-bottom:10px;">
-        <button class='btn btn-sm btn-primary' onclick='showDocEditor("{{file}}","NA");'>View File in Editor</button>
-    </div-->
-
     <div id="docModal" class="modal" tabindex="-1">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
@@ -128,23 +124,8 @@
             <div class="modal-body">
             
                 <div class="" style="border:1px solid #ccc; margin-bottom:5px;">
-                        <pre id="docstring"/>
-
-                        <!-- Add a button here that will call javascript 
-                                The javascript will use $ajax to submit yes/no to the server. 
-
-                                $.ajax({
-                                    url: '/dashboard/archeologyresults/', type: 'POST', data: { 'pr': pr, 'filename': filename }, 
-                                    success: function (result) {
-
-                                        console.log("success ajax");
-
-                                    }
-                                });
-
-                        -->
+                    <pre id="docstring"/>
                 </div>
-
                 
             </div>
             <div class="modal-footer">
