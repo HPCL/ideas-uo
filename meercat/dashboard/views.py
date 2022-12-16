@@ -1794,6 +1794,64 @@ def get_project_info(project_id):
     }
     return project_info[project_id] if project_id in project_info else None
 
+# Folder explorer
+#localhost:8080/dashboard/folderx/25?branch=master&folder=path  where 25 is test_anl id and path is to file
+def folder_explorer(request, *args, **kwargs):
+
+    template = loader.get_template('dashboard/folder_explorer.html')
+
+    # Get PR id
+    if kwargs['pk']:
+        proj_id = int(kwargs['pk'])
+        project = list(Project.objects.all().filter(id=proj_id).all())[0]
+    else:
+        return HttpResponse(
+            json.dumps('Missing project'),
+            content_type='application/json'
+            )
+
+    proj_list = list(Project.objects.all().filter(id=proj_id).all())
+    if not proj_list:
+        return HttpResponse(
+            json.dumps(f'Unknown project {proj_id}'),
+            content_type='application/json'
+            )
+
+
+    # Get branch
+    if request.GET.get('branch'):
+        branch = request.GET.get('branch')
+    else:
+        return HttpResponse(
+            json.dumps(f'Missing branch'),
+            content_type='application/json'
+            )
+
+    # Get folderpath
+    if request.GET.get('folder'):
+        folder = request.GET.get('folder')
+    else:
+        return HttpResponse(
+            json.dumps(f'Missing folder'),
+            content_type='application/json'
+            )
+
+    project_info = get_project_info(proj_id)
+    if project_info==None:
+        return HttpResponse(
+            json.dumps(f'Project id missing from project_info {proj_id}'),
+            content_type='application/json'
+            )
+
+    proj_object = proj_list[0]
+
+    context = {'folder':folder,
+             'project': project,
+             'branch':branch,
+             }
+
+    return HttpResponse(template.render(context, request))
+
 # File explorer
 #localhost:8080/dashboard/filex/25?branch=master&filename=path  where 25 is test_anl id and path is to file
 def file_explorer(request, *args, **kwargs):
@@ -2019,7 +2077,7 @@ def file_explorer_function(proj_id, project_object, project_info, branch, filena
 
     # TODO: if file is F90 check for missing doxygen 
 
-    
+
 
     context = {'file':filename,
                  'project': project_object,
