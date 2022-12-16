@@ -223,7 +223,7 @@ class Visualizer(Patterns):
         fig.autofmt_xdate()
         if not os.path.exists('figures'): os.mkdir('figures')
         fig.savefig('figures/%s-avg-%s.png' % (self.project, locc_metric), format='png',
-                    dpi=self.config['output_dpi'], box_inches='tight')
+                    dpi=self.config['output_dpi'], bbox_inches='tight')
 
     def plot_weekday_totals(self, time_range = None, locc_metric='change-size-cos'):
         df, stats_df = self.get_time_range_df(time_range)
