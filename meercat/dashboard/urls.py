@@ -15,6 +15,7 @@ urlpatterns = [
     path('pr/<int:pk>', views.pr, name='pr'),
     path('archeology/<int:pk>', views.archeology, name='archeology'),
     path('filex/<int:pk>', views.file_explorer, name='file_explorer'),
+    path('folderx/<int:pk>', views.folder_explorer, name='folder_explorer'),
     path('firstresponder/<int:pk>', views.firstresponder, name='firstresponder'),
     path('refreshproject', views.refreshProject, name='refreshproject'),
     path('createpatch/', views.createPatch, name='createpatch'),
