@@ -3,10 +3,9 @@ import mimetypes
 import os
 import re
 import requests
-from subprocess import check_output
 from datetime import datetime
-from pathlib import Path
 from google.oauth2.credentials import Credentials
+from git import Repo
 
 from django.conf import settings
 from database.models import EventLog
@@ -69,13 +68,49 @@ def get_branches_with_status(project): # only works with public repos for now
     return branches_with_status
 
 
-def list_project_files(project):
-    project_directory = settings.BASE_DIR.parent / project.name
-    project_path = Path(project_directory)
-    output_bytes = check_output(["git", "ls-files"], cwd=project_path)
 
-    file_paths = output_bytes.decode('utf-8').split('\n')[:-1]
-    return file_paths
+
+# Credits to https://stackoverflow.com/a/56469542/7281070
+# Edited for project needs
+def list_files_in_commit(commit, directory=None):
+    """
+    Lists files in a repo at a given commit
+
+    Parameters
+    ----------
+    directory: str, optional
+        Directory path relative to git repo. Only files under directory will be listed.
+        If directory is None, all files at the given commit are listed.
+    """
+    file_list = []
+    stack = [commit.tree] if directory is None else [commit.tree[directory]]
+    while len(stack) > 0:
+        tree = stack.pop()
+        # enumerate blobs (files) at this level
+        for b in tree.blobs:
+            file_list.append(b.path)
+        for subtree in tree.trees:
+            stack.append(subtree)
+    return file_list
+
+
+def list_project_files(project_name, directory=None, branch=None):
+    """
+    Lists project files tracked by git in the project project_name
+    
+    Parameters
+    ----------
+    
+    directory: str, optional
+        Directory path relative to git repo. Only files under directory will be listed.
+        If directory is None, all files are listed.
+    branch: str, optional
+        Specifies from which branch the files are listed. If None, the default branch is chosen.
+    """
+
+    project_repo = Repo(settings.REPOS_DIR / project_name).commit(branch)
+
+    return list_files_in_commit(project_repo, directory)
     
 
 python_doxygen_base_template = """\"\"\"!
