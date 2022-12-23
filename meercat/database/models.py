@@ -119,7 +119,6 @@ class ProjectRole(models.Model):
     role = models.CharField(max_length=3, choices=RoleChoices.choices)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='member')
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='project_role')
-    whitelist = models.TextField(null=True)
 
     class Meta:
         constraints = [
