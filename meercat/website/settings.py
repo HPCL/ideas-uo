@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
 from pathlib import Path
-import os
 import json
 from django.contrib.messages import constants as messages
 
@@ -153,13 +152,13 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # REPOS_DIR is the directory with the repositories that meercat will analyze
-REPOS_DIR = BASE_DIR / '..'
+REPOS_DIR = BASE_DIR.parent
 
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # GitHub OAuth client ID. This is public information.
 GH_CLIENT_ID = 'e7c936f5c399dc9a9184'
