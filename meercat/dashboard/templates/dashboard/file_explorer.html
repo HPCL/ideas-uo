@@ -184,45 +184,65 @@
                 </td>
             </tr>
             {% endfor %}
+          {% endif %}
+        </tbody>
+    </table>
+
+    
+
+    {% if doxygen_supported %}
+
+        <h3>Doxygen Status:</h3>
+
+        <div>
+            {% if doxygen_new_file %}
+                Issues found with file:         
+                <button class='btn btn-sm btn-primary' onclick='showDoxygenEditor("{{file}}","{{doxygen_new_file}}","{{doxygen_comments}}");'>View File in Editor</button>
+            {% else %}
+                <i>{{doxygen_comments}}</i>
             {% endif %}
-          </tbody>
-        </table>
+            <br/>
+            <br/>
+        </div>
+
+    {% endif %}
+
 
 
     <h3>Developers:</h3>
 
 
-                <table class="table" style="border:1px solid black;margin-left:auto;margin-right:auto;">
-                  <thead style="text-align:center">
-                    <tr>
-                        <th>Author</th>
-                        <th>Total number of commits</th>
-                        <th>Total lines changed</th>
-                        <th>Date of last commit</th>
-                        <th>Link to last commit</th>
-                    </tr>
-                  </thead>
-                  <tbody style="text-align:center">
-                    {% for author in authors %}
-                    <tr>
-                        <td><a href="#" onclick="$('#myModal').modal('show');">{{author.author.username}} - {{author.author.email}}</a></td>
-                        <td>{{author.number_commits}}</td>
-                        <td>{{author.lines}}</td>
-                        <td>{{author.most_recent_commit}}</td>
-                        <td><a href="{{project.source_url|slice:"0:-4"}}/commit/{{author.link}}">Go to commit on GitHub</a></td>
-                    </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
-                {% if authors_len == 0 %}
-                    <div class='alert alert-warning'>
-                    Possible reasons for an empty table:
-                    <ul>
-                        <li>File moved/restructured (and not touched since)</li>
-                        <li>File imported from outside of project (and not touched since)</li>
-                    </ul>
-                    </div>
-                {% endif %}
+    <table class="table" style="border:1px solid black;margin-left:auto;margin-right:auto;">
+      <thead style="text-align:center">
+        <tr>
+            <th>Author</th>
+            <th>Total number of commits</th>
+            <th>Total lines changed</th>
+            <th>Date of last commit</th>
+            <th>Link to last commit</th>
+        </tr>
+      </thead>
+      <tbody style="text-align:center">
+        {% for author in authors %}
+        <tr>
+            <td><a href="#" onclick="$('#myModal').modal('show');">{{author.author.username}} - {{author.author.email}}</a></td>
+            <td>{{author.number_commits}}</td>
+            <td>{{author.lines}}</td>
+            <td>{{author.most_recent_commit}}</td>
+            <td><a href="{{project.source_url|slice:"0:-4"}}/commit/{{author.link}}">Go to commit on GitHub</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% if authors_len == 0 %}
+        <div class='alert alert-warning'>
+        Possible reasons for an empty table:
+        <ul>
+            <li>File moved/restructured (and not touched since)</li>
+            <li>File imported from outside of project (and not touched since)</li>
+        </ul>
+        </div>
+    {% endif %}
 
 
 

@@ -46,6 +46,7 @@ from dashboard.utilities import (
     fortran_doxygen_template,
     gmail_send_message,
     save_debug_event,
+    dox_script,
 )
 from dashboard.author_merger_tool import AuthorMergerTool
 
@@ -2427,7 +2428,9 @@ def file_explorer(request, *args, **kwargs):
              'authors_len': len(dev_table),
              'functions_supported': True if function_table else False,
              'functions':function_table,
-             'prs':prs_table
+             'prs':prs_table,
+             'doxygen_new_file':'',
+             'doxygen_comments':'',
              }
     """
 
@@ -2656,7 +2659,11 @@ def file_explorer_function(proj_id, project_object, project_info, branch, filena
 
     file_table = all_files[0][1:] if all_files else []
 
-    # TODO: if file is F90 check for missing doxygen
+    # If file is F90 check for missing doxygen
+    new_file = ''
+    comments = 'File type not supported. Nothing done.'
+    if filename.endswith(".F90"):
+        new_file, comments = dox_script( str(settings.REPOS_DIR)+'/'+proj_name, filename)
 
     context = {
         "file": filename,
@@ -2669,6 +2676,9 @@ def file_explorer_function(proj_id, project_object, project_info, branch, filena
         "supports_test_hunt": project_info["supports_test_hunt"],
         "functions": file_table,  # [[all sigs], status]
         "prs": prs_table,
+        "doxygen_supported":filename.endswith(".F90"),
+        "doxygen_new_file":new_file,
+        "doxygen_comments":comments,
     }
     return context
 
