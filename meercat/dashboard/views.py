@@ -147,6 +147,7 @@ def subscriptions(request):
         )
         print(request.user.profile.subscriptions)
         request.user.profile.save()
+        messages.success(request, 'Your subscriptions were saved successfullly')
 
     projects = Project.objects.filter(project_role__user=request.user)
 
@@ -154,7 +155,7 @@ def subscriptions(request):
     project_names = []
     for project in projects:
         project_names.append(project.name)
-        files[project.name] = list_project_files(project)
+        files[project.name] = list_project_files(project.name)
 
     subscriptions = request.user.profile.subscriptions
 
@@ -2356,11 +2357,13 @@ def folder_explorer(request, *args, **kwargs):
         )
 
     proj_object = proj_list[0]
+    files = list_project_files(proj_object.name, folder, branch)
 
     context = {
         "folder": folder,
         "project": project,
         "branch": branch,
+        'files': files
     }
 
     return HttpResponse(template.render(context, request))
