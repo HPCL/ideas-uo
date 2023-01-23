@@ -120,10 +120,17 @@ class FileMetric(models.Model):
     datetime = models.DateTimeField()
     metric_type = models.CharField(max_length=25, choices=MetricTypeChoices.choices)
     file_path = models.FilePathField(max_length=256)
-    branch = models.TextField()
+    branch = models.CharField(max_length=256)
     result_string = models.TextField(blank=True)
     result_json = models.JSONField(blank=True, default=dict)
-    
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['project', 'metric_type', 'file_path', 'branch'], name='unique_file_metric'
+            )
+        ]
+
 class ProjectRole(models.Model):
 
     class RoleChoices(models.TextChoices):
