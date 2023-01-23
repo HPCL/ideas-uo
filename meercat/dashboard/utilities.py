@@ -5,7 +5,7 @@ import re
 import requests
 from datetime import datetime
 from google.oauth2.credentials import Credentials
-from git import Repo
+#from git import Repo
 
 from django.conf import settings
 from database.models import EventLog
