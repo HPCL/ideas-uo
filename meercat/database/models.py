@@ -122,7 +122,7 @@ class FileMetric(models.Model):
     file_path = models.FilePathField(max_length=256)
     branch = models.CharField(max_length=256)
     result_string = models.TextField(blank=True)
-    result_json = models.JSONField(blank=True, default=dict)
+    result_json = models.JSONField(blank=True, null=True)
 
     class Meta:
         constraints = [
