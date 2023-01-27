@@ -735,6 +735,7 @@ class Patterns(Fetcher):
 
         results = authors_commits_df
 
+        # more knowledge is assigned to the developers that modified the file most times
         if(metric == 'mul-changes-equal'):
             #copied *1
             tot_commits_per_file = pd.DataFrame(d.groupby(['filepath'])[locc_metric].sum())
@@ -769,6 +770,7 @@ class Patterns(Fetcher):
             #display(authors_commits_df.head(5))
             results = authors_commits_df
 
+        # assigns all knowledge of a file to the last developer that modified that file
         elif(metric == 'last-change-all'):
             d = work_df[['filepath', 'unique_author']].copy()
             d.sort_values(by=['filepath'], inplace=True)
@@ -810,6 +812,7 @@ class Patterns(Fetcher):
             d.reset_index(level=d.index.names, inplace=True)
             #display(d.head(7))
 
+            # assesses the developer’s knowledge according to the number of non-consecutive changes on the file
             if(metric == 'non-consec-changes'):
                 #eliminating consective commits and keeping the one with max locc_metric value
                 for ind in range(len(d.index) - 1):
@@ -825,6 +828,8 @@ class Patterns(Fetcher):
                             d.iat[ind, d.columns.get_loc(locc_metric)] = 0
                     #display(d.head(5))
 
+            # takes into account the position of the modifications in the timeline evolution of the file. 
+            # It is used to assign incremental importance to the later modifications on the file.
             elif(metric == 'weighted-non-consec'):
                 #multiplying by weight to locc_metric for a file depending upon order
                 weight = 1
