@@ -730,8 +730,11 @@ class Patterns(Fetcher):
         authors_commits_df = pd.DataFrame(d.groupby(['unique_author'])[locc_metric].sum())
         authors_commits_df.reset_index(level=authors_commits_df.index.names, inplace=True)
         tot_developers = len(authors_commits_df.index)
-        primary_X = 1/tot_developers
-        secondary_X = primary_X/2
+        primary_X = 0
+        secondary_X = 0
+        if tot_developers != 0:
+            primary_X = 1/tot_developers
+            secondary_X = primary_X/2
 
         results = authors_commits_df
 
