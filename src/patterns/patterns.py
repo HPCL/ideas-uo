@@ -601,13 +601,14 @@ class Patterns(Fetcher):
         return sorted_hot_files, stats_df
 
     def extract_directories(self):
-        """Attempt to automatically identify external sources and exclude them from analysis"""
+        """Extracting names of all the subdirectories in the src directory"""
         print("INFO: Extracting head directories from filepaths...")
         extracted_col = self.commit_data["filepath"]
         df = pd.DataFrame(extracted_col)
         filepaths = df["filepath"].tolist()
         
-        # extracting the name of head directory from each filepath
+        # extracting the names of head directory from each filepath e.g. directories in src/ for the petsc project 
+        # include vec, mat, ksp, etc
         for i in range(len(filepaths)):
             temp = filepaths[i]
             if(filepaths[i].find('src/') != -1):
@@ -624,7 +625,6 @@ class Patterns(Fetcher):
 
         # copying the directory names back to the extracted_col df
         df["directory"] = filepaths
-        display(df.head(5))
         # updating global dataframe
         self.commit_data["directory"] = df["directory"]
 
@@ -636,7 +636,6 @@ class Patterns(Fetcher):
         if 'unique_author' not in self.commit_data.columns:
             self.set_unique_authors()
 
-        print("not in the if")
         if 'directory' not in self.commit_data.columns:
             self.extract_directories()
         
