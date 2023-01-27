@@ -624,7 +624,7 @@ class Patterns(Fetcher):
 
         # copying the directory names back to the extracted_col df
         df["directory"] = filepaths
-        df.head(5)
+        display(df.head(5))
         # updating global dataframe
         self.commit_data["directory"] = df["directory"]
 
