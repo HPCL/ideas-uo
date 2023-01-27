@@ -636,9 +636,9 @@ class Patterns(Fetcher):
         if 'unique_author' not in self.commit_data.columns:
             self.set_unique_authors()
 
+        print("not in the if")
         if 'directory' not in self.commit_data.columns:
             self.extract_directories()
-            print("In this if")
         
         if my_df.empty:
             work_df, stats = self.get_time_range_df(time_range, sum=False)
