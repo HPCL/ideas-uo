@@ -629,7 +629,10 @@ class Patterns(Fetcher):
         self.commit_data["directory"] = df["directory"]
 
     def make_directory_developer_df(self, top_N=-1, locc_metric='change-size-cos', time_range=None, my_df=pd.DataFrame()):
-        
+        """
+        Create the directories x developers matrix and return the 
+        sorted list of directories based on authors' 'knowledge'/concept
+        """
         print("INFO: Creating developer matrix...")
 
         # Create the directory x developers matrix, using the value_column parameter as the values

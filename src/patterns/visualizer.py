@@ -380,7 +380,15 @@ class Visualizer(Patterns):
                     dpi=self.config['output_dpi'], bbox_inches='tight')
 
     def plot_top_N_concept_heatmap(self, top_N=10, locc_metric='change-size-cos', time_range=None, my_df=pd.DataFrame()):
-        
+        """
+        In this function we take the directories x developer matrix dataframe and reorder
+        it by sorting developer columns by total contributions and then extracting the
+        top N most-touched directories for the top N most active developers.
+        The my_df argument is assuming you know how to create and pass the directories 
+        vs developers dataframe. The top N most-touched directories for the top N most active 
+        developers basically shows that they have the most knowledge/concept about them.
+        Lastly, make a lovely heatmap from the data extracted.
+        """
         sorted_hot_files, stats_df = self.make_directory_developer_df(top_N=top_N, locc_metric=locc_metric, time_range=time_range, my_df=my_df)
 
         # Figure out number formatting (this is horribly inefficient, I'm sure there is a better way)
@@ -389,6 +397,7 @@ class Visualizer(Patterns):
         else:
             number_fmt = '.1f'
 
+        print("INFO: Creating heatmap for top developers...")
         # make a lovely heatmap
         fig, ax = plt.subplots(figsize=(top_N + 2, top_N))  # Sample figsize in inches
         if sorted_hot_files.empty:
