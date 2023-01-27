@@ -601,6 +601,7 @@ class Patterns(Fetcher):
         return sorted_hot_files, stats_df
 
     def extract_directories(self):
+        """Attempt to automatically identify external sources and exclude them from analysis"""
         print("INFO: Extracting head directories from filepaths...")
         extracted_col = self.commit_data["filepath"]
         df = pd.DataFrame(extracted_col)
@@ -623,6 +624,7 @@ class Patterns(Fetcher):
 
         # copying the directory names back to the extracted_col df
         df["directory"] = filepaths
+        df.head(5)
         # updating global dataframe
         self.commit_data["directory"] = df["directory"]
 
