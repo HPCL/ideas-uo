@@ -417,6 +417,7 @@ class Visualizer(Patterns):
         return sorted_hot_files
 
     def bus_factor_CST(self, locc_metric='change-size-cos', metric='mul-changes-equal', time_range=None, my_df=pd.DataFrame()):
+        """Gets the bus factor data for CST algorithm and prints it for the user"""
         tot_developers, prim_devs, secon_devs, bus_factor, results = self.get_busfactor_data(locc_metric=locc_metric, metric=metric, time_range=time_range, my_df=my_df)
 
         display(results.head(5))
@@ -427,5 +428,6 @@ class Visualizer(Patterns):
         print("Bus Factor: ", bus_factor)
 
     def get_unique_authors(self):
+        """Auxiliary function for the RIG bus factor algorithm. Just fetches the unique authors in a project"""
         authors_data = self.set_unique_authors()
         return authors_data

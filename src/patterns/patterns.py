@@ -697,6 +697,7 @@ class Patterns(Fetcher):
         return sorted_hot_directories, stats_df
 
     def get_busfactor_data(self, locc_metric='change-size-cos', metric='mul-changes-equal', time_range=None, my_df=pd.DataFrame()):
+        """Calculates bus factor based on the four CST algorithm metrics based on the locc_metric provided by the user"""
         print("INFO: Creating developer matrix...")
 
         # Create the files x developers matrix, using the value_column parameter as the values
