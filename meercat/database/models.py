@@ -97,6 +97,12 @@ class Project(models.Model):
     has_gitlab = models.BooleanField(default=False)
     github_last_updated = models.DateTimeField(auto_now=True, null=True)
     gitlab_last_updated = models.DateTimeField(auto_now=True, null=True)
+    complete_ignore_extensions = models.JSONField(blank=True, default=list)
+    complete_ignore_filenames = models.JSONField(blank=True, default=list)
+    documentation_ignore_extensions = models.JSONField(blank=True, default=list)
+    documentation_ignore_filenames = models.JSONField(blank=True, default=list)
+    doctype = models.CharField(max_length=64, blank=True)
+    language = models.CharField(max_length=64, blank=True)
     fork_of = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True, related_name='project_fork_of')
     child_of = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True, related_name='project_child_of')
 
