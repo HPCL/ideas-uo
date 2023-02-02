@@ -101,8 +101,7 @@ class Project(models.Model):
     complete_ignore_filenames = models.JSONField(blank=True, default=list)
     documentation_ignore_extensions = models.JSONField(blank=True, default=list)
     documentation_ignore_filenames = models.JSONField(blank=True, default=list)
-    doctype = models.CharField(max_length=64, blank=True)
-    language = models.CharField(max_length=64, blank=True)
+    doctypes = models.JSONField(blank=True, default=dict)
     fork_of = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True, related_name='project_fork_of')
     child_of = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True, related_name='project_child_of')
 
