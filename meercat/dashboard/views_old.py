@@ -1,7 +1,6 @@
 import datetime
 import json
 import requests
-import os
 
 import configparser
 
@@ -20,7 +19,7 @@ import re
 
 import sys
 
-sys.path.insert(1, "/shared/soft/ideas-uo/src")
+sys.path.insert(1, "/shared/soft/ideas_db/ideas-uo/src")
 sys.path.insert(1, "../src")
 from gitutils.github_api import GitHubAPIClient
 
@@ -169,357 +168,6 @@ def subscriptions(request):
 
     return render(request, "dashboard/subscriptions.html", context)
 
-# localhost:8080/dashboard/firstresponder/30?prid=17479
-def firstresponder(request, *args, **kwargs):
-
-    # template = loader.get_template('dashboard/firstresponder.html')
-
-    # Get PR id
-    if kwargs["pk"]:
-        proj_id = int(kwargs["pk"])
-    else:
-        return HttpResponse(
-            json.dumps("Missing project"), content_type="application/json"
-        )
-
-    proj_list = list(Project.objects.all().filter(id=proj_id).all())
-    if not proj_list:
-        return HttpResponse(
-            json.dumps(f"Unknown project {proj_id}"), content_type="application/json"
-        )
-
-    proj_object = proj_list[0]
-
-    if request.GET.get("prid"):
-        pr_id = request.GET.get("prid")
-    else:
-        return HttpResponse(
-            json.dumps(f"Missing Pull Request number"), content_type="application/json"
-        )
-
-    pr_list = list(PullRequest.objects.all().filter(id=pr_id).all())
-    if not pr_list:
-        return HttpResponse(
-            json.dumps(f"Illegal Pull Request number {pr_id}"),
-            content_type="application/json",
-        )
-
-    pull_object = pr_list[0]
-
-    message, all_contexts = first_responder_function(proj_object, pull_object)
-
-    print(f'{message = }')
-    print(f'all_contexts[0] = {all_contexts}')
-
-    return HttpResponse(json.dumps([message,all_contexts]), content_type="application/json")
-
-
-def first_responder_function(proj_object, pull_object):
-    proj_name = proj_object.name  # get project name
-    proj_id = proj_object.id
-
-    # get set up on right feature branch
-    commits_list = list(
-        Commit.objects.all().filter(
-            hash__in=[committag.sha for committag in pull_object.commits.all()]
-        )
-    )
-    assert commits_list, f"No commits found for {proj_id}"
-
-    commit_messages = [c.message for c in commits_list]
-
-    branch = commits_list[0].branch.split()[-1]
-    cmd = f"cd {settings.REPOS_DIR}/{proj_name} ; git checkout {branch}"
-
-    try:
-        import os
-        os.system(cmd)
-    except:
-        assert False, f"Failure to checkout branch {cmd}"
-
-    # get all files in PR
-    diffs = list(Diff.objects.all().filter(commit__in=[c for c in commits_list]))
-    filenames = [d.file_path for d in diffs]
-    # Get just unique filenames
-    filenames_set = set(filenames)
-    filenames = list(filenames_set)
-
-    all_contexts = {}
-
-    for filename in filenames:
-        context = file_explorer_handler(proj_object, filename, branch)
-        all_contexts[filename] = context
-    
-    '''
-    context = dict(supports_callgraph= False,  #none yet
-                    supports_test_hunt= False, #none yet
-                    file=filename,
-                    branch= branch,
-                    project= proj_object.name,
-                    complete_ignore',
-                    context['documentation'] = documentation_status
-                    context['dev_table'] = dev_table
-                    context['function_table'] = subroutine_table
-                    context['number_of_functions'] = len(subroutine_table)
-                    context['pull_requests'] = pr_links_table
-                    context['linting_table'] = None
-    '''
-
-    '''
-    documentation_status:
-    'ignore_status'
-    'check_status'
-    'doc_status'
-    'problem_lines'  [(msg, line)]
-    '''
-
-    #Find the files with documentation problems, i.e., that have the field 'problem_lines'
-    doc_problems = []
-    for filename,context in all_contexts.items():
-        documentation_status = context['documentation']  #a dictionary - see above
-        if 'problem_lines' in documentation_status:
-            doc_problems.append([filename, documentation_status['problem_lines']]) 
-
-    total_doc_problems = len(doc_problems)
-
-    message = f"""## The MeerCat Pull-Request Assistant has information for you
-
-## {total_doc_problems} file(s) in this PR have documentation issues.
-
-## k files have more linting errors than average (the average).
-
-[Please see the Pull-Request Assistant page for more detail.](http://sansa.cs.uoregon.edu:8888/dashboard/pr/{pull_object.id})
-    """
-
-    # pr_file_intersection = comute_pr_file_intersection(proj_object, filenames)
-    # return [message, all_files, pr_file_intersection]
-    return [message, all_contexts]
-
-def file_explorer_handler(proj_object, filename, branch ):
-    print(f'entering file_explorer_handler with {filename =}')
-    ignore_extensions  = proj_object.documentation_ignore_extensions
-    ignore_filenames =  proj_object.documentation_ignore_filenames
-
-
-    context = dict(supports_callgraph= False,  #none yet
-                    supports_test_hunt= False, #none yet
-                    file=filename,
-                    branch= branch,
-                    project= proj_object.name,
-
-        )
-
-    name, extension = os.path.splitext(filename)
-    #check ignorelist of allowable extensions. If no extension, check for allowed filenames.
-    #If can't find, then assume file should not be checked for documentation.
-    if (extension and (extension in ignore_extensions)) or \
-       (not extension and (filename in ignore_filenames)):
-        context['complete_ignore'] = True
-        return context
-
-    with open(
-        str(settings.REPOS_DIR) + "/" + proj_object.name + "/" + filename, "r") as f:
-        lines = f.readlines()
-        f.close()
-
-    #dict(ignore_status, check_status doc_status, problem_lines [(msg, line), (msg, line)] )
-
-    documentation_status = check_documentation(proj_object, filename, lines)
-
-    dev_table = create_dev_table(proj_object, filename)
-
-    subroutine_table = create_subroutine_table(proj_object, filename, lines)
-
-    pr_links_table = create_pr_links_table(proj_object, filename)
-
-    #linting_table = create_linting_table(proj_object, lines)
-
-    context['documentation'] = documentation_status
-    context['dev_table'] = dev_table
-    context['function_table'] = subroutine_table
-    context['number_of_functions'] = len(subroutine_table)
-    context['pull_requests'] = pr_links_table
-    context['linting_table'] = None
-
-    return context
-
-#dict(ignore_status, check_status doc_status, problem_lines [(msg, line), (msg, line)] )
-def check_documentation(proj_object, filename, lines):
-    name, extension = os.path.splitext(filename)
-
-    doctypes = proj_object.doctypes
-
-    return_dict = dict()
-
-    return_dict['ignore_status'] = False   #probably should remove this field. Assuming False to even call this function.
-
-    #go through combinations of language-doctype
-
-    if not doctypes or extension not in doctypes:
-        return_dict['check_status'] = False
-        return return_dict
-
-    if extension == '.F90' and doctypes[extension] == 'doxygen':
-        return_dict['check_status'] = True
-        for line in lines:
-            if line.startswith('!! @'):
-                return_dict['doc_status'] = True
-                break
-        else:
-            return_dict['doc_status'] = False
-            return_dict['problem_lines'] = [("Please see project documentation for converting to Doxygen", 0)]
-        return return_dict
-    
-    #find index of first line after signature
-    def parse_python_def(k):
-        while k<len(lines):
-            if ')' in lines[k]:  #simply look for closing paren
-                return k+1
-            k += 1
-        return k
-
-    #Make sure every signature is followed by ''' comments.
-    #Not currently checking for type, e.g., numpy, google. Just docstring.
-
-    if extension == '.py' and doctypes[extension] == 'docstring':
-        return_dict['check_status'] = True
-        problem_lines = []
-        i = 0
-        while i<len(lines):
-            if lines[i].startswith('def'):
-                j = parse_python_def(i)  # j is line after signature
-
-                #skip over white space
-                while lines[j].strip() == "":
-                    j += 1
-                    if j>=len(lines):
-                        break
-
-                # check for triple quotes
-                if j<len(lines) and lines[j].strip() in ["'''", '"""']:
-                    i = j+1
-                    continue
-                else:
-                    problem_lines.append(("Missing docstring", j))
-                    i += 1
-            else:
-                i += 1
-        if problem_lines:
-            return_dict['doc_status'] = False
-            return_dict['problem_lines'] = problem_lines
-        else:
-            return_dict['doc_status'] = True
-        return return_dict 
-
-    #others go here eventually,, e.g., c-doxygen, etc.
-
-    #if not currently checking combo
-    return_dict['check_status'] = False
-    return return_dict
-
-def create_dev_table(proj_object, filename):
-    # Build developer table
-
-    diffs = (
-        Diff.objects.all()
-        .filter(commit__project=proj_object, file_path=filename)
-        .all()
-    )
-
-    #compute lines of code for each author
-    author_loc = {}
-    for d in diffs:
-        body = d.body
-        author = d.commit.author
-        loc_count = body.count("\n+") + body.count("\n-")
-        if author in author_loc:
-            author_loc[author] += loc_count
-        else:
-            author_loc[author] = loc_count
-
-    # Get commits, authors for those (diffs)
-
-    info = [(d.commit.datetime, d.commit.author, d.commit.hash) for d in diffs]
-    commit_messages = [d.commit.message for d in diffs]
-    commit_hashes = [d.commit.hash for d in diffs]
-
-    tags = CommitTag.objects.all().filter(sha__in=commit_hashes)  #used later for prs
-
-    #how many commits per author
-    author_count = {}
-    for date, author, link in info:
-        if author in author_count:
-            author_count[author] += 1
-        else:
-            author_count[author] = 1
-
-    new_info = []
-    authors = []
-    for date, author, link in sorted(info, reverse=False):
-        if author in authors:
-            continue
-        new_info.append((date, author, author_count[author], author_loc[author], link))
-        authors.append(author)
-
-    # see here for avoiding author alisases: https://towardsdatascience.com/string-matching-with-fuzzywuzzy-e982c61f8a84
-    # combine counts for same author with different aliases.
-
-    dev_table = [
-        {
-            "author": author.username+' - '+author.email,
-            "number_commits": count,
-            "lines": loc,
-            "most_recent_commit": date,
-            "commit_link": link,
-        }
-        for date, author, count, loc, link in new_info
-    ]
-
-    return dev_table
-
-def create_pr_links_table(proj_object, filename):
-
-    diffs = (
-        Diff.objects.all()
-        .filter(commit__project=proj_object, file_path=filename)
-        .all()
-    )
-
-    commit_hashes = [d.commit.hash for d in diffs]
-
-    tags = CommitTag.objects.all().filter(sha__in=commit_hashes)
-
-    prs = list(
-        set(PullRequest.objects.all().filter(commits__in=tags))
-    )  # all prs that go with file commits
-
-    return [(pr.number, pr.url, pr.title) for pr in prs]
-
-
-def create_subroutine_table(proj_object, filename, lines):
-
-    name, extension = os.path.splitext(filename)
-
-    functions = []
-
-    #F90
-    if extension == '.F90':
-        for line in lines:
-            if line.startswith('subroutine'):
-                functions.append(line)
-        return functions
-    
-    #Python
-    if extension == '.py':
-        for line in lines:
-            if line.startswith('def'):
-                functions.append(line)
-        return functions
-
-    #others go here eventually,, e.g., c, etc.
-
-    #if not currently checking combo
-    return []
 
 # Project view - should list general project info
 def project(request, *args, **kwargs):
@@ -696,10 +344,10 @@ def pr(request, *args, **kwargs):
         print(cmd)
         try:
             os.system(cmd)
-            #result = subprocess.check_output(cmd, shell=True)
-            #print(result)
-        except Exception as e:
-            return [e, [f"Failure to checkout branch {cmd}"]]
+            result = subprocess.check_output(cmd, shell=True)
+            print(result)
+        except:
+            return ["", [f"Failure to checkout branch {cmd}"]]
 
     context = {
         "pr": pr,
@@ -772,7 +420,7 @@ def refreshProject(request):
 
     try:
         # cmd = f'cd /shared/soft/ideas_db/ideas-uo/meercat/.. ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {pid}'
-        cmd = f"cd {settings.REPOS_DIR} ; . meercat/meercat-env/bin/activate ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {pid}"
+        cmd = f"cd {settings.REPOS_DIR} ; . meercat/env/bin/activate ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {pid}"
         os.system(cmd)
         result = subprocess.check_output(cmd, shell=True)
         # print(result)
@@ -947,7 +595,7 @@ def diffCommitData(request):
                     + str(settings.REPOS_DIR)
                     + "/"
                     + pr.project.name
-                    + " ; . ../meercat/meercat-env/bin/activate ; pylint --output-format=json "
+                    + " ; . ../meercat/env/bin/activate ; pylint --output-format=json "
                     + filename
                 ).read()
                 linter_results.append(
@@ -963,7 +611,7 @@ def diffCommitData(request):
                 + str(settings.REPOS_DIR)
                 + "/"
                 + pr.project.name
-                + " ; . ../meercat/meercat-env/bin/activate ; fortran-linter "
+                + " ; . ../meercat/env/bin/activate ; fortran-linter "
                 + str(settings.REPOS_DIR)
                 + "/"
                 + pr.project.name
@@ -987,7 +635,7 @@ def diffCommitData(request):
                 + str(settings.REPOS_DIR)
                 + "/"
                 + pr.project.name
-                + " ; . ../meercat/meercat-env/bin/activate ; cpplint --filter=-whitespace "
+                + " ; . ../meercat/env/bin/activate ; cpplint --filter=-whitespace "
                 + str(settings.REPOS_DIR)
                 + "/"
                 + pr.project.name
@@ -1195,7 +843,7 @@ def getFile(request):
             + str(settings.REPOS_DIR)
             + "/"
             + pr.project.name
-            + " ; . ../meercat/meercat-env/bin/activate ; pylint --output-format=json "
+            + " ; . ../meercat/env/bin/activate ; pylint --output-format=json "
             + filename
         ).read()
         linter_results = json.loads(output)
@@ -1209,7 +857,7 @@ def getFile(request):
             + str(settings.REPOS_DIR)
             + "/"
             + pr.project.name
-            + " ; . ../meercat/meercat-env/bin/activate ; fortran-linter "
+            + " ; . ../meercat/env/bin/activate ; fortran-linter "
             + str(settings.REPOS_DIR)
             + "/"
             + pr.project.name
@@ -1229,7 +877,7 @@ def getFile(request):
             + str(settings.REPOS_DIR)
             + "/"
             + pr.project.name
-            + " ; . ../meercat/meercat-env/bin/activate ; cpplint --filter=-whitespace "
+            + " ; . ../meercat/env/bin/activate ; cpplint --filter=-whitespace "
             + str(settings.REPOS_DIR)
             + "/"
             + pr.project.name
@@ -1478,7 +1126,7 @@ def githubBot(request):
         username = settings.DATABASES["default"]["USER"]
         password = settings.DATABASES["default"]["PASSWORD"]
         # cmd = f'cd .. ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {project.id}'
-        cmd = f"cd {settings.REPOS_DIR} ; . meercat/meercat-env/bin/activate ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {project.id}"
+        cmd = f"cd {settings.REPOS_DIR} ; . meercat/env/bin/activate ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {project.id}"
         os.system(cmd)
         result = subprocess.check_output(cmd, shell=True)
 
@@ -1718,7 +1366,7 @@ def countlinespython(start, lines=0, header=True, begin_start=None):
         thing = os.path.join(start, thing)
         if os.path.isfile(thing):
             if thing.endswith(".py"):
-                with open(thing, "r", errors='ignore') as f:
+                with open(thing, "r") as f:
                     newlines = f.readlines()
                     newlines = len(newlines)
                     lines += newlines
@@ -1738,7 +1386,7 @@ def countlinesfortran(start, lines=0, header=True, begin_start=None):
         thing = os.path.join(start, thing)
         if os.path.isfile(thing):
             if thing.endswith(".F90"):
-                with open(thing, "r", errors='ignore') as f:
+                with open(thing, "r") as f:
                     newlines = f.readlines()
                     newlines = len(newlines)
                     lines += newlines
@@ -1758,7 +1406,7 @@ def countlinesc(start, lines=0, header=True, begin_start=None):
         thing = os.path.join(start, thing)
         if os.path.isfile(thing):
             if thing.endswith(".c") or thing.endswith(".h") or thing.endswith(".cpp"):
-                with open(thing, "r", errors='ignore') as f:
+                with open(thing, "r") as f:
                     try:
                         newlines = f.readlines()
                         newlines = len(newlines)
@@ -1808,7 +1456,148 @@ def hasAccessToPR(user, pr_id):
     return ProjectRole.objects.filter(user__id=user.id, project=project_id).exists()
 
 
+# localhost:8080/dashboard/firstresponder/26?prid=17
+def firstresponder(request, *args, **kwargs):
 
+    # template = loader.get_template('dashboard/firstresponder.html')
+
+    # Get PR id
+    if kwargs["pk"]:
+        proj_id = int(kwargs["pk"])
+    else:
+        return HttpResponse(
+            json.dumps("Missing project"), content_type="application/json"
+        )
+
+    project_info = get_project_info(proj_id)
+
+    if project_info == None:
+        return HttpResponse(
+            json.dumps(f"Project id missing from project_info {proj_id}"),
+            content_type="application/json",
+        )
+
+    proj_list = list(Project.objects.all().filter(id=proj_id).all())
+    if not proj_list:
+        return HttpResponse(
+            json.dumps(f"Unknown project {proj_id}"), content_type="application/json"
+        )
+
+    proj_object = proj_list[0]
+
+    # proj_name =
+
+    if request.GET.get("prid"):
+        pr_id = request.GET.get("prid")
+    else:
+        return HttpResponse(
+            json.dumps(f"Missing Pull Request number"), content_type="application/json"
+        )
+
+    pr_list = list(PullRequest.objects.all().filter(id=pr_id).all())
+    if not pr_list:
+        return HttpResponse(
+            json.dumps(f"Illegal Pull Request number {pr_id}"),
+            content_type="application/json",
+        )
+
+    pr_object = pr_list[0]
+
+    pr_info = first_responder_function(proj_object, pr_object)
+
+    return HttpResponse(json.dumps(pr_info), content_type="application/json")
+
+
+def first_responder_function(proj_object, pr_object):
+    proj_name = proj_object.name  # get project name
+    proj_id = proj_object.id
+    project_info = get_project_info(proj_id)  # see functions at end
+    assert project_info != None, f"Project id missing from project_info {proj_id}"
+    docstring_kind = project_info["docstring_kind"]  # None if does not exist
+
+    # get set up on right feature branch
+    commits_list = list(
+        Commit.objects.all().filter(
+            hash__in=[committag.sha for committag in pr_object.commits.all()]
+        )
+    )
+    assert commits_list, f"No commits found for {proj_id}"
+
+    commit_messages = [c.message for c in commits_list]
+
+    branch = commits_list[0].branch
+    cmd = f"cd {settings.REPOS_DIR}/{proj_name} ; git checkout {branch}"
+    try:
+        import os
+        os.system(cmd)
+    except:
+        assert False, f"Failure to checkout branch {cmd}"
+
+    # get all files in PR
+    diffs = list(Diff.objects.all().filter(commit__in=[c for c in commits_list]))
+    filenames = [d.file_path for d in diffs]
+    # Get just unique filenames
+    filenames_set = set(filenames)
+    filenames = list(filenames_set)
+
+    if proj_id == 26 or proj_id == 35:
+        all_files = handle_flash(proj_object, filenames, project_info)
+    elif proj_id == 30:
+        all_files = handle_anl_test_repo(proj_object, filenames, project_info)
+    elif proj_id == 32:
+        all_files = handle_hypre(proj_object, filenames, project_info)
+    elif proj_id == 38:
+        all_files = handle_warpx(proj_object, filenames, project_info)
+    else:
+        all_files = []
+
+    # finished with all files in PR
+
+    # all_files:
+    #   name, file_table
+    #       {'signature_name': sig, 'signature_params':params, 'docstring': doc_info, 'result': all_issues}
+    #       {'signature_name': sig, 'signature_params':params, 'docstring': doc_info, 'result': all_issues}
+    #       ...
+    #       where doc_info = (doc, doc_start, doc_end, fields, doc_params)
+    #    'status' i.e., 'checked', 'ignored', 'currently unalyzable'
+    if all_files:
+        k = 0
+        n = len(all_files)
+        for name, ft, status in all_files:
+            if status != "checked":
+                continue
+            for sig_dict in ft:
+                if sig_dict["result"]:
+                    k += 1
+                    break
+
+        message = f"""## The MeerCat Pull-Request Assistant has information for you
+
+## {k} out of {n} files in this PR were found to have issues.
+
+## We have suggestions for adding tags.
+
+## We have suggestions for adding more people to the discussion.
+
+[Please see the Pull-Request Assistant page for more detail.](http://sansa.cs.uoregon.edu:8888/dashboard/pr/{pr_object.id})
+    """
+
+    else:
+
+        message = f"""## The MeerCat Pull-Request Assistant has information for you
+
+## No files in this PR were analyzed.
+
+## We have suggestions for adding tags.
+
+## We have suggestions for adding more people to the discussion.
+
+[Please see the Pull-Request Assistant page for more detail.](http://sansa.cs.uoregon.edu:8888/dashboard/pr/{pr_object.id})
+    """
+
+    # pr_file_intersection = comute_pr_file_intersection(proj_object, filenames)
+    # return [message, all_files, pr_file_intersection]
+    return [message, all_files]
 
 
 def handle_hypre(proj_object, filenames, project_info):
@@ -2355,65 +2144,345 @@ def file_explorer(request, *args, **kwargs):
             json.dumps(f"Missing filename"), content_type="application/json"
         )
 
+    project_info = get_project_info(proj_id)
+    if project_info == None:
+        return HttpResponse(
+            json.dumps(f"Project id missing from project_info {proj_id}"),
+            content_type="application/json",
+        )
+
     proj_object = proj_list[0]
 
-    context = file_explorer_handler(proj_object, filename, branch)
+    context = file_explorer_function(
+        proj_id, proj_object, project_info, branch, filename
+    )
+    """
+    context = {'file':filename,
+             'project': project,
+             'language': extension,
+             'documentation': docstring_kind,
+             'branch':branch,
+             'authors':dev_table,
+             'authors_len': len(dev_table),
+             'functions_supported': True if function_table else False,
+             'functions':function_table,
+             'prs':prs_table,
+             'doxygen_new_file':'',
+             'doxygen_comments':'',
+             }
+    """
 
     return HttpResponse(template.render(context, request))
 
+def handle_flash_x(proj_object, filenames, lines):
+    proj_id = proj_object.id  # proj_id==35: Flash-X
+    proj_name = proj_object.name
 
+    file_lines = []
+    
+    for filename in filenames:
+        if os.path.isfile(str(settings.REPOS_DIR) + "/" + proj_name + "/" + filename):
+            name, extension = os.path.splitext(filename)
+            if (extension and extension in project_info["extensions"]) or (
+                not extension and filename in project_info["filenames"]
+            ):
+                with open(
+                    str(settings.REPOS_DIR) + "/" + proj_name + "/" + filename, "r"
+                ) as f:
+                    lines = f.readlines()
+                    f.close()
+                file_lines.append((filename, name, extension, lines))
+            else:
+                print(f"Uncheckable currently: {filename}")
+                file_lines.append((filename, name, extension, None))
 
+    # below is really idiosyncratic to Flash.
+    # a) expect changes to test.toml files to include changes to associated readme.md in same folder
+    # b) subroutines come in 3 flavors: public stub, implementation of stub, private. Documentation will vary
+    # depending on type. stubs show up in top level Unit folder. Implementations show up in UnitMain folder (or below).
+    test_toml_files = []
+    readme_files = []
+    units = [
+        "Driver",
+        "Grid",
+        "Multispecies",
+        "Particles",
+        "PhysicalConstants",
+        "RuntimeParameters",
+        "Simulation",
+    ]
 
-#Checks documentation for a file.
-#Computes developers committing to file in past.
-#Checks if references an Issue 
-def file_explorer_function(project_object, branch, filename):
+    # Gather info on each file in file_lines
+    all_files = []
+
+    for path, name, extension, lines in file_lines:
+
+        if not lines:
+            all_files.append((name + extension, [], "currently uncheckable"))
+            continue  # no lines to check for file
+
+        if name == "test" and extension == ".toml":
+            test_toml_files.append(path)
+            all_files.append((name + extension, [], "currently uncheckable"))
+            continue
+
+        if name == "readme" and extension == ".md":
+            readme_files.append(path)
+            all_files.append((name + extension, [], "currently uncheckable"))
+            continue
+
+        # special to flash - stubs under unit folder (e.g., Grid), implementations under unitMain folder (e.g., GridMain).
+        # However, stub implementations must have same name as stub otherwise private.
+        subtype = tuple()
+
+        if extension == ".F90":
+            # need to figure out which of 3 types: stub, stub implementation, private
+            the_file = os.path.basename(path)
+            the_header = os.path.dirname(path)
+            unit_name = [u for u in units if the_header.endswith(u)]
+            if unit_name:
+                subtype = (unit_name[0], "stub")  # directly under unit folder so stub
+            else:
+                # check if implementation of stub
+                unit_name = [u for u in units if u + "Main" in the_header]
+                if unit_name:
+                    # we know an implementation. But of stub or private? If stub will have same name.
+                    unit_path = (
+                        f"{settings.REPOS_DIR}/{proj_name}/source/{unit_name[0]}"
+                    )
+                    contents = os.listdir(unit_path)
+                    print(unit_path, contents, the_file)
+                    if the_file in contents:
+                        subtype = (unit_name[0], "implementation")
+                    else:
+                        subtype = (unit_name[0], "private")
+
+        # Fortran, C, C++ all have comments preceding subroutine.
+
+        function_info = []
+        i = 0  # start at top of file
+        while i < len(lines):
+            # compute values for sig_name, sig_params, (doc, doc_start, doc_end, fields, doc_params), test_info, all_issues
+
+            # look for robodoc docstring  (*if* says internal)
+            # TODO: get_f90_robodoc_string_plus_sig is not defined anywhere!!!
+            """if lines[i].startswith('!!****f*') or lines[i].startswith('!!****if*'):
+                doc_start = i
+                i, sig_name, sig_params, doc, doc_start, doc_end, fields, doc_params, params_start, issues = get_f90_robodoc_string_plus_sig(lines, i)  #parses out both docstring and signature, i last line of doc
+                issues = issues.append(['Robodoc should be replaced with Doxygen', doc_start])  #assumes want to replace robodoc with doxygen
+                function_info.append((sig_name, sig_params, doc, doc_start, doc_end, fields, doc_params, params_start, issues, subtype))
+
+            #look for doxygen. Not so easy. We cannot tell if doxygen comment is for subroutine or something else. robodoc actually flags it in header.
+            #So search past comment to see if find subroutine. If not, ignore the comment (for now).
+            elif lines[i].startswith('!>'):
+                doc_start = i
+                #check if comment goes with subroutine
+                while i<len(lines) and (lines[i].startswith('!') or lines[i].strip()==''):
+                    i+=1
+
+                if i>=len(lines):
+                    break  #done with file
+
+                #we ran into a line that not comment or blank that follows the doxygen comment. See if subroutine.
+                if not lines[i].startswith('subroutine '):
+                    i+=1
+                    continue  #comment is for something other than subroutine
+
+                #found comment and subroutine
+                i, sig_name, sig_params, doc, doc_start, doc_end, fields, doc_params, params_start, issues = get_f90_doxygen_string_plus_sig(lines, doc_start)  #parses out both docstring and signature, i last line of doc
+                function_info.append((sig_name, sig_params, doc, doc_start, doc_end, fields, doc_params, params_start, issues, subtype))
+
+            #look for subroutine with missing docstring
+            el"""
+            if lines[i].startswith("subroutine "):
+                doc_params = []
+                params_start = 0
+                doc_lines = []
+                doc_fields = []
+                doc_start = 0
+                doc_end = 0
+                # found subroutine while looking for docstring - so missing docstring
+                sub_start = i
+                nodoc_issue = [[f"No docstring for subroutine", sub_start]]
+
+                # deal with multi-line signature - uses & as line continuation
+                while lines[i].find(")") == -1:
+                    i += 1
+                    if i >= len(lines):
+                        i -= 1
+                        lines[i] += ")"  # bit of kludge - adding missing closing paren
+                        break
+
+                # looks good!
+                raw_sig = (
+                    " ".join(lines[sub_start : i + 1])
+                    .strip("\n")
+                    .replace("&", " ")[10:]
+                )
+                sig_name = raw_sig[: raw_sig.find("(")].strip()
+                sig_params = (
+                    raw_sig[raw_sig.find("(") + 1 : raw_sig.find(")")]
+                    .strip()
+                    .split(",")
+                )
+                sig_params = [sp.strip() for sp in sig_params]
+
+                function_info.append(
+                    (
+                        sig_name,
+                        sig_params,
+                        doc_lines,
+                        doc_start,
+                        doc_end,
+                        doc_fields,
+                        doc_params,
+                        params_start,
+                        nodoc_issue,
+                        subtype,
+                    )
+                )  # no doc string
+
+            i += 1  # keep looking through file
+
+        # done looking for docstrings and subroutines in file. Now work on docstring alignment and mandatory fields
+
+        extended_info = []
+        for (
+            sig_name,
+            sig_params,
+            doc,
+            doc_start,
+            doc_end,
+            doc_fields,
+            doc_params,
+            params_start,
+            issues,
+            subtype,
+        ) in function_info:
+
+            # if no doc no reason to check matching
+            if not doc:
+                extended_info.append(
+                    (
+                        sig_name,
+                        sig_params,
+                        doc,
+                        doc_start,
+                        doc_end,
+                        doc_fields,
+                        doc_params,
+                        params_start,
+                        issues,
+                        subtype,
+                    )
+                )  # no doc string found
+                continue
+
+            # if stub implementation no reason to check matching
+            if subtype and subtype[1] == "implementation":
+                extended_info.append(
+                    (
+                        sig_name,
+                        sig_params,
+                        doc,
+                        doc_start,
+                        doc_end,
+                        doc_fields,
+                        doc_params,
+                        params_start,
+                        issues,
+                        subtype,
+                    )
+                )  # no doc string found
+                continue
+
+            # found docstring for either stub or private
+            mandatories = project_info["docstring_mandatory"]
+            param_issues = check_param_match(sig_params, doc_params, params_start)
+            mandatory_issues = check_mandatory(mandatories, doc_fields, doc_start)
+            all_issues = issues + param_issues + mandatory_issues
+            extended_info.append(
+                (
+                    sig_name,
+                    sig_params,
+                    doc,
+                    doc_start,
+                    doc_end,
+                    doc_fields,
+                    doc_params,
+                    params_start,
+                    all_issues,
+                    subtype,
+                )
+            )  # add in new issues
+
+        file_table = [
+            {
+                "signature_name": sig_name,
+                "signature_params": sig_params,
+                "full_signature": sig_name + "(" + ", ".join(sig_params) + ")",
+                "subtype": subtype,
+                "docstring": "".join(doc),
+                "doc_fields": doc_fields,
+                "doc_start": doc_start,
+                "params_start": params_start,
+                "test_info": [],
+                "result": issues,
+            }
+            for sig_name, sig_params, doc, doc_start, doc_end, doc_fields, doc_params, params_start, issues, subtype in extended_info
+        ]
+        all_files.append((name + extension, file_table, "checked"))
+
+    return all_files
+
+def file_explorer_function(proj_id, project_object, project_info, branch, filename):
     import os
 
     proj_name = project_object.name
-    proj_id = project_object.id
-    proj_info = project_object.info  #need to add this field
-
+    name, extension = os.path.splitext(filename)
     cmd = f"cd {settings.REPOS_DIR}/{proj_name} ; git checkout {branch}"
     try:
+        import os
+
         os.system(cmd)
     except:
         assert False, f"Failure to checkout branch {cmd}"
 
-    #First check documentation present
-
-    name, extension = os.path.splitext(filename)
-
     #check whitelist of allowable extensions. If no extension, check for allowed filenames.
-    #If can't find, then assume file should not be checked for documentation.
     if (extension and extension in project_info["extensions"]) or (
             not extension and filename in project_info["filenames"]):
         with open(
             str(settings.REPOS_DIR) + "/" + proj_name + "/" + filename, "r") as f:
             lines = f.readlines()
             f.close()
-
-        if proj_id == 32:
-            documentation_issues = handle_hypre(project_object, [filename], lines)
-        elif proj_id == 35:
-            documentation_issues = handle_flash_x(project_object, [filename], lines)
-        elif proj_id == 30:
-            documentation_issues = handle_anl_test_repo(project_object, [filename], lines)
-        # elif proj_id==38:
-        # documentation_issues = handle_warpx(project_object, [filename], lines)
     else:
-        documentation_issues = [dict(not_parsed= 'marked as ignore')]
+        print(f"Uncheckable currently: {filename}")
+        lines = []
 
-            # finished with all files in PR
+    if not lines:
+        all_files = [[filename, [], "ignored"]]
 
-            # all_files:
-            #   name, file_table
-            #       {'signature_name': sig, 'signature_params':params, 'docstring': doc_info, 'result': all_issues}
-            #       {'signature_name': sig, 'signature_params':params, 'docstring': doc_info, 'result': all_issues}
-            #       ...
-            #       where doc_info = (doc, doc_start, doc_end, fields, doc_params)
-            #   status
+    if proj_id == 32:
+        # customize file finding for Hypre
+        all_files = handle_hypre(project_object, [filename], lines)
+    elif proj_id == 35:
+        all_files = handle_flash_x(project_object, [filename], lines)
+    elif proj_id == 30:
+        all_files = handle_anl_test_repo(project_object, [filename], lines)
+    # elif proj_id==38:
+    # all_files = handle_warpx(project_object, [filename], lines)
+    else:
+        all_files = [[filename, [], f"Unanalyzable project {(proj_name,proj_id)}"]]
 
+        # finished with all files in PR
+
+        # all_files:
+        #   name, file_table
+        #       {'signature_name': sig, 'signature_params':params, 'docstring': doc_info, 'result': all_issues}
+        #       {'signature_name': sig, 'signature_params':params, 'docstring': doc_info, 'result': all_issues}
+        #       ...
+        #       where doc_info = (doc, doc_start, doc_end, fields, doc_params)
+        #   status
 
     # Build developer table
 
@@ -2506,14 +2575,107 @@ def file_explorer_function(project_object, branch, filename):
         for date, author, count, loc, link in new_info
     ]
 
+    def compute_issue_url(pr):
+        issue_tags = [
+            "issue",
+            "close",
+            "closes",
+            "closed",
+            "fix",
+            "fixes",
+            "fixed",
+            "resolve",
+            "resolves",
+            "resolved",
+        ]
+        description = pr.description.strip()
+        for tag in issue_tags:
+            i = description.find(tag + " #")
+            i = description.find(tag + "#") if i == -1 else i
+            if i == -1:
+                continue  # did not find tag
 
-    result = {
+            # found tag
+            partial = description[i:]
+            j = partial.find("#")
+            raw_issnum = partial[j + 1 :]
+            issnum = raw_issnum[: raw_issnum.find(" ")].strip()
+            try:
+                issnum = int(issnum)
+                issue_list = list(
+                    Issue.objects.all().filter(
+                        url=project.source_url.replace(
+                            ".git", "/issues/" + issnum.group()[1:]
+                        )
+                    )
+                )
+                issue_url = issue_list[0].url
+                return [tag, issue_url]
+            except:
+                continue
+
+        # Look for #number without tag
+        if "#" in description:
+            i = description.find("#")
+            raw_issnum = description[i + 1 :]
+            issnum = raw_issnum[
+                : raw_issnum.find(" ")
+            ].strip()  # not necessarily a number
+            try:
+                n = int(issnum)
+                issue_list = list(
+                    Issue.objects.all().filter(
+                        url=project.source_url.replace(
+                            ".git", "/issues/" + n.group()[1:]
+                        )
+                    )
+                )
+                issue_url = issue_list[0].url
+                return ["Missing tag", issue_url]
+            except:
+                pass
+        return "None found"
+
+    prs_table = sorted(
+        [
+            {
+                "id": pr.pk,
+                "number": pr.number,
+                "url": pr.url,
+                "issue_url": compute_issue_url(pr),
+                "notes": ["WiP"],
+                "notes_kind": "WiP",
+            }
+            for pr in prs
+        ],
+        key=lambda d: d["number"],
+    )
+
+    file_table = all_files[0][1:] if all_files else []
+
+    # If file is F90 check for missing doxygen
+    new_file = ''
+    comments = 'File type not supported. Nothing done.'
+    if filename.endswith(".F90"):
+        new_file, comments = dox_script( str(settings.REPOS_DIR)+'/'+proj_name, filename)
+
+    context = {
+        "file": filename,
+        "project": project_object,
+        "branch": branch,
         "authors": dev_table,
         "authors_len": len(dev_table),
-        "documentation": documentation_issues,
+        "functions_supported": True if file_table[0] else False,
+        "supports_callgraph": project_info["supports_callgraph"],
+        "supports_test_hunt": project_info["supports_test_hunt"],
+        "functions": file_table,  # [[all sigs], status]
+        "prs": prs_table,
+        "doxygen_supported":filename.endswith(".F90"),
+        "doxygen_new_file":new_file,
+        "doxygen_comments":comments,
     }
+    return context
 
-    return result
 
 # call with, e.g., 'anl_test_repo', 'folder1/arithmetic.py', 'sub'
 def find_pytest_files(proj_name, file_path, function_name):
