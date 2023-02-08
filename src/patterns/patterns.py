@@ -696,18 +696,18 @@ class Patterns(Fetcher):
 
         return sorted_hot_directories, stats_df
 
-    def get_busfactor_data(self, locc_metric='change-size-cos', metric='mul-changes-equal', time_range=None, my_df=pd.DataFrame()):
-        """Calculates bus factor based on the four CST algorithm metrics based on the locc_metric provided by the user"""
+    def get_busfactor_data(self, locc_metric='change-size-cos', metric='mul-changes-equal', time_range=None, my_df=pd.DataFrame(), directory_path=""):
+        """Calculates bus factor based on the four CST algorithm metrics based on the locc_metric 
+        provided by the user either on the complete project of on a specific directory"""
         print("INFO: Creating developer matrix...")
 
         # Create the files x developers matrix, using the value_column parameter as the values
-        if 'unique_author' not in self.commit_data.columns:   #self.authors_data = df.merge(df2, how='inner', on='author')
+        if 'unique_author' not in self.commit_data.columns:
             self.set_unique_authors()
 
         if my_df.empty:
             work_df, stats = self.get_time_range_df(time_range, sum=False)
         else:
-            # TODO -- enable time ranges with user-provided dataframe my_df
             if locc_metric not in my_df.columns:
                 err('The dataframe you provided to make_file_developer_df() does '
                     'not contain the required "%s" column"' % locc_metric)
@@ -722,13 +722,21 @@ class Patterns(Fetcher):
         primary_dev = sec_devs = 0
         tot_developers = 0
 
-        #*1
-        d = pd.DataFrame(work_df.groupby(['filepath', 'unique_author'])[locc_metric].sum())
-        d["dev_knowledge"] = 0
+        directory_df = pd.DataFrame()
+        if len(directory_path):
+            directory_df = work_df[work_df['filepath'].str.contains(directory_path)]
+            #sums the value of locc_metric against each author on a certain file in directory_df
+            d = pd.DataFrame(directory_df.groupby(['filepath', 'unique_author'])[locc_metric].sum())
+            d["dev_knowledge"] = 0
+        else:
+            d = pd.DataFrame(work_df.groupby(['filepath', 'unique_author'])[locc_metric].sum())
+            d["dev_knowledge"] = 0
         d.reset_index(level=d.index.names, inplace=True)
-        #*2
+
+        #sums total commits by each author regardless of the files
         authors_commits_df = pd.DataFrame(d.groupby(['unique_author'])[locc_metric].sum())
         authors_commits_df.reset_index(level=authors_commits_df.index.names, inplace=True)
+
         tot_developers = len(authors_commits_df.index)
         primary_X = 0
         secondary_X = 0
@@ -740,11 +748,10 @@ class Patterns(Fetcher):
 
         # more knowledge is assigned to the developers that modified the file most times
         if(metric == 'mul-changes-equal'):
-            #copied *1
             tot_commits_per_file = pd.DataFrame(d.groupby(['filepath'])[locc_metric].sum())
             tot_commits_per_file.reset_index(level=tot_commits_per_file.index.names, inplace=True)
 
-            it = 0              #iterator for tot_commits_per_file dataframe
+            it = 0
             for ind in d.index:
                 path = d['filepath'][ind]
                 author = d['unique_author'][ind]
@@ -757,11 +764,6 @@ class Patterns(Fetcher):
                     tot_commits = tot_commits_per_file[locc_metric][it]
                     d.iat[ind, d.columns.get_loc('dev_knowledge')] = d_commits/tot_commits
 
-            # display(d.head(5))
-            # display(tot_commits_per_file.head(5))
-
-            #copied *2
-
             authors_commits_df["dev_knowledge"] = 0
             tot_commits = authors_commits_df[locc_metric].sum()
             for ind in authors_commits_df.index:
@@ -769,17 +771,18 @@ class Patterns(Fetcher):
                 authors_commits_df.iat[ind, authors_commits_df.columns.get_loc('dev_knowledge')] = d_commits/tot_commits
             
             authors_commits_df.sort_values(by=['dev_knowledge'], ascending=False, inplace=True)
-            
-            #display(authors_commits_df.head(5))
             results = authors_commits_df
 
         # assigns all knowledge of a file to the last developer that modified that file
         elif(metric == 'last-change-all'):
-            d = work_df[['filepath', 'unique_author']].copy()
+            #for specific directory given by user
+            if len(directory_path):
+                d = directory_df[['filepath', 'unique_author']].copy()
+            #for whole project
+            else:
+                d = work_df[['filepath', 'unique_author']].copy()
             d.sort_values(by=['filepath'], inplace=True)
             d.reset_index(level=d.index.names, inplace=True)
-
-            #display(d.head(10))
 
             column_names = ["filepath", "unique_author", "datetime", "dev_knowledge"]
             dev_knowledge_df = pd.DataFrame(columns = column_names)
@@ -794,26 +797,24 @@ class Patterns(Fetcher):
                     datetime = d['datetime'][ind]
                     author = d['unique_author'][ind]
                     ind+=1
-                if datetime < d['datetime'][ind]:
+                elif datetime < d['datetime'][ind]:
                     path = d['filepath'][ind]
                     datetime = d['datetime'][ind]
                     author = d['unique_author'][ind]
-
-            #display(dev_knowledge_df.head(5))
 
             d = pd.DataFrame(dev_knowledge_df.groupby(['unique_author'])['dev_knowledge'].sum())
             d["dev_knowledge"] = d["dev_knowledge"].apply(lambda a: a / 1000)
             d.sort_values(by=['dev_knowledge'], ascending=False, inplace=True)
             d.reset_index(level=d.index.names, inplace=True)
-
-            #display(d.head(5))
             results = d
 
         else:
-            d = work_df[['filepath', 'unique_author', locc_metric]].copy()
+            if len(directory_path):
+                d = directory_df[['filepath', 'unique_author', locc_metric]].copy()
+            else:
+                d = work_df[['filepath', 'unique_author', locc_metric]].copy()
             d.sort_values(by=['filepath', 'datetime'], inplace=True)
             d.reset_index(level=d.index.names, inplace=True)
-            #display(d.head(7))
 
             # assesses the developer’s knowledge according to the number of non-consecutive changes on the file
             if(metric == 'non-consec-changes'):
@@ -829,7 +830,6 @@ class Patterns(Fetcher):
                             d.iat[ind, d.columns.get_loc(locc_metric)] = 0
                         else:
                             d.iat[ind, d.columns.get_loc(locc_metric)] = 0
-                    #display(d.head(5))
 
             # takes into account the position of the modifications in the timeline evolution of the file. 
             # It is used to assign incremental importance to the later modifications on the file.
@@ -845,29 +845,25 @@ class Patterns(Fetcher):
                         weight += 1
                     else:
                         weight = 1
-                #display(d.head(7))
 
             #total commits of each author on each filepath
             df = pd.DataFrame(d.groupby(['filepath', 'unique_author'])[locc_metric].sum())
             df["dev_knowledge"] = 0
             df.reset_index(level=df.index.names, inplace=True)
-            #display(df.head(5))
 
             #total commits on the file by all authors collectively
             tot_commits_per_file = pd.DataFrame(df.groupby(['filepath'])[locc_metric].sum())
             tot_commits_per_file.reset_index(level=tot_commits_per_file.index.names, inplace=True)
             tot_commits_per_file.set_index('filepath', inplace=True)
-            #display(tot_commits_per_file.head(5))
 
             #calculating developer knowledge of each developer for each file
-            it = 0              #iterator for tot_commits_per_file dataframe
+            it = 0
             for ind in df.index:
                 path = df['filepath'][ind]
                 author = df['unique_author'][ind]
                 d_commits = df[locc_metric][ind]
                 tot_commits = tot_commits_per_file[locc_metric][path]
                 df.iat[ind, df.columns.get_loc('dev_knowledge')] = d_commits/tot_commits
-            #display(df.head(5))
 
             #knowledge of each developer on the whole project
             project_knowledge = pd.DataFrame(d.groupby(['unique_author'])[locc_metric].sum())
@@ -881,7 +877,6 @@ class Patterns(Fetcher):
             
             project_knowledge.sort_values(by=['dev_knowledge'], ascending=False, inplace=True)
             del project_knowledge[locc_metric]
-            #display(project_knowledge.head(5))
             results = project_knowledge
 
         for ind in results.index:

@@ -416,9 +416,9 @@ class Visualizer(Patterns):
                     bbox_inches='tight')
         return sorted_hot_files
 
-    def bus_factor_CST(self, locc_metric='change-size-cos', metric='mul-changes-equal', time_range=None, my_df=pd.DataFrame()):
+    def bus_factor_CST(self, locc_metric='change-size-cos', metric='mul-changes-equal', time_range=None, my_df=pd.DataFrame(), directory_path=""):
         """Gets the bus factor data for CST algorithm and prints it for the user"""
-        tot_developers, prim_devs, secon_devs, bus_factor, results = self.get_busfactor_data(locc_metric=locc_metric, metric=metric, time_range=time_range, my_df=my_df)
+        tot_developers, prim_devs, secon_devs, bus_factor, results = self.get_busfactor_data(locc_metric=locc_metric, metric=metric, time_range=time_range, my_df=my_df, directory_path=directory_path)
 
         display(results.head(5))
 
