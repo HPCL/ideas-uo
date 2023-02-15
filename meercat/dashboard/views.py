@@ -38,6 +38,7 @@ from database.models import (
     CommitTag,
     PullRequestLabel,
     Label,
+    FileMetric,
 )
 from database.utilities import comment_pullrequest, get_repo_owner
 from dashboard.forms import SupportSubmissionForm
@@ -247,8 +248,10 @@ def first_responder_function(proj_object, pull_object):
     all_contexts = {}
 
     for filename in filenames:
-        context = file_explorer_handler(proj_object, filename, branch)
-        all_contexts[filename] = context
+        # Need to see if file exists because it could have been renamed in another commit in same PR.
+        if os.path.isfile(str(settings.REPOS_DIR) + "/" + proj_object.name + "/" + filename):
+            context = file_explorer_handler(proj_object, filename, branch)
+            all_contexts[filename] = context
     
     '''
     context = dict(supports_callgraph= False,  #none yet
@@ -282,13 +285,36 @@ def first_responder_function(proj_object, pull_object):
 
     total_doc_problems = len(doc_problems)
 
+    
+
+    # Use metrics to compute average (and get live results for just the files in PR branch)
+    linter_metrics = list(FileMetric.objects.all().filter(metric_type=FileMetric.MetricTypeChoices.LINTING, project=proj_object, branch='main'))
+    numerator = 0
+    denominator = 0
+    average = 0
+    for metric in linter_metrics:
+        if metric.result_json:
+            if len(metric.result_json) > 0:
+                denominator += 1
+                numerator += len(metric.result_json)
+    if denominator > 0:
+        average = (numerator/denominator)            
+    print("AVERAGE PROBLEMS: "+ str(numerator/denominator))
+    
+    linter_problems = 0;
+    for filename in filenames:
+        results = file_linter(proj_object, filename)
+        if len(results) > average:
+            linter_problems += 1
+    print("TOTAL PROBLEMS OVER AVERAGE: "+ str(linter_problems))
+
     message = f"""## The MeerCat Pull-Request Assistant has information for you
 
 ## {total_doc_problems} file(s) in this PR have documentation issues.
 
-## k files have more linting errors than average (the average).
+## {linter_problems} files have more linting errors than average (the average).
 
-[Please see the Pull-Request Assistant page for more detail.](http://sansa.cs.uoregon.edu:8888/dashboard/pr/{pull_object.id})
+[Please see the Pull-Request Assistant page for more detail.](https://meercat.cs.uoregon.edu/dashboard/pr/{pull_object.id})
     """
 
     # pr_file_intersection = comute_pr_file_intersection(proj_object, filenames)
@@ -305,7 +331,7 @@ def file_explorer_handler(proj_object, filename, branch ):
                     supports_test_hunt= False, #none yet
                     file=filename,
                     branch= branch,
-                    project= proj_object.name,
+                    project= dict(id=proj_object.name, name=proj_object.name),
 
         )
 
@@ -469,7 +495,7 @@ def create_dev_table(proj_object, filename):
             "author": author.username+' - '+author.email,
             "number_commits": count,
             "lines": loc,
-            "most_recent_commit": date,
+            "most_recent_commit": date.strftime("%Y-%m-%d, %H:%M %p"),
             "commit_link": link,
         }
         for date, author, count, loc, link in new_info
@@ -493,7 +519,7 @@ def create_pr_links_table(proj_object, filename):
         set(PullRequest.objects.all().filter(commits__in=tags))
     )  # all prs that go with file commits
 
-    return [(pr.number, pr.url, pr.title) for pr in prs]
+    return [(pr.number, pr.url, pr.title, pr.id) for pr in prs]
 
 
 def create_subroutine_table(proj_object, filename, lines):
@@ -520,6 +546,100 @@ def create_subroutine_table(proj_object, filename, lines):
 
     #if not currently checking combo
     return []
+
+def file_linter(proj_object, filename):
+
+    results = []
+
+    if filename.endswith(".py"):
+        try:
+            # output = os.popen('export PYTHONPATH=${PYTHONPATH}:'+os.path.abspath(str(settings.REPOS_DIR)+'/'+pr.project.name)+' ; cd '+str(settings.REPOS_DIR)+'/'+pr.project.name+' ; '+str(settings.REPOS_DIR)+'/meercat/env/bin/pylint --output-format=json '+filename).read()
+            output = os.popen(
+                "export PYTHONPATH=${PYTHONPATH}:"
+                + os.path.abspath(str(settings.REPOS_DIR) + "/" + proj_object.name)
+                + " ; cd "
+                + str(settings.REPOS_DIR)
+                + "/"
+                + proj_object.name
+                + " ; . ../meercat/meercat-env/bin/activate ; pylint --output-format=json "
+                + filename
+            ).read()
+            results = json.loads(output)
+        except Exception as e:
+            pass
+
+    if filename.endswith(".F90"):
+        output = os.popen(
+            "export PYTHONPATH=${PYTHONPATH}:"
+            + os.path.abspath(str(settings.REPOS_DIR) + "/" + proj_object.name)
+            + " ; cd "
+            + str(settings.REPOS_DIR)
+            + "/"
+            + proj_object.name
+            + " ; . ../meercat/meercat-env/bin/activate ; fortran-linter "
+            + str(settings.REPOS_DIR)
+            + "/"
+            + proj_object.name
+            + "/"
+            + filename
+            + " --syntax-only"
+        ).read()
+        #linter_results.append( {"filename": filename, "results": output.split(str(settings.REPOS_DIR) + "/" + pr.project.name + "/" + filename)} )
+        results = []
+        for result in output.split(
+            str(settings.REPOS_DIR) + "/" + proj_object.name + "/" + filename + ":"
+        ):
+            if result and len(result) > 0:
+                try:
+                    results.append(
+                        {
+                            "column": 0,
+                            "line": int(result.split(":")[0]),
+                            "message": result.strip().split("\n")[-1].split(": ")[1],
+                            "type": result.strip().split("\n")[-1].split(": ")[0],
+                        }
+                    )
+                except:
+                    pass
+
+    if filename.endswith(".c"):
+        output = os.popen(
+            "export PYTHONPATH=${PYTHONPATH}:"
+            + os.path.abspath(str(settings.REPOS_DIR) + "/" + proj_object.name)
+            + " ; cd "
+            + str(settings.REPOS_DIR)
+            + "/"
+            + proj_object.name
+            + " ; . ../meercat/meercat-env/bin/activate ; cpplint --filter=-whitespace "
+            + str(settings.REPOS_DIR)
+            + "/"
+            + proj_object.name
+            + "/"
+            + filename
+            + " 2>&1"
+        ).read()
+        # linter_results.append( {'filename': filename, 'results':output.split('../'+pr.project.name+'/'+filename+':')} )
+
+        results = []
+        for result in output.split(
+            str(settings.REPOS_DIR) + "/" + proj_object.name + "/" + filename + ":"
+        ):
+            if result and len(result) > 0:
+                try:
+                    # if result.split(":")[1].split("  [")[1].split("] ")[0].startswith('whitespace') == False:
+                    results.append(
+                        {
+                            "column": 0,
+                            "line": int(result.split(":")[0]),
+                            "message": result.split(":")[1].split("  [")[0].strip(),
+                            "type": result.split(":")[1]
+                            .split("  [")[1]
+                            .split("] ")[0],
+                        }
+                    )
+                except:
+                    pass
+    return results
 
 # Project view - should list general project info
 def project(request, *args, **kwargs):
@@ -692,7 +812,7 @@ def pr(request, *args, **kwargs):
         branch = commits[0].branch.split()[-1]
         print("PRA Switch branches to: " + branch)
         proj_name = pr.project.name
-        cmd = f"cd {settings.REPOS_DIR}/{proj_name} ; git checkout {branch}"
+        cmd = f"cd {settings.REPOS_DIR}/{proj_name} ; git checkout --force {branch}"
         print(cmd)
         try:
             os.system(cmd)
@@ -773,7 +893,7 @@ def refreshProject(request):
     try:
         # cmd = f'cd /shared/soft/ideas_db/ideas-uo/meercat/.. ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {pid}'
         cmd = f"cd {settings.REPOS_DIR} ; . meercat/meercat-env/bin/activate ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {pid}"
-        os.system(cmd)
+        # os.system(cmd)
         result = subprocess.check_output(cmd, shell=True)
         # print(result)
 
@@ -919,104 +1039,29 @@ def diffCommitData(request):
         commit__datetime__lte=enddate,
     )
     for filename in filenames:
-        diffcommits.append(
-            {
-                "filename": filename,
-                "commits": [
-                    {"commit": d.commit.hash, "diff": d.body}
-                    for d in filtereddiffs.filter(file_path=filename)
-                ],
-            }
-        )
+        if os.path.isfile(str(settings.REPOS_DIR) + "/" + pr.project.name + "/" + filename):
+            diffcommits.append(
+                {
+                    "filename": filename,
+                    "commits": [
+                        {"commit": d.commit.hash, "diff": d.body}
+                        for d in filtereddiffs.filter(file_path=filename)
+                    ],
+                }
+            )
 
     prcommits = []
     for commit in commits:
         prcommits.append({"hash": commit.hash})
 
-    docstring_results = first_responder_function(pr.project, pr)
+    message, docstring_results = first_responder_function(pr.project, pr)
+
 
     linter_results = []
     for filename in filenames:
-        if filename.endswith(".py"):
-            try:
-                # output = os.popen('export PYTHONPATH=${PYTHONPATH}:'+os.path.abspath(str(settings.REPOS_DIR)+'/'+pr.project.name)+' ; cd '+str(settings.REPOS_DIR)+'/'+pr.project.name+' ; '+str(settings.REPOS_DIR)+'/meercat/env/bin/pylint --output-format=json '+filename).read()
-                output = os.popen(
-                    "export PYTHONPATH=${PYTHONPATH}:"
-                    + os.path.abspath(str(settings.REPOS_DIR) + "/" + pr.project.name)
-                    + " ; cd "
-                    + str(settings.REPOS_DIR)
-                    + "/"
-                    + pr.project.name
-                    + " ; . ../meercat/meercat-env/bin/activate ; pylint --output-format=json "
-                    + filename
-                ).read()
-                linter_results.append(
-                    {"filename": filename, "results": json.loads(output)}
-                )
-            except Exception as e:
-                linter_results.append({"filename": filename, "results": str(e)})
-        if filename.endswith(".F90"):
-            output = os.popen(
-                "export PYTHONPATH=${PYTHONPATH}:"
-                + os.path.abspath(str(settings.REPOS_DIR) + "/" + pr.project.name)
-                + " ; cd "
-                + str(settings.REPOS_DIR)
-                + "/"
-                + pr.project.name
-                + " ; . ../meercat/meercat-env/bin/activate ; fortran-linter "
-                + str(settings.REPOS_DIR)
-                + "/"
-                + pr.project.name
-                + "/"
-                + filename
-                + " --syntax-only"
-            ).read()
-            linter_results.append(
-                {
-                    "filename": filename,
-                    "results": output.split(
-                        str(settings.REPOS_DIR) + "/" + pr.project.name + "/" + filename
-                    ),
-                }
-            )
-        if filename.endswith(".c"):
-            output = os.popen(
-                "export PYTHONPATH=${PYTHONPATH}:"
-                + os.path.abspath(str(settings.REPOS_DIR) + "/" + pr.project.name)
-                + " ; cd "
-                + str(settings.REPOS_DIR)
-                + "/"
-                + pr.project.name
-                + " ; . ../meercat/meercat-env/bin/activate ; cpplint --filter=-whitespace "
-                + str(settings.REPOS_DIR)
-                + "/"
-                + pr.project.name
-                + "/"
-                + filename
-                + " 2>&1"
-            ).read()
-            # linter_results.append( {'filename': filename, 'results':output.split('../'+pr.project.name+'/'+filename+':')} )
+        results = file_linter(pr.project, filename)
+        linter_results.append({"filename": filename, "results": results})
 
-            results = []
-            for result in output.split(
-                str(settings.REPOS_DIR) + "/" + pr.project.name + "/" + filename + ":"
-            ):
-                if result and len(result) > 0:
-                    try:
-                        # if result.split(":")[1].split("  [")[1].split("] ")[0].startswith('whitespace') == False:
-                        results.append(
-                            {
-                                "column": 0,
-                                "line": int(result.split(":")[0]),
-                                "message": result.split(":")[1].split("  [")[0].strip(),
-                                "type": result.split(":")[1]
-                                .split("  [")[1]
-                                .split("] ")[0],
-                            }
-                        )
-                    except:
-                        pass
-            linter_results.append({"filename": filename, "results": results})
 
     # Build developer table
     author_loc = {}
@@ -1166,8 +1211,8 @@ def getFile(request):
     if request.POST.get("pr"):
         prid = int(request.POST.get("pr"))
 
-    if not hasAccessToPR(request.user, prid):
-        return redirect("not_authorized")
+    #if not hasAccessToPR(request.user, prid):
+    #    return redirect("not_authorized")
 
     filename = "folder1/arithmetic.py"
     if request.POST.get("filename"):
@@ -1217,9 +1262,24 @@ def getFile(request):
             + filename
             + " --syntax-only"
         ).read()
-        linter_results = output.split(
-            str(settings.REPOS_DIR) + "/" + pr.project.name + "/" + filename
-        )
+
+        results = []
+        for result in output.split(
+            str(settings.REPOS_DIR) + "/" + pr.project.name + "/" + filename + ":"
+        ):
+            if result and len(result) > 0:
+                try:
+                    results.append(
+                        {
+                            "column": 0,
+                            "line": int(result.split(":")[0]),
+                            "message": result.strip().split("\n")[-1].split(": ")[1],
+                            "type": result.strip().split("\n")[-1].split(": ")[0],
+                        }
+                    )
+                except:
+                    pass
+        linter_results = results
 
     if filename.endswith(".c"):
         output = os.popen(
@@ -1449,7 +1509,7 @@ def githubBot(request):
 
     prnumber = str(payload["number"])
 
-    if str(payload["action"]) == "opened":
+    if str(payload["action"]) == "opened" or str(payload["action"]) == "edited":
 
         project = list(
             Project.objects.all()
@@ -1458,8 +1518,12 @@ def githubBot(request):
         )[0]
 
         # Only post comments for anl_test_repo and FLASH5
-        if project.id == 30 or project.id == 26:
+        '''if project.id == 30 or project.id == 26:
             try:
+                # BASE_DIR = Path(__file__).resolve().parent.parent
+                with open(settings.BASE_DIR / 'meercat.config.json') as meercat_config:
+                    config = json.load(meercat_config)
+
                 repo_name = project.name
                 repo_owner = get_repo_owner(project)
                 url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues/{prnumber}/comments"
@@ -1468,18 +1532,19 @@ def githubBot(request):
                 }
                 headers = {
                     "Accept": "application/vnd.github+json",
-                    "Authorization": "token " + os.environ.get("MEERCAT_USER_TOKEN"),
+                    "Authorization": "token " + config['MEERCAT_USER_TOKEN'],
                 }
                 result = requests.post(url, headers=headers, data=json.dumps(payload))
             except:
                 pass
+        '''        
 
         # Need to refresh the database before
         username = settings.DATABASES["default"]["USER"]
         password = settings.DATABASES["default"]["PASSWORD"]
         # cmd = f'cd .. ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {project.id}'
         cmd = f"cd {settings.REPOS_DIR} ; . meercat/meercat-env/bin/activate ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {project.id}"
-        os.system(cmd)
+        # os.system(cmd)
         result = subprocess.check_output(cmd, shell=True)
 
         pull_request = list(
@@ -1492,9 +1557,9 @@ def githubBot(request):
 
         if pull_request:
 
-            comment = first_responder_function(pull_request.project, pull_request)[0]
+            comment, all_contexts = first_responder_function(pull_request.project, pull_request)
             print("------------")
-            if comment:
+            '''if comment:
                 # Only post comments for anl_test_repo and FLASH5
                 if project.id == 30 or project.id == 26:
                     comment_pullrequest(pull_request, comment)
@@ -1513,9 +1578,9 @@ def githubBot(request):
                     datetime=datetime.today(),
                 )
                 print("don't bug me")
-
+            '''
             print("------------")
-
+        
     return HttpResponse(
         json.dumps({"results": "success"}), content_type="application/json"
     )
@@ -2356,6 +2421,14 @@ def file_explorer(request, *args, **kwargs):
         )
 
     proj_object = proj_list[0]
+    proj_name = proj_object.name
+
+    cmd = f"cd {settings.REPOS_DIR}/{proj_name} ; git checkout {branch}"
+    try:
+        import os
+        os.system(cmd)
+    except:
+        assert False, f"Failure to checkout branch {cmd}"
 
     context = file_explorer_handler(proj_object, filename, branch)
 
@@ -2367,6 +2440,7 @@ def file_explorer(request, *args, **kwargs):
 #Checks documentation for a file.
 #Computes developers committing to file in past.
 #Checks if references an Issue 
+# TODO: REMOVE THIS
 def file_explorer_function(project_object, branch, filename):
     import os
 

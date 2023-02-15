@@ -110,7 +110,7 @@ function showDocEditor(docfilename, difftext) {
             //for(var i=0; i<result['linter_results'].length; i++){
             //    editor.markText({ line: result['linter_results'][i].line-1, ch: result['linter_results'][i].column }, { line: result['linter_results'][i].line-1, ch: 100 }, { className: "styled-background" });
             //}
-
+/*
             for(var i=0; i<docstring_results[1].length; i++){
 
                 if( docstring_results[1][i][0] == filename ){
@@ -128,6 +128,18 @@ function showDocEditor(docfilename, difftext) {
                             }
                         }
                     }
+                }
+            }
+*/
+            var file_doc_results = docstring_results[filename];
+            if( file_doc_results['documentation']['check_status'] && !file_doc_results['documentation']['documentation.doc_status'] ){
+                //docissues = file_doc_results['documentation']['problem_lines'].length;
+                for(var i=0; i<file_doc_results['documentation']['problem_lines'].length; i++){
+
+                    // Problem line format: ['message', linenumber]
+                    //For some reason, the line is off by one 
+                    file_doc_results['documentation']['problem_lines'][i][1] -= 1;
+                    editor.markText({ line: file_doc_results['documentation']['problem_lines'][i][1], ch: 0 }, { line: file_doc_results['documentation']['problem_lines'][i][1], ch: 100 }, { className: "styled-background" });
                 }
             }
 
@@ -148,6 +160,7 @@ function showDocEditor(docfilename, difftext) {
                 if( !ignoreLineChanges && lines > previousLines ){
 
                     //Bump the line numbers by 1 if after linenumber (this is currenlty only looking at first item in results)
+/*                    
                     for(var i=0; i<docstring_results[1].length; i++){
                         if( docstring_results[1][i][0] == filename ){
                             for(var j=0; j<docstring_results[1][i][1].length; j++){
@@ -159,6 +172,14 @@ function showDocEditor(docfilename, difftext) {
                             }
                         }
                     }
+*/  
+                    var file_doc_results = docstring_results[filename];
+                    for(var i=0; i<file_doc_results['documentation']['problem_lines'].length; i++){
+                        // Problem line format: ['message', linenumber]
+                         if( cursor.line <= file_doc_results['documentation']['problem_lines'][i][1] ){
+                            file_doc_results['documentation']['problem_lines'][i][1] += 1;
+                        }
+                    }                    
                     previousLines = lines;
                 }
 
@@ -172,7 +193,7 @@ function showDocEditor(docfilename, difftext) {
                 } else {
                     popupNode.remove();
                 }*/
-
+/*
                 for(var i=0; i<docstring_results[1].length; i++){
 
                     if( docstring_results[1][i][0] == filename ){
@@ -210,6 +231,29 @@ function showDocEditor(docfilename, difftext) {
                         }
                     }
                 }
+*/
+                var file_doc_results = docstring_results[filename];
+                for(var i=0; i<file_doc_results['documentation']['problem_lines'].length; i++){
+                    // Problem line format: ['message', linenumber]
+                    if (cursor.line == file_doc_results['documentation']['problem_lines'][i][1] ) {
+                        
+                        popupNode.innerHTML = '';
+                        var text = document.createTextNode(file_doc_results['documentation']['problem_lines'][i][0]);
+                        popupNode.appendChild(text);
+              
+                        if( file_doc_results['documentation']['problem_lines'][i][0].indexOf("No docstring") >= 0 ){
+                            var button = document.createElement('button');
+                            button.setAttribute('onclick', 'insertTemplate('+(cursor.line)+', \'  \"\"\"\\n  Template will go here.\\n  \"\"\"\')');
+                            button.classList.add('btn');
+                            button.classList.add('btn-sm');
+                            button.classList.add('btn-primary');
+                            button.style['margin-left'] = "10px"
+                            button.innerHTML = 'Insert docstring template'
+                            popupNode.appendChild(button);
+                        }
+                        editor.addWidget({ line: cursor.line, ch: 9 }, popupNode, true);
+                    }
+                } 
 
                 /* JUST FOR DEMO */
                 //var text = document.createTextNode("Test cases no longer valid.");
@@ -791,6 +835,37 @@ $.ajax({
         var doctable = $("#docdiffcommittable > tbody");
         doctable.empty();
 
+        for (var i = 0; i < result['diffcommits'].length; i++) {
+            var filename = result['diffcommits'][i]['filename'];
+
+
+            var file_doc_results = result['docstring_results'][filename];
+            console.log(file_doc_results);
+
+            var docbuttons = "";
+            var docissues = -1;
+            docbuttons += "<button class='btn btn-sm btn-primary' onclick='showDocEditor(\"" + filename + "\",\"" + "DIFF STUFF TO GO HERE" + "\");'>View File in Editor</button><br/>";
+ 
+            //Compute number of issues
+            if( file_doc_results['documentation']['check_status'] && !file_doc_results['documentation']['documentation.doc_status'] ){
+                //docissues = 0;
+                docissues = file_doc_results['documentation']['problem_lines'].length;
+            }
+
+            doctable.append("<tr><td>" +
+                "<a href='/dashboard/filex/"+project+"?filename="+filename+"&branch="+branch+"'>"+filename +"</a>"+
+                "</td><td>" +
+                    (docissues < 0 ? '-' : docissues) +
+                "</td><td>" +
+                    docbuttons +
+                "</td></tr>");
+
+            if( docissues > 0 )
+                $("#docwarning").show();
+        }
+
+
+/*
         for (var k = 0; k < result['docstring_results'][1].length; k++) {
             var docbuttons = "";
             var docissues = -1;
@@ -843,13 +918,13 @@ $.ajax({
             }
             
         }
-
+*/
 
         var testtable = $("#testtable > tbody");
         testtable.empty();
 
         var testmap = new Map();
-
+/*
         for (var k = 0; k < result['docstring_results'][1].length; k++) {
             //if (result['diffcommits'][i]['filename'] == result['docstring_results'][1][k][0]) {
                 for (var m = 0; m < result['docstring_results'][1][k][1].length; m++) {
@@ -873,7 +948,7 @@ $.ajax({
                 }
             //}
         }
-
+*/
 
         if( testmap.size < 1 ){
             testtable.append("<tr><td colspan='3'>"+
