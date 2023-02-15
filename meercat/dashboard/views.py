@@ -286,7 +286,6 @@ def first_responder_function(proj_object, pull_object):
     total_doc_problems = len(doc_problems)
 
     
-
     # Use metrics to compute average (and get live results for just the files in PR branch)
     linter_metrics = list(FileMetric.objects.all().filter(metric_type=FileMetric.MetricTypeChoices.LINTING, project=proj_object, branch='main'))
     numerator = 0
@@ -1583,7 +1582,7 @@ def githubBot(request):
 
     prnumber = str(payload["number"])
 
-    if str(payload["action"]) == "opened" or str(payload["action"]) == "edited":
+    if str(payload["action"]) == "opened": # or str(payload["action"]) == "edited":
 
         project = list(
             Project.objects.all()
@@ -1592,7 +1591,7 @@ def githubBot(request):
         )[0]
 
         # Only post comments for anl_test_repo and FLASH5
-        '''if project.id == 30 or project.id == 26:
+        if project.id == 30 or project.id == 26:
             try:
                 # BASE_DIR = Path(__file__).resolve().parent.parent
                 with open(settings.BASE_DIR / 'meercat.config.json') as meercat_config:
@@ -1610,8 +1609,7 @@ def githubBot(request):
                 }
                 result = requests.post(url, headers=headers, data=json.dumps(payload))
             except:
-                pass
-        '''        
+                pass        
 
         # Need to refresh the database before
         username = settings.DATABASES["default"]["USER"]
@@ -1633,7 +1631,7 @@ def githubBot(request):
 
             comment, all_contexts = first_responder_function(pull_request.project, pull_request)
             print("------------")
-            '''if comment:
+            if comment:
                 # Only post comments for anl_test_repo and FLASH5
                 if project.id == 30 or project.id == 26:
                     comment_pullrequest(pull_request, comment)
@@ -1652,7 +1650,6 @@ def githubBot(request):
                     datetime=datetime.today(),
                 )
                 print("don't bug me")
-            '''
             print("------------")
         
     return HttpResponse(
