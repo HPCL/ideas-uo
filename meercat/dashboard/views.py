@@ -439,6 +439,41 @@ def check_documentation(proj_object, filename, lines):
 
     #others go here eventually,, e.g., c-doxygen, etc.
 
+    #Special case for Hypre
+    if extension == '.h' and doctypes[extension] == 'hypre':
+        if not name.startswith('HYPRE_'):
+            return_dict['check_status'] = False
+            return return_dict
+        problem_lines = []
+        i = 0
+        while i<len(lines):
+            if lines[i].strip().endswith(';'):
+                interface = i
+                j = i - 1
+
+                #look backward for end of comment
+                while lines[j].strip() == "" or lines[j].strip().endswith(','):  #handle multi-line defs
+                    j -= 1
+                    if j<0:
+                        break
+
+                # check for triple quotes
+                if j>=0 and lines[j].startswith(' **/'):
+                    i = interface + 1
+                    continue
+                else:
+                    problem_lines.append(("Missing Doxygen header", interface))
+                    i = interface + 1
+            else:
+                i += 1
+
+        if problem_lines:
+            return_dict['doc_status'] = False
+            return_dict['problem_lines'] = problem_lines
+        else:
+            return_dict['doc_status'] = True
+        return return_dict
+
     #if not currently checking combo
     return_dict['check_status'] = False
     return return_dict
@@ -543,8 +578,47 @@ def create_subroutine_table(proj_object, filename, lines):
         return functions
 
     #others go here eventually,, e.g., c, etc.
+    if extension == '.h' or extension == '.H':
+        #will be looking for function interfaces only - ends with ;
+        i = 0
+        while i<len(lines):
+            if lines[i].strip().endswith(';'):
+                #search backwards for start
+                end = i
+                j = i - 1
+                while j>= 0 and lines[j].strip() != '':  #assumes blank line preceding definition
+                    j -= 1
+                start = j+1
+                if 'struct ' not in lines[start]:  #make sure do not capture structs
+                    functions.append(lines[start])
+                i = end + 1
+            else:
+                i += 1
+        return functions
 
-    #if not currently checking combo
+    if extension == '.c':
+        #will be looking for functions only - not structs
+        i = 0
+        while i<len(lines):
+            if '{' in lines[i]:
+                #search backwards for start
+                end = i
+                j = i
+                while j>= 0 and '(' not in lines[j] and 'struct ' not in lines[j]:
+                    j -= 1
+                if j<0: assert False, f'Did not find start of function or structure in {lines[:end]}'
+                if 'struct ' in lines[j]:
+                    i = end + 1
+                    continue  #hope this continues while loop
+
+                #found beginning of function def
+                functions.append(lines[j])
+                i = end + 1
+            else:
+                i += 1
+        return functions
+
+    #if not currently checking extension
     return []
 
 def file_linter(proj_object, filename):
