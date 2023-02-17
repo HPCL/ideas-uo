@@ -384,6 +384,18 @@ def check_documentation(proj_object, filename, lines):
         return_dict['check_status'] = False
         return return_dict
 
+
+    #handle flash-x specially
+    if extension == '.F90' and doctypes[extension] == 'flash-x':
+        return_dict['check_status'] = True
+        problem_lines = check_flashx_documentation(filename, lines)
+        return_dict['doc_status'] = True
+        if problem_lines:
+            return_dict['doc_status'] = False
+            return_dict['problem_lines'] = problem_lines
+        return return_dict
+
+    #Generic check for doxygen
     if extension == '.F90' and doctypes[extension] == 'doxygen':
         return_dict['check_status'] = True
         for line in lines:
@@ -457,7 +469,7 @@ def check_documentation(proj_object, filename, lines):
                         break
 
                 # check for triple quotes
-                if j>=0 and lines[j].startswith(' **/'):
+                if j>=0 and lines[j].strip().endswith('**/'):
                     i = interface + 1
                     continue
                 else:
@@ -476,6 +488,27 @@ def check_documentation(proj_object, filename, lines):
     #if not currently checking combo
     return_dict['check_status'] = False
     return return_dict
+
+    def check_flashx_documentation(filename, lines):
+        placeholders = ['<missing details>', '<missing param info>']  #need to get from Jared
+        problem_lines = []
+        if lines[0].strip().startswith('!!*'):
+            problem_lines.append(('File still in Robodoc format. See project documentation for converting to Doxygen', 0))
+            return problem_lines
+
+        for line in lines:
+            if line.strip().startswith('!! @copyright')
+            break
+        else:
+            problem_lines.append(('File missing @copyright', 0))
+            return problem_lines
+
+        for i,line in enumerate(lines):
+            for placeholder in placeholders:
+                if line.contains(placeholder):
+                    problem_lines.append(('Placeholder needs to be filled in.', i))
+                    break
+        return problem_lines
 
 def create_dev_table(proj_object, filename):
     # Build developer table
