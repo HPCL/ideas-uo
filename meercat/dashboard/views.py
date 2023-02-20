@@ -15,7 +15,7 @@ from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
 
 import pandas as pd
-
+import math
 import re
 
 import sys
@@ -248,6 +248,7 @@ def first_responder_function(proj_object, pull_object):
     all_contexts = {}
 
     for filename in filenames:
+        print("CHECKING FILE: "+filename)
         # Need to see if file exists because it could have been renamed in another commit in same PR.
         if os.path.isfile(str(settings.REPOS_DIR) + "/" + proj_object.name + "/" + filename):
             context = file_explorer_handler(proj_object, filename, branch)
@@ -299,7 +300,8 @@ def first_responder_function(proj_object, pull_object):
     if denominator > 0:
         average = (numerator/denominator)            
     print("AVERAGE PROBLEMS: "+ str(numerator/denominator))
-    
+    average = math.floor(average)
+
     linter_problems = 0;
     for filename in filenames:
         results = file_linter(proj_object, filename)
@@ -311,7 +313,7 @@ def first_responder_function(proj_object, pull_object):
 
 ## {total_doc_problems} file(s) in this PR have documentation issues.
 
-## {linter_problems} files have more linting errors than average (the average).
+## {linter_problems} files have more linting errors than average ({average}).
 
 [Please see the Pull-Request Assistant page for more detail.](https://meercat.cs.uoregon.edu/dashboard/pr/{pull_object.id})
     """
@@ -384,6 +386,26 @@ def check_documentation(proj_object, filename, lines):
         return_dict['check_status'] = False
         return return_dict
 
+    def check_flashx_documentation(filename, lines):
+        placeholders = ['<missing details>', '<missing param info>']  #need to get from Jared
+        problem_lines = []
+        if lines[0].strip().startswith('!!*'):
+            problem_lines.append(('File still in Robodoc format. See project documentation for converting to Doxygen', 1))
+            return problem_lines
+
+        for line in lines:
+            if line.strip().startswith('!! @copyright'):
+                break
+        else:
+            problem_lines.append(('File missing @copyright', 0))
+            return problem_lines
+
+        for i,line in enumerate(lines):
+            for placeholder in placeholders:
+                if placeholder in line:
+                    problem_lines.append(('Placeholder needs to be filled in.', i))
+                    break
+        return problem_lines
 
     #handle flash-x specially
     if extension == '.F90' and doctypes[extension] == 'flash-x':
@@ -488,27 +510,6 @@ def check_documentation(proj_object, filename, lines):
     #if not currently checking combo
     return_dict['check_status'] = False
     return return_dict
-
-    def check_flashx_documentation(filename, lines):
-        placeholders = ['<missing details>', '<missing param info>']  #need to get from Jared
-        problem_lines = []
-        if lines[0].strip().startswith('!!*'):
-            problem_lines.append(('File still in Robodoc format. See project documentation for converting to Doxygen', 0))
-            return problem_lines
-
-        for line in lines:
-            if line.strip().startswith('!! @copyright')
-            break
-        else:
-            problem_lines.append(('File missing @copyright', 0))
-            return problem_lines
-
-        for i,line in enumerate(lines):
-            for placeholder in placeholders:
-                if line.contains(placeholder):
-                    problem_lines.append(('Placeholder needs to be filled in.', i))
-                    break
-        return problem_lines
 
 def create_dev_table(proj_object, filename):
     # Build developer table
@@ -1502,7 +1503,7 @@ def sendInvite(request):
     for filename in filenames:
         filetext += (
             filename
-            + " http://sansa.cs.uoregon.edu:8888/dashboard/filex/"
+            + " https://meercat.cs.uoregon.edu/dashboard/filex/"
             + str(pr.project.id)
             + "?filename="
             + filename
@@ -1514,7 +1515,7 @@ def sendInvite(request):
     if len(filenames) < 5:
         gmail_send_message(
             subject="MeerCat Invitation",
-            body="Files that you have worked on in the past are part of a new Pull Request: http://sansa.cs.uoregon.edu:8888/dashboard/pr/"
+            body="Files that you have worked on in the past are part of a new Pull Request: https://meercat.cs.uoregon.edu/dashboard/pr/"
             + str(prid)
             + "\n\nThe files are:\n\n"
             + filetext
@@ -1524,7 +1525,7 @@ def sendInvite(request):
     else:
         gmail_send_message(
             subject="MeerCat Invitation",
-            body="You have worked on many files in the past that are part of a new Pull Request: http://sansa.cs.uoregon.edu:8888/dashboard/pr/"
+            body="You have worked on many files in the past that are part of a new Pull Request: https://meercat.cs.uoregon.edu/dashboard/pr/"
             + str(prid)
             + "\n\nYou are invited to join the PR discussion if interested.",
             recipient_list=[email],
@@ -1615,7 +1616,7 @@ def githubBot(request):
 
     prnumber = str(payload["number"])
 
-    if str(payload["action"]) == "opened": # or str(payload["action"]) == "edited":
+    if str(payload["action"]) == "opened" or str(payload["action"]) == "edited":
 
         project = list(
             Project.objects.all()

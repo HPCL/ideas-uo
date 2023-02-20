@@ -847,9 +847,11 @@ $.ajax({
             docbuttons += "<button class='btn btn-sm btn-primary' onclick='showDocEditor(\"" + filename + "\",\"" + "DIFF STUFF TO GO HERE" + "\");'>View File in Editor</button><br/>";
  
             //Compute number of issues
-            if( file_doc_results['documentation']['check_status'] && !file_doc_results['documentation']['documentation.doc_status'] ){
-                //docissues = 0;
-                docissues = file_doc_results['documentation']['problem_lines'].length;
+            if( file_doc_results['documentation']['check_status'] && !file_doc_results['documentation']['doc_status'] ){
+                docissues = 0;
+                try{
+                    docissues = file_doc_results['documentation']['problem_lines'].length;
+                }catch(error){}
             }
 
             doctable.append("<tr><td>" +
