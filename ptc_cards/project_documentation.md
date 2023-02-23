@@ -28,7 +28,7 @@ Use documentation structuring tools (e.g., Doxygen) that take structured code do
 | 3 | Team uses the often full-featured structuring features of a tool, e.g., Doxygen. A good example are the notion of predefined tags/fields like @param for describing each parameter of a function or @brief for a brief description of a component.  Auto-generated user manuals now become more useful. <sup>2</sup>|
 | 4 | Team relies on the PR process to incrementally fill in fields. PR reviewers check for missing field content and ask PR author to fill in.| 
 | 5 | Team uses MeerCat to check for placeholders indicating missing content, relieving the reviewer of this task. MeerCat can find fields with missing content and help the developer (PR author) fill them in.|
-| 6 | Eventually, fully-realized structured-documentation is produced and a rich user manual is generated.|
+| 6 | Eventually, fully-realized structured-documentation is produced and a rich user manual is generated. A win for both developers and users.|
 
 
 ## Comments
