@@ -9,7 +9,7 @@ Improve our team’s project documentation. This includes code documentation and
 
 ## Approach
 
-Use documentation structuring tools (e.g., Doxygen) that take structured code documentation and produce user-level project documentation, e.g., user manuals in html. Use MeerCat to find missing documentation, giving the developer the chance to create it.
+Use documentation structuring tools (e.g., Doxygen) that take structured code documentation and produce user-level project documentation, e.g., user manuals in html. Use MeerCat to find missing or erroneous documentation, giving the developer the chance to create it or correct it.
 
 
 ## User Story
