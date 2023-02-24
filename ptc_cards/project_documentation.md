@@ -9,7 +9,7 @@ Improve our team’s project documentation. This includes code documentation and
 
 ## Approach
 
-Use documentation structuring tools (e.g., Doxygen) that take structured code documentation and produce user-level project documentation, e.g., user manuals in html. Use MeerCat to find missing documentation and to create it.
+Use documentation structuring tools (e.g., Doxygen) that take structured code documentation and produce user-level project documentation, e.g., user manuals in html. Use MeerCat to find missing documentation, giving the developer the chance to create it.
 
 
 ## User Story
@@ -25,7 +25,8 @@ Use documentation structuring tools (e.g., Doxygen) that take structured code do
 | :-------------: | :------------- |
 | 0 | Team does ad-hoc code documentation, possibly with a vague mandate to document well. Up to each developer to decide what code to document (possibly none) and how to document. At best, inline comments are scattered through code. User manuals, if they exist, are hand-created.|
 | 1 | Team chooses a modern structured-documentation tool, e.g., Doxygen. Developers are required to use Doxygen comments for every major component in their code, e.g., functions, subroutines, structs, classes. Team uses the full-featured structuring features of the tool. A good example are the notion of predefined tags/fields like @param for describing each parameter of a function or @brief for a brief description of a component.  Auto-generated user manuals now become available. <sup>1,2</sup>|
-| 2 | Team uses MeerCat to incrementally fill in field content during the Pull Request process, taking some of the burden off of PR reviewers. MeerCat can check for placeholders indicating missing documentation content, and help the developer (PR author) fill them in.|
+| 2 | Team uses MeerCat to incrementally fill in field content during the Pull Request process, taking some of the burden off of PR reviewers. MeerCat can check for placeholders (see comment 2) indicating missing documentation content, and help the developer (PR author) fill them in.|
+
 Eventually, fully-realized structured-documentation is produced and a rich user manual is generated.|
 
 
