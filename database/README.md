@@ -95,7 +95,7 @@ After making changes to `database/models.py` do the following:
 
 | Source File               | Change                                                               |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `IDEAS/IDEAS/settings.py` | Add `'database'` to `INSTALLED_APPS`. Connects database application to the project. Does not automatically occur when running `migrate.py`. |
-| `IDEAS/IDEAS/settings.py` | May want to change `SECRET_KEY` once closer to use.                                                                                         |
-| `IDEAS/IDEAS/settings.py` | Under `DATABASE` set `options` to include: `charset: utf8mb4` and `use_unicode: True`.                                                      |
-| `MySQL Tables & Database` | Need to alter database and tables to collate to `utf8mb4` charset.                                                                          |
+| `meercat/website/settings.py` | Under `DATABASE` set `engine`, `name`, `host`, `port`, `user`, and `password` to match the database you are running. |
+| `meercat/website/settings.py` | May want to change `SECRET_KEY` once closer to using meercat.                                                        |
+| `meercat/website/settings.py` | Under `DATABASE` set `options` to include: `charset: utf8mb4` and `use_unicode: True`.                                                      |
+| `MySQL Tables & Database` | You may need to alter your database and tables to collate to `utf8mb4` charset.                                                                          |
