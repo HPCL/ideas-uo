@@ -204,7 +204,7 @@ class Patterns(Fetcher):
         summary, old, new = "", "", ""
         for line in lines_list:
             # We consider lines starting with a single '+' or '-' character
-            if len(line) > 2 and line[0] in ["-", "+"] and line[1] == " ":
+            if len(line) > 1 and line[0] in ["-", "+"] and line[1] not in ['+', '-']:
                 summary += line[0]
                 if line[0] == "-":
                     old += line
