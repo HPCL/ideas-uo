@@ -403,8 +403,17 @@ def check_documentation(proj_object, filename, lines):
         for i,line in enumerate(lines):
             for placeholder in placeholders:
                 if placeholder in line:
-                    problem_lines.append(('Placeholder needs to be filled in.', i))
+                    problem_lines.append(('Placeholder needs to be filled in.', (i+1)))
                     break
+
+        for i,line in enumerate(lines):
+            if '<Insert ' in line:
+                problem_lines.append(('Please fill in tag.', (i+1)))
+
+        for i,line in enumerate(lines):
+            if '__AUTO_INSERT_' in line:
+                problem_lines.append(('Should have been handled by Doxygen script.', (i+1)))
+
         return problem_lines
 
     #handle flash-x specially
