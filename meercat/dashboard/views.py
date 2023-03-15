@@ -393,11 +393,17 @@ def check_documentation(proj_object, filename, lines):
             problem_lines.append(('File still in Robodoc format. See project documentation for converting to Doxygen', 1))
             return problem_lines
 
+        found_copyright = False
         for line in lines:
-            if line.strip().startswith('!! @copyright'):
+            if '@copyright' in line:
+                found_copyright = True
                 break
-        else:
-            problem_lines.append(('File missing @copyright', 0))
+
+        if not found_copyright:        
+            if len(lines[0].strip()) > 0:
+                problem_lines.append(('File missing @copyright', 1))
+            else:    
+                problem_lines.append(('File missing @copyright', 2))
             return problem_lines
 
         for i,line in enumerate(lines):
@@ -407,7 +413,7 @@ def check_documentation(proj_object, filename, lines):
                     break
 
         for i,line in enumerate(lines):
-            if '<Insert ' in line:
+            if '<Insert ' in line or '<insert ' in line:
                 problem_lines.append(('Please fill in tag.', (i+1)))
 
         for i,line in enumerate(lines):
@@ -707,14 +713,15 @@ def file_linter(proj_object, filename):
         ):
             if result and len(result) > 0:
                 try:
-                    results.append(
-                        {
-                            "column": 0,
-                            "line": int(result.split(":")[0]),
-                            "message": result.strip().split("\n")[-1].split(": ")[1],
-                            "type": result.strip().split("\n")[-1].split(": ")[0],
-                        }
-                    )
+                    if 'Exactly one space after' not in result:
+                        results.append(
+                            {
+                                "column": 0,
+                                "line": int(result.split(":")[0]),
+                                "message": result.strip().split("\n")[-1].split(": ")[1],
+                                "type": result.strip().split("\n")[-1].split(": ")[0],
+                            }
+                        )
                 except:
                     pass
 
@@ -1385,14 +1392,15 @@ def getFile(request):
         ):
             if result and len(result) > 0:
                 try:
-                    results.append(
-                        {
-                            "column": 0,
-                            "line": int(result.split(":")[0]),
-                            "message": result.strip().split("\n")[-1].split(": ")[1],
-                            "type": result.strip().split("\n")[-1].split(": ")[0],
-                        }
-                    )
+                    if 'Exactly one space after' not in result:
+                        results.append(
+                            {
+                                "column": 0,
+                                "line": int(result.split(":")[0]),
+                                "message": result.strip().split("\n")[-1].split(": ")[1],
+                                "type": result.strip().split("\n")[-1].split(": ")[0],
+                            }
+                        )
                 except:
                     pass
         linter_results = results
