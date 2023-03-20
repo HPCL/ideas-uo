@@ -1,6 +1,7 @@
 import datetime
 import json
 import requests
+import os
 
 import configparser
 
@@ -19,7 +20,7 @@ import re
 
 import sys
 
-sys.path.insert(1, "/shared/soft/ideas_db/ideas-uo/src")
+sys.path.insert(1, "/shared/soft/ideas-uo/src")
 sys.path.insert(1, "../src")
 from gitutils.github_api import GitHubAPIClient
 
@@ -344,10 +345,10 @@ def pr(request, *args, **kwargs):
         print(cmd)
         try:
             os.system(cmd)
-            result = subprocess.check_output(cmd, shell=True)
-            print(result)
-        except:
-            return ["", [f"Failure to checkout branch {cmd}"]]
+            #result = subprocess.check_output(cmd, shell=True)
+            #print(result)
+        except Exception as e:
+            return [e, [f"Failure to checkout branch {cmd}"]]
 
     context = {
         "pr": pr,
@@ -420,7 +421,7 @@ def refreshProject(request):
 
     try:
         # cmd = f'cd /shared/soft/ideas_db/ideas-uo/meercat/.. ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {pid}'
-        cmd = f"cd {settings.REPOS_DIR} ; . meercat/env/bin/activate ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {pid}"
+        cmd = f"cd {settings.REPOS_DIR} ; . meercat/meercat-env/bin/activate ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {pid}"
         os.system(cmd)
         result = subprocess.check_output(cmd, shell=True)
         # print(result)
@@ -595,7 +596,7 @@ def diffCommitData(request):
                     + str(settings.REPOS_DIR)
                     + "/"
                     + pr.project.name
-                    + " ; . ../meercat/env/bin/activate ; pylint --output-format=json "
+                    + " ; . ../meercat/meercat-env/bin/activate ; pylint --output-format=json "
                     + filename
                 ).read()
                 linter_results.append(
@@ -611,7 +612,7 @@ def diffCommitData(request):
                 + str(settings.REPOS_DIR)
                 + "/"
                 + pr.project.name
-                + " ; . ../meercat/env/bin/activate ; fortran-linter "
+                + " ; . ../meercat/meercat-env/bin/activate ; fortran-linter "
                 + str(settings.REPOS_DIR)
                 + "/"
                 + pr.project.name
@@ -635,7 +636,7 @@ def diffCommitData(request):
                 + str(settings.REPOS_DIR)
                 + "/"
                 + pr.project.name
-                + " ; . ../meercat/env/bin/activate ; cpplint --filter=-whitespace "
+                + " ; . ../meercat/meercat-env/bin/activate ; cpplint --filter=-whitespace "
                 + str(settings.REPOS_DIR)
                 + "/"
                 + pr.project.name
@@ -843,7 +844,7 @@ def getFile(request):
             + str(settings.REPOS_DIR)
             + "/"
             + pr.project.name
-            + " ; . ../meercat/env/bin/activate ; pylint --output-format=json "
+            + " ; . ../meercat/meercat-env/bin/activate ; pylint --output-format=json "
             + filename
         ).read()
         linter_results = json.loads(output)
@@ -857,7 +858,7 @@ def getFile(request):
             + str(settings.REPOS_DIR)
             + "/"
             + pr.project.name
-            + " ; . ../meercat/env/bin/activate ; fortran-linter "
+            + " ; . ../meercat/meercat-env/bin/activate ; fortran-linter "
             + str(settings.REPOS_DIR)
             + "/"
             + pr.project.name
@@ -877,7 +878,7 @@ def getFile(request):
             + str(settings.REPOS_DIR)
             + "/"
             + pr.project.name
-            + " ; . ../meercat/env/bin/activate ; cpplint --filter=-whitespace "
+            + " ; . ../meercat/meercat-env/bin/activate ; cpplint --filter=-whitespace "
             + str(settings.REPOS_DIR)
             + "/"
             + pr.project.name
@@ -1126,7 +1127,7 @@ def githubBot(request):
         username = settings.DATABASES["default"]["USER"]
         password = settings.DATABASES["default"]["PASSWORD"]
         # cmd = f'cd .. ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {project.id}'
-        cmd = f"cd {settings.REPOS_DIR} ; . meercat/env/bin/activate ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {project.id}"
+        cmd = f"cd {settings.REPOS_DIR} ; . meercat/meercat-env/bin/activate ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {project.id}"
         os.system(cmd)
         result = subprocess.check_output(cmd, shell=True)
 
@@ -1366,7 +1367,7 @@ def countlinespython(start, lines=0, header=True, begin_start=None):
         thing = os.path.join(start, thing)
         if os.path.isfile(thing):
             if thing.endswith(".py"):
-                with open(thing, "r") as f:
+                with open(thing, "r", errors='ignore') as f:
                     newlines = f.readlines()
                     newlines = len(newlines)
                     lines += newlines
@@ -1386,7 +1387,7 @@ def countlinesfortran(start, lines=0, header=True, begin_start=None):
         thing = os.path.join(start, thing)
         if os.path.isfile(thing):
             if thing.endswith(".F90"):
-                with open(thing, "r") as f:
+                with open(thing, "r", errors='ignore') as f:
                     newlines = f.readlines()
                     newlines = len(newlines)
                     lines += newlines
@@ -1406,7 +1407,7 @@ def countlinesc(start, lines=0, header=True, begin_start=None):
         thing = os.path.join(start, thing)
         if os.path.isfile(thing):
             if thing.endswith(".c") or thing.endswith(".h") or thing.endswith(".cpp"):
-                with open(thing, "r") as f:
+                with open(thing, "r", errors='ignore') as f:
                     try:
                         newlines = f.readlines()
                         newlines = len(newlines)
