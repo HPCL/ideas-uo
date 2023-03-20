@@ -10,59 +10,89 @@ function sortedIndex(array, value) {
     return low;
 }
 
+function* infinite() {
+    let index = 0;
+  
+    while (true) {
+        yield index++;
+    }
+}
+  
+
+function insertFileIntoTree(node, filePath, generator, errors = null) {
+    const pathList = filePath.split('/');
+    const fileName = pathList[pathList.length - 1];
+
+    for (let text of pathList) {
+        let foundIndex = node.children.findIndex(child => child.text === text);
+        if (foundIndex > -1) { // Found partial path, keep exploring until path different
+            node = node.children[foundIndex];
+                    
+            if (errors !== null) {
+                node.attributes.error = errors;
+            }
+        } else { // Partial path not Found, create new Nodes until fileName is reached
+            const isLeaf = text === fileName;
+            const newNode = {
+                // id must be the filePath if it's a leaf node. 
+                // This way, "values" parameter from treejs knows
+                // which leaf nodes to check.
+                id: isLeaf ? filePath : generator.next().value,
+                text,
+                children: [],
+                attributes: {
+                    leaf: isLeaf,
+                }
+            };
+                    
+            if (errors!== null) {
+                newNode.attributes.error = errors;
+            }
+
+            const insertIndex = sortedIndex(node.children, newNode.text);
+            node.children.splice(insertIndex, 0, newNode);
+            node = newNode;
+        }
+
+    }
+}
+
+
+// Tree node structure
+
+// {
+//   "id": "unique_ID",
+//   "text": "node-0",
+//   "attributes": {},
+//   "children": [],
+//   "checked": true|false
+// }
+
+function createTreeFromResults(results) {
+    const rootNode = {
+        children: [],
+    }
+
+    const generator = infinite();
+
+    for (let result of results) {
+        insertFileIntoTree(rootNode, result.filePath, generator, result.errors);
+    }
+
+    return rootNode.children;
+}
+
 function createTreeFromFilePaths(filePaths) {
 
-    // Tree node structure
-
-    // {
-    //   "id": "unique_ID",
-    //   "text": "node-0",
-    //   "attributes": {},
-    //   "children": [],
-    //   "checked": true
-    // }
 
     const rootNode = {
-        id: 'rootNode',
-        text: 'rootNode',
         children: [],
-        checked: false,
     }
 
-    let nodeId = 0;
-    function insertFileIntoTree(filePath) {
-        const pathList = filePath.split('/');
-        const fileName = pathList[pathList.length - 1];
-        let currentNode = rootNode;
-
-        for (let text of pathList) {
-            let foundIndex = currentNode.children.findIndex(child => child.text === text);
-            if (foundIndex > -1) { // Found partial path, keep exploring until path different
-                currentNode = currentNode.children[foundIndex];
-                continue;
-            } else { // Partial path not Found, create new Nodes until fileName is reached
-                const isLeaf = text === fileName;
-                const newNode = {
-                    // id must be the filePath if it's a leaf node. 
-                    // This way, "values" parameter from treejs knows
-                    // which leaf nodes to check.
-                    id: isLeaf ? filePath : nodeId++,
-                    text,
-                    children: [],
-                    attributes: {
-                        leaf: isLeaf,
-                    }
-                };
-
-                const insertIndex = sortedIndex(currentNode.children, newNode.text);
-                currentNode.children.splice(insertIndex, 0, newNode);
-                currentNode = newNode;
-            }
-        }
-    }
+    const generator = infinite();
 
     for (let filePath of filePaths) {
-        insertFileIntoTree(filePath);
+        insertFileIntoTree(rootNode, filePath, generator);
     }
 
     return rootNode.children;

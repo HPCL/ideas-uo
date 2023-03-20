@@ -5,6 +5,7 @@
 <h2>Folder Explorer</h2><br/>
 
 <b><i>Folder:</i></b> {{folder}} - <a href="{{project.source_url|slice:"0:-4"}}/tree/{{branch}}/{{folder}}" target="_blank">Go to folder on GitHub</a><br/>
+<b><i>Branch:</i></b> {{branch}} <br/>
 
 <div style="margin-left:15px; margin-top:15px;">
 
@@ -156,6 +157,11 @@
 <input id="branch" type="hidden" value="{{ branch }}"/>
 
 {{ files|json_script:"files" }}
+
+{% if results|length %}
+    {{ results|json_script:"results" }}
+{% endif %}
+
 {% endblock content %}
 
 
@@ -175,5 +181,5 @@
 <script src="{% static 'js/branches.js' %}"></script>
 <script src="{% static 'js/tree.min.js' %}"></script>
 <script src="{% static 'js/treeUtilities.js' %}"></script>
-<script src="{% static 'js/fileExplorer.js' %}"></script>
+<script src="{% static 'js/folderExplorer.js' %}"></script>
 {% endblock script %}
