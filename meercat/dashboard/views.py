@@ -38,6 +38,7 @@ from database.models import (
     CommitTag,
     PullRequestLabel,
     Label,
+    EventLog,
     FileMetric,
 )
 from database.utilities import comment_pullrequest, get_repo_owner
@@ -439,7 +440,7 @@ def check_documentation(proj_object, filename, lines):
             if line.startswith('!! @'):
                 return_dict['doc_status'] = True
                 break
-        else:
+        if not return_dict['doc_status']:
             return_dict['doc_status'] = False
             return_dict['problem_lines'] = [("Please see project documentation for converting to Doxygen", 0)]
         return return_dict
@@ -957,6 +958,32 @@ def pr(request, *args, **kwargs):
     }
 
     return HttpResponse(template.render(context, request))
+
+# For logging generic events
+def logEvent(request, *args, **kwargs):
+
+    # Get PR id
+    prid = 0
+    if request.POST.get("pr"):
+        prid = int(request.POST.get("pr"))
+
+    #if not hasAccessToPR(request.user, prid):
+    #    return redirect("not_authorized")
+
+    pr = list(PullRequest.objects.all().filter(id=prid).all())[0]
+
+    comments = request.POST.get("comments")
+
+    event = EventLog(
+        event_type=EventLog.EventTypeChoices.FEATURE,
+        log=comments,
+        pull_request=pr,
+        datetime=datetime.datetime.today(),
+    )
+    event.save()
+
+    resultdata = {"status": "success"}
+    return HttpResponse(json.dumps(resultdata), content_type="application/json")
 
 #*********  DELETE THIS?
 # Pull Request view - show the assistant for specific PR
@@ -1692,14 +1719,16 @@ def githubBot(request):
                         event_type=EventLog.EventTypeChoices.NOTIFICATION,
                         log=comment,
                         pull_request=pull_request,
-                        datetime=datetime.today(),
+                        datetime=datetime.datetime.today(),
                     )
+                    event.save()
             else:
                 event = EventLog(
                     event_type=EventLog.EventTypeChoices.NO_NOTIFICATION,
                     pull_request=pull_request,
-                    datetime=datetime.today(),
+                    datetime=datetime.datetime.today(),
                 )
+                event.save()
                 print("don't bug me")
             print("------------")
         

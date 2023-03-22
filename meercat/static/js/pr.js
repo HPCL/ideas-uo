@@ -84,6 +84,13 @@ function showDocEditor(docfilename, difftext) {
     //$('#dochelper').empty();
 
     $.ajax({
+        url: '/dashboard/logevent/', type: 'POST', data: { 'pr': pr, 'comments': 'Documentation editor opened for: '+filename }, success: function (result) {
+            console.log("success ajax");
+            console.log(result);
+        }
+    });
+
+    $.ajax({
         url: '/dashboard/getfile/', type: 'POST', data: { 'pr': pr, 'filename': filename }, success: function (result) {
             console.log("get file contents");
             console.log(result);
