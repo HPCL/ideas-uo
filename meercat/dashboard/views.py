@@ -1,6 +1,7 @@
 import datetime
 import json
 import requests
+import os
 
 import configparser
 
@@ -19,7 +20,7 @@ import re
 
 import sys
 
-sys.path.insert(1, "/shared/soft/ideas_db/ideas-uo/src")
+sys.path.insert(1, "/shared/soft/ideas-uo/src")
 sys.path.insert(1, "../src")
 from gitutils.github_api import GitHubAPIClient
 
@@ -46,6 +47,7 @@ from dashboard.utilities import (
     fortran_doxygen_template,
     gmail_send_message,
     save_debug_event,
+    dox_script,
 )
 from dashboard.author_merger_tool import AuthorMergerTool
 
@@ -147,6 +149,7 @@ def subscriptions(request):
         )
         print(request.user.profile.subscriptions)
         request.user.profile.save()
+        messages.success(request, 'Your subscriptions were saved successfullly')
 
     projects = Project.objects.filter(project_role__user=request.user)
 
@@ -154,7 +157,7 @@ def subscriptions(request):
     project_names = []
     for project in projects:
         project_names.append(project.name)
-        files[project.name] = list_project_files(project)
+        files[project.name] = list_project_files(project.name)
 
     subscriptions = request.user.profile.subscriptions
 
@@ -342,10 +345,10 @@ def pr(request, *args, **kwargs):
         print(cmd)
         try:
             os.system(cmd)
-            result = subprocess.check_output(cmd, shell=True)
-            print(result)
-        except:
-            return ["", [f"Failure to checkout branch {cmd}"]]
+            #result = subprocess.check_output(cmd, shell=True)
+            #print(result)
+        except Exception as e:
+            return [e, [f"Failure to checkout branch {cmd}"]]
 
     context = {
         "pr": pr,
@@ -418,7 +421,7 @@ def refreshProject(request):
 
     try:
         # cmd = f'cd /shared/soft/ideas_db/ideas-uo/meercat/.. ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {pid}'
-        cmd = f"cd {settings.REPOS_DIR} ; . meercat/env/bin/activate ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {pid}"
+        cmd = f"cd {settings.REPOS_DIR} ; . meercat/meercat-env/bin/activate ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {pid}"
         os.system(cmd)
         result = subprocess.check_output(cmd, shell=True)
         # print(result)
@@ -593,7 +596,7 @@ def diffCommitData(request):
                     + str(settings.REPOS_DIR)
                     + "/"
                     + pr.project.name
-                    + " ; . ../meercat/env/bin/activate ; pylint --output-format=json "
+                    + " ; . ../meercat/meercat-env/bin/activate ; pylint --output-format=json "
                     + filename
                 ).read()
                 linter_results.append(
@@ -609,7 +612,7 @@ def diffCommitData(request):
                 + str(settings.REPOS_DIR)
                 + "/"
                 + pr.project.name
-                + " ; . ../meercat/env/bin/activate ; fortran-linter "
+                + " ; . ../meercat/meercat-env/bin/activate ; fortran-linter "
                 + str(settings.REPOS_DIR)
                 + "/"
                 + pr.project.name
@@ -633,7 +636,7 @@ def diffCommitData(request):
                 + str(settings.REPOS_DIR)
                 + "/"
                 + pr.project.name
-                + " ; . ../meercat/env/bin/activate ; cpplint --filter=-whitespace "
+                + " ; . ../meercat/meercat-env/bin/activate ; cpplint --filter=-whitespace "
                 + str(settings.REPOS_DIR)
                 + "/"
                 + pr.project.name
@@ -841,7 +844,7 @@ def getFile(request):
             + str(settings.REPOS_DIR)
             + "/"
             + pr.project.name
-            + " ; . ../meercat/env/bin/activate ; pylint --output-format=json "
+            + " ; . ../meercat/meercat-env/bin/activate ; pylint --output-format=json "
             + filename
         ).read()
         linter_results = json.loads(output)
@@ -855,7 +858,7 @@ def getFile(request):
             + str(settings.REPOS_DIR)
             + "/"
             + pr.project.name
-            + " ; . ../meercat/env/bin/activate ; fortran-linter "
+            + " ; . ../meercat/meercat-env/bin/activate ; fortran-linter "
             + str(settings.REPOS_DIR)
             + "/"
             + pr.project.name
@@ -875,7 +878,7 @@ def getFile(request):
             + str(settings.REPOS_DIR)
             + "/"
             + pr.project.name
-            + " ; . ../meercat/env/bin/activate ; cpplint --filter=-whitespace "
+            + " ; . ../meercat/meercat-env/bin/activate ; cpplint --filter=-whitespace "
             + str(settings.REPOS_DIR)
             + "/"
             + pr.project.name
@@ -1124,7 +1127,7 @@ def githubBot(request):
         username = settings.DATABASES["default"]["USER"]
         password = settings.DATABASES["default"]["PASSWORD"]
         # cmd = f'cd .. ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {project.id}'
-        cmd = f"cd {settings.REPOS_DIR} ; . meercat/env/bin/activate ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {project.id}"
+        cmd = f"cd {settings.REPOS_DIR} ; . meercat/meercat-env/bin/activate ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {project.id}"
         os.system(cmd)
         result = subprocess.check_output(cmd, shell=True)
 
@@ -1364,7 +1367,7 @@ def countlinespython(start, lines=0, header=True, begin_start=None):
         thing = os.path.join(start, thing)
         if os.path.isfile(thing):
             if thing.endswith(".py"):
-                with open(thing, "r") as f:
+                with open(thing, "r", errors='ignore') as f:
                     newlines = f.readlines()
                     newlines = len(newlines)
                     lines += newlines
@@ -1384,7 +1387,7 @@ def countlinesfortran(start, lines=0, header=True, begin_start=None):
         thing = os.path.join(start, thing)
         if os.path.isfile(thing):
             if thing.endswith(".F90"):
-                with open(thing, "r") as f:
+                with open(thing, "r", errors='ignore') as f:
                     newlines = f.readlines()
                     newlines = len(newlines)
                     lines += newlines
@@ -1404,7 +1407,7 @@ def countlinesc(start, lines=0, header=True, begin_start=None):
         thing = os.path.join(start, thing)
         if os.path.isfile(thing):
             if thing.endswith(".c") or thing.endswith(".h") or thing.endswith(".cpp"):
-                with open(thing, "r") as f:
+                with open(thing, "r", errors='ignore') as f:
                     try:
                         newlines = f.readlines()
                         newlines = len(newlines)
@@ -2356,11 +2359,13 @@ def folder_explorer(request, *args, **kwargs):
         )
 
     proj_object = proj_list[0]
+    files = list_project_files(proj_object.name, folder, branch)
 
     context = {
         "folder": folder,
         "project": project,
         "branch": branch,
+        'files': files
     }
 
     return HttpResponse(template.render(context, request))
@@ -2424,7 +2429,9 @@ def file_explorer(request, *args, **kwargs):
              'authors_len': len(dev_table),
              'functions_supported': True if function_table else False,
              'functions':function_table,
-             'prs':prs_table
+             'prs':prs_table,
+             'doxygen_new_file':'',
+             'doxygen_comments':'',
              }
     """
 
@@ -2653,7 +2660,11 @@ def file_explorer_function(proj_id, project_object, project_info, branch, filena
 
     file_table = all_files[0][1:] if all_files else []
 
-    # TODO: if file is F90 check for missing doxygen
+    # If file is F90 check for missing doxygen
+    new_file = ''
+    comments = 'File type not supported. Nothing done.'
+    if filename.endswith(".F90"):
+        new_file, comments = dox_script( str(settings.REPOS_DIR)+'/'+proj_name, filename)
 
     context = {
         "file": filename,
@@ -2666,6 +2677,9 @@ def file_explorer_function(proj_id, project_object, project_info, branch, filena
         "supports_test_hunt": project_info["supports_test_hunt"],
         "functions": file_table,  # [[all sigs], status]
         "prs": prs_table,
+        "doxygen_supported":filename.endswith(".F90"),
+        "doxygen_new_file":new_file,
+        "doxygen_comments":comments,
     }
     return context
 

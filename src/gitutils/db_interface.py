@@ -14,6 +14,8 @@ from urllib.parse import urlparse
 
 import arrow
 import MySQLdb
+import subprocess
+import json
 
 from src.gitutils.gitcommand import GitCommand
 from src.gitutils.graphql_interface import fetch_prs, fetch_issues, Source
@@ -56,7 +58,7 @@ class DatabaseInterface:
             project = self.args.add_project
             repo = self.get_git_name(project)
             logger.debug(f'{repo}: Adding new project(s) to database...')
-            self.add_project(project, since=self.args.since, until=self.args.until, fork_of=self.args.fork_of, child_of=self.args.child_of, tags=self.args.tags)
+            self.add_project(project, since=self.args.since, until=self.args.until, fork_of=self.args.fork_of, child_of=self.args.child_of, tags=self.args.tags, metrics=self.args.metrics)
 
         elif self.args.add_issues:
             project = self.args.add_issues
@@ -104,6 +106,7 @@ class DatabaseInterface:
         self.cmdline_parser.add_argument('--tags', help='tags to add to project', nargs='+', type=str)
         self.cmdline_parser.add_argument('--fork_of', help='fork of another project', type=str)
         self.cmdline_parser.add_argument('--child_of', help='child of another project', type=str)
+        self.cmdline_parser.add_argument('--metrics', help='compute project metrics', action='store_true')
 
 
     def terminate(self):
@@ -614,7 +617,7 @@ class DatabaseInterface:
                                 self.db.commit()
 
 
-    def add_project(self, url, name=None, since=None, until=datetime.datetime.today().isoformat(), fork_of=None, child_of=None, tags=None):
+    def add_project(self, url, name=None, since=None, until=datetime.datetime.today().isoformat(), fork_of=None, child_of=None, tags=None, metrics=False):
         '''
             url: url to git file
             name: descriptive name of project, defaults to .git file name
@@ -725,6 +728,155 @@ class DatabaseInterface:
             query = 'update project set last_updated=utc_timestamp() where id=%s'
             cursor.execute(query, (project_id,))
             self.db.commit()
+
+            # Now run metrics on project  
+            if metrics:
+                # Repeat for every active branch
+                branches = ["main", "master"]
+                for branch in branches:
+                    cmd = f"git checkout {branch}"
+                    try:
+                        # Using subprocess will throw exception if branch doesn exist which we want to happen
+                        #os.system(cmd) Switch to this once we are smarter about getting branches
+                        result = subprocess.check_output(cmd, shell=True)
+
+                        # Run linter on every .py file in project
+                        self.lint_python('.', project_id, cursor, branch)
+                        self.lint_fortran('.', project_id, cursor, branch)
+                        self.lint_cpp('.', project_id, cursor, branch)
+
+                        # TODO: Run documentation check on every file in project
+
+                        # TODO: Find related dev authors for every file in project
+
+                    except Exception as e:
+                        print('Failed to checkout branch: '+branch)
+                
+
+    def lint_python(self, start, project_id, cursor, branch):
+
+        for thing in os.listdir(start):
+            thing = os.path.join(start, thing)
+            if os.path.isfile(thing):
+                if thing.endswith(".py"):
+
+                    output = '[]'
+                    try:
+                        output = os.popen(
+                            "export PYTHONPATH=${PYTHONPATH}:"
+                            + os.path.abspath('.')
+                            + " ; . ../meercat/meercat-env/bin/activate ; pylint --output-format=json "
+                            + thing
+                        ).read()
+                        # output is in json format: json.loads(output) 
+                    except Exception as e:
+                        output = '[{ "error": "' + str(e) + '"}]'
+
+                    query = 'replace into database_filemetric (project_id, metric_type, file_path, branch, result_string, result_json, datetime) values (%s, %s, %s, %s, %s, %s, now())'
+                    cursor.execute(query, (project_id, 'LINTING', thing[2:], branch, output, output))
+                    self.db.commit()
+
+        for thing in os.listdir(start):
+            if not thing.startswith(".git") and not thing.startswith("repos"):
+                thing = os.path.join(start, thing)
+                if os.path.isdir(thing):
+                    self.lint_python(thing, project_id, cursor, branch)
+
+    def lint_fortran(self, start, project_id, cursor, branch):
+
+        for thing in os.listdir(start):
+            thing = os.path.join(start, thing)
+            if os.path.isfile(thing):
+                if thing.endswith(".F90"):
+
+                    output = '[]'
+                    try:
+                        output = os.popen(
+                            "export PYTHONPATH=${PYTHONPATH}:"
+                            + os.path.abspath('.')
+                            + " ; . ../meercat/meercat-env/bin/activate ; fortran-linter "
+                            + thing
+                            + " --syntax-only"
+                        ).read()
+                        # output is in json format: json.loads(output) 
+                    except Exception as e:
+                        output = '[{ "error": "' + str(e) + '"}]'
+
+                    results = []
+                    for result in output.split(
+                        thing + ":"
+                    ):
+                        if result and len(result) > 0:
+                            try:
+                                results.append(
+                                    {
+                                        "column": 0,
+                                        "line": int(result.split(":")[0]),
+                                        "message": result.strip().split("\n")[-1].split(": ")[1],
+                                        "type": result.strip().split("\n")[-1].split(": ")[0],
+                                    }
+                                )
+                            except:
+                                pass 
+
+                    query = 'replace into database_filemetric (project_id, metric_type, file_path, branch, result_string, result_json, datetime) values (%s, %s, %s, %s, %s, %s, now())'
+                    cursor.execute(query, (project_id, 'LINTING', thing[2:], branch, str(results), str(json.dumps(results))))
+                    self.db.commit()
+
+        for thing in os.listdir(start):
+            if not thing.startswith(".git") and not thing.startswith("repos"):
+                thing = os.path.join(start, thing)
+                if os.path.isdir(thing):
+                    self.lint_fortran(thing, project_id, cursor, branch)                    
+
+    def lint_cpp(self, start, project_id, cursor, branch):
+
+        for thing in os.listdir(start):
+            thing = os.path.join(start, thing)
+            if os.path.isfile(thing):
+                if thing.endswith(".c"): #just c for now
+
+                    output = '[]'
+                    try:
+                        output = os.popen(
+                            "export PYTHONPATH=${PYTHONPATH}:"
+                            + os.path.abspath('.')
+                            + " ; . ../meercat/meercat-env/bin/activate ; cpplint --filter=-whitespace "
+                            + thing
+                            + " 2>&1"
+                        ).read()
+                        # output is in json format: json.loads(output) 
+                    except Exception as e:
+                        output = '[{ "error": "' + str(e) + '"}]'
+
+                    results = []
+                    for result in output.split(
+                        thing + ":"
+                    ):
+                        if result and len(result) > 0:
+                            try:
+                                results.append(
+                                    {
+                                        "column": 0,
+                                        "line": int(result.split(":")[0]),
+                                        "message": result.split(":")[1].split("  [")[0].strip(),
+                                        "type": result.split(":")[1]
+                                        .split("  [")[1]
+                                        .split("] ")[0],
+                                    }
+                                )
+                            except:
+                                pass    
+
+                    query = 'replace into database_filemetric (project_id, metric_type, file_path, branch, result_string, result_json, datetime) values (%s, %s, %s, %s, %s, %s, now())'
+                    cursor.execute(query, (project_id, 'LINTING', thing[2:], branch, str(results), str(json.dumps(results))))
+                    self.db.commit()
+
+        for thing in os.listdir(start):
+            if not thing.startswith(".git") and not thing.startswith("repos"):
+                thing = os.path.join(start, thing)
+                if os.path.isdir(thing):
+                    self.lint_cpp(thing, project_id, cursor, branch)      
 
     def process_project(self, url, since, until):
         name = self.get_git_name(url)

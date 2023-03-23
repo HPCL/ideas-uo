@@ -274,6 +274,162 @@ function insertTemplate(linenumber, text){
     
 }
 
+
+function showDoxygenEditor(docfilename, newFileContent, oldDocContent) {
+
+    console.log("------- TEST --------");
+    console.log(docfilename);
+    console.log(pr);
+    console.log(csrf_token);
+
+    filename = docfilename;
+
+    $('#dochelpertitle').html(filename);
+    previousLines = 0;
+    ignoreLineChanges = true;
+
+    $.ajax({
+        url: '/dashboard/getfile/', type: 'POST', data: { 'pr': pr, 'filename': filename }, success: function (result) {
+            console.log("get file contents");
+            console.log(result);
+
+            if( filename.indexOf(".h") >= 0 || filename.indexOf(".c") ){
+                editor.setOption("mode", "text/x-c++src");
+            }else if( filename.indexOf(".py") >= 0 ){
+                editor.setOption("mode", "text/x-python");
+            }else if( filename.indexOf(".F90") >= 0 ){
+                editor.setOption("mode", "text/x-fortran");
+            }else{
+                editor.setOption("mode", "text/html");
+            }
+
+            editor.setValue(result['filecontents']);
+
+            previousLines = editor.lineCount();
+            ignoreLineChanges = false;
+
+            //editor.markText({ line: 3, ch: 0 }, { line: 3, ch: 13 }, { className: "styled-background" });
+            //editor.markText({ line: 6, ch: 12 }, { line: 6, ch: 22 }, { className: "styled-background" });
+            //editor.markText({ line: 4, ch: 2 }, { line: 4, ch: 6 }, { className: "styled-background" });
+
+            //for(var i=0; i<result['linter_results'].length; i++){
+            //    editor.markText({ line: result['linter_results'][i].line-1, ch: result['linter_results'][i].column }, { line: result['linter_results'][i].line-1, ch: 100 }, { className: "styled-background" });
+            //}
+
+            for(var i=0; i<docstring_results[1].length; i++){
+
+                if( docstring_results[1][i][0] == filename ){
+                    for(var j=0; j<docstring_results[1][i][1].length; j++){
+
+                        if( docstring_results[1][i][1][j].result.length > 0 ){ 
+
+                            for(var k=0; k<docstring_results[1][i][1][j].result.length; k++){ 
+                                
+                                if( docstring_results[1][i][1][j].result[k][0].indexOf("No docstring") >= 0 ){
+                                    docstring_results[1][i][1][j].result[k][1] -= 1;
+                                }
+                                console.log("MARK LINE: " + docstring_results[1][i][1][j].result[k][1] ); 
+                                editor.markText({ line: docstring_results[1][i][1][j].result[k][1], ch: 0 }, { line: docstring_results[1][i][1][j].result[k][1], ch: 100 }, { className: "styled-background" });
+                            }
+                        }
+                    }
+                }
+            }
+
+            /* JUST FOR DEMO */
+            //editor.markText({ line: 6, ch: 0 }, { line: 7, ch: 100 }, { className: "styled-background" });
+            /* */
+
+            popupNode.remove();
+
+            editor.on("cursorActivity", function () {
+
+                var cursor = editor.getCursor();
+                var lines = editor.lineCount();
+                
+                console.log(previousLines + " now -> "+lines);
+                console.log("ignore: "+ignoreLineChanges);
+
+                if( !ignoreLineChanges && lines > previousLines ){
+
+                    //Bump the line numbers by 1 if after linenumber (this is currenlty only looking at first item in results)
+                    for(var i=0; i<docstring_results[1].length; i++){
+                        if( docstring_results[1][i][0] == filename ){
+                            for(var j=0; j<docstring_results[1][i][1].length; j++){
+                                if( docstring_results[1][i][1][j].result.length > 0 ){     
+                                    if( cursor.line <= docstring_results[1][i][1][j].result[0][1] ){
+                                        docstring_results[1][i][1][j].result[0][1] += 1;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    previousLines = lines;
+                }
+
+                popupNode.remove();
+
+                /*if (cursor.line == 3 && cursor.ch >= 0 && cursor.ch <= 13) {
+                    var text = document.createTextNode("We can say a bunch of stuff about why this is highlighted right here.");
+                    popupNode.innerHTML = '';
+                    popupNode.appendChild(text);
+                    editor.addWidget({ line: 4, ch: 9 }, popupNode, true);
+                } else {
+                    popupNode.remove();
+                }*/
+
+                for(var i=0; i<docstring_results[1].length; i++){
+
+                    if( docstring_results[1][i][0] == filename ){
+                        for(var j=0; j<docstring_results[1][i][1].length; j++){
+
+                            if( docstring_results[1][i][1][j].result.length > 0 ){                        
+
+                                if (cursor.line == docstring_results[1][i][1][j].result[0][1] ) {
+                                    
+                                    popupNode.innerHTML = '';
+                                    for(var k=0; k<docstring_results[1][i][1][j].result.length; k++){
+                                        var text = document.createTextNode(docstring_results[1][i][1][j].result[k][0]);
+                                        popupNode.appendChild(text);
+                                        if( k < docstring_results[1][i][1][j].result.length-1 ){
+                                            var br = document.createElement('br');
+                                            popupNode.appendChild(br);
+                                        }
+                                    }
+
+                                    
+
+                                    if( docstring_results[1][i][1][j].result[0][0].indexOf("No docstring") >= 0 ){
+                                        var button = document.createElement('button');
+                                        button.setAttribute('onclick', 'insertTemplate('+(cursor.line)+', \'  \"\"\"\\n  Template will go here.\\n  \"\"\"\')');
+                                        button.classList.add('btn');
+                                        button.classList.add('btn-sm');
+                                        button.classList.add('btn-primary');
+                                        button.style['margin-left'] = "10px"
+                                        button.innerHTML = 'Insert docstring template'
+                                        popupNode.appendChild(button);
+                                    }
+                                    editor.addWidget({ line: cursor.line, ch: 9 }, popupNode, true);
+                                }
+                            }
+                        }
+                    }
+                }
+
+            });
+
+
+            setTimeout(function () {
+                editor.refresh();
+            }, 1);
+
+            $('#docModal').modal('show');
+        }
+    });
+
+}
+
+
 function sendInvite(email, filenames){
 
     console.log("Send Invite");

@@ -3,10 +3,9 @@ import mimetypes
 import os
 import re
 import requests
-from subprocess import check_output
 from datetime import datetime
-from pathlib import Path
 from google.oauth2.credentials import Credentials
+#from git import Repo
 
 from django.conf import settings
 from database.models import EventLog
@@ -69,13 +68,49 @@ def get_branches_with_status(project): # only works with public repos for now
     return branches_with_status
 
 
-def list_project_files(project):
-    project_directory = settings.BASE_DIR.parent / project.name
-    project_path = Path(project_directory)
-    output_bytes = check_output(["git", "ls-files"], cwd=project_path)
 
-    file_paths = output_bytes.decode('utf-8').split('\n')[:-1]
-    return file_paths
+
+# Credits to https://stackoverflow.com/a/56469542/7281070
+# Edited for project needs
+def list_files_in_commit(commit, directory=None):
+    """
+    Lists files in a repo at a given commit
+
+    Parameters
+    ----------
+    directory: str, optional
+        Directory path relative to git repo. Only files under directory will be listed.
+        If directory is None, all files at the given commit are listed.
+    """
+    file_list = []
+    stack = [commit.tree] if directory is None else [commit.tree[directory]]
+    while len(stack) > 0:
+        tree = stack.pop()
+        # enumerate blobs (files) at this level
+        for b in tree.blobs:
+            file_list.append(b.path)
+        for subtree in tree.trees:
+            stack.append(subtree)
+    return file_list
+
+
+def list_project_files(project_name, directory=None, branch=None):
+    """
+    Lists project files tracked by git in the project project_name
+    
+    Parameters
+    ----------
+    
+    directory: str, optional
+        Directory path relative to git repo. Only files under directory will be listed.
+        If directory is None, all files are listed.
+    branch: str, optional
+        Specifies from which branch the files are listed. If None, the default branch is chosen.
+    """
+
+    project_repo = Repo(settings.REPOS_DIR / project_name).commit(branch)
+
+    return list_files_in_commit(project_repo, directory)
     
 
 python_doxygen_base_template = """\"\"\"!
@@ -90,7 +125,202 @@ python_doxygen_base_template = """\"\"\"!
     
 """
 
-    
+copyright_template = '''!> @copyright Copyright 2022 UChicago Argonne, LLC and contributors
+!!
+!! @licenseblock
+!!   Licensed under the Apache License, Version 2.0 (the "License");
+!!   you may not use this file except in compliance with the License.
+!!
+!!   Unless required by applicable law or agreed to in writing, software
+!!   distributed under the License is distributed on an "AS IS" BASIS,
+!!   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+!!   See the License for the specific language governing permissions and
+!!   limitations under the License.
+!! @endlicenseblock
+!!
+!! @file
+!! @brief %%function_name%% %%file_type%%
+'''
+
+stub_template = '''!> @ingroup %%unit_name%%
+!!
+!! @brief %%function_brief%%
+!!
+!! @details
+!! @anchor %%function_name%%_stub
+!!
+!! %%function_details%%
+!!
+!!
+%%param_breakout%%
+'''
+
+imp_template = '''!> @ingroup %%current_folder%%
+!!
+!! @brief %%function_brief%%
+!!
+!! @stubref{%%function_name%%}
+'''
+
+user_fields = ['%%function_brief%%', '%%function_details%%', '_description%%']
+
+#check for @copyright at top of file
+def missing_doxygen(lines):
+  assert isinstance(lines, list)
+  for line in lines:
+    if line.strip():
+      return not line.startswith('!> @copyright')  #True if not Doxygen commented
+
+def number_of_subroutines(lines):
+  count = 0
+  for i,line in enumerate(lines):
+    if line.startswith('subroutine'): count += 1
+  return count
+
+def find_subroutine(lines):
+  assert isinstance(lines, list)
+
+  main = []  #non-comment code up until subroutine
+  comments = []  #exsiting robodoc comment lines
+  for i,line in enumerate(lines):
+    if line.startswith('!!'):
+      comments.append(line)
+      continue
+    if line.startswith('subroutine'):
+      sub_start = i
+      break
+    main.append(line)  #no subroutine yet and not comment
+  else:
+    assert False, f'did not find subroutine in file'
+
+  name, params = parse_signature(lines, sub_start)
+
+  return comments, main, sub_start, name, params
+
+#deals with multi-line and single line
+def parse_signature(lines, i):
+  assert isinstance(lines, list)
+  assert i < len(lines)
+  assert lines[i].startswith('subroutine')
+  try:
+    j = lines[i].index('(')
+  except:
+    assert False, f'missing ( in signature {lines[i]}'  #assuming start of params is on first line
+
+  start = i
+  #deal with multi line signature
+  while not lines[i].strip().endswith(')'):
+      i += 1
+      assert i < len(lines), f'did not find closing ) for {lines[i]}'
+  #found signature end
+  line = ' '.join(lines[start:i+1]).replace('&', ' ')
+  name = line[len('subroutine')+1:j].strip()
+  params = line[j+1:line.find(')')].split(',')
+
+  return name, [p.strip() for p in params]
+
+def build_new_stub_file(copyright_dox, stub_dox, lines, main, sub_start, name, params, current_folder):
+  new_file = copyright_dox + '\n'.join(main)  #everything up to subroutine
+  new_file += stub_dox  #add rest of dox comments
+  new_file += '\n'.join(lines[sub_start:])
+  new_file = new_file.replace('%%file_type%%', 'stub')
+  new_file = new_file.replace('%%function_name%%', name)
+  new_file = new_file.replace('%%unit_name%%', current_folder)
+
+  params_string = ''
+  for param in params:
+    params_string += f'!! @param {param} %%{param}_description%%\n'
+  new_file = new_file.replace('%%param_breakout%%', params_string)
+  
+  return new_file  #as string
+
+def build_new_imp_file(copyright_dox, imp_dox, lines, main, sub_start, name, current_folder):
+  new_file = copyright_dox + '\n'.join(main)  #everything up to subroutine
+  new_file += imp_dox  #add rest of dox comments
+  new_file += '\n'.join(lines[sub_start:])
+  new_file = new_file.replace('%%file_type%%', 'implementation')
+  new_file = new_file.replace('%%function_name%%', name)
+  new_file = new_file.replace('%%current_folder%%', current_folder)
+  
+  return new_file  #as string
+
+def find_fields_to_fill(lines, user_fields):
+  to_fill = []
+  for i,line in enumerate(lines):
+    for field in user_fields:
+      if field in line: to_fill.append((i,field))
+  return to_fill
+
+#making lines global for now - normally would be generated by read
+def dox_script(path_location, file_path):
+  new_file = ''
+  comments = ''
+
+  file_parts = Path(file_path).parts
+
+  if len(file_parts)<2:
+    print(f'{file_path} not part of a Unit. Nothing done.')
+    return new_file, f'{file_path} not part of a Unit. Nothing done.'
+
+  current_folder = file_parts[-2]
+
+  if file_parts[0] != 'source' or not file_parts[1][0].isupper():  #all Unit folders start upper case
+    print(f'{file_path} not part of a Unit. Nothing done.')
+    return new_file, f'{file_path} not part of a Unit. Nothing done.'
+
+  unit = file_parts[1]
+
+  file_type = 'stub' if len(file_parts)==3 else 'imp'
+  the_file = file_parts[-1]
+  filename, extension = os.path.splitext(the_file)
+
+  if extension != '.F90':
+    print(f'{file_path} not an F90 file. Nothing done.')
+    return new_file, f'{file_path} not an F90 file. Nothing done.'
+
+  if not filename.startswith(unit):
+    print(f'{file_name} not public. Nothing done.')
+    return new_file, f'{file_name} not public. Nothing done.'
+
+  #read the file next
+  try:
+      with open(f'{path_location}/{file_path}', 'r') as f:
+          lines = f.readlines()
+          f.close()
+  except:
+      assert False, f'Could not read {file_path}'
+
+  if not lines:
+      assert False, f'{filename} is empty'
+
+  if not missing_doxygen(lines):
+    to_fill = find_fields_to_fill(lines, user_fields)
+    if to_fill:
+      print(f'{filename} appears to have have Doxygen comments but missing field fillers at these lines: {to_fill}. Nothing done.')
+      return new_file, f'{filename} appears to have have Doxygen comments but missing field fillers at these lines: {to_fill}. Nothing done.'
+    else:
+      print(f'{filename} appears to have no missing Doxygen comments. Nothing done.')
+      return new_file, f'{filename} appears to have no missing Doxygen comments. Nothing done.'
+
+  if number_of_subroutines(lines)!=1:
+    print(f'{filename} appears to have {number_of_subroutines(lines)} subroutines. Can only handle 1 currently. Nothing done.')
+    return new_file, f'{filename} appears to have {number_of_subroutines(lines)} subroutines. Can only handle 1 currently. Nothing done.'
+
+  if file_type=='stub':
+    comments, main, sub_start, name, params = find_subroutine(lines)
+    new_file = build_new_stub_file(copyright_template, stub_template, lines, main, sub_start, name, params, current_folder)
+  elif file_type=='imp':
+    comments, main, sub_start, name, params = find_subroutine(lines)
+    new_file = build_new_imp_file(copyright_template, imp_template, lines, main, sub_start, name, current_folder)
+  else:
+    assert False, f'Not imp or stub.'
+
+  return new_file, '\n'.join(comments)  #both strings
+
+
+
+
+
 def get_type_hints(tree):
     arguments = []
     return_type = ""
@@ -101,7 +331,6 @@ def get_type_hints(tree):
             return_type = node.returns.id if node.returns else '-'
     
     return arguments, return_type
-
 
 def python_doxygen_template(function_definition):
     pass_str = " pass" if function_definition[-1] == ':' else ': pass'
