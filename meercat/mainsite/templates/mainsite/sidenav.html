@@ -1,32 +1,35 @@
 {% load static %}
 <div class="sidenav">
     <a id="" href="#" onclick="" style="color:white; pointer-events: none; cursor: default; margin-left:-10px;">
-        <img src="{% static 'images/meercat_logo_reverse.png' %}" width="36px"/> MeerCat
+        <img src="{% static 'images/meercat_logo_reverse.png' %}" width="36px" /> MeerCat
     </a>
 
     {% if user.is_authenticated %}
-        <p class="text-white">Logged in as <br/> 
-            {% if user.profile.gh_login %}
-                {{ user.profile.gh_login }}
-            {% else %}
-                <span style="font-size:11pt">{{ user.username }}</span>
-            {% endif %}
-        </p>
+    <p class="text-white">Logged in as <br />
+        {% if user.profile.gh_login %}
+        {{ user.profile.gh_login }}
+        {% else %}
+        <span style="font-size:11pt">{{ user.username }}</span>
+        {% endif %}
+    </p>
     {% endif %}
 
-    <br/>
+    <br />
 
     <a id="" href="/" onclick="">Home</a>
     <a id="" href="." onclick="">About</a>
     <!--a id="" href="." onclick="">Branches</a-->
 
     {% if user.is_authenticated %}
-        <a id="" href="/dashboard/" onclick="">PR Assistant</a>
-        <a href="{% url 'subscriptions' %}">Subscriptions</a>
-        <a href="{% url 'support' %}">Support</a>
+    <a id="" href="/dashboard/" onclick="">PR Assistant</a>
+    <a href="{% url 'subscriptions' %}">Subscriptions</a>
+    <a href="{% url 'support' %}">Support</a>
+    {% if request.user.is_superuser %}
+    <a href="{% url 'gmail_token' %}">Gmail token</a>
     {% endif %}
-    
-    <br/>
+    {% endif %}
+
+    <br />
 
     <div class="dashboard_hiding_for_now" style="display:none;">
         <a id="button1" href="#">Grid On</a>
@@ -36,9 +39,9 @@
     </div>
 
     {% if user.is_authenticated %}
-        <a href="{% url 'logout' %}" class="mt-5 d-inline-box">Log out</a>
+    <a href="{% url 'logout' %}" class="mt-5 d-inline-box">Log out</a>
     {% else %}
-        <a href="{% url 'login' %}" class="mt-5 d-inline-box">Log in</a>
+    <a href="{% url 'login' %}" class="mt-5 d-inline-box">Log in</a>
     {% endif %}
-    
+
 </div>
