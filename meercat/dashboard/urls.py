@@ -28,5 +28,6 @@ urlpatterns = [
     path('getdoctemplate/', views.getDocTemplate, name='getdoctemplate'),
     path('sendinvite/', views.sendInvite, name='sendinvite'),
     path('updatetags/', views.updateTags, name='updatetags'),
+    path('logevent/', views.logEvent, name='logevent'),
 ]
 

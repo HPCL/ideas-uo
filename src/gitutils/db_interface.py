@@ -745,13 +745,193 @@ class DatabaseInterface:
                         self.lint_fortran('.', project_id, cursor, branch)
                         self.lint_cpp('.', project_id, cursor, branch)
 
-                        # TODO: Run documentation check on every file in project
+                        # Run documentation check on every file in project
+                        if project_id == 30 or project_id == 35:
+                            self.documentation_fortran('.', project_id, cursor, branch)
 
                         # TODO: Find related dev authors for every file in project
 
                     except Exception as e:
                         print('Failed to checkout branch: '+branch)
                 
+
+    def documentation_fortran(self, start, project_id, cursor, branch):
+
+        for thing in os.listdir(start):
+            thing = os.path.join(start, thing)
+            if os.path.isfile(thing):
+                if thing.endswith(".F90"):
+
+                    lines = []
+                    with open(thing, "r") as f:
+                        lines = f.readlines()
+                        f.close()
+
+                    results = self.check_documentation({'.F90':'flash-x','.h':'hypre','.py':'docstring'}, thing, lines)
+
+                    query = 'replace into database_filemetric (project_id, metric_type, file_path, branch, result_string, result_json, datetime) values (%s, %s, %s, %s, %s, %s, now())'
+                    cursor.execute(query, (project_id, 'DOCUMENTATION', thing[2:], branch, str(results), str(json.dumps(results))))
+                    self.db.commit()
+
+        for thing in os.listdir(start):
+            if not thing.startswith(".git") and not thing.startswith("repos"):
+                thing = os.path.join(start, thing)
+                if os.path.isdir(thing):
+                    self.documentation_fortran(thing, project_id, cursor, branch)
+
+    #TODO: Move to utils.py once done adding Flash-X updates
+    def check_documentation(self, doctypes, filename, lines):
+        name, extension = os.path.splitext(filename)
+
+        return_dict = dict()
+
+        return_dict['ignore_status'] = False   #probably should remove this field. Assuming False to even call this function.
+
+        #go through combinations of language-doctype
+
+        if not doctypes or extension not in doctypes:
+            return_dict['check_status'] = False
+            return return_dict
+
+        def check_flashx_documentation(filename, lines):
+            placeholders = ['<missing details>', '<missing param info>']  #need to get from Jared
+            problem_lines = []
+            if lines[0].strip().startswith('!!*'):
+                problem_lines.append(('File still in Robodoc format. See project documentation for converting to Doxygen', 1))
+                return problem_lines
+
+            found_copyright = False
+            for line in lines:
+                if '@copyright' in line:
+                    found_copyright = True
+                    break
+
+            if not found_copyright:        
+                if len(lines[0].strip()) > 0:
+                    problem_lines.append(('File missing @copyright', 1))
+                else:    
+                    problem_lines.append(('File missing @copyright', 2))
+                return problem_lines
+
+            for i,line in enumerate(lines):
+                for placeholder in placeholders:
+                    if placeholder in line:
+                        problem_lines.append(('Placeholder needs to be filled in.', (i+1)))
+                        break
+
+            for i,line in enumerate(lines):
+                if '<Insert ' in line or  '<insert ' in line:
+                    problem_lines.append(('Please fill in tag.', (i+1)))
+
+            for i,line in enumerate(lines):
+                if '__AUTO_INSERT_' in line:
+                    problem_lines.append(('Should have been handled by Doxygen script.', (i+1)))
+
+            return problem_lines
+
+        #handle flash-x specially
+        if extension == '.F90' and doctypes[extension] == 'flash-x':
+            return_dict['check_status'] = True
+            problem_lines = check_flashx_documentation(filename, lines)
+            return_dict['doc_status'] = True
+            if problem_lines:
+                return_dict['doc_status'] = False
+                return_dict['problem_lines'] = problem_lines
+            return return_dict
+
+        #Generic check for doxygen
+        if extension == '.F90' and doctypes[extension] == 'doxygen':
+            return_dict['check_status'] = True
+            for line in lines:
+                if line.startswith('!! @'):
+                    return_dict['doc_status'] = True
+                    break
+            if not return_dict['doc_status']:
+                return_dict['doc_status'] = False
+                return_dict['problem_lines'] = [("Please see project documentation for converting to Doxygen", 0)]
+            return return_dict
+        
+        #find index of first line after signature
+        def parse_python_def(k):
+            while k<len(lines):
+                if ')' in lines[k]:  #simply look for closing paren
+                    return k+1
+                k += 1
+            return k
+
+        #Make sure every signature is followed by ''' comments.
+        #Not currently checking for type, e.g., numpy, google. Just docstring.
+
+        if extension == '.py' and doctypes[extension] == 'docstring':
+            return_dict['check_status'] = True
+            problem_lines = []
+            i = 0
+            while i<len(lines):
+                if lines[i].startswith('def'):
+                    j = parse_python_def(i)  # j is line after signature
+
+                    #skip over white space
+                    while lines[j].strip() == "":
+                        j += 1
+                        if j>=len(lines):
+                            break
+
+                    # check for triple quotes
+                    if j<len(lines) and lines[j].strip() in ["'''", '"""']:
+                        i = j+1
+                        continue
+                    else:
+                        problem_lines.append(("Missing docstring", j))
+                        i += 1
+                else:
+                    i += 1
+            if problem_lines:
+                return_dict['doc_status'] = False
+                return_dict['problem_lines'] = problem_lines
+            else:
+                return_dict['doc_status'] = True
+            return return_dict 
+
+        #others go here eventually,, e.g., c-doxygen, etc.
+
+        #Special case for Hypre
+        if extension == '.h' and doctypes[extension] == 'hypre':
+            if not name.startswith('HYPRE_'):
+                return_dict['check_status'] = False
+                return return_dict
+            problem_lines = []
+            i = 0
+            while i<len(lines):
+                if lines[i].strip().endswith(';'):
+                    interface = i
+                    j = i - 1
+
+                    #look backward for end of comment
+                    while lines[j].strip() == "" or lines[j].strip().endswith(','):  #handle multi-line defs
+                        j -= 1
+                        if j<0:
+                            break
+
+                    # check for triple quotes
+                    if j>=0 and lines[j].strip().endswith('**/'):
+                        i = interface + 1
+                        continue
+                    else:
+                        problem_lines.append(("Missing Doxygen header", interface))
+                        i = interface + 1
+                else:
+                    i += 1
+
+            if problem_lines:
+                return_dict['doc_status'] = False
+                return_dict['problem_lines'] = problem_lines
+            else:
+                return_dict['doc_status'] = True
+            return return_dict
+
+        #if not currently checking combo
+        return_dict['check_status'] = False
+        return return_dict
 
     def lint_python(self, start, project_id, cursor, branch):
 
@@ -808,14 +988,15 @@ class DatabaseInterface:
                     ):
                         if result and len(result) > 0:
                             try:
-                                results.append(
-                                    {
-                                        "column": 0,
-                                        "line": int(result.split(":")[0]),
-                                        "message": result.strip().split("\n")[-1].split(": ")[1],
-                                        "type": result.strip().split("\n")[-1].split(": ")[0],
-                                    }
-                                )
+                                if 'Exactly one space after' not in result:
+                                    results.append(
+                                        {
+                                            "column": 0,
+                                            "line": int(result.split(":")[0]),
+                                            "message": result.strip().split("\n")[-1].split(": ")[1],
+                                            "type": result.strip().split("\n")[-1].split(": ")[0],
+                                        }
+                                    )
                             except:
                                 pass 
 
