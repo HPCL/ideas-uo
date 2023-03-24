@@ -479,6 +479,7 @@ import base64
 
 SCOPES = [
     "https://www.googleapis.com/auth/gmail.send",
+    "https://www.googleapis.com/auth/gmail.metadata",
     "https://www.googleapis.com/auth/gmail.readonly",
 ]
 
