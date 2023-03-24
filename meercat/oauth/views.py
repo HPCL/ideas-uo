@@ -212,6 +212,7 @@ def authorize_gmail(request):
         settings.BASE_DIR / "client_secret.json",
         scopes=[
             "https://www.googleapis.com/auth/gmail.send",
+            "https://www.googleapis.com/auth/gmail.metadata",
             "https://www.googleapis.com/auth/gmail.readonly",
         ],
     )
@@ -219,7 +220,7 @@ def authorize_gmail(request):
     flow.redirect_uri = "https://meercat.cs.uoregon.edu/oauth/gmail_callback"
 
     authorization_url, state = flow.authorization_url(
-        access_type="offline", include_granted_scopes="true"
+        access_type="offline", include_granted_scopes="true", prompt="consent"
     )
 
     request.session["gmail_state"] = state
@@ -235,6 +236,7 @@ def gmail_callback(request):
         "client_secret.json",
         scopes=[
             "https://www.googleapis.com/auth/gmail.send",
+            "https://www.googleapis.com/auth/gmail.metadata",
             "https://www.googleapis.com/auth/gmail.readonly",
         ],
         state=state,
