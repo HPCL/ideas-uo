@@ -416,15 +416,20 @@ class Visualizer(Patterns):
                     bbox_inches='tight')
         return sorted_hot_files
 
-    def bus_factor_CST(self, locc_metric='change-size-cos', metric='mul-changes-equal', time_range=None, my_df=pd.DataFrame(), directory_path=""):
+    def bus_factor_CST(self, locc_metric='change-size-cos', metric='mul-changes-equal', time_range=None, my_df=pd.DataFrame(), directory_path="", branches=[]):
         """Gets the bus factor data for CST algorithm and prints it for the user"""
 
         #checking if the provided directory path is correct
         if len(directory_path) != 0 and directory_path[len(directory_path) - 1] != "/":
-            err('The directory path provided is incorrect, it should end with a backslash ("/")')
+            err('The directory path provided is incorrect, it should end with a forward slash ("/")')
+            return
+        
+        # checking if the list of branches contains valid items
+        if not all(isinstance(item, str) for item in branches):
+            err('Type incorrect: All the item(s) in list of branhces are not of type string')
             return
 
-        tot_developers, prim_devs, secon_devs, bus_factor, results = self.get_busfactor_data(locc_metric=locc_metric, metric=metric, time_range=time_range, my_df=my_df, directory_path=directory_path)
+        tot_developers, prim_devs, secon_devs, bus_factor, results = self.get_busfactor_data(locc_metric=locc_metric, metric=metric, time_range=time_range, my_df=my_df, directory_path=directory_path, branches=branches)
 
         if(len(results)):
             display(results.head(5))
