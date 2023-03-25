@@ -802,7 +802,7 @@ class Patterns(Fetcher):
                 authors_commits_df.iat[ind, authors_commits_df.columns.get_loc('dev_knowledge')] = d_commits/tot_commits # calculating dev_knowledge on the whole project/directory
             
             authors_commits_df.sort_values(by=['dev_knowledge'], ascending=False, inplace=True)
-            results = authors_commits_df
+            results = aggregated_df
 
         # assigns all knowledge of a file to the last developer that modified that file
         elif(metric == 'last-change-all'):
