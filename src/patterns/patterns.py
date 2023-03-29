@@ -160,6 +160,9 @@ class Patterns(Fetcher):
     # These are global, and generally applicable, unless a project-specific list is provided
     excluded_subpaths = ["contrib/", "extern/", "external/"]
 
+    # These are global, and generally applicable, unless a project-specific name is provided
+    default_branches = ["/main", "/master", "/develop"]
+
     @staticmethod
     def is_code(path_str):
         if "." in path_str:
@@ -696,7 +699,7 @@ class Patterns(Fetcher):
 
         return sorted_hot_directories, stats_df
 
-    def get_busfactor_data(self, locc_metric='change-size-cos', metric='mul-changes-equal', time_range=None, my_df=pd.DataFrame(), directory_path=""):
+    def get_busfactor_data(self, locc_metric='change-size-cos', metric='mul-changes-equal', time_range=None, my_df=pd.DataFrame(), directory_path="", branches=[]):
         """Calculates bus factor based on the four CST algorithm metrics based and the locc_metric 
         provided by the user either on the complete project or on a specific directory"""
         print("INFO: Creating developer matrix...")
@@ -721,6 +724,27 @@ class Patterns(Fetcher):
         secon_devs = []
         primary_dev = sec_devs = 0
         tot_developers = 0
+
+        # picks commits from the branch(es) provided by user, else picks commits from default branch only
+        branch_df = pd.DataFrame()
+        if len(branches) == 0:
+            for b in Patterns.default_branches:
+                if len(work_df[work_df['branch'].str.contains(b)]) != 0:
+                    branches.append(b)
+                    break
+        else:
+            for i in range(len(branches)):
+                if branches[i][0] != "/":
+                    branches[i] = "/" + branches[i]
+        for i in range(len(branches)):
+            branch_df = pd.concat([branch_df, work_df[work_df['branch'].str.contains(branches[i])]], axis=0)
+            work_df = work_df[~work_df.branch.str.contains(branches[i])]
+        
+        work_df = branch_df
+
+        if(not len(work_df)):
+            err('The given branch(es) do(es) not exist')
+            return 0, pd.DataFrame(), pd.DataFrame(), 0, pd.DataFrame()
 
         directory_df = pd.DataFrame()
         if len(directory_path):
@@ -771,14 +795,7 @@ class Patterns(Fetcher):
             aggregated_df.reset_index(inplace=True)
             aggregated_df.sort_values(by=['dev_knowledge'], ascending=False, inplace=True)
 
-            authors_commits_df["dev_knowledge"] = 0
-            tot_commits = authors_commits_df[locc_metric].sum() # total number of commits on the project/directory
-            for ind in authors_commits_df.index:
-                d_commits = authors_commits_df[locc_metric][ind]
-                authors_commits_df.iat[ind, authors_commits_df.columns.get_loc('dev_knowledge')] = d_commits/tot_commits # calculating dev_knowledge on the whole project/directory
-            
-            authors_commits_df.sort_values(by=['dev_knowledge'], ascending=False, inplace=True)
-            results = authors_commits_df
+            results = aggregated_df
 
         # assigns all knowledge of a file to the last developer that modified that file
         elif(metric == 'last-change-all'):
@@ -809,8 +826,8 @@ class Patterns(Fetcher):
                     datetime = d['datetime'][ind]
                     author = d['unique_author'][ind]
 
+            norm_factor = len(dev_knowledge_df) # total number of files in the directory, branch or project
             d = pd.DataFrame(dev_knowledge_df.groupby(['unique_author'])['dev_knowledge'].sum())
-            norm_factor = d['dev_knowledge'].sum()
             d["dev_knowledge"] = d["dev_knowledge"].apply(lambda a: a / norm_factor)
             d.sort_values(by=['dev_knowledge'], ascending=False, inplace=True)
             d.reset_index(inplace=True)
