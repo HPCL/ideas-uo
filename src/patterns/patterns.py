@@ -732,7 +732,7 @@ class Patterns(Fetcher):
                 if len(work_df[work_df['branch'].str.contains(b)]) != 0:
                     branches.append(b)
                     break
-        elif len(branches) != 0:
+        else:
             for i in range(len(branches)):
                 if branches[i][0] != "/":
                     branches[i] = "/" + branches[i]
@@ -795,13 +795,6 @@ class Patterns(Fetcher):
             aggregated_df.reset_index(inplace=True)
             aggregated_df.sort_values(by=['dev_knowledge'], ascending=False, inplace=True)
 
-            authors_commits_df["dev_knowledge"] = 0
-            tot_commits = authors_commits_df[locc_metric].sum() # total number of commits on the project/directory
-            for ind in authors_commits_df.index:
-                d_commits = authors_commits_df[locc_metric][ind]
-                authors_commits_df.iat[ind, authors_commits_df.columns.get_loc('dev_knowledge')] = d_commits/tot_commits # calculating dev_knowledge on the whole project/directory
-            
-            authors_commits_df.sort_values(by=['dev_knowledge'], ascending=False, inplace=True)
             results = aggregated_df
 
         # assigns all knowledge of a file to the last developer that modified that file
