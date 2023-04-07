@@ -1345,6 +1345,7 @@ def diffCommitData(request):
         "dev_table": dev_table,
         "merged_dev_table": merged_dev_table,
         "source_url": pr.project.source_url[0:-4],
+        "repo_structure": repo_structure(str(settings.REPOS_DIR) + "/" + pr.project.name),
     }
 
     return HttpResponse(json.dumps(resultdata), content_type="application/json")
@@ -1896,6 +1897,25 @@ def branchData(request):
 
     return HttpResponse(json.dumps(resultdata), content_type="application/json")
 
+
+def repo_structure(start, begin_start=None):
+
+    folder_structure = []
+
+    for thing in os.listdir(start):
+        ogthing = thing
+        thing = os.path.join(start, thing)
+        if os.path.isfile(thing):
+            folder_structure.append({'isFile':True, 'name':ogthing})
+
+    for thing in os.listdir(start):
+        if not thing.startswith(".git") and not thing.startswith("repos"):
+            ogthing = thing
+            thing = os.path.join(start, thing)
+            if os.path.isdir(thing):
+                folder_structure.append({'isFile':False, 'name':ogthing, 'contents':repo_structure(thing, begin_start=start)})
+
+    return folder_structure
 
 def countlines(start, lines=0, header=True, begin_start=None):
     # if header:
