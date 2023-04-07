@@ -2543,12 +2543,15 @@ def folder_explorer(request, *args, **kwargs):
 
     proj_object = proj_list[0]
     files = list_project_files(proj_object.name, folder, branch)
+    #results = [{"filePath": ".github/CODEOWNERS", "errors": False}, {"filePath": ".github/workflows/codeql-analysis.yml", "errors": True}, {"filePath": ".github/workflows/doxygen-gh-pages.yml", "errors": False} ,{"filePath": ".github/workflows/github-actions-demo.yml", "errors": True}]
+    results = [{"filePath": ".github/CODEOWNERS", "errors": False}, {"filePath": ".github/workflows/codeql-analysis.yml", "errors": False}, {"filePath": ".github/workflows/doxygen-gh-pages.yml", "errors": False} ,{"filePath": ".github/workflows/github-actions-demo.yml", "errors": False}]
 
     context = {
         "folder": folder,
         "project": project,
         "branch": branch,
-        'files': files
+        "files": files,
+        "results": results
     }
 
     return HttpResponse(template.render(context, request))
