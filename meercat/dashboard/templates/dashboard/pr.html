@@ -242,8 +242,43 @@
             </h2>
             <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#accordionExample4">
             <div class="accordion-body">
-                               
-                <div id="devdiv" style="border:1px solid grey; margin:10px; padding:10px;">
+
+                <div class="card m-3">
+                    <div class="card-header">
+                        Recommended people to loop into the conversation
+                    </div>
+                    <div class="card-body" id="all-recommended-people">
+
+                        <div class="row p-1">
+                            <div class="col">
+                                <strong class="text-decoration-underline"><em>Person</em></strong>
+                            </div>
+                            <div class="col">
+                                <strong class="text-decoration-underline"><em>Email</em></strong>
+                            </div>
+                            <div class="col">
+                                <strong class="text-decoration-underline"><em>Strength of recommendation</em></strong>
+
+                                <a tabindex="0" class="p-0 px-1 text-decoration-none btn btn-primary btn-sm popover-dismiss" role="button" data-bs-toggle="popover" data-bs-trigger="focus" title="How did we arrive at this recommendation?" data-bs-content="Write some sort of brief explaination, with a link to our paper/blog post (even if it's on ArXiV).">&#128712;</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card m-3">
+                    <div class="card-header">
+                        Explore by file
+                    </div>
+                    <div class="card-body">
+
+                        <div class="accordion" id="file-recommendations-accordion">
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- TODO: remove this once Sam's stuff is good.   -->
+                <div id="devdiv" style="border:1px solid grey; margin:10px; padding:10px; display:none;">
                     <b>Developers who've worked on files involved with this PR:</b>
                     <table class="table" id="devtable" style="font-size:10pt;">
                         <thead>
@@ -267,7 +302,6 @@
     </div>
 
     <br/>
-
 
     <div class="accordion" id="accordionExample7">
         <div class="accordion-item">
@@ -707,4 +741,12 @@
 <script src="{% static 'codemirror/addon/selection/mark-selection.js' %}"></script>
 <script src="{% static 'js/pr.js' %}"></script>
 <script src="{% static 'js/branches.js' %}"></script>
+<script src="{% static 'js/recommender.js' %}"></script>
+
+<script>
+    var popover = new bootstrap.Popover(document.querySelector('.popover-dismiss'), {
+    trigger: 'focus'
+    })
+</script>
+
 {% endblock script %}

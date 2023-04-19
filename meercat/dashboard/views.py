@@ -52,6 +52,7 @@ from dashboard.utilities import (
     dox_script,
 )
 from dashboard.author_merger_tool import AuthorMergerTool
+from dashboard.lib import flashx
 
 import subprocess
 import os, warnings
@@ -170,6 +171,24 @@ def subscriptions(request):
     }
 
     return render(request, "dashboard/subscriptions.html", context)
+
+@login_required
+def recommender(request):
+
+    proj_list = list(Project.objects.all().filter(id=int(request.GET.get('project','0'))).all())
+    proj_object = proj_list[0]
+
+    print('RECOMMENDER: '+request.GET.get('filename',''))
+    url = "https://meercat.cs.uoregon.edu:8099/p/"+proj_object.name+'/'+request.GET.get('filename','')
+    print('RECOMMENDER URL: '+url)
+    result = requests.get(url)
+    #print('RECOMMENDER RESULTS: '+json.dumps(result.json()))
+
+    result_data = []
+    if result.status_code == 200:
+        result_data = result.json()
+
+    return HttpResponse(json.dumps(result_data), content_type="application/json")
 
 # localhost:8080/dashboard/firstresponder/30?prid=17479
 def firstresponder(request, *args, **kwargs):
@@ -352,6 +371,10 @@ def file_explorer_handler(proj_object, filename, branch ):
 
     #dict(ignore_status, check_status doc_status, problem_lines [(msg, line), (msg, line)] )
 
+    # THIS IS WHERE WE CALL THE FLASHX LIBRARY TODO: NEED TO ONLY CALL IT IF FLASHX OR ANL_TEST_REPO THOUGH
+    flashx.set_directory_structure(repo_structure(str(settings.REPOS_DIR) + "/" + proj_object.name))
+    documentation_status_lib = flashx.check_file_documentation(lines, filename)
+    # This is the old checker.  Keep it for non-flashx projects
     documentation_status = check_documentation(proj_object, filename, lines)
 
     dev_table = create_dev_table(proj_object, filename)
@@ -363,6 +386,7 @@ def file_explorer_handler(proj_object, filename, branch ):
     #linting_table = create_linting_table(proj_object, lines)
 
     context['documentation'] = documentation_status
+    context['documentation_lib'] = documentation_status_lib
     context['dev_table'] = dev_table
     context['function_table'] = subroutine_table
     context['number_of_functions'] = len(subroutine_table)
