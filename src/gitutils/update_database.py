@@ -4,7 +4,6 @@ import os
 import sys
 
 import MySQLdb
-from db_interface import *
 
 HOST = 'sansa.cs.uoregon.edu'
 USERNAME = '' # edit this

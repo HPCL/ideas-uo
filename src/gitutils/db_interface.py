@@ -17,9 +17,10 @@ import MySQLdb
 import subprocess
 import json
 
-from src.gitutils.gitcommand import GitCommand
-from src.gitutils.graphql_interface import fetch_prs, fetch_issues, Source
-from src.gitutils.github_api import GitHubAPIClient
+from .gitcommand import GitCommand
+from .graphql_interface import fetch_prs, fetch_issues, Source
+from .github_api import GitHubAPIClient
+from .lib import flashx, bus_factor
 
 # Setup Logger
 logger = logging.getLogger('db_interface')
@@ -745,15 +746,47 @@ class DatabaseInterface:
                         self.lint_fortran('.', project_id, cursor, branch)
                         self.lint_cpp('.', project_id, cursor, branch)
 
-                        # Run documentation check on every file in project
+                        # Run documentation and busfactor on just flash and anl_test_repo for now
                         if project_id == 30 or project_id == 35:
+                            flashx.set_directory_structure(self.repo_structure('.'))
                             self.documentation_fortran('.', project_id, cursor, branch)
 
-                        # TODO: Find related dev authors for every file in project
+                            self.refresh_busfactor(cursor, name, project_id, branch)
 
                     except Exception as e:
                         print('Failed to checkout branch: '+branch)
                 
+    def refresh_busfactor(self, cursor, name, project_id, branch):
+
+        results = bus_factor.compute_busfactor(cursor, name)
+        print("BUSFACTOR")
+        print(len(results))
+        #go through results and enter data into database
+        for filename in results:
+            #print(filename)
+            query = 'replace into database_filemetric (project_id, metric_type, file_path, branch, result_string, result_json, datetime) values (%s, %s, %s, %s, %s, %s, now())'
+            cursor.execute(query, (project_id, 'BUSFACTOR', filename, branch, str(results[filename]), str(json.dumps(results[filename]))))
+            self.db.commit()
+                
+
+    def repo_structure(self, start, begin_start=None):
+
+        folder_structure = []
+
+        for thing in os.listdir(start):
+            ogthing = thing
+            thing = os.path.join(start, thing)
+            if os.path.isfile(thing):
+                folder_structure.append({'isFile':True, 'name':ogthing})
+
+        for thing in os.listdir(start):
+            if not thing.startswith(".git") and not thing.startswith("repos"):
+                ogthing = thing
+                thing = os.path.join(start, thing)
+                if os.path.isdir(thing):
+                    folder_structure.append({'isFile':False, 'name':ogthing, 'contents':self.repo_structure(thing, begin_start=start)})
+
+        return folder_structure
 
     def documentation_fortran(self, start, project_id, cursor, branch):
 
@@ -767,7 +800,8 @@ class DatabaseInterface:
                         lines = f.readlines()
                         f.close()
 
-                    results = self.check_documentation({'.F90':'flash-x','.h':'hypre','.py':'docstring'}, thing, lines)
+                    #results = self.check_documentation({'.F90':'flash-x','.h':'hypre','.py':'docstring'}, thing, lines)
+                    results = flashx.check_file_documentation(lines, thing)
 
                     query = 'replace into database_filemetric (project_id, metric_type, file_path, branch, result_string, result_json, datetime) values (%s, %s, %s, %s, %s, %s, now())'
                     cursor.execute(query, (project_id, 'DOCUMENTATION', thing[2:], branch, str(results), str(json.dumps(results))))

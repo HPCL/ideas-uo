@@ -118,8 +118,9 @@ class FileMetric(models.Model):
     
     class MetricTypeChoices(models.TextChoices):
         DOCUMENTATION = 'DOCUMENTATION', _('Documentation')
-        LINTING = 'LINTING', _('Liting')
+        LINTING = 'LINTING', _('Linting')
         DEVELOPERS = 'DEVELOPERS', _('Developers')
+        BUSFACTOR = 'BUSFACTOR', _('Busfactor')
 
     project = models.ForeignKey(Project, on_delete=models.CASCADE, blank=True, null=True)
     datetime = models.DateTimeField()

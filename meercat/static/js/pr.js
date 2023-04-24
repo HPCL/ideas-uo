@@ -905,16 +905,21 @@ $.ajax({
 
             var docbuttons = "";
             var docissues = -1;
+            var docstatus = "";
             docbuttons += "<button class='btn btn-sm btn-primary' onclick='showDocEditor(\"" + filename + "\",\"" + "DIFF STUFF TO GO HERE" + "\");'>View File in Editor</button><br/>";
  
             //Compute number of issues
-            if( filename.indexOf(".F90") >= 0 ){
+            if( filename.indexOf(".F90") >= 0 || filename.indexOf(".dox") >= 0 ){
+                docstatus = file_doc_results['documentation_lib']['file_status'].replaceAll('/','/<br/>');
                 if( file_doc_results['documentation_lib']['file_status'].indexOf("checkable") == 0 ){
                     docissues = 0;
                     try{
                         docissues = file_doc_results['documentation_lib']['problem_fields'].length + file_doc_results['documentation_lib']['missing_fields'].length;
                     }catch(error){
                         console.log(error);
+                    }
+                    if( file_doc_results['documentation_lib']['file_status'].indexOf("checkable but no documentation") == 0 ){
+                        docissues = '-';
                     }
                 }
             }else if( file_doc_results['documentation']['check_status'] && !file_doc_results['documentation']['doc_status'] ){
@@ -927,6 +932,8 @@ $.ajax({
 
             doctable.append("<tr><td>" +
                 "<a href='/dashboard/filex/"+project+"?filename="+filename+"&branch="+branch+"'>"+filename +"</a>"+
+                "</td><td>" +
+                    docstatus +
                 "</td><td>" +
                     (docissues < 0 ? '-' : docissues) +
                 "</td><td>" +
