@@ -5,8 +5,7 @@ import re
 import requests
 from datetime import datetime
 from google.oauth2.credentials import Credentials
-
-# from git import Repo
+from git import Repo
 
 from django.conf import settings
 from database.models import EventLog
@@ -110,6 +109,8 @@ def list_project_files(project_name, directory=None, branch=None):
 
     project_repo = Repo(settings.REPOS_DIR / project_name).commit(branch)
 
+    if directory == "/":
+       directory = None
     return list_files_in_commit(project_repo, directory)
 
 

@@ -1,5 +1,9 @@
 {% extends 'dashboard/base.html' %}
 {% load static %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="{% static 'css/fileTreeStyle.css' %}">
+{% endblock stylesheets %}
 {% block content %}
 {% csrf_token %}
 <h2>Folder Explorer</h2><br/>
@@ -28,16 +32,48 @@
         </div>
     {% endif %}
 
-    
-    <section id="path-selector" class="border rounded">
-        <div class="p-3">
-            <div class="mb-3">
-                <label for="file-filter" class="form-label">Filter by text:</label>
-                <input type="text" name="file-filter" class="form-control" id="file-filter" />
+    <!-- FILE TREE -->
+    <section id="file-tree-container">
+        <div id="file-tree"></div>
+        <div id="panel">
+            <div>
+                <p id="detail">Click on a file/directory to see details</p>
+                <span id="path"></span>
+                <span><a title="Go to file in file explorer" href="#"><img class="post-label-icon" id="hyperlink-icon"
+                            src="/static/images/hyperlink-icon.png" style="visibility: hidden;"></img></a></span>
             </div>
-            <div id="tree-view" class="mb-3"></div>
+            <div id="panel-metrics" class="my-4">
+                <p class="metric"><img src="/static/images/documentation-icon.png" alt="linter"
+                        class="metric-icon">Documentation (<span id="documentation-metric">0</span>%)</p>
+                <div class="panel-bar"><span id="documentation-bar"></span></div>
+
+                <p class="sub-metric">Missing documentation (<span id="missing-docs-metric">0</span>%)</p>
+                <div class="panel-bar panel-sub-bar">
+                    <div id="missing-docs-bar"></div>
+                </div>
+
+                <p class="sub-metric">Documentation issues (<span id="non-doxy-docs-metric">0</span>%)</p>
+                <div class="panel-bar panel-sub-bar">
+                    <div id="non-doxy-docs-bar"></div>
+                </div>
+
+                <p class="metric"><img src="/static/images/bus-factor-icon.png" alt="linter" class="metric-icon"> Bus Factor
+                    (N/A)</p>
+                <div class="panel-bar under-development-wrapper"><span id="bus-factor-bar"></span><span
+                        class="under-development">Under Development</span></div>
+
+                <p class="metric"><img src="/static/images/linter-icon.png" alt="linter" class="metric-icon"> Linter issues
+                    (<span id="linter-metric">0</span>%)</p>
+                <div class="panel-bar"><span id="linter-bar"></span></div>
+            </div>
+
+            <div>
+                <a id="panel-subscribe-btn" class="btn btn-primary d-inline my-4" style="visibility: hidden;">Notify on
+                    pull request</a>
+            </div>
         </div>
     </section>
+    <!-- END FILE TREE -->
 
     <div id="docModal" class="modal" tabindex="-1">
         <div class="modal-dialog modal-xl">
@@ -179,7 +215,8 @@
 <script src="{% static 'codemirror/addon/selection/mark-selection.js' %}"></script>
 <script src="{% static 'js/pr.js' %}"></script>
 <script src="{% static 'js/branches.js' %}"></script>
-<script src="{% static 'js/tree.min.js' %}"></script>
+<script src="{% static 'js/fileTree.js' %}"></script>
+<!-- <script src="{% static 'js/tree.min.js' %}"></script>
 <script src="{% static 'js/treeUtilities.js' %}"></script>
-<script src="{% static 'js/folderExplorer.js' %}"></script>
+<script src="{% static 'js/fileExplorer.js' %}"></script> -->
 {% endblock script %}
