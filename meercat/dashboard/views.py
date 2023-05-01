@@ -738,7 +738,7 @@ def file_linter(proj_object, filename):
         ):
             if result and len(result) > 0:
                 try:
-                    if 'Exactly one space after' not in result:
+                    if 'Exactly one space after' not in result and 'Missing space' not in result and 'Trailing whitespace' not in result:
                         results.append(
                             {
                                 "column": 0,
@@ -1444,7 +1444,7 @@ def getFile(request):
         ):
             if result and len(result) > 0:
                 try:
-                    if 'Exactly one space after' not in result:
+                    if 'Exactly one space after' not in result and 'Missing space' not in result and 'Trailing whitespace' not in result:
                         results.append(
                             {
                                 "column": 0,
