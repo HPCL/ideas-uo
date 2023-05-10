@@ -34,8 +34,10 @@ function generateIndividualPersonRowsHTML(personName) {
                  </div>
                  <div class="col">`;
 
+ var mainPersonIndividualEmail = '';
  $.each(emailsArray, function (personNameIndex, personIndividualEmail) {
    if (personNameIndex == 0) {
+     mainPersonIndividualEmail = personIndividualEmail;
      tableRow += `<strong><a href="mailto:${personIndividualEmail}">${personIndividualEmail}</a></strong>`;
    }
    else {
@@ -59,14 +61,19 @@ function generateIndividualPersonRowsHTML(personName) {
  }
 
  tableRow += `</div>
-                 <div class="col">
-                     <div class="progress">
-                         <div class="progress-bar ${color}" role="progressbar"
+              <div class="col">
+                  <div class="progress">
+                      <div class="progress-bar ${color}" role="progressbar"
                              style="width: ${percentStrength}%" aria-valuenow="${percentStrength}" aria-valuemin="0"
                              aria-valuemax="100">${strength}</div>
-                     </div>
-                 </div>
-             </div>`;
+                  </div>
+              </div>
+             `;
+
+ tableRow += `  <div class="col col-sm-1">
+                  <button class="btn btn-xs btn-success" onclick='sendInvite(\"${mainPersonIndividualEmail}\", \"test test test test test test\");'>Invite</button>
+                </div>
+              </div>`;
 
 return tableRow;
 }
@@ -105,6 +112,8 @@ function addToFileRecommendationsAccordion(fileIndex, fileName, fileData) {
                     </div>
                     <div class="col">
                         <strong><em>Strength of recommendation</em></strong>
+                    </div>
+                    <div class="col col-sm-1">
                     </div>
                 </div>`;
 
