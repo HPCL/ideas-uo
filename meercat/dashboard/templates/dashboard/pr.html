@@ -58,6 +58,12 @@
 
             <div class="row" style="margin-top:6px;">
                 <div class="col-sm-12"><p style="white-space:pre-wrap;">{{pr.description}}</p></div>
+                    {% if not pr.description %}   
+                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                            Warning: This PR has no description!
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endif %}
             </div>
 
 
@@ -135,18 +141,18 @@
             <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
                 <div class="accordion-body">
                 
-                    <div id="docfilenamesdiv" style="border:1px solid grey; margin:10px; padding:10px;">
-                        <b>Files modified in this PR:</b>
-                        <table class="table" id="docdiffcommittable" style="font-size:10pt;">
+                    <div id="docfilenamesdiv" style="border:0px solid grey; margin:5px; padding:5px;">
+                        <!--b>Files modified in this PR:</b-->
+                        <table class="table" id="docdiffcommittable">
                             <thead>
                                 <tr>
-                                    <th>File</th>
-                                    <th style="width:150px;">Status</th>
-                                    <th>Issues</th>
+                                    <th><span class="text-decoration-underline"><em>File</em></span></th>
+                                    <th style="width:150px;"><span class="text-decoration-underline"><em>Status</em></span></th>
+                                    <th><span class="text-decoration-underline"><em>Issues</em></span></th>
                                     <th> </th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody style="font-size:10pt;">
                                 <tr><td colspan="3">Loading...</td></tr>
                             </tbody>
                         </table>
@@ -171,17 +177,17 @@
             <div id="collapseSix" class="accordion-collapse collapse show" aria-labelledby="headingSix" data-bs-parent="#accordionExample8">
                 <div class="accordion-body">
                 
-                    <div id="cqfilenamesdiv" style="border:1px solid grey; margin:10px; padding:10px;">
-                        <b>Files modified in this PR:</b>
-                        <table class="table" id="cqdiffcommittable" style="font-size:10pt;">
+                    <div id="cqfilenamesdiv" style="border:0px solid grey; margin:5px; padding:5px;">
+                        <!--b>Files modified in this PR:</b-->
+                        <table class="table" id="cqdiffcommittable">
                             <thead>
                                 <tr>
-                                    <th>File</th>
-                                    <th>Detected Issues</th>
+                                    <th><span class="text-decoration-underline"><em>File</em></span></th>
+                                    <th><span class="text-decoration-underline"><em>Issues</em></span></th>
                                     <th></th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody style="font-size:10pt;">
                                 <tr><td colspan="3">Loading...</td></tr>
                             </tbody>
                         </table>
@@ -195,44 +201,6 @@
     </div>
 
     <br/>
-
-
-    <div class="accordion" id="accordionExample6">
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="headingTwo">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                <strong>Testing</strong> &nbsp;&nbsp;
-                <i id="testwarning" class="bi bi-exclamation-triangle-fill" style="display:none; color:red; font-size:16pt;"></i>
-            </button>
-            </h2>
-            <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample6">
-            <div class="accordion-body">
-                
-                <div id="testdiv" style="border:1px solid grey; margin:10px; padding:10px;">
-                    <b>Test files affected by this PR:</b>
-                    <table class="table" id="testtable" style="font-size:10pt;">
-                        <thead>
-                            <tr>
-                                <th>Test File</th>
-                                <th>Detected Issues</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td colspan="3">Loading...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <br/> 
-
-            </div>
-            </div>
-        </div>
-    </div>
-
-    <br/>
-
 
     <div class="accordion" id="accordionExample4">
         <div class="accordion-item">
@@ -261,6 +229,8 @@
                                 <strong class="text-decoration-underline"><em>Strength of recommendation</em></strong>
 
                                 <a tabindex="0" class="p-0 px-1 text-decoration-none btn btn-primary btn-sm popover-dismiss" role="button" data-bs-toggle="popover" data-bs-trigger="focus" title="How did we arrive at this recommendation?" data-bs-content="Write some sort of brief explaination, with a link to our paper/blog post (even if it's on ArXiV).">&#128712;</a>
+                            </div>
+                            <div class="col" style="width:24px; min-width:24px; max-width:24px;">
                             </div>
                             <div class="col col-sm-1">
                             </div>
@@ -298,6 +268,99 @@
                         </tbody>
                     </table>
                 </div>
+
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <br/>
+
+
+    <div class="accordion" id="accordionExample5">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingFive">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+                <strong>Tags</strong>
+            </button>
+            </h2>
+            <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive" data-bs-parent="#accordionExample5">
+            <div class="accordion-body">
+
+                <b>Drag a <i>Potential Tag</i> to the <i>PR's Tags</i> to add it to the PR.</b><br/>
+                
+                <div class="container">
+                    <div class="drop-targets">
+                        <div>
+                            <span style="margin-left:10px;">Potential Tags</span>
+                            <div class="box">
+                                <div class="item" id="item1" draggable="true">Requirements Created/Updated</div>
+                                <div class="item" id="item2" draggable="true">Baseline Established/Updated</div>
+                                <div class="item" id="item3" draggable="true">Test Established/Updated</div>
+                                <div class="item" id="item4" draggable="true">New Feature</div>
+                                <div class="item" id="item5" draggable="true">Bug Fixes</div>
+                                <div class="item" id="item6" draggable="true"><input type="text" style="text-align:center; width:200px;" placeholder="Other"/></div>
+                                <div class="item" id="item7" draggable="true"><input type="text" style="text-align:center; width:200px;" placeholder="Other"/></div>
+                            </div>
+                        </div>
+                        <!--div>
+                            <span style="margin-left:10px;">Category 2</span>
+                            <div class="box">
+                                <div class="item" id="item6" draggable="true">Component</div>
+                                <div class="item" id="item7" draggable="true">Package</div>
+                                <div class="item" id="item8" draggable="true">Design</div>
+                            </div>
+                        </div-->
+                        <div>
+                            <span style="margin-left:10px;">PR's Tags</span>
+                            <div class="box" id="prtags">
+                                
+                                {% for label in labels %}
+                                    <div class="item" id="item{{label.id}}" draggable="true">{{label.name}}</div>
+                                {% endfor %}
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                               
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <br/>
+
+    <div class="accordion" id="accordionExample6">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingTwo">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                <strong>Testing</strong> &nbsp;&nbsp;
+                <i id="testwarning" class="bi bi-exclamation-triangle-fill" style="display:none; color:red; font-size:16pt;"></i>
+            </button>
+            </h2>
+            <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample6">
+            <div class="accordion-body">
+                
+                <b>This section is still under development</b><br/>
+
+                <!--div id="testdiv" style="border:1px solid grey; margin:10px; padding:10px;">
+                    <b>Test files affected by this PR:</b>
+                    <table class="table" id="testtable" style="font-size:10pt;">
+                        <thead>
+                            <tr>
+                                <th>Test File</th>
+                                <th>Detected Issues</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="3">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <br/--> 
 
             </div>
             </div>
@@ -397,60 +460,6 @@
         </div>
     </div>
     
-    <br/>
-
-    <div class="accordion" id="accordionExample5">
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="headingFive">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
-                <strong>Tags</strong>
-            </button>
-            </h2>
-            <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive" data-bs-parent="#accordionExample5">
-            <div class="accordion-body">
-
-                <b>Drag a <i>Potential Tag</i> to the <i>PR's Tags</i> to add it to the PR.</b><br/>
-                
-                <div class="container">
-                    <div class="drop-targets">
-                        <div>
-                            <span style="margin-left:10px;">Potential Tags</span>
-                            <div class="box">
-                                <div class="item" id="item1" draggable="true">Requirements Created/Updated</div>
-                                <div class="item" id="item2" draggable="true">Baseline Established/Updated</div>
-                                <div class="item" id="item3" draggable="true">Test Established/Updated</div>
-                                <div class="item" id="item4" draggable="true">New Feature</div>
-                                <div class="item" id="item5" draggable="true">Bug Fixes</div>
-                                <div class="item" id="item6" draggable="true"><input type="text" style="text-align:center; width:200px;" placeholder="Other"/></div>
-                                <div class="item" id="item7" draggable="true"><input type="text" style="text-align:center; width:200px;" placeholder="Other"/></div>
-                            </div>
-                        </div>
-                        <!--div>
-                            <span style="margin-left:10px;">Category 2</span>
-                            <div class="box">
-                                <div class="item" id="item6" draggable="true">Component</div>
-                                <div class="item" id="item7" draggable="true">Package</div>
-                                <div class="item" id="item8" draggable="true">Design</div>
-                            </div>
-                        </div-->
-                        <div>
-                            <span style="margin-left:10px;">PR's Tags</span>
-                            <div class="box" id="prtags">
-                                
-                                {% for label in labels %}
-                                    <div class="item" id="item{{label.id}}" draggable="true">{{label.name}}</div>
-                                {% endfor %}
-
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                               
-            </div>
-            </div>
-        </div>
-    </div>
-
     <br/>
 
 
@@ -724,6 +733,7 @@
 
 
 <input id="pr" type="hidden" value="{{ pr.pk }}"/>
+<input id="prauthor" type="hidden" value="{{ pr.author.username }}"/>
 <input id="project" type="hidden" value="{{ pr.project.pk }}"/>
 <input id="branch" type="hidden" value="{{ branch }}"/>
 

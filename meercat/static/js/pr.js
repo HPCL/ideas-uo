@@ -13,11 +13,13 @@ enddate.val(date.toISOString().substr(0, 10));
 var queryString = window.location.search;
 var urlParams = new URLSearchParams(queryString);
 var pr = $("#pr").val(); //urlParams.get('pr') //{{ pr.pk }}
+var prauthor = $("#prauthor").val();
 var project = $("#project").val();
 var branch = $("#branch").val();
 console.log("The PR id...");
 console.log($("#pr"));
 console.log(pr);
+console.log(prauthor);
 var filename = "";
 var previousLines = 0;
 var ignoreLineChanges = true;
@@ -863,11 +865,12 @@ $.ajax({
 
             if( project == 30 || project == 26 || project == 35 || project == 32 ){
                 cqtable.append("<tr><td>"+
-                        "<a href='/dashboard/filex/"+project+"?filename="+result['diffcommits'][i]['filename']+"&branch="+branch+"'>"+result['diffcommits'][i]['filename'] +"</a>"+
+                        "<span>"+result['diffcommits'][i]['filename'] +"</span>"+
+                        "<br/><a class='btn btn-xs btn-secondary' target='_blank' href='/dashboard/filex/"+project+"?filename="+result['diffcommits'][i]['filename']+"&branch="+branch+"'>View in File Explorer</a>"+
                     "</td><td>"+
                         (cqissues < 0 ? '-' : cqissues) +
                     "</td><td>"+
-                        cqbuttons+
+                        (cqissues > 0 ? cqbuttons : '') +
                     "</td></tr>");
             }
 
@@ -910,7 +913,6 @@ $.ajax({
  
             //Compute number of issues
             if( filename.indexOf(".F90") >= 0 || filename.indexOf(".dox") >= 0 ){
-                docstatus = file_doc_results['documentation_lib']['file_status'].replaceAll('/','/<br/>');
                 if( file_doc_results['documentation_lib']['file_status'].indexOf("checkable") == 0 ){
                     docissues = 0;
                     try{
@@ -929,16 +931,40 @@ $.ajax({
                 }catch(error){}
             }
 
+            docstatus = file_doc_results['documentation_lib']['file_status']; //.replaceAll('/','/<br/>');
 
-            doctable.append("<tr><td>" +
-                "<a href='/dashboard/filex/"+project+"?filename="+filename+"&branch="+branch+"'>"+filename +"</a>"+
-                "</td><td>" +
-                    docstatus +
-                "</td><td>" +
-                    (docissues < 0 ? '-' : docissues) +
-                "</td><td>" +
-                    docbuttons +
-                "</td></tr>");
+            if( docstatus.indexOf("uncheckable") >= 0  ){
+                doctable.append("<tr><td>" +
+                    "<span>"+filename +"</span>"+
+                    "<br/><a class='btn btn-xs btn-secondary' target='_blank' href='/dashboard/filex/"+project+"?filename="+filename+"&branch="+branch+"'>View in File Explorer</a>"+
+                    "</td><td colspan='3'>" +
+                        docstatus +
+                    "</td></tr>");
+            }else{
+                if( docstatus.indexOf("but no documentation") >= 0 ){
+                    doctable.append("<tr><td>" +
+                        "<span>"+filename +"</span>"+
+                        "<br/><a class='btn btn-xs btn-secondary' target='_blank' href='/dashboard/filex/"+project+"?filename="+filename+"&branch="+branch+"'>View in File Explorer</a>"+
+                        "</td><td>" +
+                            docstatus +
+                        "</td><td>" +
+                            '-' +
+                        "</td><td>" +
+                            "<a class='btn btn-sm btn-primary' target='_blank' href='#''>View Doc Template</a><br/>" +
+                        "</td></tr>");
+                }else{
+                    doctable.append("<tr><td>" +
+                        "<span>"+filename +"</span>"+
+                        "<br/><a class='btn btn-xs btn-secondary' target='_blank' href='/dashboard/filex/"+project+"?filename="+filename+"&branch="+branch+"'>View in File Explorer</a>"+
+                        "</td><td>" +
+                            docstatus +
+                        "</td><td>" +
+                            (docissues < 0 ? '-' : docissues) +
+                        "</td><td>" +
+                            docbuttons +
+                        "</td></tr>");
+                }
+            }
 
             if( docissues > 0 )
                 $("#docwarning").show();
