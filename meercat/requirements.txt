@@ -10,7 +10,7 @@ colorama==0.4.4
 cpplint==1.6.1
 cycler==0.11.0
 dill==0.3.4
-Django==4.0.7
+Django==4.1.7
 django-cors-headers==3.13.0
 docstring-parser==0.14.1
 fonttools==4.33.3
@@ -33,7 +33,7 @@ mccabe==0.7.0
 mypy-extensions==0.4.3
 mysqlclient==2.1.0
 numpy==1.22.3
-oauthlib==3.2.1
+oauthlib==3.2.2
 packaging==21.3
 pandas==1.4.2
 pathspec==0.9.0
