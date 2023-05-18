@@ -2,73 +2,89 @@
 var hostname = "https://meercat.cs.uoregon.edu/dashboard/recommender/";
 
 
-function generateIndividualPersonRowsHTML(personName) {
- // Do some initial data clensing
- [namesArray, emailsArray, strength] = personName;
+function generateIndividualPersonRowsHTML(personName, fileName="default filename must be five words or more") {
+  // Do some initial data clensing
+  [namesArray, emailsArray, strength] = personName;
 
- namesArray = namesArray.filter(function (el) {
-   return el != null && el.trim() != "";
- });
+  namesArray = namesArray.filter(function (el) {
+    return el != null && el.trim() != "";
+  });
 
- emailsArray = emailsArray.filter(function (el) {
-   return el != null && el.trim() != "";
- });
+  emailsArray = emailsArray.filter(function (el) {
+    return el != null && el.trim() != "";
+  });
 
- // Add HTML to rows
- tableRow = `
- <div class="row border-top p-1">
+  // Add HTML to rows
+  tableRow = `
+  <div class="row border-top p-1">
                  <div class="col">`;
 
- // Add name information
- $.each(namesArray, function (personNameIndex, personIndividualName) {
-   if (personNameIndex == 0) {
-     tableRow += `<strong>${personIndividualName}</strong>`;
-   }
-   else {
-     tableRow += `, ${personIndividualName}`;
-   }
- });
+  // Add name information
+  var mainPersonIndividualName = '';
+  $.each(namesArray, function (personNameIndex, personIndividualName) {
+    if (personNameIndex == 0) {
+      mainPersonIndividualName = personIndividualName;
+      tableRow += `<strong>${personIndividualName}</strong>`;
+    }
+    else {
+      tableRow += `, ${personIndividualName}`;
+    }
+  });
 
- // Add email information
- tableRow += `
+  // Add email information
+  tableRow += `
                  </div>
                  <div class="col">`;
 
- $.each(emailsArray, function (personNameIndex, personIndividualEmail) {
-   if (personNameIndex == 0) {
-     tableRow += `<strong><a href="mailto:${personIndividualEmail}">${personIndividualEmail}</a></strong>`;
-   }
-   else {
-     tableRow += `, <a href="mailto:${personIndividualEmail}">${personIndividualEmail}</a>`;
-   }
- });
+  var mainPersonIndividualEmail = '';
+  $.each(emailsArray, function (personNameIndex, personIndividualEmail) {
+    if (personNameIndex == 0) {
+      mainPersonIndividualEmail = personIndividualEmail;
+      tableRow += `<strong><a href="mailto:${personIndividualEmail}">${personIndividualEmail}</a></strong>`;
+    }
+    else {
+      tableRow += `, <a href="mailto:${personIndividualEmail}">${personIndividualEmail}</a>`;
+    }
+  });
 
- // Add strength information
- percentStrength = 0;
- color = "";
+  // Add strength information
+  percentStrength = 0;
+  color = "";
 
- if(strength == "Strong"){
-   percentStrength = "100";
-   color = "bg-success";
- } else if (strength == "Medium"){
-   percentStrength = "66";
-   color = "bg-warning";
- } else if (strength == "Weak"){
-   percentStrength = "33";
-   color = "bg-danger";
- }
+  if(strength == "Strong"){
+    percentStrength = "100";
+    color = "bg-success";
+  } else if (strength == "Medium"){
+    percentStrength = "66";
+    color = "bg-warning";
+  } else if (strength == "Weak"){
+    percentStrength = "33";
+    color = "bg-danger";
+  }
 
- tableRow += `</div>
-                 <div class="col">
-                     <div class="progress">
-                         <div class="progress-bar ${color}" role="progressbar"
+  tableRow += `</div>
+              <div class="col" style="padding-top:5px;">
+                  <div class="progress">
+                      <div class="progress-bar ${color}" role="progressbar"
                              style="width: ${percentStrength}%" aria-valuenow="${percentStrength}" aria-valuemin="0"
                              aria-valuemax="100">${strength}</div>
-                     </div>
-                 </div>
-             </div>`;
+                  </div>
+              </div>
+             `;
 
-return tableRow;
+  tableRow += ` <div class="col" style="width:24px; min-width:24px; max-width:24px; text-align:left; padding:0px;">
+                  <span onclick="console.log('I CLICKED');"><b>&#9432;</b></span>
+                </div>
+                <div class="col col-sm-1">
+                  <button class="btn btn-xs btn-success" onclick='sendInvite(\"${mainPersonIndividualEmail}\", \"${fileName}\");'>Invite</button>
+                </div>
+              </div>`;
+       
+  if( mainPersonIndividualName != prauthor ){
+    return tableRow;
+  }else{
+    return '';
+  }
 }
 
 function updateAllRecommendedPeople(nameData){
@@ -106,12 +122,16 @@ function addToFileRecommendationsAccordion(fileIndex, fileName, fileData) {
                     <div class="col">
                         <strong><em>Strength of recommendation</em></strong>
                     </div>
+                    <div class="col" style="width:24px; min-width:24px; max-width:24px;">
+                    </div>
+                    <div class="col col-sm-1">
+                    </div>
                 </div>`;
 
   // Add individual rows
   $.each(fileData, function (personIndex, personName) {
 
-    accordionItem += generateIndividualPersonRowsHTML(personName);
+    accordionItem += generateIndividualPersonRowsHTML(personName, fileName);
     
   });
 

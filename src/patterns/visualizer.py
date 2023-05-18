@@ -6,6 +6,7 @@ import seaborn as sns
 import os
 from patterns.patterns import Patterns
 from gitutils.utils import err
+from subprocess import Popen, PIPE
 
 
 class Visualizer(Patterns):
@@ -377,3 +378,70 @@ class Visualizer(Patterns):
         if not os.path.exists('figures'): os.mkdir('figures')
         fig.savefig('figures/%s-2020-%s.png' % (self.project, locc_metric), format='png',
                     dpi=self.config['output_dpi'], bbox_inches='tight')
+
+    def plot_top_N_concept_heatmap(self, top_N=10, locc_metric='change-size-cos', time_range=None, my_df=pd.DataFrame()):
+        """
+        In this function we take the directories x developer matrix dataframe and reorder
+        it by sorting developer columns by total contributions and then extracting the
+        top N most-touched directories for the top N most active developers.
+        The my_df argument is assuming you know how to create and pass the directories 
+        vs developers dataframe. The top N most-touched directories for the top N most active 
+        developers basically shows that they have the most knowledge/concept about them.
+        Lastly, make a lovely heatmap from the data extracted.
+        """
+        sorted_hot_files, stats_df = self.make_directory_developer_df(top_N=top_N, locc_metric=locc_metric, time_range=time_range, my_df=my_df)
+
+        # Figure out number formatting (this is horribly inefficient, I'm sure there is a better way)
+        if (self.commit_data[locc_metric].astype(int) == self.commit_data[locc_metric]).all():
+            number_fmt = 'g'
+        else:
+            number_fmt = '.1f'
+
+        print("INFO: Creating heatmap for top developers...")
+        # make a lovely heatmap
+        fig, ax = plt.subplots(figsize=(top_N + 2, top_N))  # Sample figsize in inches
+        if sorted_hot_files.empty:
+            print("We found no data for this time period!")
+            return sorted_hot_files
+        g = sns.heatmap(sorted_hot_files, annot=True, linewidths=.5, ax=ax, fmt=number_fmt, cmap=self.config['cmap_hm'],
+                        cbar_kws={'label': 'Values: %s' % locc_metric})
+        if self.hide_names:
+            g.set(xticklabels=[])
+            ax.get_xaxis().set_visible(False)
+        time_range_str = self.get_time_range_str(time_range)
+        ax.set_title(self.get_title_str(time_range, stats_df, locc_metric, False))
+        if not os.path.exists('figures'): os.mkdir('figures')
+        fig.savefig('figures/%s-top-%d-%s-map-%s.png' % (self.project, top_N, locc_metric,
+                    time_range_str.replace(', ','_').replace(' ','_')), format='png', dpi=self.config['output_dpi'],
+                    bbox_inches='tight')
+        return sorted_hot_files
+
+    def bus_factor_CST(self, locc_metric='change-size-cos', metric='mul-changes-equal', time_range=None, my_df=pd.DataFrame(), directory_path="", branches=[]):
+        """Gets the bus factor data for CST algorithm and prints it for the user"""
+
+        #checking if the provided directory path is correct
+        if len(directory_path) != 0 and directory_path[len(directory_path) - 1] != "/":
+            err('The directory path provided is incorrect, it should end with a forward slash ("/")')
+            return
+        
+        # checking if the list of branches contains valid items
+        if not all(isinstance(item, str) for item in branches):
+            err('Type incorrect: All the item(s) in list of branhces are not of type string')
+            return
+
+        tot_developers, prim_devs, secon_devs, bus_factor, results = self.get_busfactor_data(locc_metric=locc_metric, metric=metric, time_range=time_range, my_df=my_df, directory_path=directory_path, branches=branches)
+
+        if(len(results)):
+            display(results.head(5))
+
+        print("Total developers: ", tot_developers)
+        if(len(prim_devs)):
+            print("Primary Developers: ", prim_devs)
+        if(len(secon_devs)):
+            print("Secondary Developers: ", secon_devs)
+        print("Bus Factor: ", bus_factor)
+
+    def get_unique_authors(self):
+        """Auxiliary function for the RIG bus factor algorithm. Just fetches the unique authors in a project"""
+        authors_data = self.set_unique_authors()
+        return authors_data

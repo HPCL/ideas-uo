@@ -738,7 +738,7 @@ def file_linter(proj_object, filename):
         ):
             if result and len(result) > 0:
                 try:
-                    if 'Exactly one space after' not in result:
+                    if 'Exactly one space after' not in result and 'Missing space' not in result and 'Trailing whitespace' not in result:
                         results.append(
                             {
                                 "column": 0,
@@ -1458,7 +1458,7 @@ def getFile(request):
         ):
             if result and len(result) > 0:
                 try:
-                    if 'Exactly one space after' not in result:
+                    if 'Exactly one space after' not in result and 'Missing space' not in result and 'Trailing whitespace' not in result:
                         results.append(
                             {
                                 "column": 0,
@@ -1696,6 +1696,7 @@ def githubBot(request):
     print("Pull Request Number: " + str(payload["number"]))
     print("Repository: " + str(payload["repository"]["clone_url"]))
     print("Draft: " + str(payload["pull_request"]["draft"]))
+    print("Branch from: " + str(payload["pull_request"]["head"]["label"]))
 
     prnumber = str(payload["number"])
 
@@ -1717,15 +1718,23 @@ def githubBot(request):
                 repo_name = project.name
                 repo_owner = get_repo_owner(project)
                 url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues/{prnumber}/comments"
-                payload = {
+                gh_payload = {
                     "body": "## MeerCat is working on this PR.  Please stay tuned."
                 }
+
+                branch = str(payload["pull_request"]["head"]["label"])
+                if "staged" in branch:
+                    gh_payload = {
+                        "body": "## MeerCat will ignore this PR because it is coming from the staged branch."
+                    }
+
                 headers = {
                     "Accept": "application/vnd.github+json",
                     "Authorization": "token " + config['MEERCAT_USER_TOKEN'],
                 }
-                result = requests.post(url, headers=headers, data=json.dumps(payload))
-            except:
+                result = requests.post(url, headers=headers, data=json.dumps(gh_payload))
+            except Exception as e:
+                print(e)
                 pass        
 
         # Need to refresh the database before
@@ -1743,8 +1752,8 @@ def githubBot(request):
         )[0]
 
         # TODO: eventually only do this for new PRs (check payload for action type I think)
-
-        if pull_request:
+        branch = str(payload["pull_request"]["head"]["label"])
+        if pull_request and "staged" not in branch:
 
             comment, all_contexts = first_responder_function(pull_request.project, pull_request)
             print("------------")

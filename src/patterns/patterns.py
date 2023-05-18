@@ -160,6 +160,9 @@ class Patterns(Fetcher):
     # These are global, and generally applicable, unless a project-specific list is provided
     excluded_subpaths = ["contrib/", "extern/", "external/"]
 
+    # These are global, and generally applicable, unless a project-specific name is provided
+    default_branches = ["/main", "/master", "/develop"]
+
     @staticmethod
     def is_code(path_str):
         if "." in path_str:
@@ -599,3 +602,317 @@ class Patterns(Fetcher):
             sorted_hot_files = hot_files[sorted_dev_list]
         self.top_N_map = sorted_hot_files
         return sorted_hot_files, stats_df
+
+    def extract_directories(self):
+        """Extracting names of all the subdirectories in the src directory"""
+        print("INFO: Extracting head directories from filepaths...")
+        extracted_col = self.commit_data["filepath"]
+        df = pd.DataFrame(extracted_col)
+        filepaths = df["filepath"].tolist()
+        
+        # extracting the names of head directory from each filepath e.g. directories in src/ for the petsc project 
+        # include vec, mat, ksp, etc
+        for i in range(len(filepaths)):
+            temp = filepaths[i]
+            if(filepaths[i].find('src/') != -1):
+                split = temp.split("src/", 1)
+                temp = split[1]
+                if(temp.find('/') != -1):
+                    split = temp.split("/", 1)
+                    temp = split[0]
+                filepaths[i] = temp
+            elif(filepaths[i].find('/') != -1):
+                split = temp.split("/", 1)
+                temp = split[0]
+            filepaths[i] = temp
+
+        # copying the directory names back to the extracted_col df
+        df["directory"] = filepaths
+        # updating global dataframe
+        self.commit_data["directory"] = df["directory"]
+
+    def make_directory_developer_df(self, top_N=-1, locc_metric='change-size-cos', time_range=None, my_df=pd.DataFrame()):
+        """
+        Create the directories x developers matrix and return the 
+        sorted list of directories based on authors' 'knowledge'/concept
+        """
+        print("INFO: Creating developer matrix...")
+
+        # Create the directory x developers matrix, using the value_column parameter as the values
+        if 'unique_author' not in self.commit_data.columns:
+            self.set_unique_authors()
+
+        if 'directory' not in self.commit_data.columns:
+            self.extract_directories()
+        
+        if my_df.empty:
+            work_df, stats = self.get_time_range_df(time_range, sum=False)
+        else:
+            # TODO -- enable time ranges with user-provided dataframe my_df
+            if locc_metric not in my_df.columns:
+                err('The dataframe you provided to make_file_developer_df() does '
+                    'not contain the required "%s" column"' % locc_metric)
+            work_df = my_df
+
+        if locc_metric not in work_df.select_dtypes(include=['float64', 'int']):
+            err('plot_top_N_heatmap column parameter must be one of %s' % ','.join(work_df.select_dtypes(
+                include=['float64','int']).columns))
+
+        d = pd.DataFrame(work_df.groupby(['directory', 'unique_author'])[locc_metric].sum())
+        d.reset_index(level=d.index.names, inplace=True)
+
+        # Compute the stats
+        stats_df = d.describe().loc[['count','mean', 'std', 'min', 'max']]
+
+        heat_obj = d.pivot_table(index='directory', columns='unique_author', values=locc_metric, aggfunc=np.sum,
+                                 fill_value=0).dropna()
+
+        # Get a df containing developers (1st column) and total contributions (2nd column)
+        sorted_developers = heat_obj.sum(axis='rows').sort_values(ascending=False)
+        self.top_developers = sorted_developers
+        if top_N> 0: top_developers = sorted_developers.head(top_N)
+        else: top_developers = sorted_developers
+        hot_developers = heat_obj[top_developers.index]  # top-N developers
+
+        # Similarly, get a list of top-N files, directory (column 1), changes (column 2)
+        top_directories = heat_obj.sum(axis='columns').sort_values(ascending=False)
+        if top_N > 0: top_directories = top_directories.head(top_N)
+
+        # Now, go back to the original matrix df and extract only the hot files
+        hot_directories = heat_obj.iloc[heat_obj.index.isin(top_directories.to_dict().keys())]
+        # drop 0 columns
+        hot_directories = hot_directories.loc[:, (hot_directories != 0).any(axis=0)]
+
+        # Next, we need to clean up our top-developer list since some developers got
+        # removed in the previous step
+        sorted_full_dev_list = list(sorted_developers.to_dict().keys())
+        sorted_dev_list = []
+        for dev in sorted_full_dev_list:
+            if dev in hot_directories.columns:
+                sorted_dev_list.append(dev)
+
+        # Create a new matrix that has only the top-n developer columns (sorted in
+        # descending order); this produces an n x n matrix dataframe, a subset of heat_obj
+        if top_N > 0: sorted_hot_directories = hot_directories[sorted_dev_list[:top_N]]
+        else: sorted_hot_directories = hot_directories[sorted_dev_list]
+        self.top_N_map = sorted_hot_directories
+
+        return sorted_hot_directories, stats_df
+
+    def get_busfactor_data(self, locc_metric='change-size-cos', metric='mul-changes-equal', time_range=None, my_df=pd.DataFrame(), directory_path="", branches=[]):
+        """Calculates bus factor based on the four CST algorithm metrics based and the locc_metric 
+        provided by the user either on the complete project or on a specific directory"""
+        print("INFO: Creating developer matrix...")
+
+        # Create the files x developers matrix, using the value_column parameter as the values
+        if 'unique_author' not in self.commit_data.columns:
+            self.set_unique_authors()
+
+        if my_df.empty:
+            work_df, stats = self.get_time_range_df(time_range, sum=False)
+        else:
+            if locc_metric not in my_df.columns:
+                err('The dataframe you provided to make_file_developer_df() does '
+                    'not contain the required "%s" column"' % locc_metric)
+            work_df = my_df
+
+        if locc_metric not in work_df.select_dtypes(include=['float64', 'int']):
+            err('get_busfactor_data column parameter must be one of %s' % ','.join(work_df.select_dtypes(
+                include=['float64','int']).columns))
+
+        prim_devs = []
+        secon_devs = []
+        primary_dev = sec_devs = 0
+        tot_developers = 0
+
+        # picks commits from the branch(es) provided by user, else picks commits from default branch only
+        branch_df = pd.DataFrame()
+        if len(branches) == 0:
+            for b in Patterns.default_branches:
+                if len(work_df[work_df['branch'].str.contains(b)]) != 0:
+                    branches.append(b)
+                    break
+        else:
+            for i in range(len(branches)):
+                if branches[i][0] != "/":
+                    branches[i] = "/" + branches[i]
+        for i in range(len(branches)):
+            branch_df = pd.concat([branch_df, work_df[work_df['branch'].str.contains(branches[i])]], axis=0)
+            work_df = work_df[~work_df.branch.str.contains(branches[i])]
+        
+        work_df = branch_df
+
+        if(not len(work_df)):
+            err('The given branch(es) do(es) not exist')
+            return 0, pd.DataFrame(), pd.DataFrame(), 0, pd.DataFrame()
+
+        directory_df = pd.DataFrame()
+        if len(directory_path):
+            directory_df = work_df[work_df['filepath'].str.contains(directory_path)]
+            if(not len(directory_df)):
+                err('The given directory does not exist')
+                return 0, pd.DataFrame(), pd.DataFrame(), 0, pd.DataFrame()
+            #sums the value of locc_metric against each author on a certain file in directory_df
+            d = pd.DataFrame(directory_df.groupby(['filepath', 'unique_author'])[locc_metric].sum())
+            d["dev_knowledge"] = 0
+        else:
+            d = pd.DataFrame(work_df.groupby(['filepath', 'unique_author'])[locc_metric].sum())
+            d["dev_knowledge"] = 0
+        d.reset_index(inplace=True)
+
+        #sums total commits by each author regardless of the files
+        authors_commits_df = pd.DataFrame(d.groupby(['unique_author'])[locc_metric].sum())
+        authors_commits_df.reset_index(inplace=True)
+
+        tot_developers = len(authors_commits_df.index)
+        primary_X = 0
+        secondary_X = 0
+        if tot_developers != 0:
+            primary_X = 1/tot_developers
+            secondary_X = primary_X/2
+
+        results = authors_commits_df
+
+        # more knowledge is assigned to the developers that modified the file most times
+        if(metric == 'mul-changes-equal'):
+            tot_commits_per_file = pd.DataFrame(d.groupby(['filepath'])[locc_metric].sum())
+            tot_commits_per_file.reset_index(inplace=True)
+
+            # calculating developer knowledge on each file
+            for ind in d.index:
+                path = d['filepath'][ind]
+                author = d['unique_author'][ind]
+                d_commits = d[locc_metric][ind]
+                index = ((tot_commits_per_file[tot_commits_per_file['filepath']==path].index.values).tolist())[0]
+                tot_commits = tot_commits_per_file[locc_metric][index]
+                d.iat[ind, d.columns.get_loc('dev_knowledge')] = d_commits/tot_commits
+
+            tot_files = len(tot_commits_per_file.index) #scaling factor
+            # aggregating the knowledge on each file to project/directory level
+            temp_df = d.drop(columns=['filepath', locc_metric])
+            aggregated_df = pd.DataFrame(temp_df.groupby(['unique_author'])['dev_knowledge'].sum())
+            aggregated_df['dev_knowledge'] = aggregated_df['dev_knowledge']/tot_files #scaling down by dividing with the total number of files to keep percentage value within 100
+            aggregated_df.reset_index(inplace=True)
+            aggregated_df.sort_values(by=['dev_knowledge'], ascending=False, inplace=True)
+
+            results = aggregated_df
+
+        # assigns all knowledge of a file to the last developer that modified that file
+        elif(metric == 'last-change-all'):
+            #for specific directory given by user
+            if len(directory_path):
+                d = directory_df[['filepath', 'unique_author']].copy()
+            #for whole project
+            else:
+                d = work_df[['filepath', 'unique_author']].copy()
+            d.sort_values(by=['filepath'], inplace=True)
+            d.reset_index(inplace=True)
+
+            column_names = ["filepath", "unique_author", "datetime", "dev_knowledge"]
+            dev_knowledge_df = pd.DataFrame(columns = column_names)
+
+            path = d['filepath'][0]
+            datetime = d['datetime'][0]
+            author = d['unique_author'][0]
+            for ind in range(1,len(d.index)):
+                if(path != d['filepath'][ind]):
+                    dev_knowledge_df.loc[len(dev_knowledge_df.index)] = [path, author, datetime, 1]
+                    path = d['filepath'][ind]
+                    datetime = d['datetime'][ind]
+                    author = d['unique_author'][ind]
+                    ind+=1
+                elif datetime < d['datetime'][ind]:
+                    path = d['filepath'][ind]
+                    datetime = d['datetime'][ind]
+                    author = d['unique_author'][ind]
+
+            norm_factor = len(dev_knowledge_df) # total number of files in the directory, branch or project
+            d = pd.DataFrame(dev_knowledge_df.groupby(['unique_author'])['dev_knowledge'].sum())
+            d["dev_knowledge"] = d["dev_knowledge"].apply(lambda a: a / norm_factor)
+            d.sort_values(by=['dev_knowledge'], ascending=False, inplace=True)
+            d.reset_index(inplace=True)
+            results = d
+
+        else:
+            if len(directory_path):
+                d = directory_df[['filepath', 'unique_author', locc_metric]].copy()
+            else:
+                d = work_df[['filepath', 'unique_author', locc_metric]].copy()
+            d.sort_values(by=['filepath', 'datetime'], inplace=True)
+            d.reset_index(inplace=True)
+
+            # assesses the developer’s knowledge according to the number of non-consecutive changes on the file
+            if(metric == 'non-consec-changes'):
+                #eliminating consective commits and keeping the one with max locc_metric value
+                for ind in range(len(d.index) - 1):
+                    path = d['filepath'][ind]
+                    author = d['unique_author'][ind]
+                    locc_val = d[locc_metric][ind]
+                    next_index = ind + 1
+                    if(path == d['filepath'][next_index] and author == d['unique_author'][next_index]):
+                        if locc_val >= d[locc_metric][next_index]:
+                            d.iat[next_index, d.columns.get_loc(locc_metric)] = locc_val
+                            d.iat[ind, d.columns.get_loc(locc_metric)] = 0
+                        else:
+                            d.iat[ind, d.columns.get_loc(locc_metric)] = 0
+
+            # takes into account the position of the modifications in the timeline evolution of the file. 
+            # It is used to assign incremental importance to the later modifications on the file.
+            elif(metric == 'weighted-non-consec'):
+                #multiplying by weight to locc_metric for a file depending upon order
+                weight = 1
+                for ind in range(len(d.index) - 1):
+                    path = d['filepath'][ind]
+                    locc_val = d[locc_metric][ind]
+                    d.iat[ind, d.columns.get_loc(locc_metric)] = locc_val*weight
+                    next_index = ind + 1
+                    if(path == d['filepath'][next_index]):
+                        weight += 1
+                    else:
+                        weight = 1
+
+            #total commits of each author on each filepath
+            df = pd.DataFrame(d.groupby(['filepath', 'unique_author'])[locc_metric].sum())
+            df["dev_knowledge"] = 0
+            df.reset_index(inplace=True)
+
+            #total commits on the file by all authors collectively
+            tot_commits_per_file = pd.DataFrame(df.groupby(['filepath'])[locc_metric].sum())
+            tot_commits_per_file.reset_index(inplace=True)
+            tot_commits_per_file.set_index('filepath', inplace=True)
+
+            #calculating developer knowledge of each developer for each file
+            it = 0
+            for ind in df.index:
+                path = df['filepath'][ind]
+                author = df['unique_author'][ind]
+                d_commits = df[locc_metric][ind]
+                tot_commits = tot_commits_per_file[locc_metric][path]
+                df.iat[ind, df.columns.get_loc('dev_knowledge')] = d_commits/tot_commits
+
+            #knowledge of each developer on the whole project
+            project_knowledge = pd.DataFrame(d.groupby(['unique_author'])[locc_metric].sum())
+            project_knowledge.reset_index(inplace=True)
+            project_knowledge["dev_knowledge"] = 0
+            tot_commits = project_knowledge[locc_metric].sum()
+
+            for ind in project_knowledge.index:
+                d_commits = project_knowledge[locc_metric][ind]
+                project_knowledge.iat[ind, project_knowledge.columns.get_loc('dev_knowledge')] = d_commits/tot_commits
+            
+            project_knowledge.sort_values(by=['dev_knowledge'], ascending=False, inplace=True)
+            del project_knowledge[locc_metric]
+            results = project_knowledge
+
+        for ind in results.index:
+            dev_knowledge = results['dev_knowledge'][ind]
+            if dev_knowledge >= primary_X:
+                primary_dev += 1
+                prim_devs.append(results['unique_author'][ind])
+            elif dev_knowledge<primary_X and dev_knowledge>=secondary_X:
+                sec_devs += 1
+                secon_devs.append(results['unique_author'][ind])
+
+        bus_factor = primary_dev + sec_devs
+
+        return tot_developers, prim_devs, secon_devs, bus_factor, results
