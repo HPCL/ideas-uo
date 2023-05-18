@@ -56,7 +56,7 @@ class Profile(models.Model):
     gh_email = models.EmailField("GitHub email", blank=True, max_length=200)
     gl_username = models.CharField("GitLab username", blank=True, max_length=200)
     gl_email = models.EmailField("GitLab email", blank=True, max_length=200)
-    subscriptions = models.JSONField(blank=True, default=dict)
+    subscriptions = models.JSONField(blank=True, default=list)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
     class Meta:
