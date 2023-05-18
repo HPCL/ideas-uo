@@ -8,9 +8,8 @@ import configparser
 from django.http import HttpResponse
 from django.template import loader
 from django.conf import settings
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
-from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
 
@@ -32,6 +31,7 @@ from database.models import (
     Diff,
     Issue,
     PullRequest,
+    Profile,
     PullRequestIssue,
     Comment,
     EventPayload,
@@ -982,6 +982,20 @@ def pr(request, *args, **kwargs):
     }
 
     return HttpResponse(template.render(context, request))
+
+
+def save_subscriptions(request):
+    
+    if request.method == "POST":
+        try:
+            profile = Profile.objects.get(user=request.user)
+            profile.subscriptions = json.loads(request.POST.get("subscriptions"))
+            profile.save()
+
+            return HttpResponse(json.dumps({"success": "true"}), content_type="application/json")
+        except Exception as e:
+            return HttpResponse(json.dumps({"success": "false", "message": str(e)}), content_type="application/json")
+
 
 # For logging generic events
 def logEvent(request, *args, **kwargs):
@@ -2570,12 +2584,15 @@ def folder_explorer(request, *args, **kwargs):
     #results = [{"filePath": ".github/CODEOWNERS", "errors": False}, {"filePath": ".github/workflows/codeql-analysis.yml", "errors": True}, {"filePath": ".github/workflows/doxygen-gh-pages.yml", "errors": False} ,{"filePath": ".github/workflows/github-actions-demo.yml", "errors": True}]
     results = [{"filePath": ".github/CODEOWNERS", "errors": False}, {"filePath": ".github/workflows/codeql-analysis.yml", "errors": False}, {"filePath": ".github/workflows/doxygen-gh-pages.yml", "errors": False} ,{"filePath": ".github/workflows/github-actions-demo.yml", "errors": False}]
 
+    subscriptions = Profile.objects.get(user=request.user).subscriptions
+
     context = {
         "folder": folder,
         "project": project,
         "branch": branch,
         "files": files,
-        "results": results
+        "subscriptions": subscriptions,
+        "results": results,
     }
 
     return HttpResponse(template.render(context, request))

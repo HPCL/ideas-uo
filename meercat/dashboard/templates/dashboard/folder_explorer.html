@@ -68,8 +68,8 @@
             </div>
 
             <div>
-                <a id="panel-subscribe-btn" class="btn btn-primary d-inline my-4" style="visibility: hidden;">Notify on
-                    pull request</a>
+                <button id="panel-subscribe-btn" class="btn btn-primary d-inline my-4 me-4" style="visibility: hidden;">Notify on
+                    pull request</button><span id="save-status"></span>
             </div>
         </div>
     </section>
@@ -193,6 +193,7 @@
 <input id="branch" type="hidden" value="{{ branch }}"/>
 
 {{ files|json_script:"files" }}
+{{ subscriptions|json_script:"subscriptions" }}
 
 {% if results|length %}
     {{ results|json_script:"results" }}

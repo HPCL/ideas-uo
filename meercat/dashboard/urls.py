@@ -30,5 +30,6 @@ urlpatterns = [
     path('sendinvite/', views.sendInvite, name='sendinvite'),
     path('updatetags/', views.updateTags, name='updatetags'),
     path('logevent/', views.logEvent, name='logevent'),
+    path('save_subscriptions/', views.save_subscriptions, name='save_subscriptions'),
 ]
 
