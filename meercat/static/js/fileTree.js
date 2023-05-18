@@ -7,7 +7,6 @@ class Path {
     static commonPrefix(path1, path2) {
         let i = 0;
         while (i < path1.length && i < path2.length && path1[i] === path2[i]) {
-            console.log(i, path1[i], path2[i]);
             i += 1;
         }
 
@@ -43,7 +42,7 @@ class Path {
 }
 
 class TreeNode {
-    constructor({ parent, path, metrics }) {
+    constructor({ parent, path, metrics}) {
         this.metrics = metrics? 
         metrics
         :
@@ -123,12 +122,12 @@ class TreeNode {
     }
 
     updateParentSubscriptions() {
+        // 
         if (this.parent === null) return;
         const SubscribedSiblingCount = this.parent.children.reduce((count, child) => child.subscribed? count + 1 : count, 0);
         const nullSiblingCount = this.parent.children.reduce((count, child) => child.subscribed === null? count + 1: count, 0);
         const siblingCount = this.parent.children.length;
 
-        console.log(this.parent.path, siblingCount, nullSiblingCount, SubscribedSiblingCount);
         if (nullSiblingCount > 0) {
             this.parent.subscribed = null;
         } else if (SubscribedSiblingCount === siblingCount) {
@@ -145,21 +144,37 @@ class TreeNode {
     }
 
     updateSubtreeSubscriptions() {
+        /**
+         * updateSubtreeSubscriptions: changes the subscription based on the current subscription value for "this".
+         */
+        
+        // Terminology: Files for which the user is notified on pull requests are called subscriptions
+        // Case: neither this node nor nodes under it (if any) are in the subscriptions. The following code adds all files
+        // in the subtree rooted in the current node to the subscriptions.
         if (!this.subscribed && this.subscribed !== null) {
             for (let node of this) {
-                node.subscribed = true && node.visible;
+                if (node.visible) node.subscribed = true;
             }
             return;
         }
 
+        // Case: Some nodes under this node are in the subcsriptions (only folders can have null subscribed value). The following code
+        // removes every file under this folder from the subcsriptions.
         if (this.subscribed === null) {
-            let confirmed = confirm("subcribing to this folder will unsubscribe from every file and folder underneath it. Continue?");
+            let confirmed = confirm("This action will stop notifications from every file and folder underneath it. Continue?");
             if (!confirmed) return;
         }
 
+        // Case: this node and all nodes under it (if any) have a subscription. The following code removes all files in the subtree
+        // rooted in the current node from the subscriptions.
         for (let node of this) {
             node.subscribed = false;
         }
+    }
+
+    updateSubscriptions() {
+        this.updateSubtreeSubscriptions();
+        this.updateParentSubscriptions();
     }
 
     getDeepestMatchingNode(path) {
@@ -185,6 +200,14 @@ class TreeNode {
             yield currentNode;
             nodesStack.push(...currentNode.children);
         }
+    }
+
+    getSubscribedNodePaths() {
+        let subscribedNodePaths = [];
+        for (let node in this) {
+            if (node.isLeaf() && node.subscribed) subscribedNodePaths.push(node.path);
+        }
+        return subscribedNodePaths;
     }
 
     computeMetrics() {
@@ -285,7 +308,7 @@ class FileTreeLi {
         }
 
         let subscriptionSrc = treeNode.subscribed ? '/static/images/subscription-icon.png' : (treeNode.subscribed === null ? '/static/images/partial-subscription-icon.png' : '');
-        let subscriptionAlt = treeNode.subscribed ? 'Your are subscribed to this' : (treeNode.subscribed === null ? 'Some items under this folder have a subscription' : '');
+        let subscriptionAlt = treeNode.subscribed ? 'You will get notifications on pull requests' : (treeNode.subscribed === null ? 'You will get notifications for some iems under this folder on pull requests' : '');
         let subscriptionIcon = FileTreeLi.createIcon(subscriptionSrc, subscriptionAlt, ['post-label-icon']);
         subscriptionIcon.classList.add('subscription-icon');
         subscriptionIcon.onerror = function () { this.style.display = 'none'; };
@@ -443,13 +466,13 @@ class Renderer {
 
         if (treeNode.subscribed === null) {
             subscriptionIcon.src = '/static/images/partial-subscription-icon.png';
-            subscriptionIcon.alt = 'Some items under this folder have a subscription';
-            subscriptionIcon.title = 'Some items under this folder have a subscription';
+            subscriptionIcon.alt = 'You will get notifications for some iems under this folder on pull requests';
+            subscriptionIcon.title = 'You will get notifications for some iems under this folder on pull requests';
             subscriptionIcon.style.display = 'inline-block';
         } else if (treeNode.subscribed === true) {
             subscriptionIcon.src = '/static/images/subscription-icon.png';
-            subscriptionIcon.alt = 'Your are subscribed to this';
-            subscriptionIcon.title = 'Your are subscribed to this';
+            subscriptionIcon.alt = 'You will get notifications on pull requests';
+            subscriptionIcon.title = 'You will get notifications on pull requests';
             subscriptionIcon.style.display = 'inline-block';
         } else {
             subscriptionIcon.src = '';
@@ -472,9 +495,9 @@ class Renderer {
 }
 
 class DataBinder {
-    constructor(elementId, tree) {
-        this.tree = tree;
-        Renderer.renderRoot(tree, elementId);
+    constructor(elementId, fileTree) {
+        this.fileTree = fileTree;
+        Renderer.renderRoot(fileTree.root, elementId);
     }
 
     handleEvent(event) {
@@ -495,7 +518,7 @@ class DataBinder {
 
     handleNodeLabelClick(event) {
         const liNode = event.target.closest('li');
-        const liTreeNode = this.tree.getDescendant(liNode.dataset.path);
+        const liTreeNode = this.fileTree.root.getDescendant(liNode.dataset.path);
 
         if (!liTreeNode.visible) return;
 
@@ -507,7 +530,7 @@ class DataBinder {
 
     handleSwitcherClick(event) {
         const liNode = event.target.closest('li');
-        const liTreeNode = this.tree.getDescendant(liNode.dataset.path);
+        const liTreeNode = this.fileTree.root.getDescendant(liNode.dataset.path);
         const liNodeList = liNode.querySelector('ul');
         const parentList = liNode.closest('ul');
         const switcher = event.target;
@@ -519,7 +542,7 @@ class DataBinder {
             const expandedSiblingLiNodeList = parentList.querySelector('li > ul[data-collapsed="false"]');
             if (expandedSiblingLiNodeList !== null) {
                 const expandedSiblingLiNode = expandedSiblingLiNodeList.closest('li');
-                const expandedSiblingTreeNode = this.tree.getDescendant(expandedSiblingLiNode.dataset.path);
+                const expandedSiblingTreeNode = this.fileTree.root.getDescendant(expandedSiblingLiNode.dataset.path);
                 Renderer.collapseSection(expandedSiblingLiNodeList);
                 Renderer.renderChildren(expandedSiblingLiNode, expandedSiblingTreeNode);
 
@@ -538,33 +561,68 @@ class DataBinder {
     }
 
     handleSubscriptionClick(event) {
-        const treeNode = this.tree.getDescendant(event.target.dataset.path);
+        const treeNode = this.fileTree.root.getDescendant(event.target.dataset.path);
 
-        treeNode.updateSubtreeSubscriptions();
-        treeNode.updateParentSubscriptions();
-        Renderer.UpdateDOMSubtreeSubscriptions(treeNode);
-        Renderer.updateDOMParentSubscriptions(treeNode);
+        // save current subscriptions in case of save failure
+        const old_subscriptions = Array.from(this.fileTree.subscriptions); // make a copy of old subscriptions
 
-        event.target.textContent = !treeNode.subscribed ? 'Notify on pull request' : 'Stop notifications';
+        // update watched state on relevant tree nodes
+        treeNode.updateSubscriptions();
+
+        // Update subscriptions
+        for (let node of treeNode) {
+            if (!node.isLeaf()) continue;
+
+            if (node.subscribed) {
+                this.fileTree.subscriptions.add(node.path);
+            } else {
+                this.fileTree.subscriptions.delete(node.path);
+            }
+        }
+
+        let subscriptions = JSON.stringify(Array.from(this.fileTree.subscriptions));
+        const status = document.getElementById("save-status");
+        status.innerText = "Loading..."
+        event.target.disabled = true;
+
+        $.ajax({
+            url: '/dashboard/save_subscriptions/', 
+            type: 'POST', 
+            data: { subscriptions: subscriptions }, 
+            success: (result) => {
+                if (result.success === "true") {
+                    event.target.textContent = !treeNode.subscribed ? 'Notify on pull request' : 'Stop notifications';
+                    status.innerText = "notifications updated";
+
+                    Renderer.UpdateDOMSubtreeSubscriptions(treeNode);
+                    Renderer.updateDOMParentSubscriptions(treeNode);
+                } else {
+                    this.fileTree.subscriptions = old_subscriptions; // restore subscriptions on failure
+                    status.innerText = "There was an error saving your notifications";
+                    console.error(result.message);
+                }
+                event.target.disabled = false;
+            },
+            error: (error) => {
+                this.fileTree.subscriptions = old_subscriptions; // restore subscriptions on failure
+
+                status.innerText = "There was an error saving your notifications";
+                console.error(error);
+                event.target.disabled = false;
+            } 
+        });
     }
 }
 
 class FileTree {
-    constructor(paths, watchedPaths = []) {
+    constructor(paths, subscriptions = []) {
         this.paths = paths;
-        this.watchedPaths = new Set(watchedPaths);
-        this.tree = this.generateTreeWithMetrics(paths);
-        let container = document.getElementById('file-tree-container');
-        let dataBinder =  new DataBinder('file-tree', this.tree);
-        container.addEventListener('click', dataBinder);
-    }
-
-    getWatchedPaths() {
-        return Array.from(this.watchedPaths);
+        this.subscriptions = new Set(subscriptions);
+        this.root = this.generateTreeWithMetrics(paths, this.subscriptions);
     }
 
     // This method injects dummy metrics, should be deleted when incorporating real metrics
-    generateTreeWithMetrics(paths) {
+    generateTreeWithMetrics(paths, subscriptions) {
         function randInt(min, max) {
             return Math.floor(Math.random() * (max - min + 1)) + min;
         }
@@ -584,6 +642,13 @@ class FileTree {
             }
         }
 
+        for (let path of paths) {  
+            if (subscriptions.has(path)) {
+                tree.getDescendant(path).updateSubscriptions();
+
+            }
+        }
+
         tree.computeMetrics();
 
         return tree;
@@ -594,7 +659,11 @@ class FileTree {
 $(document).ready(function() {
 
     const paths = JSON.parse(document.getElementById('files').textContent);
+    const subscriptions = JSON.parse(document.getElementById('subscriptions').textContent);
 
-    const fileTree = new FileTree(paths);
-    console.log(fileTree);
-})
+    const fileTree = new FileTree(paths, subscriptions);
+    
+    let container = document.getElementById('file-tree-container');
+    let dataBinder =  new DataBinder('file-tree', fileTree);
+    container.addEventListener('click', dataBinder);
+});
