@@ -212,7 +212,7 @@
             <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#accordionExample4">
             <div class="accordion-body">
 
-                <div class="card m-3">
+                <div class="card m-3" style="display:none;">
                     <div class="card-header">
                         Recommended people to loop into the conversation
                     </div>
@@ -238,7 +238,7 @@
                     </div>
                 </div>
 
-                <div class="card m-3">
+                <div class="card m-3" style="display:none;">
                     <div class="card-header">
                         Explore by file
                     </div>
@@ -251,8 +251,8 @@
                 </div>
 
                 <!-- TODO: remove this once Sam's stuff is good.   -->
-                <div id="devdiv" style="border:1px solid grey; margin:10px; padding:10px; display:none;">
-                    <b>Developers who've worked on files involved with this PR:</b>
+                <div id="devdiv" style="border:0px solid grey; margin:10px; padding:10px;">
+                    <!--b>Developers who've worked on files involved with this PR:</b-->
                     <table class="table" id="devtable" style="font-size:10pt;">
                         <thead>
                             <tr>
@@ -260,11 +260,11 @@
                                 <th style="width:110px">Total Number<br/>of Commits</th>
                                 <th style="width:90px">Total Lines Changed</th>
                                 <th>Date of Last Commit</th>
-                                <th> Link to Last Commit</th>
+                                <th>Link to Last Commit</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr><td colspan="5">Loading...</td></tr>
+                            <tr><td colspan="6">Loading...</td></tr>
                         </tbody>
                     </table>
                 </div>
