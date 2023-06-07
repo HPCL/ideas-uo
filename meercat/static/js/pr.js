@@ -934,14 +934,7 @@ $.ajax({
             docstatus = file_doc_results['documentation_lib']['file_status']; //.replaceAll('/','/<br/>');
 
             if( docstatus.indexOf("uncheckable") >= 0  ){
-                doctable.append("<tr><td>" +
-                    "<span>"+filename +"</span>"+
-                    "<br/><a class='btn btn-xs btn-secondary' target='_blank' href='/dashboard/filex/"+project+"?filename="+filename+"&branch="+branch+"'>View in File Explorer</a>"+
-                    "</td><td colspan='3'>" +
-                        docstatus +
-                    "</td></tr>");
-            }else{
-                if( docstatus.indexOf("but no documentation") >= 0 ){
+                if( docstatus.indexOf("no documentation") >= 0 ){
                     doctable.append("<tr><td>" +
                         "<span>"+filename +"</span>"+
                         "<br/><a class='btn btn-xs btn-secondary' target='_blank' href='/dashboard/filex/"+project+"?filename="+filename+"&branch="+branch+"'>View in File Explorer</a>"+
@@ -956,6 +949,15 @@ $.ajax({
                     doctable.append("<tr><td>" +
                         "<span>"+filename +"</span>"+
                         "<br/><a class='btn btn-xs btn-secondary' target='_blank' href='/dashboard/filex/"+project+"?filename="+filename+"&branch="+branch+"'>View in File Explorer</a>"+
+                        "</td><td colspan='3'>" +
+                            docstatus +
+                        "</td></tr>");
+                }
+            }else{
+
+                    doctable.append("<tr><td>" +
+                        "<span>"+filename +"</span>"+
+                        "<br/><a class='btn btn-xs btn-secondary' target='_blank' href='/dashboard/filex/"+project+"?filename="+filename+"&branch="+branch+"'>View in File Explorer</a>"+
                         "</td><td>" +
                             docstatus +
                         "</td><td>" +
@@ -963,7 +965,7 @@ $.ajax({
                         "</td><td>" +
                             docbuttons +
                         "</td></tr>");
-                }
+                
             }
 
             if( docissues > 0 )

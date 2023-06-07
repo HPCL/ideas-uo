@@ -91,7 +91,7 @@
         <h4>This file (name or extension) is explicitly listed as to be ignored in terms of all analysis.</h4>
     {% else %}
         <h3>Documentation:</h3>
-        <div style="margin-left:20px;">
+        <div style="margin-left:20px; display:none;">
             {% if  documentation.ignore_status %}  <!-- level 2 if -->
                 <h4>This file (name or extension) is explicitly listed as to be ignored in terms of documentation checks.</h4>
             {% elif  not documentation.check_status %}
@@ -110,6 +110,38 @@
                 </ul>
             {% endif %}  <!-- level 2 if -->
         </div>
+
+        <div style="margin-left:20px; margin-bottom:20px;">
+            <h4>{{documentation_lib.file_status}}</h4>
+
+            {% if documentation_lib.missing_fields %}  
+                <b>This file has missing fields:</b>
+                <ul>
+                    {% for line in documentation_lib.missing_fields %}
+                        <li>{{line}}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            {% if documentation_lib.problem_fields %}  
+                <b>This file has problem fields:</b>
+                <ul>
+                    {% for line in documentation_lib.problem_fields %}
+                        <li>{{line}}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            {% if documentation_lib.bogus_fields %}  
+                <b>This file has bogus fields:</b>
+                <ul>
+                    {% for line in documentation_lib.bogus_fields %}
+                        <li>{{line}}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+
 
         <h3>Functions/Subroutines defined in file:</h3>
         <table class="table" style="border:1px solid black;margin-left:auto;margin-right:auto;">
@@ -306,7 +338,7 @@
 
 
 
-{% with pull_requests|last as last %}
+{% with pull_requests|first as last %}
     <input id="pr" type="hidden" value="{{last.3}}"/>
 {% endwith %}
 <input id="project" type="hidden" value="{{ project.pk }}"/>
