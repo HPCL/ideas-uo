@@ -320,7 +320,7 @@ def check_file_documentation_aux(dir_struct, lines:list, path:str):
 
     #dox files can appear above a unit folder, e.g., source/numericalTools/numericalTools.dox
     if not the_unit:
-      results_dict['file_status'] = f'checkable but currently not checking dox files above unit folder.'
+      results_dict['file_status'] = f'uncheckable: currently not checking dox files above unit folder.'
       return results_dict
     #could replace above with checker later if wanted
 
@@ -331,7 +331,7 @@ def check_file_documentation_aux(dir_struct, lines:list, path:str):
       results_dict[key] = results[key]
     return results
 
-  results_dict['file_status'] = f'checkable but no checkers found'
+  results_dict['file_status'] = f'uncheckable: no checkers found'
   return results_dict
 
 """###Public or Private stub
@@ -372,7 +372,7 @@ def check_implementation_stub(lines, path, file_name, unit, public=True):
       found_fields.append(('@param', line, i))  
 
   if not found_fields:
-    problems['file_status'] = f"{problems['file_status']} but no documentation"
+    problems['file_status'] = f"uncheckable: no documentation found on {'public' if public else 'private'} stub"
     return problems
 
   missing_fields = (set(required_fields) - set([f for f,l,i in found_fields]))
@@ -421,7 +421,7 @@ def check_implementation_stub(lines, path, file_name, unit, public=True):
   while not lines[i].startswith("subroutine "):
       i += 1
       if i >= len(lines):
-        problems['file_status'] = f"{problems['file_statuc']} but no subroutine in file: {path}"
+        problems['file_status'] = f"uncheckable: {'public' if public else 'private'} stub has no subroutine in file: {path}"
         return problems
   j = i
   while lines[i].find(")") == -1:
@@ -474,7 +474,7 @@ def check_implementation(lines, path, file_name, unit, public=True):
       if field in line: found_fields.append((field, line, i))
 
   if not found_fields:
-    problems['file_status'] = f"{problems['file_status']} but no documentation"
+    problems['file_status'] = f"uncheckable: {'public' if public else 'private'} stub implementation has no documentation"
     return problems
 
   missing_fields = (set(required_fields) - set([f for f,l,i in found_fields]))
@@ -523,7 +523,7 @@ def check_private_file(dir_struct, lines, path, file_name, unit):
 
   #No, not in localAPI. Is there a stub for the file in localApi folder?
   if not dir_struct:
-    return {'file_status': f'checkable but directory structure has not been set - necessary to check private implementation'}
+    return {'file_status': f'uncheckable: directory structure has not been set - necessary to check private implementation'}
 
   #dir_struct is set so we can see if can find localAPI.
   #first build path to unit.
@@ -550,7 +550,7 @@ def check_private_file(dir_struct, lines, path, file_name, unit):
   return check_implementation(lines, path, file_name, unit, public=False)  #same as normal stubbed implementation
 
 def check_private_nonstubbed_implementation(lines, path, file_name, unit):
-  return {'file_status': f'Checkable but not checking non-stubbed private files. Either no localAPI folder or {file_name} not found in that folder'}
+  return {'file_status': f'uncheckable: not checking non-stubbed private files. Either no localAPI folder or {file_name} not found in that folder'}
 
 
 """# Check dox file
