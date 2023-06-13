@@ -45,7 +45,7 @@
     margin-top: 5px;
 }
 
-#panel #panel-metrics .metric-icon {
+#panel .metric-icon {
     width: 20px;
     margin-right: 3px;
     vertical-align: text-bottom;
