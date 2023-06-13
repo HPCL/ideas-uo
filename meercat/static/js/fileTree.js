@@ -1,38 +1,75 @@
 const SEPARATOR = '/';
 
-// All paths, relative or absolute, start and end without a slash
+/**
+ * Class with static utility functions to handle path manipulation.
+ * Paths are represented as strings and hold no state, so there is no need to instantiate Path objects.
+ * Paths can be relative or absolute. 
+ * A path is considered valid if and only if its first and last character are not SEPARATOR.
+ */
 class Path {
 
-    // Returns an string with the common prefix of both paths.
+    /**
+     * Finds the longest common path between two file paths.
+     * @example
+     * Path.commonPrefix('a/b/c', 'a/b/d') // returns 'a/b'
+     * Path.commonPrefix('c/d/a', 'a/b/d') // returns empty string
+     * @param {string} path1 represents a valid file path
+     * @param {string} path2 represents a valid file path
+     * @returns the longest matching common prefix
+     */
     static commonPrefix(path1, path2) {
         let i = 0;
-        while (i < path1.length && i < path2.length && path1[i] === path2[i]) {
+        while (i < path1.length && i < path2.length && path1[i] === path2[i]) { // compare char by char
             i += 1;
         }
 
-        return path1.slice(0, i - 1 < 0 ? 0 : i - 1);
+        /**
+         * If there is a common prefix, the resulting substring will have a trailing slash, 
+         * which is removed by edcrementing the slice index. If there is no match i will be 0 and i - 1
+         * will be -1, but the call to slice is still safe.
+         */
+        return path1.slice(0, i - 1);  
     }
 
-    // returns the string difference between path and subpath.
+    /**
+     * Finds the file path that results from taking subPath away from path. If path is not a file path within subPath, subPath is returned.
+     * @param {string} path directory within subPath
+     * @param {string} subPath parent directory of path
+     * @returns the file path that results from taking subPath away from path, or subPath if path is not a file path within subPath.
+     */
     static trailingPath(path, subPath) {
+        // Check if subPath is not a file path within path
         if (!subPath || !path.includes(SEPARATOR) || !path.includes(subPath)) return path;
 
-        return path.slice(subPath.length + 1);
+        return path.slice(subPath.length + 1); // the +1 is needed to return a new file path beginning without a slash
     }
 
-    // Returns last component in this.path. Returns an empty string if path is empty.
+    /**
+     * Get the last substring in path after the last forward slash
+     * @param {string} path a file path
+     * @returns the substring in path after the last forward slash
+     */
     static baseName(path) {
         let crumbs = path.split(SEPARATOR);
         let tail = crumbs.pop();
         return tail;
     }
 
-    // Returns a list with every component in the path
+    /**
+     * Gets the list of substrings in path separated by a forward slash
+     * @param {string} path a file path
+     * @returns a list of strings that results from spliting path with the forward slash
+     */
     static crumbs(path) {
         return path.split(SEPARATOR);
     }
 
-    // Returns joint paths
+    /**
+     * Joins path1 and path2 with a forward slash an returns the result.
+     * @param {string} path1 a file path
+     * @param {string} path2 a file path
+     * @returns The file path path1/path2. If one path is empty, the other path is returned.
+     */
     static join(path1, path2) {
         if (path1 === '') return path2;
         if (path2 === '') return path1;
@@ -41,10 +78,20 @@ class Path {
     }
 }
 
+/**
+ * Class for saving the state of a node in the file tree. TreeNode objects correspond to nodes in the file tree.
+ * Paths in TreeNode are relative to the project root and are a unique id for every tree node in the file tree.
+ */
 class TreeNode {
-    constructor({ parent, path, metrics}) {
+    /**
+     * @param {TreeNode} parent Points the the parent of this node. The root node has its parent set to null.
+     * @param {string} path the file path of the tree node relative to the project root.
+     * @param {object} metrics (optional) metrics for the node provided by meercat. The object must have the exact same properties
+     *                         as the ones in the default object set below.
+     */
+    constructor({ parent, path, metrics }) {
         this.metrics = metrics? 
-        metrics
+        metrics // If metrics are provided in the object paramter, use them. set default values otherwise.
         :
         {
             documentation: {
@@ -58,12 +105,25 @@ class TreeNode {
         this.parent = parent;
         this.path = path;
         this.label = Path.baseName(path);
-        this.children = [];
+        this.children = []; // List of TreeNodes populated when the tree is contructed
+        /**
+         * Indicates if the node sends notifications to the user when appearing on pull requests. A leaf node can only be true or false.
+         * A folder can be true, meaning the user gets notified for all its descendants on pull requests; false, meaning the user does 
+         * not get notifications for any node under this node; or null, meaning the user gets notified about some nodes but not all.
+         */
         this.subscribed = false;
-        this.visible = true;
+        /**
+         * Indicates if this node is not grayed out. Grayed out nodes (visibile = false) are not considered for averaging metrics
+         * and are not considered in the events found in DataBinder.
+         */
+        this.visible = true; 
     }
 
-    // path should be relative to project root
+    /**
+     * Looks for a child node of this node whose file path is path.
+     * @param {string} path a file path relative to the project root
+     * @returns A TreeNode object corresponding to path that is a descendant of this node if found, otherwise null.
+     */
     getChild(path) {
         for (let child of this.children) {
             if (child.path === path) {
@@ -74,37 +134,61 @@ class TreeNode {
         return null;
     }
 
+    /**
+     * Determines if this node has a child with its file path equal to the path provided
+     * @param {string} path a file path relative to the project root
+     * @returns true if this node has a child whose file path equals path
+     */
     hasChild(path) {
         return this.children.some(child => child.path === path);
     }
 
-    // The path should be relative to the project root
+    /**
+     * Gets a desendant of this node whose file path equals the path provided
+     * @param {string} path a file path relative to the project root
+     * @returns a descendant node of this path if exists, null otherwise.
+     */
     getDescendant(path) {
+        // Separate path into two components: this node's path and the pah following the parameters' path.
         let commonPrefix = Path.commonPrefix(this.path, path);
         let trailingPath = Path.trailingPath(path, commonPrefix);
 
         const trailingCrumbs = Path.crumbs(trailingPath);
         let currentPath = commonPrefix;
         let descendant = this;
+
+        // Look for descendant by visiting descendant nodes until the descendant is reached.
         for (let crumb of trailingCrumbs) {
             currentPath = Path.join(currentPath, crumb);
             descendant = descendant.getChild(currentPath);
 
-            if (descendant === null) break;
+            if (descendant === null) break; // if path does not exist in tree it will return null
         }
 
         return descendant;
     }
 
+    /**
+     * Adds a child to this node.
+     * @param {TreeNode} node The node to be added as a child of this node
+     */
     addChildNode(node) {
         this.children.push(node);
     }
 
+    /**
+     * Determine if this node is a leaf node by checking its children
+     * @returns wether this node is a leaf node
+     */
     isLeaf() {
         return this.children.length === 0;
     }
 
-    // This function adds a child Node with the subtree built from path.
+    /**
+     * Adds achild Node with the subtree built from path.
+     * @param {string} path a file path relative to the project root
+     * @param {object} metrics a metric objects as defined in the constructor of this class
+     */
     insert(path, metrics) {
         const crumbs = Path.crumbs(path);
 
@@ -121,34 +205,44 @@ class TreeNode {
         if (metrics) node.metrics = metrics;
     }
 
+    /**
+     * Recuresively updates the subscription status for this node's parents based on the status of its sibling. Stops at the root node.
+     * 
+     * @returns nothing
+     */
     updateParentSubscriptions() {
-        // 
+        // this return is needed to stop the recursion on the root node for some reason.
         if (this.parent === null) return;
+
+        // count number of siblings and their subscritpion status
         const SubscribedSiblingCount = this.parent.children.reduce((count, child) => child.subscribed? count + 1 : count, 0);
         const nullSiblingCount = this.parent.children.reduce((count, child) => child.subscribed === null? count + 1: count, 0);
         const siblingCount = this.parent.children.length;
 
-        if (nullSiblingCount > 0) {
+        if (nullSiblingCount > 0) { // Some siblings have null subscription status, meaning the parents gets null subscritpion too.
             this.parent.subscribed = null;
-        } else if (SubscribedSiblingCount === siblingCount) {
+        } else if (SubscribedSiblingCount === siblingCount) { // all child nodes of this node's parent have its subscription set to true
             this.parent.subscribed = true;
-        } else if (SubscribedSiblingCount === 0) {
+        } else if (SubscribedSiblingCount === 0) { // all child nodes of this node's parent have its subscription set to false
             this.parent.subscribed = false;
         } else {
             this.parent.subscribed = null;
         }
 
-        if (this.parent !== null) {
+        if (this.parent !== null) { // keep recursion if root node has not been reached.
             this.parent.updateParentSubscriptions();
         }
     }
 
+    /**
+     * changes the subscription of all descendant nodes based on the subscription value for this node.
+     * @returns nothing
+     */
     updateSubtreeSubscriptions() {
         /**
          * updateSubtreeSubscriptions: changes the subscription based on the current subscription value for "this".
          */
         
-        // Terminology: Files for which the user is notified on pull requests are called subscriptions
         // Case: neither this node nor nodes under it (if any) are in the subscriptions. The following code adds all files
         // in the subtree rooted in the current node to the subscriptions.
         if (!this.subscribed && this.subscribed !== null) {
@@ -172,11 +266,23 @@ class TreeNode {
         }
     }
 
+    /**
+     * updates subscriptions for ancestry and descendants based on the value of this node.
+     */
     updateSubscriptions() {
         this.updateSubtreeSubscriptions();
         this.updateParentSubscriptions();
     }
 
+    /**
+     * Finds and returns the node matching the path parameter at the deepest level of the file tree.
+     * @example
+     * getDeepestMatchingNode('a/b/c/d/e') // if the file tree has a leaf node with path 'a/b/c', return that node
+     * getDeepestMatchingNode('a/b/c/d/e') // if the file tree has a leaf node with path 'a/b/c', return that node
+     * getDeepestMatchingNode('a/b/c') // if the file tree has no node starting with 'a', return the root node
+     * @param {string} path a file path relative to the root project
+     * @returns the node that has the deepest match with the path parameter in the file tree.
+     */
     getDeepestMatchingNode(path) {
         let crumbs = Path.crumbs(path);
 
@@ -191,6 +297,9 @@ class TreeNode {
         return node;
     }
 
+    /**
+     * iterates over this node all descendant nodes. This is a JavaScript feature to make TreeNode iterable.
+     */
     *[Symbol.iterator]() {
         const nodesStack = [...this.children];
         let currentNode;
@@ -202,6 +311,10 @@ class TreeNode {
         }
     }
 
+    /**
+     * 
+     * @returns all descendant nodes, including this node, that have subscription set to true
+     */
     getSubscribedNodePaths() {
         let subscribedNodePaths = [];
         for (let node in this) {
@@ -210,6 +323,10 @@ class TreeNode {
         return subscribedNodePaths;
     }
 
+    /**
+     * Calculates the metrics aggregation (average for now) for non-leaf nodes and their visibility.
+     * @returns nothing to stop recursion
+     */
     computeMetrics() {
         if (!this.children.length) {
             this.visible = this.label.endsWith('.F90');
@@ -223,8 +340,8 @@ class TreeNode {
             visible = visible || child.visible;
             if (child.visible) childrenWithMetrics += 1;
             this.metrics.documentation.total += child.metrics.documentation.total;
-            this.metrics.documentation.missingDocs += child.metrics.documentation.missingDocs;
-            this.metrics.documentation.nonDoxyDocs += child.metrics.documentation.nonDoxyDocs;
+            this.metrics.documentation.missing += child.metrics.documentation.missing;
+            this.metrics.documentation.issues += child.metrics.documentation.issues;
             this.metrics.busFactor += child.metrics.busFactor;
             this.metrics.linter += child.metrics.linter;
         }
@@ -232,14 +349,24 @@ class TreeNode {
         this.visible = visible;
         if (childrenWithMetrics === 0) return;
         this.metrics.documentation.total = Math.round(this.metrics.documentation.total / childrenWithMetrics);
-        this.metrics.documentation.missingDocs = Math.round(this.metrics.documentation.missingDocs / childrenWithMetrics);
-        this.metrics.documentation.nonDoxyDocs = Math.round(this.metrics.documentation.nonDoxyDocs / childrenWithMetrics);
+        this.metrics.documentation.missing = Math.round(this.metrics.documentation.missing / childrenWithMetrics);
+        this.metrics.documentation.issues = Math.round(this.metrics.documentation.issues / childrenWithMetrics);
         this.metrics.busFactor = Math.round(this.metrics.busFactor / childrenWithMetrics);
         this.metrics.linter = Math.round(this.metrics.linter / childrenWithMetrics);
     }
 }
 
+/**
+ * Class with static utility functions to render TreeNodes.
+ */
 class FileTreeLi {
+    /**
+     * Creates and return an image DOMElement with the properties specified in the parameters
+     * @param {string} src image source for the icon
+     * @param {string} alt alt message for the icon
+     * @param {Array} classList Array of strings with html classes for the icon
+     * @returns an image DOMElement with the desired attributes
+     */
     static createIcon(src, alt, classList) {
         const icon = document.createElement('img');
         icon.src = src;
@@ -250,6 +377,14 @@ class FileTreeLi {
         return icon;
     }
 
+    /**
+     * Create and return an image DOMElement wrapped in a helper class to display before a label in the rendered file tree.
+     * This function is used for garyed out icons.
+     * @param {string} src image source for the icon
+     * @param {string} alt alt message for the icon
+     * @param {Array} classList Array of strings with html classes for the image
+     * @returns a div DOMElement wrapping an image element
+     */
     static createPreLabelIcon(src, alt, classList) {
         const icon = document.createElement('img');
         icon.src = src;
@@ -265,6 +400,13 @@ class FileTreeLi {
         return iconWrapper;
     }
 
+    /**
+     * Creates an image DOMElement next to a span element with a metric number and returns them wrapper in a div
+     * @param {number} metric a number for the metric that this icon represents
+     * @param {string} src image source for the icon
+     * @param {string} alt alt message for the icon
+     * @returns an image with a wrapper that overlays it when stylized with css
+     */
     static createMetricIcon(metric, src, alt) {
         const icon = document.createElement('img');
         icon.src = src;
@@ -283,6 +425,11 @@ class FileTreeLi {
         return iconWrapper;
     }
 
+    /**
+     * Constructs the DOM elements needed to display a file tree node information in the browser
+     * @param {TreeNode} treeNode a TreeNode object
+     * @returns a div DOMElement with all nested elements needed to display a tree node in the li element
+     */
     static render(treeNode) {
 
         const wrapper = document.createElement('div');
@@ -292,7 +439,7 @@ class FileTreeLi {
         nodeLabel.textContent = treeNode.label;
 
         let icons;
-        if (!treeNode.visible) {
+        if (!treeNode.visible) { // grays out the node element
             wrapper.classList.add(['grayed-out']);
             icons = [
                 FileTreeLi.createPreLabelIcon('/static/images/documentation-icon.png', 'documenatation metric', ['pre-label-icon', 'grayed-out-icon']),
@@ -307,66 +454,95 @@ class FileTreeLi {
             ];
         }
 
+        // adds subscription icons
         let subscriptionSrc = treeNode.subscribed ? '/static/images/subscription-icon.png' : (treeNode.subscribed === null ? '/static/images/partial-subscription-icon.png' : '');
         let subscriptionAlt = treeNode.subscribed ? 'You will get notifications on pull requests' : (treeNode.subscribed === null ? 'You will get notifications for some iems under this folder on pull requests' : '');
         let subscriptionIcon = FileTreeLi.createIcon(subscriptionSrc, subscriptionAlt, ['post-label-icon']);
         subscriptionIcon.classList.add('subscription-icon');
-        subscriptionIcon.onerror = function () { this.style.display = 'none'; };
+        subscriptionIcon.onerror = function () { this.style.display = 'none'; }; // empty string on src attribute from image tag displays a broken image icon. This function hides it.
 
+        // Add elements to wrapper
         wrapper.append(...icons, nodeLabel, subscriptionIcon);
 
         return wrapper;
     }
 }
 
+/**
+ * Renderer is in charge of rendering the file tree through static utility functions.
+ * Due to the large amount of file paths that need to be handled (~10,000) and the folder nodes generated from the file paths, rendered
+ * nodes are only rendered when they need to appear. The program takes advantage of the requirement stating that only one folder can
+ * be expanded per folder level. When a folder node is expanded, its children are rendered, and their grandchildren are rendered too 
+ * but hidden. When a folder node is colsed, all the rendered subtree underneath it is removed from the DOM and its children are
+ * rendered again but hidden.
+ */
 class Renderer {
+
+    /**
+     * Creates a DOMElement with the node's information by calling the static render function of the FileTreeLi class.
+     * The rendering should change by modifying FileTreeLi's render method or by creating a different class with a render method.
+     * @param {TreeNode} treeNode the tree node to render
+     * @returns a DOMElement containing the rendered TreeNode
+     */
     static createTreeNode(treeNode) {
         return FileTreeLi.render(treeNode);
     }
 
+    /**
+     * Render the treeNode infromation in the panel section.
+     * @param {TreeNode} treeNode a treeNode to display its information in the panel area.
+     */
     static renderPanel(treeNode) {
-
-        const documentationBar = document.getElementById('documentation-bar');
-        const documentationMetric = document.getElementById('documentation-metric');
 
         const missingDocsBar = document.getElementById('missing-docs-bar');
         const missingDocsMetric = document.getElementById('missing-docs-metric');
-        const nonDoxyDocsBar = document.getElementById('non-doxy-docs-bar');
-        const nonDoxyDocsMetric = document.getElementById('non-doxy-docs-metric');
-
-        // const busFactorBar = document.getElementById('bus-factor-bar');
-        // const busFactorMetric = document.getElementById('bus-factor-metric');
+        const docIssuesBar = document.getElementById('non-doxy-docs-bar');
+        const docIssuesMetric = document.getElementById('non-doxy-docs-metric');
         const linterBar = document.getElementById('linter-bar');
         const linterMetric = document.getElementById('linter-metric');
 
-        documentationBar.style.width = treeNode.metrics.documentation.total + '%';
-        documentationBar.className = `error-${Math.floor(treeNode.metrics.documentation.total * 3 / 101)}`;
-
+        /**
+         * Metrics are randomly generated with numbers from 0 to 100 and thus need no conversion to percentage when calculating
+         * the bar width. If the metrics change, a percentage will have to be calculated.
+         */
         missingDocsBar.style.width = treeNode.metrics.documentation.missing + '%';
+        /**
+         * Bar colors are stylized based on the classes error-0 for a green bar, error-1 for a yellow-bar, and error-2 for a red bar.
+         * The following mapping applies based on the calculation:
+         *  - 0 <= error-0 <= 33
+         *  - 34 <= error-1 <= 67
+         *  - 68 <= error-2 <= 100
+         * A different mapping will be needed if the metrics change
+         */
         missingDocsBar.className = `error-${Math.floor(treeNode.metrics.documentation.missing * 3 / 101)}`;
-        nonDoxyDocsBar.style.width = treeNode.metrics.documentation.issues + '%';
-        nonDoxyDocsBar.className = `error-${Math.floor(treeNode.metrics.documentation.issues * 3 / 101)}`;
+        docIssuesBar.style.width = treeNode.metrics.documentation.issues + '%';
+        docIssuesBar.className = `error-${Math.floor(treeNode.metrics.documentation.issues * 3 / 101)}`;
 
-        documentationMetric.textContent = treeNode.metrics.documentation.total;
         missingDocsMetric.textContent = treeNode.metrics.documentation.missing;
-        nonDoxyDocsMetric.textContent = treeNode.metrics.documentation.issues;
+        docIssuesMetric.textContent = treeNode.metrics.documentation.issues;
 
-        // busFactorBar.style.width = treeNode.metrics.busFactor + '%';
-        // busFactorBar.className = `error-${Math.floor(treeNode.metrics.busFactor * 3 / 101)}`;
-        // busFactorMetric.textContent = treeNode.metrics.busFactor;
         linterBar.style.width = treeNode.metrics.linter + '%';
         linterBar.className = `error-${Math.floor(treeNode.metrics.linter * 3 / 101)}`;
         linterMetric.textContent = treeNode.metrics.linter;
 
+        // Display file path in panel
         const fileLabel = document.getElementById('path');
         fileLabel.textContent = treeNode.path;
         document.getElementById('hyperlink-icon').style.visibility = 'visible';
+        // TODO: construct a link to file explorer or incorporate it to the data sent by the backend
 
+        // Change notification button based on nodes subscription value
         const button = document.getElementById('panel-subscribe-btn');
         button.textContent = !treeNode.subscribed ? 'Notify on pull request' : 'Stop notifications';
         button.dataset.path = treeNode.path;
     }
 
+    /**
+     * Render the nodes that are a direct child of th root node (the root node itself is not rendered) according to the rules stated
+     * in the documentation of the class
+     * @param {TreeNode} treeRoot the root node of the file tree
+     * @param {string} DOMRootId id of DOM element where the tree will be rendered as a child
+     */
     static renderRoot(treeRoot, DOMRootId) {
         const container = document.getElementById(DOMRootId);
         const div = document.createElement('div');
@@ -379,6 +555,11 @@ class Renderer {
         }
     }
 
+    /**
+     * Create Li element and add it as a child of DOMNode.
+     * @param {Element} DOMNode a DOMElement that will add the resulting li element as its child
+     * @param {TreeNode} treeNode the tree node to be rendered
+     */
     static renderLi(DOMNode, treeNode) {
         const li = document.createElement('li');
         li.dataset.path = treeNode.path;
@@ -398,7 +579,13 @@ class Renderer {
         DOMNode.appendChild(li);
     }
 
-
+    /**
+     * Render all treeNode's children in a ul and add it as a child of DOMNode. If the rendered tree node is not the root,
+     * render the children but do not show them.
+     * @param {Element} DOMNode DOMElement where the resulting ul will be added as a child
+     * @param {TreeNode} treeNode a tree node whose children will be rendered under the resulting ul
+     * @param {boolean} root indicates wether the call is being made for the root node or not
+     */
     static renderChildren(DOMNode, treeNode, root = false) {
         const ul = document.createElement('ul');
         if (!root) {
@@ -460,8 +647,15 @@ class Renderer {
         element.dataset.collapsed = false;
     }
 
+    /**
+     * Updates the subscription icon for a single tree node
+     * @param {TreeNode} treeNode updates the subscritpion icon of this node
+     * @returns nothing
+     */
     static updateSubscirptionIcon(treeNode) {
         let subscriptionIcon = document.querySelector('[data-path="' + treeNode.path + '"] > .rendered-element > .subscription-icon');
+        // Although nodes under treeNode may have a subscription, it may not be rendered and the check for its existence
+        // in the rendered tree is necessary
         if (!subscriptionIcon || !treeNode.visible) return;
 
         if (treeNode.subscribed === null) {
@@ -481,12 +675,21 @@ class Renderer {
         }
     }
 
+    /**
+     * Recursively updates the parent node of the treeNode until the root element is reached.
+     * @param {TreeNode} treeNode the child of the DOM parent node to be updated
+     * @returns nothing to stop the recursion
+     */
     static updateDOMParentSubscriptions(treeNode) {
         if (treeNode.parent === null) return;
         Renderer.updateSubscirptionIcon(treeNode.parent);
         Renderer.updateDOMParentSubscriptions(treeNode.parent);
     }
 
+    /**
+     * Updates the subscription icon of treeNode and all its descendants.
+     * @param {TreeNode} treeNode a tree node
+     */
     static UpdateDOMSubtreeSubscriptions(treeNode) {
         for (let node of treeNode) {
             Renderer.updateSubscirptionIcon(node);
@@ -494,28 +697,48 @@ class Renderer {
     }
 }
 
+/**
+ * DataBinder handles the events triggered by interactions with the file tree on the browser.
+ */
 class DataBinder {
+    /**
+     * Saves the fileTree as state and renders it in the browser.
+     * @param {string} elementId id of the html element where the file tree will be rendered as a child
+     * @param {FileTree} fileTree an instance of a FileTree
+     */
     constructor(elementId, fileTree) {
         this.fileTree = fileTree;
         Renderer.renderRoot(fileTree.root, elementId);
     }
 
+    /**
+     * Delgates the event handling to the relevant function based on what the user interacted with.
+     * @param {Event} event a DOM event
+     */
     handleEvent(event) {
         if (event.type === 'click') {
+            // switcher clicks expand folder nodes
             if (event.target.classList.contains(['switcher'])) {
                 this.handleSwitcherClick(event);
             }
 
+            // node-label clicks display information of the clicked node on the panel
             if (event.target.classList.contains(['node-label'])) {
                 this.handleNodeLabelClick(event);
             }
 
+            // subscribed the user to the node displayed in the panel
             if (event.target.id === 'panel-subscribe-btn') {
                 this.handleSubscriptionClick(event);
             }
         }
     }
 
+    /**
+     * Renders the treeNode information in the panel.
+     * @param {Event} event the DOM event that triggered this function
+     * @returns nothing
+     */
     handleNodeLabelClick(event) {
         const liNode = event.target.closest('li');
         const liTreeNode = this.fileTree.root.getDescendant(liNode.dataset.path);
@@ -528,6 +751,10 @@ class DataBinder {
         button.style = 'visibility: visible;';
     }
 
+    /**
+     * Expands or collapses the folder next to the clicked switcher if it was collapsed or expanded, respectively.
+     * @param {Event} event DOM event that triggered this action
+     */
     handleSwitcherClick(event) {
         const liNode = event.target.closest('li');
         const liTreeNode = this.fileTree.root.getDescendant(liNode.dataset.path);
@@ -535,36 +762,43 @@ class DataBinder {
         const parentList = liNode.closest('ul');
         const switcher = event.target;
 
+        // collapsed is false when the folder is expanded.
         if (liNodeList.dataset.collapsed === 'false') {
-            Renderer.collapseSection(liNodeList);
-            Renderer.renderChildren(liNode, liTreeNode);
-        } else {
-            const expandedSiblingLiNodeList = parentList.querySelector('li > ul[data-collapsed="false"]');
-            if (expandedSiblingLiNodeList !== null) {
+            Renderer.collapseSection(liNodeList); // collapse the folder's children and remove them from the DOM
+            Renderer.renderChildren(liNode, liTreeNode); // Render the folder's children again without showing them
+        } else { // case when node was collapsed
+            const expandedSiblingLiNodeList = parentList.querySelector('li > ul[data-collapsed="false"]'); // Get expanded sibling folder, if any.
+            if (expandedSiblingLiNodeList !== null) { // There was an expande sibling folder.
                 const expandedSiblingLiNode = expandedSiblingLiNodeList.closest('li');
                 const expandedSiblingTreeNode = this.fileTree.root.getDescendant(expandedSiblingLiNode.dataset.path);
-                Renderer.collapseSection(expandedSiblingLiNodeList);
-                Renderer.renderChildren(expandedSiblingLiNode, expandedSiblingTreeNode);
+                Renderer.collapseSection(expandedSiblingLiNodeList); // collapse sibling's children
+                Renderer.renderChildren(expandedSiblingLiNode, expandedSiblingTreeNode); // render sibling's children without showing them
 
                 const switchers = expandedSiblingLiNode.querySelectorAll('span.switcher.expanded');
-                switchers.forEach(switcher => switcher.classList.remove('expanded'));
+                switchers.forEach(switcher => switcher.classList.remove('expanded')); // restore original position of switchers under sibling node
             }
 
+            // Expand folder of node next to the clicked switcher
             Renderer.expandSection(liNodeList);
-            for (let child of liTreeNode.children) {
+            for (let child of liTreeNode.children) { // render the children of every child within folder
                 let childNode = document.querySelector('[data-path="' + child.path + '"]');
                 Renderer.renderChildren(childNode, child);
             }
         }
 
-        switcher.classList.toggle('expanded');
+        switcher.classList.toggle('expanded'); // change the position of the clicked switcher
     }
 
+    /**
+     * Update subscriptions generated by the click event and send the resulting subscription list to the backend. Update the front end
+     * if the back end saved the list successfully, otherwise, show an error message on the front end.
+     * @param {Event} event DOM event that triggered this action
+     */
     handleSubscriptionClick(event) {
         const treeNode = this.fileTree.root.getDescendant(event.target.dataset.path);
 
         // save current subscriptions in case of save failure
-        const old_subscriptions = Array.from(this.fileTree.subscriptions); // make a copy of old subscriptions
+        const old_subscriptions = Array.from(this.fileTree.subscriptions); 
 
         // update watched state on relevant tree nodes
         treeNode.updateSubscriptions();
@@ -580,30 +814,31 @@ class DataBinder {
             }
         }
 
-        let subscriptions = JSON.stringify(Array.from(this.fileTree.subscriptions));
+        let subscriptions = JSON.stringify(Array.from(this.fileTree.subscriptions)); // stringify subscriptions list
+        // set loading message
         const status = document.getElementById("save-status");
         status.innerText = "Loading..."
-        event.target.disabled = true;
+        event.target.disabled = true; // disable action button
 
         $.ajax({
             url: '/dashboard/save_subscriptions/', 
             type: 'POST', 
             data: { subscriptions: subscriptions }, 
             success: (result) => {
-                if (result.success === "true") {
+                if (result.success === "true") { // update DOM elements on success
                     event.target.textContent = !treeNode.subscribed ? 'Notify on pull request' : 'Stop notifications';
                     status.innerText = "notifications updated";
 
                     Renderer.UpdateDOMSubtreeSubscriptions(treeNode);
                     Renderer.updateDOMParentSubscriptions(treeNode);
-                } else {
+                } else { // show error message on failure (due to server error)
                     this.fileTree.subscriptions = old_subscriptions; // restore subscriptions on failure
                     status.innerText = "There was an error saving your notifications";
                     console.error(result.message);
                 }
                 event.target.disabled = false;
             },
-            error: (error) => {
+            error: (error) => { //  show error message on failure (due to ajax error)
                 this.fileTree.subscriptions = old_subscriptions; // restore subscriptions on failure
 
                 status.innerText = "There was an error saving your notifications";
@@ -614,41 +849,73 @@ class DataBinder {
     }
 }
 
+/**
+ * Class to save relevant file tree state information.
+ */
 class FileTree {
+    /**
+     * Instantiates a file tree with the specified paths, a subscription list that is a subset of paths, and
+     * generates random metrics for the file tree.
+     * 
+     * @param {list} paths list of strings representing file paths
+     * @param {list} subscriptions list of paths representing file paths
+     */
     constructor(paths, subscriptions = []) {
         this.paths = paths;
         this.subscriptions = new Set(subscriptions);
         this.root = this.generateTreeWithMetrics(paths, this.subscriptions);
     }
 
-    // This method injects dummy metrics, should be deleted when incorporating real metrics
+    /**
+     * Inserts randomly generated metrics and sets the subscription status for the tree nodes based on the subscription list.
+     * @param {list} paths a list of file paths
+     * @param {list} subscriptions a list of file paths that is a subset of paths
+     * @returns the constructed file tree
+     */
     generateTreeWithMetrics(paths, subscriptions) {
+        // genates random integers between min and max, inclusive.
         function randInt(min, max) {
             return Math.floor(Math.random() * (max - min + 1)) + min;
         }
 
+        /**
+         * [{filepath: 'a/b/c', metrics: {
+                documentation: {
+                    total: 0,
+                    missing: 0,
+                    issues: 0
+                },
+                busFactor: 0,
+                linter: 0
+            }}]
+         */
+
+        // create tree root
         const tree = new TreeNode({ parent: null, path: ''});
     
+        // insert paths into tree
         for (let path of paths) {
-            let insertNode = tree.getDeepestMatchingNode(path);
-            const trailingPath = Path.trailingPath(path, insertNode.path);
-            let missing = randInt(0, 50);
-            let issues = randInt(0, 50);
-            if (path.endsWith('.F90')) {
-                let metrics = path.endsWith('.F90')? { documentation: { total: missing + issues, missing, issues }, busFactor: randInt(0, 100), linter: randInt(0, 100) }: null;
+            let insertNode = tree.getDeepestMatchingNode(path); // get the deepest common folder path in tree that matches path
+            const trailingPath = Path.trailingPath(path, insertNode.path); // get remainder path afterprevious line
+
+            let missing = randInt(0, 50); // missing documentation metrics
+            let issues = randInt(0, 50); // documentation issues metrics
+            if (path.endsWith('.F90')) { // insert metrics only if it is an .F90 file
+                let metrics = path.endsWith('.F90') ? { documentation: { total: missing + issues, missing, issues }, busFactor: randInt(0, 100), linter: randInt(0, 100) }: null;
                 insertNode.insert(trailingPath, metrics);
             } else {
-                insertNode.insert(trailingPath)
+                insertNode.insert(trailingPath);
             }
         }
 
+        // update subscriptions for each file
         for (let path of paths) {  
             if (subscriptions.has(path)) {
                 tree.getDescendant(path).updateSubscriptions();
-
             }
         }
 
+        // aggregate file metrics on folders
         tree.computeMetrics();
 
         return tree;
@@ -658,11 +925,13 @@ class FileTree {
 
 $(document).ready(function() {
 
+    // parse paths and subscriptions lists
     const paths = JSON.parse(document.getElementById('files').textContent);
     const subscriptions = JSON.parse(document.getElementById('subscriptions').textContent);
 
     const fileTree = new FileTree(paths, subscriptions);
-    
+    console.log(fileTree)
+
     let container = document.getElementById('file-tree-container');
     let dataBinder =  new DataBinder('file-tree', fileTree);
     container.addEventListener('click', dataBinder);
