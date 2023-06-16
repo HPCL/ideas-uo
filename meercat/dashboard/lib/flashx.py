@@ -49,6 +49,7 @@ If a private file is found without a stub in localAPI, it is considered private 
 
 #global for now - probably could move into check_file_documentation
 units = [
+    "MyUnit",
     "Driver",
     "Grid",
     "Multispecies",
@@ -580,7 +581,8 @@ def check_unit_dox(lines, path, file_name, unit):
 
   path_components = splitall(path)
 
-  problems = dict(bogus_fields=[],  #fields that appear but should not appear in the file
+  problems = dict(file_status = f"checkable dox",
+                  bogus_fields=[],  #fields that appear but should not appear in the file
                   no_required_fields = False,
                   missing_fields = [],  #missing fields that should appear
                   problem_fields = [])  #appropriate fields but with a problem in content
