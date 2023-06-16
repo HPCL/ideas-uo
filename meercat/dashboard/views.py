@@ -24,6 +24,7 @@ sys.path.insert(1, "../src")
 from gitutils.github_api import GitHubAPIClient
 
 from database.models import (
+    RecommenderFeedback,
     SupportSubmission,
     Project,
     ProjectRole,
@@ -85,6 +86,22 @@ def index(request):
     context = {"devProjects": devProjects, "PMProjects": PMProjects}
 
     return render(request, "dashboard/index.html", context)
+
+
+@login_required
+def recommender_feedback(request):
+    if request.method == "POST":
+        try:
+            feedback = RecommenderFeedback(
+                thumbs = request.POST.get("thumbs", ""),
+                message = request.POST.get("message", ""),
+                user = request.user
+            )
+            feedback.save()
+
+            return HttpResponse(json.dumps({"success": "true"}), content_type="application/json")
+        except Exception as e:
+            return HttpResponse(json.dumps({"success": "false", "message": str(e)}), content_type="application/json")
 
 
 @login_required
