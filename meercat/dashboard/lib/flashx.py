@@ -284,7 +284,7 @@ def check_file_documentation_aux(dir_struct, lines:list, path:str):
   the_unit = [unit for unit in units if unit in path_components]
   if len(the_unit)>1:
     #weird case - 2+ units on branch
-    results_dict['file_status'] = f'uncheckable: more_than_one_unit_on_path {path}'
+    results_dict['file_status'] = f'uncheckable: more than one unit on path {path}'
     return results_dict
 
   name, extension = os.path.splitext(path_components[-1])  #e.g., ('MoL_advance', '.F90') notice dot included
