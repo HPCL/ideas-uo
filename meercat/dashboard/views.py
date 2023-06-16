@@ -1700,7 +1700,7 @@ def githubBot(request):
 
     prnumber = str(payload["number"])
 
-    if str(payload["action"]) == "opened" or str(payload["action"]) == "edited":
+    if str(payload["action"]) == "opened": # or str(payload["action"]) == "edited":
 
         project = list(
             Project.objects.all()
@@ -1752,8 +1752,10 @@ def githubBot(request):
         )[0]
 
         # TODO: eventually only do this for new PRs (check payload for action type I think)
-        branch = str(payload["pull_request"]["head"]["label"])
-        if pull_request and "staged" not in branch:
+        #branch = str(payload["pull_request"]["head"]["label"])
+        targetbranch = str(payload["pull_request"]["base"]["label"])
+        #if pull_request and "staged" not in branch:
+        if pull_request and "main" not in targetbranch and "master" not in targetbranch:
 
             comment, all_contexts = first_responder_function(pull_request.project, pull_request)
             print("------------")

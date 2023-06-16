@@ -68,7 +68,7 @@ units = [
     "RadTrans",
 ]
 
-doc_extensions_to_check = ['.F90', '.dox']  #might add more types later, e.g., .md files
+doc_extensions_to_check = ['.F90', '.F90-mc', '.dox']  #might add more types later, e.g., .md files
 filenames_to_check = []
 
 #Auxilliary function used by check_file_documentation.
@@ -113,7 +113,7 @@ def is_file_documentation_checkable(lines:list, path:str) -> tuple:
 
   if extension=='.dox': return (True, '')  #currently no restrictions on dox files
   
-  if extension == '.F90':
+  if extension == '.F90' or extension == '.F90-mc':
     '''
     There are 4 types of F90 files that we will eventually want to check in Flash-X:
       1. Single subroutine per file
@@ -126,7 +126,12 @@ def is_file_documentation_checkable(lines:list, path:str) -> tuple:
     '''
     subs = [line for line in lines if line.startswith('subroutine ')]  #list subroutines in file
     mods = [line for line in lines if line.startswith('module ')]      #list modules in file
-    return (False, f'Only checking files with a single subroutine currently') if (len(subs) != 1 or len(mods) != 0) else (True, '')
+    '''return (False, f'Only checking files with a single subroutine currently') if (len(subs) != 1 or len(mods) != 0) else (True, '')
+    '''
+    if mods and not subs:
+      return (False, f'Not checking module-only files currently')
+    if len(subs)>1:
+      return (False, f'Only checking files with a single subroutine currently')
 
   #checks for other things eventually here, e.g., md, config or toml files.
 
@@ -283,7 +288,7 @@ def check_file_documentation_aux(dir_struct, lines:list, path:str):
     return results_dict
 
   name, extension = os.path.splitext(path_components[-1])  #e.g., ('MoL_advance', '.F90') notice dot included
-  if extension == '.F90':
+  if extension == '.F90' or extension == '.F90-mc':
       #need to figure out if stub or implementation or private
       the_file = os.path.basename(path)
       the_header = os.path.dirname(path)
@@ -347,7 +352,7 @@ def check_implementation_stub(lines, path, file_name, unit, public=True):
                     '@ingroup',
                     '@details',
                     '@anchor',
-                    #'@param',  #depends if parameters exist
+                    #'@param',  #depends if parameters exists
   ]
 
   bogus_fields = ['@defgroup', '@stubref']  #probably others
