@@ -4,6 +4,13 @@ from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 
 # Create your models here.
+class RecommenderFeedback(models.Model):
+    thumbs = models.BooleanField('Thumbs up', blank=False)
+    message = models.TextField('Feedback message', blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    datetime = models.DateTimeField(auto_now_add=True)
+
+
 class SupportSubmission(models.Model):
 
     class SupportTypeChoices(models.TextChoices):
