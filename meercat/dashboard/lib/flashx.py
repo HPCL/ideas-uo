@@ -49,7 +49,6 @@ If a private file is found without a stub in localAPI, it is considered private 
 
 #global for now - probably could move into check_file_documentation
 units = [
-    "MyUnit",
     "Driver",
     "Grid",
     "Multispecies",
@@ -67,9 +66,10 @@ units = [
     "IncompNS",
     "Multiphase",
     "RadTrans",
+    'Timers', 'Logfile', 'Debugger', 'Profiler',  #from source/monitors
 ]
 
-doc_extensions_to_check = ['.F90', '.F90-mc', '.dox']  #might add more types later, e.g., .md files
+doc_extensions_to_check = ['.F90', '.dox', '.F90-mc']  #might add more types later, e.g., .md files
 filenames_to_check = []
 
 #Auxilliary function used by check_file_documentation.
@@ -114,7 +114,7 @@ def is_file_documentation_checkable(lines:list, path:str) -> tuple:
 
   if extension=='.dox': return (True, '')  #currently no restrictions on dox files
   
-  if extension == '.F90' or extension == '.F90-mc':
+  if extension in ['.F90', '.F90-mc']:
     '''
     There are 4 types of F90 files that we will eventually want to check in Flash-X:
       1. Single subroutine per file
@@ -127,12 +127,11 @@ def is_file_documentation_checkable(lines:list, path:str) -> tuple:
     '''
     subs = [line for line in lines if line.startswith('subroutine ')]  #list subroutines in file
     mods = [line for line in lines if line.startswith('module ')]      #list modules in file
-    '''return (False, f'Only checking files with a single subroutine currently') if (len(subs) != 1 or len(mods) != 0) else (True, '')
-    '''
     if mods and not subs:
       return (False, f'Not checking module-only files currently')
     if len(subs)>1:
       return (False, f'Only checking files with a single subroutine currently')
+    return  (True, '')
 
   #checks for other things eventually here, e.g., md, config or toml files.
 
@@ -285,18 +284,19 @@ def check_file_documentation_aux(dir_struct, lines:list, path:str):
   the_unit = [unit for unit in units if unit in path_components]
   if len(the_unit)>1:
     #weird case - 2+ units on branch
+    print(path_components, the_unit)
     results_dict['file_status'] = f'uncheckable: more than one unit on path {path}'
     return results_dict
 
   name, extension = os.path.splitext(path_components[-1])  #e.g., ('MoL_advance', '.F90') notice dot included
-  if extension == '.F90' or extension == '.F90-mc':
+  if extension in ['.F90', '.F90-mc']:
       #need to figure out if stub or implementation or private
       the_file = os.path.basename(path)
       the_header = os.path.dirname(path)
       
       if not the_unit:
         #weird case - F90 file on path that does not include a unit name
-        results_dict['file_status'] = f'uncheckable: no unit on path {path}'
+        results_dict['file_status'] = f'uncheckable: for {path=}, no checkable unit found among {units}'
         return results_dict
 
       unit_name = the_unit[0]
@@ -353,7 +353,7 @@ def check_implementation_stub(lines, path, file_name, unit, public=True):
                     '@ingroup',
                     '@details',
                     '@anchor',
-                    #'@param',  #depends if parameters exists
+                    #'@param',  #depends if parameters exist
   ]
 
   bogus_fields = ['@defgroup', '@stubref']  #probably others
@@ -378,7 +378,7 @@ def check_implementation_stub(lines, path, file_name, unit, public=True):
       found_fields.append(('@param', line, i))  
 
   if not found_fields:
-    problems['file_status'] = f"uncheckable: no documentation found on {'public' if public else 'private'} stub"
+    problems['file_status'] = f"uncheckable: no Doxygen documentation found on {'public' if public else 'private'} stub"
     return problems
 
   missing_fields = (set(required_fields) - set([f for f,l,i in found_fields]))
@@ -480,7 +480,7 @@ def check_implementation(lines, path, file_name, unit, public=True):
       if field in line: found_fields.append((field, line, i))
 
   if not found_fields:
-    problems['file_status'] = f"uncheckable: {'public' if public else 'private'} stub implementation has no documentation"
+    problems['file_status'] = f"uncheckable: {'public' if public else 'private'} stub implementation has no Doxygen documentation"
     return problems
 
   missing_fields = (set(required_fields) - set([f for f,l,i in found_fields]))
@@ -506,6 +506,7 @@ def check_implementation(lines, path, file_name, unit, public=True):
 
     if field == '@stubref':
       name, extension = os.path.splitext(path_components[-1])
+      print(line, name)
       if not line.strip().endswith('{'+name+'}'):
         problems['problem_fields'] += [('@stubref should end with {'+name+'}', line, i)]
       continue
@@ -524,7 +525,7 @@ def check_private_file(dir_struct, lines, path, file_name, unit):
 
   #First check if we are in localApi folder.
   path_components = splitall(path)  #list of all pieces in path, e.g., ['source', 'numericalTools', 'MoL', 'MoL_advance.F90']
-  if path_components[-2] == 'localAPI':
+  if path_components[-2] == 'localApi':
     return check_implementation_stub(lines, path, file_name, unit, public=False)
 
   #No, not in localAPI. Is there a stub for the file in localApi folder?
@@ -539,17 +540,19 @@ def check_private_file(dir_struct, lines, path, file_name, unit):
       unit_path.append(item)
       break
     unit_path.append(item)
+  else: assert False, f'{unit=} should be on path but is not found'
 
   #check if localApi exists under unit
-  localAPI_path = '/'.join(unit_path) + '/localAPI'
+  localAPI_path = '/'.join(unit_path) + '/localApi'
   folder, path = find_folder_on_path(dir_struct, localAPI_path)
+
   if path != localAPI_path:
-    #No localApi folder so must be non_stubbed
+    print(f'No localApi folder so must be non_stubbed. {localAPI_path=}')
     return check_private_nonstubbed_implementation(lines, path, file_name, unit)
 
   #localAPI does exist. check if stub in localAPI
   if not contains_file(folder, file_name):
-    #localApi folder but no stub
+    print(f'localApi folder but no stub. {folder=}')
     return check_private_nonstubbed_implementation(lines, path, file_name, unit)
 
   #stub exists so must be implementation of stub
@@ -581,8 +584,7 @@ def check_unit_dox(lines, path, file_name, unit):
 
   path_components = splitall(path)
 
-  problems = dict(file_status = f"checkable dox",
-                  bogus_fields=[],  #fields that appear but should not appear in the file
+  problems = dict(bogus_fields=[],  #fields that appear but should not appear in the file
                   no_required_fields = False,
                   missing_fields = [],  #missing fields that should appear
                   problem_fields = [])  #appropriate fields but with a problem in content
