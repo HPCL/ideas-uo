@@ -261,7 +261,7 @@ function showDocEditor(docfilename, difftext) {
                 }
 */
                 var file_doc_results = docstring_results[filename];
-                if( filename.indexOf(".F90") >= 0 ){
+                if( filename.indexOf(".F90") >= 0 || filename.indexOf(".F90-mc") >= 0 || filename.indexOf(".dox") >= 0 ){
                     for(var i=0; i<file_doc_results['documentation_lib']['problem_fields'].length; i++){
                         // Problem line format: ['message', linenumber]
                         if (cursor.line == file_doc_results['documentation_lib']['problem_fields'][i][2] ) {
