@@ -24,7 +24,7 @@ sys.path.insert(1, "../src")
 from gitutils.github_api import GitHubAPIClient
 
 from database.models import (
-    RecommenderFeedback,
+    PRAFeedback,
     SupportSubmission,
     Project,
     ProjectRole,
@@ -92,10 +92,13 @@ def index(request):
 def recommender_feedback(request):
     if request.method == "POST":
         try:
-            feedback = RecommenderFeedback(
-                thumbs = request.POST.get("thumbs", ""),
+            feedback = PRAFeedback(
+                thumbs = request.POST.get("thumbs", False),
                 message = request.POST.get("message", ""),
-                user = request.user
+                user = request.user,
+                filepath = request.POST.get("filepath"),
+                type = request.POST.get("type"),
+                pullrequest = PullRequest.objects.get(id=request.POST.get("prid"))
             )
             feedback.save()
 
