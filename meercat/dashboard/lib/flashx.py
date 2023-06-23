@@ -49,6 +49,7 @@ If a private file is found without a stub in localAPI, it is considered private 
 
 #global for now - probably could move into check_file_documentation
 units = [
+    "MyUnit",
     "Driver",
     "Grid",
     "Multispecies",
@@ -129,8 +130,6 @@ def is_file_documentation_checkable(lines:list, path:str) -> tuple:
     mods = [line for line in lines if line.startswith('module ')]      #list modules in file
     if mods and not subs:
       return (False, f'Not checking module-only files currently')
-    if len(subs)>1:
-      return (False, f'Only checking files with a single subroutine currently')
     return  (True, '')
 
   #checks for other things eventually here, e.g., md, config or toml files.
@@ -346,14 +345,15 @@ An F90 stub can be for either a public function or a private function. The field
 """
 
 def check_implementation_stub(lines, path, file_name, unit, public=True):
-  required_fields = ['@copyright',
-                    '@licenseblock',
-                    '@file',
-                    '@brief',
-                    '@ingroup',
-                    '@details',
-                    '@anchor',
-                    #'@param',  #depends if parameters exist
+  required_file_fields = ['@copyright',  #per file
+                    '@licenseblock',  #per file
+                    '@file',  #per file
+                    ]
+  required_subroutine_fields = ['@brief',  #per subroutine
+                    '@ingroup',  #per subroutine
+                    '@details',  #per subroutine
+                    '@anchor',  #per subroutine
+                    #'@param',  #per subroutine - depends if parameters exist
   ]
 
   bogus_fields = ['@defgroup', '@stubref']  #probably others
@@ -362,7 +362,9 @@ def check_implementation_stub(lines, path, file_name, unit, public=True):
 
   problems = dict(file_status = f"checkable {'public' if public else 'private'} stub",
                   bogus_fields=[],  #fields that appear but should not appear in the file
-                  missing_fields = [],  #missing fields that should appear
+                  missing_file_fields = [],  #missing fields that should appear at top of file
+                  missing_subroutine_fields = [],  #pair: subroutine line, missing fields that should appear with subroutine
+                  unrecognized_fields = [],  #unaccounted for fields
                   problem_fields = [])  #appropriate fields but with a problem in content
   
   #check for bogus fields
@@ -372,22 +374,68 @@ def check_implementation_stub(lines, path, file_name, unit, public=True):
 
   found_fields = []
   for i,line in enumerate(lines):
-    for field in required_fields:
+    for field in required_file_fields+required_subroutine_fields:
       if field in line: found_fields.append((field, line, i))
-    if '@param' in line:  #Check for param separately, else it will be counted missing.
-      found_fields.append(('@param', line, i))  
 
   if not found_fields:
     problems['file_status'] = f"uncheckable: no Doxygen documentation found on {'public' if public else 'private'} stub"
     return problems
 
-  missing_fields = (set(required_fields) - set([f for f,l,i in found_fields]))
+  unrecognized_fields = set([f for f,l,i in found_fields]) - set(required_file_fields+required_subroutine_fields+['@param'])
+  if unrecognized_fields:
+    problems['unrecognized_fields'] = list(unrecognized_fields)
 
+  missing_file_fields = (set(required_file_fields) - set([f for f,l,i in found_fields]))
+
+  if missing_file_fields:
+    problems['missing_file_fields'] = list(missing_file_fields)
+
+  #now have to deal with possibly multiple subroutines
+
+  print('DEBUGGING FLASH X DOC CHECKER ----------------------------+')
+  print(file_name)
+
+  start = 0
+  i = 0
+  while i<len(lines):
+    line = lines[i]
+    if line.startswith('subroutine '):
+      print('START '+str(start))
+      end = check_sub_stub(lines, start, i, required_subroutine_fields, problems, public, unit)  #will mutate problems so no need to return it
+      start = end+1  #move past subroutine
+      i = start
+      continue
+    i += 1  #not found so keep moving
+
+  return problems
+
+#Search for fields between lines dlineated by lstart (line above subroutine where fields should start to be found)
+#and lsub (line where the subroutine is found). #Mutate problems directly so don't have to return it as value. Return where the end of the
+#subroutine is found.
+def check_sub_stub(lines, lstart, lsub, required_subroutine_fields, problems, public, unit):
+
+  sub_name = lines[lsub][11:]
+  k = sub_name.find('(')
+  sub_name = sub_name[:k]
+
+  found_fields = []
+  for i in range(lstart, lsub):
+    line = lines[i]
+    for field in required_subroutine_fields:
+      if field in line:
+        found_fields.append((field, line, i))
+        break  #found it so can move on to next line
+    #did not find one but maybe it is @param - check
+    if '@param' in line:  #Check for param separately
+      found_fields.append(('@param', line, i))  
+
+  #now have what fields were found preceding the subroutine
+
+  missing_fields = (set(required_subroutine_fields) - set([f for f,l,i in found_fields]))
   if missing_fields:
-    problems['missing_fields'] = list(missing_fields)
+    problems['missing_subroutine_fields'] += [lsub, list(missing_fields)]
 
-  params_found = []
-
+  params_found = []  #keep these in separate list so can later check against actuals
   for field, line, i in found_fields:
     if field == '@brief':
       if '<insert ' in line.lower():
@@ -410,8 +458,8 @@ def check_implementation_stub(lines, path, file_name, unit, public=True):
       continue
 
     if field == '@anchor':
-      if not line.strip().endswith(file_name+'_stub'):
-        problems['problem_fields'] += [(f'Expecting @anchor {file_name}_stub', line, i)]
+      if not line.strip().endswith(sub_name+'_stub'):
+        problems['problem_fields'] += [(f'Expecting @anchor {sub_name}_stub', line, i)]
       continue
 
     if field == '@param':
@@ -420,24 +468,19 @@ def check_implementation_stub(lines, path, file_name, unit, public=True):
       if '<insert ' in line.lower():
         problems['problem_fields'] += [('@param has place holder', line, i)]
       continue
+  #end for
 
   #Now check if @params missing altogether. First find actual params.
 
-  i = 0
-  while not lines[i].startswith("subroutine "):
-      i += 1
-      if i >= len(lines):
-        problems['file_status'] = f"uncheckable: {'public' if public else 'private'} stub has no subroutine in file: {path}"
-        return problems
-  j = i
+  i = lsub  #line with subroutine
   while lines[i].find(")") == -1:
       i += 1
       if i >= len(lines):
-        problems['problem_fields'] += [('No closing found for subroutine.', line, i)]
+        problems['problem_fields'] += [('No closing found for subroutine.', lines[i-1], i-1)]
         return problems
 
-  #Now get params
-  raw_sig = " ".join(lines[j : i + 1]).strip("\n").replace("&", " ")[10:]
+  #Found closing ) - Now get params
+  raw_sig = " ".join(lines[lsub : i + 1]).strip("\n").replace("&", " ")[10:]
   sig_params = raw_sig[raw_sig.find("(") + 1 : raw_sig.find(")")].strip().split(",")
   sig_params = [sp.strip() for sp in sig_params]
 
@@ -446,47 +489,101 @@ def check_implementation_stub(lines, path, file_name, unit, public=True):
     if param in params_found: 
       continue
     else:
-      problems['missing_fields'].append(f'@param {param}')
+      problems['missing_subroutine_fields'].append(f'@param {param} for subroutine at line {lsub}')
 
-  return problems
+  i = lsub+1
+  while i< len(lines):
+    if lines[i].startswith('end subroutine'):
+      return i
+    i += 1
+
+  assert False, f'Never found end of subroutine starting at line {lsub}'
 
 def check_implementation(lines, path, file_name, unit, public=True):
-  required_fields = ['@copyright',
-                    '@licenseblock',
-                    '@file',
-                    '@brief',
-                    '@ingroup',
-                    '@details',
-                    '@stubref',
+
+  required_file_fields = ['@copyright',  #per file
+                    '@licenseblock',  #per file
+                    '@file',  #per file
+                    ]
+  required_subroutine_fields = ['@brief',  #per subroutine
+                    '@ingroup',  #per subroutine
+                    '@stubref',  #per subroutine
+                    #'@param',  #per subroutine - depends if parameters exist
   ]
 
-  bogus_fields = ['@defgroup', '@anchor']
+  bogus_fields = ['@details', '@anchor', '@param']  #probably others
+  
+  path_components = splitall(path)
 
   problems = dict(file_status = f"checkable {'public' if public else 'private'} stub implementation",
                   bogus_fields=[],  #fields that appear but should not appear in the file
-                missing_fields = [],  #missing fields that should appear
-                problem_fields = [])  #appropriate fields but with a problem in content
-
-  path_components = splitall(path)
-
+                  missing_file_fields = [],  #missing fields that should appear at top of file
+                  missing_subroutine_fields = [],  #pair: subroutine line, missing fields that should appear with subroutine
+                  unrecognized_fields = [],  #unaccounted for fields
+                  problem_fields = [])  #appropriate fields but with a problem in content
+  
   #check for bogus fields
   for i,line in enumerate(lines):
     for field in bogus_fields:
-      if field in line: problems['bogus_fields'] += [(f'{field} should not appear in stub implementation', line, i)]
+      if field in line: problems['bogus_fields'] += [(f'{field} should not appear in implementation file', line, i)]
 
   found_fields = []
   for i,line in enumerate(lines):
-    for field in required_fields:
+    for field in required_file_fields+required_subroutine_fields:
       if field in line: found_fields.append((field, line, i))
 
   if not found_fields:
-    problems['file_status'] = f"uncheckable: {'public' if public else 'private'} stub implementation has no Doxygen documentation"
+    problems['file_status'] = f"uncheckable: no Doxygen documentation found on {'public' if public else 'private'} implementation"
     return problems
 
-  missing_fields = (set(required_fields) - set([f for f,l,i in found_fields]))
+  unrecognized_fields = set([f for f,l,i in found_fields]) - set(required_file_fields+required_subroutine_fields)
+  if unrecognized_fields:
+    problems['unrecognized_fields'] = list(unrecognized_fields)
 
+  missing_file_fields = (set(required_file_fields) - set([f for f,l,i in found_fields]))
+
+  if missing_file_fields:
+    problems['missing_file_fields'] = list(missing_file_fields)
+
+  #now have to deal with possibly multiple subroutines
+
+  start = 0
+  while i<len(lines):
+    line = lines[i]
+    if line.startswith('subroutine '):
+      end = check_sub_imp(lines, start, i, required_subroutine_fields, path_components, problems, public=True)  #will mutate problems so no need to return it
+      start = end+1  #move past subroutine
+      i = start
+      continue
+    i += 1  #not found so keep moving
+
+  return problems
+
+
+#Search for fields between lines dlineated by lstart (line above subroutine where fields should start to be found)
+#and lsub (line where the subroutine is found). Mutate problems directly so don't have to return it as value. Return where the end of the
+#subroutine is found.
+def check_sub_imp(lines, lstart, lsub, required_subroutine_fields, path_components, problems, public=True):
+
+  #Note the the public param seems to have no bearing. Private implementation looks the same as public implementation.
+
+  sub_name = lines[lsub][11:]
+  k = sub_name.find('(')
+  sub_name = sub_name[:k]
+
+  found_fields = []
+  for i in range(lstart, lsub):
+    line = lines[i]
+    for field in required_subroutine_fields:
+      if field in line:
+        found_fields.append((field, line, i))
+        break  #found it so can move on to next line 
+
+  #now have what fields were found preceding the subroutine
+
+  missing_fields = set(required_subroutine_fields) - set(found_fields)
   if missing_fields:
-    problems['missing_fields'] = list(missing_fields)
+    problems['missing_subroutine_fields'] += [lsbub, list(missing_fields)]
 
   for field, line, i in found_fields:
     if field == '@brief':
@@ -499,19 +596,18 @@ def check_implementation(lines, path, file_name, unit, public=True):
         problems['problem_fields'] += [(f'@ingroup should name containing folder {path_components[-2]}', line, i)]
       continue
 
-    if field == '@details':
-      if '<insert ' in line.lower():
-        problems['problem_fields'] += [('@details has place holder', line, i)]
-      continue
-
     if field == '@stubref':
-      name, extension = os.path.splitext(path_components[-1])
-      print(line, name)
-      if not line.strip().endswith('{'+name+'}'):
-        problems['problem_fields'] += [('@stubref should end with {'+name+'}', line, i)]
+      if not line.strip().endswith('{'+sub_name+'}'):
+        problems['problem_fields'] += [('Expecting @stubref{'+sub_name+'}', line, i)]
       continue
+  #end for
 
-  return problems
+  i = lsub+1
+  while i< len(lines):
+    if line[i].startswith('end subroutine'):
+      return i
+
+  assert False, f'Never found end of subroutine starting at line {lsub}'
 
 def check_private_file(dir_struct, lines, path, file_name, unit):
   '''
@@ -559,7 +655,7 @@ def check_private_file(dir_struct, lines, path, file_name, unit):
   return check_implementation(lines, path, file_name, unit, public=False)  #same as normal stubbed implementation
 
 def check_private_nonstubbed_implementation(lines, path, file_name, unit):
-  return {'file_status': f'uncheckable: not checking non-stubbed private files. Either no localAPI folder or {file_name} not found in that folder'}
+  return {'file_status': f'uncheckable: not checking non-stubbed private files. Either no localApi folder or {file_name} not found in that folder'}
 
 
 """# Check dox file
