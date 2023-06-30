@@ -401,7 +401,7 @@ def check_implementation_stub(lines, path, file_name, unit, public=True):
     line = lines[i]
     if line.startswith('subroutine '):
       print('START '+str(start))
-      end = check_sub_stub(lines, start, i, required_subroutine_fields, problems, public, unit)  #will mutate problems so no need to return it
+      end = check_sub_stub(lines, start, i, required_subroutine_fields, problems, public, unit, path_components)  #will mutate problems so no need to return it
       start = end+1  #move past subroutine
       i = start
       continue
@@ -412,7 +412,7 @@ def check_implementation_stub(lines, path, file_name, unit, public=True):
 #Search for fields between lines dlineated by lstart (line above subroutine where fields should start to be found)
 #and lsub (line where the subroutine is found). #Mutate problems directly so don't have to return it as value. Return where the end of the
 #subroutine is found.
-def check_sub_stub(lines, lstart, lsub, required_subroutine_fields, problems, public, unit):
+def check_sub_stub(lines, lstart, lsub, required_subroutine_fields, problems, public, unit, path_components):
 
   sub_name = lines[lsub][11:]
   k = sub_name.find('(')
@@ -433,7 +433,7 @@ def check_sub_stub(lines, lstart, lsub, required_subroutine_fields, problems, pu
 
   missing_fields = (set(required_subroutine_fields) - set([f for f,l,i in found_fields]))
   if missing_fields:
-    problems['missing_subroutine_fields'] += [lsub, list(missing_fields)]
+    problems['missing_subroutine_fields'].append([lsub, list(missing_fields)])
 
   params_found = []  #keep these in separate list so can later check against actuals
   for field, line, i in found_fields:
@@ -489,7 +489,7 @@ def check_sub_stub(lines, lstart, lsub, required_subroutine_fields, problems, pu
     if param in params_found: 
       continue
     else:
-      problems['missing_subroutine_fields'].append(f'@param {param} for subroutine at line {lsub}')
+      problems['missing_subroutine_fields'].append([lsub, f'@param {param} for subroutine'])
 
   i = lsub+1
   while i< len(lines):
@@ -583,7 +583,7 @@ def check_sub_imp(lines, lstart, lsub, required_subroutine_fields, path_componen
 
   missing_fields = set(required_subroutine_fields) - set(found_fields)
   if missing_fields:
-    problems['missing_subroutine_fields'] += [lsbub, list(missing_fields)]
+    problems['missing_subroutine_fields'].append([lsbub, list(missing_fields)])
 
   for field, line, i in found_fields:
     if field == '@brief':
@@ -680,7 +680,10 @@ def check_unit_dox(lines, path, file_name, unit):
 
   path_components = splitall(path)
 
-  problems = dict(bogus_fields=[],  #fields that appear but should not appear in the file
+  problems = dict(file_status = f"checkable dox",
+                  bogus_fields=[],  #fields that appear but should not appear in the file
+                  missing_file_fields = [],
+                  missing_subroutine_fields = [],
                   no_required_fields = False,
                   missing_fields = [],  #missing fields that should appear
                   problem_fields = [])  #appropriate fields but with a problem in content

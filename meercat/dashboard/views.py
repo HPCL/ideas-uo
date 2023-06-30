@@ -381,10 +381,14 @@ def file_explorer_handler(proj_object, filename, branch ):
         context['complete_ignore'] = True
         return context
 
-    with open(
-        str(settings.REPOS_DIR) + "/" + proj_object.name + "/" + filename, "r") as f:
-        lines = f.readlines()
-        f.close()
+    try:
+        with open(
+            str(settings.REPOS_DIR) + "/" + proj_object.name + "/" + filename, "r") as f:
+            lines = f.readlines()
+            f.close()
+    except:
+        lines = []        
+
 
     #dict(ignore_status, check_status doc_status, problem_lines [(msg, line), (msg, line)] )
 
