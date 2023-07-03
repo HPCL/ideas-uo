@@ -316,12 +316,23 @@ def first_responder_function(proj_object, pull_object):
 
     #Find the files with documentation problems, i.e., that have the field 'problem_lines'
     doc_problems = []
+    missing_doxygen = False
     for filename,context in all_contexts.items():
-        documentation_status = context['documentation']  #a dictionary - see above
-        if 'problem_lines' in documentation_status:
-            doc_problems.append([filename, documentation_status['problem_lines']]) 
+        # documentation_status = context['documentation']  #a dictionary - see above
+        # if 'problem_lines' in documentation_status:
+        #     doc_problems.append([filename, documentation_status['problem_lines']]) 
+        documentation_status = context['documentation_lib']  #a dictionary - see above
+        if len(documentation_status['problem_fields']) > 0 or len(documentation_status['missing_fields']) > 0 or ('missing_file_fields' in documentation_status and len(documentation_status['missing_file_fields']) > 0) or  ('missing_subroutine_fields' in documentation_status and len(documentation_status['missing_subroutine_fields']) > 0):
+            doc_problems.append([filename, 'true']) 
+
+        if 'no Doxygen' in documentation_status['file_status']:
+            missing_doxygen = True
 
     total_doc_problems = len(doc_problems)
+
+    extra_text = ''
+    if missing_doxygen:
+        extra_text = '## 1 or more files are missing Doxygen.'
 
     
     # Use metrics to compute average (and get live results for just the files in PR branch)
@@ -346,9 +357,12 @@ def first_responder_function(proj_object, pull_object):
             linter_problems += 1
     print("TOTAL PROBLEMS OVER AVERAGE: "+ str(linter_problems))
 
+
     message = f"""## The MeerCat Pull-Request Assistant has information for you
 
 ## {total_doc_problems} file(s) in this PR have documentation issues.
+
+{extra_text}
 
 ## {linter_problems} files have more linting errors than average ({average}).
 
@@ -1721,7 +1735,8 @@ def githubBot(request):
 
     prnumber = str(payload["number"])
 
-    if str(payload["action"]) == "opened": # or str(payload["action"]) == "edited":
+    # Only do this for new PRs (run on edited for testing)
+    if str(payload["action"]) == "opened" or str(payload["action"]) == "edited":
 
         project = list(
             Project.objects.all()
@@ -1729,54 +1744,55 @@ def githubBot(request):
             .all()
         )[0]
 
-        # Only post comments for anl_test_repo and FLASH5
-        if project.id == 30 or project.id == 26:
-            try:
-                # BASE_DIR = Path(__file__).resolve().parent.parent
-                with open(settings.BASE_DIR / 'meercat.config.json') as meercat_config:
-                    config = json.load(meercat_config)
-
-                repo_name = project.name
-                repo_owner = get_repo_owner(project)
-                url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues/{prnumber}/comments"
-                gh_payload = {
-                    "body": "## MeerCat is working on this PR.  Please stay tuned."
-                }
-
-                branch = str(payload["pull_request"]["head"]["label"])
-                if "staged" in branch:
-                    gh_payload = {
-                        "body": "## MeerCat will ignore this PR because it is coming from the staged branch."
-                    }
-
-                headers = {
-                    "Accept": "application/vnd.github+json",
-                    "Authorization": "token " + config['MEERCAT_USER_TOKEN'],
-                }
-                result = requests.post(url, headers=headers, data=json.dumps(gh_payload))
-            except Exception as e:
-                print(e)
-                pass        
-
-        # Need to refresh the database before
-        username = settings.DATABASES["default"]["USER"]
-        password = settings.DATABASES["default"]["PASSWORD"]
-        # cmd = f'cd .. ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {project.id}'
-        cmd = f"cd {settings.REPOS_DIR} ; . meercat/meercat-env/bin/activate ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {project.id}"
-        # os.system(cmd)
-        result = subprocess.check_output(cmd, shell=True)
-
-        pull_request = list(
-            PullRequest.objects.all()
-            .filter(project=project.id, number=int(prnumber))
-            .all()
-        )[0]
-
-        # TODO: eventually only do this for new PRs (check payload for action type I think)
+        # Ignore if merging into main or master
         #branch = str(payload["pull_request"]["head"]["label"])
         targetbranch = str(payload["pull_request"]["base"]["label"])
-        #if pull_request and "staged" not in branch:
-        if pull_request and "main" not in targetbranch and "master" not in targetbranch:
+        if  project.id == 30 or (pull_request and "main" not in targetbranch and "master" not in targetbranch):
+
+            # Only post comments for anl_test_repo and FLASH5
+            if project.id == 30 or project.id == 26:
+                try:
+                    # BASE_DIR = Path(__file__).resolve().parent.parent
+                    with open(settings.BASE_DIR / 'meercat.config.json') as meercat_config:
+                        config = json.load(meercat_config)
+
+                    repo_name = project.name
+                    repo_owner = get_repo_owner(project)
+                    url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues/{prnumber}/comments"
+                    gh_payload = {
+                        "body": "## MeerCat is working on this PR.  Please stay tuned."
+                    }
+
+                    branch = str(payload["pull_request"]["head"]["label"])
+                    if "staged" in branch:
+                        gh_payload = {
+                            "body": "## MeerCat will ignore this PR because it is coming from the staged branch."
+                        }
+
+                    headers = {
+                        "Accept": "application/vnd.github+json",
+                        "Authorization": "token " + config['MEERCAT_USER_TOKEN'],
+                    }
+                    result = requests.post(url, headers=headers, data=json.dumps(gh_payload))
+                except Exception as e:
+                    print(e)
+                    pass        
+
+            # Need to refresh the database before
+            username = settings.DATABASES["default"]["USER"]
+            password = settings.DATABASES["default"]["PASSWORD"]
+            # cmd = f'cd .. ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {project.id}'
+            cmd = f"cd {settings.REPOS_DIR} ; . meercat/meercat-env/bin/activate ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {project.id}"
+            # os.system(cmd)
+            result = subprocess.check_output(cmd, shell=True)
+
+            pull_request = list(
+                PullRequest.objects.all()
+                .filter(project=project.id, number=int(prnumber))
+                .all()
+            )[0]
+
+
 
             comment, all_contexts = first_responder_function(pull_request.project, pull_request)
             print("------------")
