@@ -54,7 +54,7 @@ rsa==4.9
 scipy==1.8.1
 seaborn==0.11.2
 six==1.16.0
-sqlparse==0.4.2
+sqlparse==0.4.4
 tenacity==8.0.1
 textdistance==4.2.2
 tomli==2.0.1
