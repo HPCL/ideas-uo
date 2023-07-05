@@ -54,6 +54,7 @@ from dashboard.utilities import (
 )
 from dashboard.author_merger_tool import AuthorMergerTool
 from dashboard.lib import flashx
+from dashboard.lib import default
 
 import subprocess
 import os, warnings
@@ -316,7 +317,7 @@ def first_responder_function(proj_object, pull_object):
 
     #Find the files with documentation problems, i.e., that have the field 'problem_lines'
     doc_problems = []
-    missing_doxygen = False
+    no_library = False
     for filename,context in all_contexts.items():
         # documentation_status = context['documentation']  #a dictionary - see above
         # if 'problem_lines' in documentation_status:
@@ -324,17 +325,13 @@ def first_responder_function(proj_object, pull_object):
         documentation_status = context['documentation_lib']  #a dictionary - see above
         if len(documentation_status['problem_fields']) > 0 or len(documentation_status['missing_fields']) > 0 or ('missing_file_fields' in documentation_status and len(documentation_status['missing_file_fields']) > 0) or  ('missing_subroutine_fields' in documentation_status and len(documentation_status['missing_subroutine_fields']) > 0):
             doc_problems.append([filename, 'true']) 
-
-        if 'no Doxygen' in documentation_status['file_status']:
-            missing_doxygen = True
+        elif 'no Doxygen' in documentation_status['file_status']:
+            doc_problems.append([filename, 'true']) 
+        elif 'No documentation checker library available' in documentation_status['file_status']:
+            no_library = True
 
     total_doc_problems = len(doc_problems)
 
-    extra_text = ''
-    if missing_doxygen:
-        extra_text = '## 1 or more files are missing Doxygen.'
-
-    
     # Use metrics to compute average (and get live results for just the files in PR branch)
     linter_metrics = list(FileMetric.objects.all().filter(metric_type=FileMetric.MetricTypeChoices.LINTING, project=proj_object, branch='main'))
     numerator = 0
@@ -361,8 +358,6 @@ def first_responder_function(proj_object, pull_object):
     message = f"""## The MeerCat Pull-Request Assistant has information for you
 
 ## {total_doc_problems} file(s) in this PR have documentation issues.
-
-{extra_text}
 
 ## {linter_problems} files have more linting errors than average ({average}).
 
@@ -404,12 +399,15 @@ def file_explorer_handler(proj_object, filename, branch ):
         lines = []        
 
 
-    #dict(ignore_status, check_status doc_status, problem_lines [(msg, line), (msg, line)] )
-
     # THIS IS WHERE WE CALL THE FLASHX LIBRARY TODO: NEED TO ONLY CALL IT IF FLASHX OR ANL_TEST_REPO THOUGH
-    flashx.set_directory_structure(repo_structure(str(settings.REPOS_DIR) + "/" + proj_object.name))
-    documentation_status_lib = flashx.check_file_documentation(lines, filename)
-    # This is the old checker.  Keep it for non-flashx projects
+    if proj_object.id == 35 or proj_object.id == 30 or proj_object.id == 26:
+        flashx.set_directory_structure(repo_structure(str(settings.REPOS_DIR) + "/" + proj_object.name))
+        documentation_status_lib = flashx.check_file_documentation(lines, filename)
+    else:    
+        default.set_directory_structure(repo_structure(str(settings.REPOS_DIR) + "/" + proj_object.name))
+        documentation_status_lib = default.check_file_documentation(lines, filename)
+
+    #TODO: Remove this! This is the old checker.  Keep it for non-flashx projects for now.
     documentation_status = check_documentation(proj_object, filename, lines)
 
     dev_table = create_dev_table(proj_object, filename)
@@ -1736,7 +1734,7 @@ def githubBot(request):
     prnumber = str(payload["number"])
 
     # Only do this for new PRs (run on edited for testing)
-    if str(payload["action"]) == "opened" or str(payload["action"]) == "edited":
+    if str(payload["action"]) == "opened": #or str(payload["action"]) == "edited":
 
         project = list(
             Project.objects.all()
@@ -1750,7 +1748,7 @@ def githubBot(request):
         if  project.id == 30 or (pull_request and "main" not in targetbranch and "master" not in targetbranch):
 
             # Only post comments for anl_test_repo and FLASH5
-            if project.id == 30 or project.id == 26:
+            if project.id == 35 or project.id == 30 or project.id == 26:
                 try:
                     # BASE_DIR = Path(__file__).resolve().parent.parent
                     with open(settings.BASE_DIR / 'meercat.config.json') as meercat_config:
@@ -1798,7 +1796,7 @@ def githubBot(request):
             print("------------")
             if comment:
                 # Only post comments for anl_test_repo and FLASH5
-                if project.id == 30 or project.id == 26:
+                if project.id == 35 or project.id == 30 or project.id == 26:
                     comment_pullrequest(pull_request, comment)
                     print("commented")
                 else:
