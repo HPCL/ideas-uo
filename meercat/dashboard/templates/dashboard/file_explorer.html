@@ -4,32 +4,12 @@
 {% csrf_token %}
 <h2>File Explorer</h2><br/>
 
+
 <b><i>File name:</i></b> {{file}} - <a href="{{project.source_url|slice:"0:-4"}}/blob/{{branch}}/{{file}}" target="_blank">Go to file on GitHub</a><br/>
 
-<div style="margin-left:15px; margin-top:15px;">
+<br/>
 
-    <h3>Functions/Subroutines defined in file:</h3>
-
-
-    {% if not supports_callgraph %}
-        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-          The Call Graph feature is not supported for this project.
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-          </button>
-        </div>
-    {% endif %}
-
-    {% if not supports_test_hunt %}
-        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-          The Test Hunt feature is not supported for this project.
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-          </button>
-        </div>
-    {% endif %}
-
-    <div style="text-align:right; margin-bottom:10px;">
-        <button class='btn btn-sm btn-primary' onclick='showDocEditor("{{file}}","NA");'>View File in Editor</button>
-    </div>
+<div style="margin-left:15px; margin-top:0px;">
 
     <div id="docModal" class="modal" tabindex="-1">
         <div class="modal-dialog modal-xl">
@@ -107,219 +87,214 @@
         </div>
     </div>
 
-    <table class="table" style="border:1px solid black;margin-left:auto;margin-right:auto;">
-      <thead style="text-align:center">
-        <tr>
-            <th>Signature</th>
-            <th>Doc String</th>
-            <th>Doc String Comments</th>
-            <th>Call Graph</th>
-            <th>Test Info</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% if functions.1 != 'checked' %}
-            <tr><td colspan='5' style="text-align:center">File {{functions.1}}. No analysis done.</td></tr>
-        {% elif not functions_supported %}
-            <tr><td colspan='5' style="text-align:center">No functions/subroutines found in file</td></tr>
-        {% else %}
-        {% for func in functions.0 %}
-            <div id="myModal{{forloop.counter}}" class="modal" tabindex="-1">
-                <div class="modal-dialog modal-xl">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Docstring</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                        
-                            <div class="" style="border:1px solid #ccc; margin-bottom:5px;">
-                                    <pre>{{func.docstring}}</pre>
+    {% if  complete_ignore %}  <!-- level 1 if -->
+        <h4>This file (name or extension) is explicitly listed as to be ignored in terms of all analysis.</h4>
+    {% else %}
+        <h3>Documentation:</h3>
+        <div style="margin-left:20px; display:none;">
+            {% if  documentation.ignore_status %}  <!-- level 2 if -->
+                <h4>This file (name or extension) is explicitly listed as to be ignored in terms of documentation checks.</h4>
+            {% elif  not documentation.check_status %}
+                <h4>This file has no documentation checker currently.</h4>
+            {% elif  documentation.doc_status %}
+                <h4>This file has correct type of documentation although formatting not checked.</h4>
+            {% else %}
+                <div style="float:right;">
+                    <button class='btn btn-sm btn-primary' onclick='showDocEditor("{{file}}","NA");'>View File in Editor</button>
+                </div>
+                <h4>This file has missing documentation:</h4>
+                <ul>
+                    {% for line in documentation.problem_lines %}
+                        <li>{{line}}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}  <!-- level 2 if -->
+        </div>
+
+        <div style="margin-left:20px; margin-bottom:20px;">
+            <h4>{{documentation_lib.file_status}}</h4>
+
+            {% if documentation_lib.missing_fields %}  
+                <b>This file has missing fields:</b>
+                <ul>
+                    {% for line in documentation_lib.missing_fields %}
+                        <li>{{line}}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            {% if documentation_lib.problem_fields %}  
+                <b>This file has problem fields:</b>
+                <ul>
+                    {% for line in documentation_lib.problem_fields %}
+                        <li>{{line}}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            {% if documentation_lib.bogus_fields %}  
+                <b>This file has bogus fields:</b>
+                <ul>
+                    {% for line in documentation_lib.bogus_fields %}
+                        <li>{{line}}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+
+
+        <h3>Functions/Subroutines defined in file:</h3>
+        <table class="table" style="border:1px solid black;margin-left:auto;margin-right:auto;">
+          <thead style="text-align:center">
+            <tr>
+                <th>Signature</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if number_of_functions < 1 %}  <!-- level 2 if -->
+                <tr><td colspan='5' style="text-align:center">No functions/subroutines found in file.</td></tr>
+            {% else %}
+            {% for func in function_table %}
+
+                <!-- 
+                <div id="myModal{{forloop.counter}}" class="modal" tabindex="-1">
+                    <div class="modal-dialog modal-xl">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Docstring</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                            
+                                <div class="" style="border:1px solid #ccc; margin-bottom:5px;">
+                                        <pre>{{func.docstring}}</pre>
+
+                                </div>
 
                             </div>
+                            <div class="modal-footer">
 
-                        </div>
-                        <div class="modal-footer">
-
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <tr>
-                <td><b>{{func.full_signature}}</b></td>
-                <td style="text-align:center">
-                    {% if func.docstring %}
-                        <a href="#" onclick="$('#myModal{{forloop.counter}}').modal('show');">Yes</a>
-                    {% endif %}
-                </td>
+            -->
+                <tr>
+                    <td><b>{{func}}</b></td>
+                {% endfor %}
+              {% endif %}  <!-- level 2 if -->
+            </tbody>
+        </table>
 
-                <td>{{func.subtype}}
-                    {% if functions.1 == 'checked' %}
-                        {% for errors in func.result %}
-                            {{errors.0}} ({{errors.1}})<br>
-                        {% endfor %}
-                    {% else %}
-                        {{functions.1}}
-                    {% endif %}
-                </td>
+        <h3>Developers:</h3>
 
-                <td>{% if supports_callgraph %}
-                        <!-- [('folder1/arithmetic.py', 'list_sub', 'code'), ('folder1/test_arithmetic.py', 'test_sub', 'test')] -->
-                        {% for caller_list in func.callers %}
-                            <a target='_blank' href="{{project.source_url|slice:"0:-4"}}/blob/{{branch}}/{{caller_list.0}}"
-                                >Go to {{caller_list.0}} to find <b><i>{{caller_list.1}}</i></b> on GitHub</a><br/>
-                            <br/>
-                        {% endfor %}
-                    {% endif %}
-                </td>
-                <td>{% if supports_test_hunt %}
-                        <!-- [('folder1/arithmetic.py', 'list_sub', 'code'), ('folder1/test_arithmetic.py', 'test_sub', 'test')] -->
-                        {% for caller_list in func.test_info %}
-                            <a target='_blank' href="{{project.source_url|slice:"0:-4"}}/blob/{{branch}}/{{caller_list.0}}"
-                                >Go to {{caller_list.0}} to find <b><i>{{caller_list.1}}</i></b> on GitHub</a><br/>
-                            <br/>
-                        {% endfor %}
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-          {% endif %}
-        </tbody>
-    </table>
-
-    
-
-    {% if doxygen_supported %}
-
-        <h3>Doxygen Status:</h3>
-
-        <div>
-            {% if doxygen_new_file %}
-                Issues found with file:         
-                <button class='btn btn-sm btn-primary' onclick='showDoxygenEditor("{{file}}","{{doxygen_new_file}}","{{doxygen_comments}}");'>View File in Editor</button>
-            {% else %}
-                <i>{{doxygen_comments}}</i>
-            {% endif %}
-            <br/>
-            <br/>
-        </div>
-
-    {% endif %}
-
-
-
-    <h3>Developers:</h3>
-
-
-    <table class="table" style="border:1px solid black;margin-left:auto;margin-right:auto;">
-      <thead style="text-align:center">
-        <tr>
-            <th>Author</th>
-            <th>Total number of commits</th>
-            <th>Total lines changed</th>
-            <th>Date of last commit</th>
-            <th>Link to last commit</th>
-        </tr>
-      </thead>
-      <tbody style="text-align:center">
-        {% for author in authors %}
-        <tr>
-            <td><a href="#" onclick="$('#myModal').modal('show');">{{author.author.username}} - {{author.author.email}}</a></td>
-            <td>{{author.number_commits}}</td>
-            <td>{{author.lines}}</td>
-            <td>{{author.most_recent_commit}}</td>
-            <td><a href="{{project.source_url|slice:"0:-4"}}/commit/{{author.link}}">Go to commit on GitHub</a></td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    {% if authors_len == 0 %}
-        <div class='alert alert-warning'>
-        Possible reasons for an empty table:
-        <ul>
-            <li>File moved/restructured (and not touched since)</li>
-            <li>File imported from outside of project (and not touched since)</li>
-        </ul>
-        </div>
-    {% endif %}
-
-
-
-    <h3>Change History</h3>
-
-    <a href="{{project.source_url|slice:"0:-4"}}/blame/{{branch}}/{{file}}">Go to file blame on GitHub</a>
-
-    <p>
-        <h3>Included in Pull Requests:</h3>
 
         <table class="table" style="border:1px solid black;margin-left:auto;margin-right:auto;">
           <thead style="text-align:center">
             <tr>
-                <th>PR #</th>
-                <th>PR URL</th>
-                <th>PR Issue link</th>
-                <th>Notes</th>
+                <th style="text-align:left">Author</th>
+                <th>Total number of commits</th>
+                <th>Total lines changed</th>
+                <th>Date of last commit</th>
+                <th>Link to last commit</th>
             </tr>
           </thead>
           <tbody style="text-align:center">
-            {% for pr in prs %}
-
-            <div id="prModal{{forloop.counter}}" class="modal" tabindex="-1">
-                <div class="modal-dialog modal-xl">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">PR Notes</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                        
-                            <div class="" style="border:1px solid #ccc; margin-bottom:5px;">
-                                    <pre>{{pr.notes}}</pre>
-
-                            </div>
-
-                        </div>
-                        <div class="modal-footer">
-
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+            {% for author in dev_table %}
             <tr>
-                <td>{{pr.number}}</td>
-                <td><a href="{{pr.url}}">Go to PR on GitHub</a><br/></td>
-                <td>{{pr.issue_url}}</td>
-                <td style="text-align:center">{% if pr.notes %}<a href="#" onclick="$('#prModal{{forloop.counter}}').modal('show');">{{pr.notes_kind}}</a>
-                    {% else %}
-                    
-                    {% endif %}
-
-                </td>
+                <td style="text-align:left"><a href="#" onclick="$('#myModal').modal('show');">{{author.author}}</a></td>
+                <td>{{author.number_commits}}</td>
+                <td>{{author.lines}}</td>
+                <td>{{author.most_recent_commit}}</td>
+                <td><a href="{{project.source_url|slice:"0:-4"}}/commit/{{author.link}}">Go to commit on GitHub</a></td>
             </tr>
             {% endfor %}
           </tbody>
         </table>
-    </p>
+        {% if authors_len == 0 %}
+            <div class='alert alert-warning'>
+            Possible reasons for an empty table:
+            <ul>
+                <li>File moved/restructured (and not touched since)</li>
+                <li>File imported from outside of project (and not touched since)</li>
+            </ul>
+            </div>
+        {% endif %}
 
-    <p>
-        <h3>Related to Issues:</h3>
 
-        In progress.
-    </p>
 
-    <p>
-        <h3>Interested Parties:</h3>
+        <h3>Change History</h3>
 
-        In progress.
-    </p>
+        <a href="{{project.source_url|slice:"0:-4"}}/blame/{{branch}}/{{file}}">Go to file blame on GitHub</a>
 
-    <br/>
-    <br/>
-    <br/>
+        <p>
+            <h3>Included in Pull Requests:</h3>
 
+            <table class="table" style="border:1px solid black;margin-left:auto;margin-right:auto;">
+              <thead style="text-align:center">
+                <tr>
+                    <th>PR #</th>
+                    <th>Title</th>
+                    <th>PR URL</th>
+                    <th>PR Issue link</th>
+                    
+                </tr>
+              </thead>
+              <tbody style="text-align:center">
+                {% for pr in pull_requests %}
+
+                <div id="prModal{{forloop.counter}}" class="modal" tabindex="-1">
+                    <div class="modal-dialog modal-xl">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">PR Notes</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                            
+                                <div class="" style="border:1px solid #ccc; margin-bottom:5px;">
+                                        <pre>{{pr.notes}}</pre>
+
+                                </div>
+
+                            </div>
+                            <div class="modal-footer">
+
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <tr>
+                    <td>{{pr.0}}</td>
+                    <td> {{pr.2}}</td>
+                    <td><a href="{{pr.1}}">Go to PR on GitHub</a><br/></td>
+                    <td>TBD</td>
+                    
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+        </p>
+
+        <p>
+            <h3>Related to Issues:</h3>
+
+            In progress.
+        </p>
+
+        <p>
+            <h3>Interested Parties:</h3>
+
+            In progress.
+        </p>
+
+        <br/>
+        <br/>
+        <br/>
+    {% endif %}  <!-- closes complete_ignore -->
 </div>
 
 
@@ -363,8 +338,8 @@
 
 
 
-{% with prs|last as last %}
-    <input id="pr" type="hidden" value="{{last.id}}"/>
+{% with pull_requests|first as last %}
+    <input id="pr" type="hidden" value="{{last.3}}"/>
 {% endwith %}
 <input id="project" type="hidden" value="{{ project.pk }}"/>
 <input id="branch" type="hidden" value="{{ branch }}"/>

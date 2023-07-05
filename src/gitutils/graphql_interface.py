@@ -4,7 +4,7 @@ import logging
 import requests
 import time
 
-from src.gitutils.graphql_queries import *
+from .graphql_queries import *
 
 logger = logging.getLogger('graphql_interface')
 logger.setLevel(logging.INFO)

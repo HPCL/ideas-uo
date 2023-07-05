@@ -13,11 +13,13 @@ enddate.val(date.toISOString().substr(0, 10));
 var queryString = window.location.search;
 var urlParams = new URLSearchParams(queryString);
 var pr = $("#pr").val(); //urlParams.get('pr') //{{ pr.pk }}
+var prauthor = $("#prauthor").val();
 var project = $("#project").val();
 var branch = $("#branch").val();
 console.log("The PR id...");
 console.log($("#pr"));
 console.log(pr);
+console.log(prauthor);
 var filename = "";
 var previousLines = 0;
 var ignoreLineChanges = true;
@@ -84,6 +86,13 @@ function showDocEditor(docfilename, difftext) {
     //$('#dochelper').empty();
 
     $.ajax({
+        url: '/dashboard/logevent/', type: 'POST', data: { 'pr': pr, 'comments': 'Documentation editor opened for: '+filename }, success: function (result) {
+            console.log("success ajax");
+            console.log(result);
+        }
+    });
+
+    $.ajax({
         url: '/dashboard/getfile/', type: 'POST', data: { 'pr': pr, 'filename': filename }, success: function (result) {
             console.log("get file contents");
             console.log(result);
@@ -92,7 +101,7 @@ function showDocEditor(docfilename, difftext) {
                 editor.setOption("mode", "text/x-c++src");
             }else if( filename.indexOf(".py") >= 0 ){
                 editor.setOption("mode", "text/x-python");
-            }else if( filename.indexOf(".F90") >= 0 ){
+            }else if( filename.indexOf(".F90") >= 0 || filename.indexOf(".dox") >= 0 ){
                 editor.setOption("mode", "text/x-fortran");
             }else{
                 editor.setOption("mode", "text/html");
@@ -110,7 +119,7 @@ function showDocEditor(docfilename, difftext) {
             //for(var i=0; i<result['linter_results'].length; i++){
             //    editor.markText({ line: result['linter_results'][i].line-1, ch: result['linter_results'][i].column }, { line: result['linter_results'][i].line-1, ch: 100 }, { className: "styled-background" });
             //}
-
+/*
             for(var i=0; i<docstring_results[1].length; i++){
 
                 if( docstring_results[1][i][0] == filename ){
@@ -128,6 +137,35 @@ function showDocEditor(docfilename, difftext) {
                             }
                         }
                     }
+                }
+            }
+*/
+            var file_doc_results = docstring_results[filename];
+
+            if( filename.indexOf(".F90") >= 0 || filename.indexOf(".dox") >= 0 ){
+                if( file_doc_results['documentation_lib']['file_status'].indexOf("checkable") == 0 ){
+                    for(var i=0; i<file_doc_results['documentation_lib']['problem_fields'].length; i++){
+                        editor.markText({ line: file_doc_results['documentation_lib']['problem_fields'][i][2], ch: 0 }, { line: file_doc_results['documentation_lib']['problem_fields'][i][2], ch: 100 }, { className: "styled-background" });
+                    }
+                    //for(var i=0; i<file_doc_results['documentation_lib']['missing_fields'].length; i++){
+                    if( file_doc_results['documentation_lib']['missing_fields'].length > 0){
+                        editor.markText({ line: 0, ch: 0 }, { line: 0, ch: 100 }, { className: "styled-background" });
+                    }
+                    //for(var i=0; i<file_doc_results['documentation_lib']['missing_file_fields'].length; i++){
+                    if( file_doc_results['documentation_lib']['missing_file_fields'].length > 0){
+                        editor.markText({ line: 0, ch: 0 }, { line: 0, ch: 100 }, { className: "styled-background" });
+                    }
+                    for(var i=0; i<file_doc_results['documentation_lib']['missing_subroutine_fields'].length; i++){
+                        editor.markText({ line: file_doc_results['documentation_lib']['missing_subroutine_fields'][i][0], ch: 0 }, { line: file_doc_results['documentation_lib']['missing_subroutine_fields'][i][0], ch: 100 }, { className: "styled-background" });
+                    }
+                }
+            }else if( file_doc_results['documentation']['check_status'] && !file_doc_results['documentation']['documentation.doc_status'] ){
+                //docissues = file_doc_results['documentation']['problem_lines'].length;
+                for(var i=0; i<file_doc_results['documentation']['problem_lines'].length; i++){
+                    // Problem line format: ['message', linenumber]
+                    //For some reason, the line is off by one 
+                    file_doc_results['documentation']['problem_lines'][i][1] -= 1;
+                    editor.markText({ line: file_doc_results['documentation']['problem_lines'][i][1], ch: 0 }, { line: file_doc_results['documentation']['problem_lines'][i][1], ch: 100 }, { className: "styled-background" });
                 }
             }
 
@@ -148,6 +186,7 @@ function showDocEditor(docfilename, difftext) {
                 if( !ignoreLineChanges && lines > previousLines ){
 
                     //Bump the line numbers by 1 if after linenumber (this is currenlty only looking at first item in results)
+/*                    
                     for(var i=0; i<docstring_results[1].length; i++){
                         if( docstring_results[1][i][0] == filename ){
                             for(var j=0; j<docstring_results[1][i][1].length; j++){
@@ -159,6 +198,25 @@ function showDocEditor(docfilename, difftext) {
                             }
                         }
                     }
+*/  
+                    var file_doc_results = docstring_results[filename];
+                    if( filename.indexOf(".F90") >= 0 || filename.indexOf(".docx") >= 0){
+                        if( file_doc_results['documentation_lib']['file_status'].indexOf("checkable") == 0 ){
+                            for(var i=0; i<file_doc_results['documentation_lib']['problem_fields'].length; i++){
+                                // Problem line format: ['message', 'line', linenumber]
+                                 if( cursor.line <= file_doc_results['documentation_lib']['problem_fields'][i][2] ){
+                                    file_doc_results['documentation_lib']['problem_fields'][i][2] += 1;
+                                }
+                            } 
+                        }
+                    }else{
+                        for(var i=0; i<file_doc_results['documentation']['problem_lines'].length; i++){
+                            // Problem line format: ['message', linenumber]
+                             if( cursor.line <= file_doc_results['documentation']['problem_lines'][i][1] ){
+                                file_doc_results['documentation']['problem_lines'][i][1] += 1;
+                            }
+                        }    
+                    }                
                     previousLines = lines;
                 }
 
@@ -172,7 +230,7 @@ function showDocEditor(docfilename, difftext) {
                 } else {
                     popupNode.remove();
                 }*/
-
+/*
                 for(var i=0; i<docstring_results[1].length; i++){
 
                     if( docstring_results[1][i][0] == filename ){
@@ -209,6 +267,92 @@ function showDocEditor(docfilename, difftext) {
                             }
                         }
                     }
+                }
+*/
+                var file_doc_results = docstring_results[filename];
+                if( filename.indexOf(".F90") >= 0 || filename.indexOf(".F90-mc") >= 0 || filename.indexOf(".dox") >= 0 ){
+                    for(var i=0; i<file_doc_results['documentation_lib']['problem_fields'].length; i++){
+                        // Problem line format: ['message', linenumber]
+                        if (cursor.line == file_doc_results['documentation_lib']['problem_fields'][i][2] ) {
+                            
+                            popupNode.innerHTML = '';
+                            var text = document.createTextNode(file_doc_results['documentation_lib']['problem_fields'][i][0]);
+                            popupNode.appendChild(text);
+                  
+                            if( file_doc_results['documentation_lib']['problem_fields'][i][0].indexOf("No docstring") >= 0 ){
+                                var button = document.createElement('button');
+                                button.setAttribute('onclick', 'insertTemplate('+(cursor.line)+', \'  \"\"\"\\n  Template will go here.\\n  \"\"\"\')');
+                                button.classList.add('btn');
+                                button.classList.add('btn-sm');
+                                button.classList.add('btn-primary');
+                                button.style['margin-left'] = "10px"
+                                button.innerHTML = 'Insert docstring template'
+                                popupNode.appendChild(button);
+                            }
+                            editor.addWidget({ line: cursor.line, ch: 9 }, popupNode, true);
+                        }
+                    }
+                    //for(var i=0; i<file_doc_results['documentation_lib']['missing_fields'].length; i++){
+                    if( file_doc_results['documentation_lib']['missing_fields'].length > 0){
+                        // Problem line format: ['message', linenumber]
+                        if (cursor.line == 0 ) {
+                            
+                            popupNode.innerHTML = '';
+                            var text = document.createTextNode("Missing fields: "+file_doc_results['documentation_lib']['missing_fields']);
+                            popupNode.appendChild(text);
+                  
+                            editor.addWidget({ line: cursor.line, ch: 9 }, popupNode, true);
+                        }
+                    }  
+                    //for(var i=0; i<file_doc_results['documentation_lib']['missing_file_fields'].length; i++){
+                    if( file_doc_results['documentation_lib']['missing_file_fields'].length > 0){
+                        // Problem line format: ['message', linenumber]
+                        if (cursor.line == 0 ) {
+                            
+                            popupNode.innerHTML = '';
+                            var text = document.createTextNode("Missing file fields: "+file_doc_results['documentation_lib']['missing_file_fields']);
+                            popupNode.appendChild(text);
+                  
+                            editor.addWidget({ line: cursor.line, ch: 9 }, popupNode, true);
+                        }
+                    }  
+
+                    subroutine_text = []
+                    for(var i=0; i<file_doc_results['documentation_lib']['missing_subroutine_fields'].length; i++){
+                        // Problem line format: ['message', linenumber]
+                        if (cursor.line ==  file_doc_results['documentation_lib']['missing_subroutine_fields'][i][0] ) {
+                            
+                            subroutine_text.push(file_doc_results['documentation_lib']['missing_subroutine_fields'][i][1]);
+                        }
+                    }  
+                    if( subroutine_text.length > 0 ){
+                        popupNode.innerHTML = '';
+                        var text = document.createTextNode("Missing fields: "+subroutine_text);
+                        popupNode.appendChild(text);
+                        editor.addWidget({ line: cursor.line, ch: 9 }, popupNode, true);
+                    }
+                }else{
+                    for(var i=0; i<file_doc_results['documentation']['problem_lines'].length; i++){
+                        // Problem line format: ['message', linenumber]
+                        if (cursor.line == file_doc_results['documentation']['problem_lines'][i][1] ) {
+                            
+                            popupNode.innerHTML = '';
+                            var text = document.createTextNode(file_doc_results['documentation']['problem_lines'][i][0]);
+                            popupNode.appendChild(text);
+                  
+                            if( file_doc_results['documentation']['problem_lines'][i][0].indexOf("No docstring") >= 0 ){
+                                var button = document.createElement('button');
+                                button.setAttribute('onclick', 'insertTemplate('+(cursor.line)+', \'  \"\"\"\\n  Template will go here.\\n  \"\"\"\')');
+                                button.classList.add('btn');
+                                button.classList.add('btn-sm');
+                                button.classList.add('btn-primary');
+                                button.style['margin-left'] = "10px"
+                                button.innerHTML = 'Insert docstring template'
+                                popupNode.appendChild(button);
+                            }
+                            editor.addWidget({ line: cursor.line, ch: 9 }, popupNode, true);
+                        }
+                    } 
                 }
 
                 /* JUST FOR DEMO */
@@ -758,11 +902,12 @@ $.ajax({
 
             if( project == 30 || project == 26 || project == 35 || project == 32 ){
                 cqtable.append("<tr><td>"+
-                        "<a href='/dashboard/filex/"+project+"?filename="+result['diffcommits'][i]['filename']+"&branch="+branch+"'>"+result['diffcommits'][i]['filename'] +"</a>"+
+                        "<span>"+result['diffcommits'][i]['filename'] +"</span>"+
+                        "<br/><a class='btn btn-xs btn-secondary' target='_blank' href='/dashboard/filex/"+project+"?filename="+result['diffcommits'][i]['filename']+"&branch="+branch+"'>View in File Explorer</a>"+
                     "</td><td>"+
                         (cqissues < 0 ? '-' : cqissues) +
                     "</td><td>"+
-                        cqbuttons+
+                        (cqissues > 0 ? cqbuttons : '') +
                     "</td></tr>");
             }
 
@@ -791,6 +936,82 @@ $.ajax({
         var doctable = $("#docdiffcommittable > tbody");
         doctable.empty();
 
+        for (var i = 0; i < result['diffcommits'].length; i++) {
+            var filename = result['diffcommits'][i]['filename'];
+
+
+            var file_doc_results = result['docstring_results'][filename];
+            console.log(file_doc_results);
+
+            var docbuttons = "";
+            var docissues = -1;
+            var docstatus = "-";
+            docbuttons += "<button class='btn btn-sm btn-primary' onclick='showDocEditor(\"" + filename + "\",\"" + "DIFF STUFF TO GO HERE" + "\");'>View File in Editor</button><br/>";
+ 
+            //Compute number of issues
+            if( filename.indexOf(".F90") >= 0 || filename.indexOf(".dox") >= 0 ){
+                if( file_doc_results['documentation_lib']['file_status'] && file_doc_results['documentation_lib']['file_status'].indexOf("checkable") == 0 ){
+                    docissues = 0;
+                    try{
+                        docissues = file_doc_results['documentation_lib']['problem_fields'].length + file_doc_results['documentation_lib']['missing_fields'].length + file_doc_results['documentation_lib']['missing_file_fields'].length + file_doc_results['documentation_lib']['missing_subroutine_fields'].length;
+                    }catch(error){
+                        console.log(error);
+                    }
+                    if( file_doc_results['documentation_lib']['file_status'].indexOf("checkable but no documentation") == 0 ){
+                        docissues = '-';
+                    }
+                }
+            }else if( file_doc_results['documentation']['check_status'] && !file_doc_results['documentation']['doc_status'] ){
+                docissues = 0;
+                try{
+                    docissues = file_doc_results['documentation']['problem_lines'].length;
+                }catch(error){}
+            }
+
+            if( file_doc_results['documentation_lib']['file_status'] )
+                docstatus = file_doc_results['documentation_lib']['file_status']; //.replaceAll('/','/<br/>');
+
+            if( docstatus.indexOf("uncheckable") >= 0  ){
+                if( docstatus.indexOf("no documentation") >= 0 ){
+                    doctable.append("<tr><td>" +
+                        "<span>"+filename +"</span>"+
+                        "<br/><a class='btn btn-xs btn-secondary' target='_blank' href='/dashboard/filex/"+project+"?filename="+filename+"&branch="+branch+"'>View in File Explorer</a>"+
+                        "</td><td>" +
+                            docstatus +
+                        "</td><td>" +
+                            '-' +
+                        "</td><td>" +
+                            "<a class='btn btn-sm btn-primary' target='_blank' href='#''>View Doc Template</a><br/>" +
+                        "</td></tr>");
+                }else{
+                    doctable.append("<tr><td>" +
+                        "<span>"+filename +"</span>"+
+                        "<br/><a class='btn btn-xs btn-secondary' target='_blank' href='/dashboard/filex/"+project+"?filename="+filename+"&branch="+branch+"'>View in File Explorer</a>"+
+                        "</td><td colspan='3'>" +
+                            docstatus +
+                        "</td></tr>");
+                }
+            }else{
+
+                    doctable.append("<tr><td>" +
+                        "<span>"+filename +"</span>"+
+                        "<br/><a class='btn btn-xs btn-secondary' target='_blank' href='/dashboard/filex/"+project+"?filename="+filename+"&branch="+branch+"'>View in File Explorer</a>"+
+                        "</td><td>" +
+                            docstatus +
+                        "</td><td>" +
+                            (docissues < 0 ? '-' : docissues) +
+                        "</td><td>" +
+                            docbuttons +
+                        "</td></tr>");
+                
+            }
+
+            if( docissues > 0 )
+                $("#docwarning").show();
+        }
+
+
+/*
         for (var k = 0; k < result['docstring_results'][1].length; k++) {
             var docbuttons = "";
             var docissues = -1;
@@ -843,13 +1064,13 @@ $.ajax({
             }
             
         }
-
+*/
 
         var testtable = $("#testtable > tbody");
         testtable.empty();
 
         var testmap = new Map();
-
+/*
         for (var k = 0; k < result['docstring_results'][1].length; k++) {
             //if (result['diffcommits'][i]['filename'] == result['docstring_results'][1][k][0]) {
                 for (var m = 0; m < result['docstring_results'][1][k][1].length; m++) {
@@ -873,7 +1094,7 @@ $.ajax({
                 }
             //}
         }
-
+*/
 
         if( testmap.size < 1 ){
             testtable.append("<tr><td colspan='3'>"+
@@ -919,6 +1140,15 @@ $.ajax({
                 "</td></tr>");
 
         }
+
+
+        //Collect filename to send to the author recommender tool.
+        let fileNames = [];
+        for (var i = 0; i < result['diffcommits'].length; i++) {
+            var filename = result['diffcommits'][i]['filename'];
+            fileNames.push(filename);
+        }
+        populateView(fileNames);
 
 
 

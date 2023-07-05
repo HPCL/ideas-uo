@@ -166,3 +166,21 @@
   line-height: .5;
   border-radius: .2rem;
 }
+
+.file-error-icon {
+    content: url('/static/images/x-mark-16.png');
+    width: 10px;
+    height: 10px;
+    vertical-align: sub; 
+}
+
+.file-success-icon {
+    content: url('/static/images/checkmark-16.png');
+    width: 10px;
+    height: 10px;
+    vertical-align: sub;   
+}
+
+.treejs-label {
+    padding-left: 4px;
+}

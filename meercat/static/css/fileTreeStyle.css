@@ -1,0 +1,214 @@
+#file-tree-container {
+    margin-top: 30px;
+    padding: 20px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+}
+
+#panel {
+    padding: 20px 30px;
+    position: sticky;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    top: 50px;
+    width: 50%;
+    border: 1px solid black;
+    border-radius: 5px;
+}
+
+#file-path-tree > ul {
+    padding-left: 0;
+}
+
+#panel #detail {
+    font-weight: bold;
+    font-size: small;
+}
+
+#panel #path {
+    min-height: 30px;
+}
+
+#panel #panel-metrics {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 30px;
+    row-gap: 1em;
+    grid-template-rows: 3fr;
+    align-items: center;
+}
+
+#panel #panel-metrics .metric {
+    margin: 0;
+    margin-top: 5px;
+}
+
+#panel .metric-icon {
+    width: 20px;
+    margin-right: 3px;
+    vertical-align: text-bottom;
+}
+
+
+#panel #panel-metrics .sub-metric {
+    margin-top: -5px;
+    margin-left: 30px;
+    margin-bottom: 0;
+    font-size: 14px;
+}
+
+#panel .panel-bar {
+    width: 100%;
+    height: 20px;
+    border: 1px solid gray;
+    border-radius: 2px;
+}
+
+#panel .panel-bar span {
+    display: inline-block;
+    height: 100%;
+}
+
+#panel .under-development-wrapper {
+    position: relative;
+}
+
+#panel .under-development {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding-left: 20px;
+    z-index: 3;
+    background-color: rgba(0, 0, 0, 0.1);
+    font-weight: bold;
+    text-align: center;
+    line-height: 1;
+}
+
+#panel .panel-sub-bar {
+    height: 14px;
+}
+
+#panel .panel-sub-bar div {
+    height: 100%;
+}
+
+#panel #hyperlink-icon {
+    width: 25px;
+    padding-bottom: 7px;
+    padding-left: 4px;
+}
+
+
+#file-path-tree li {
+    display: block;
+}
+
+#file-path-tree .grayed-out * {
+    opacity: 0.5;
+}
+
+
+#file-path-tree .switcher {
+    display: inline-block;
+    cursor: pointer;
+    transition: transform 0.1s ease-out, border-color 0.15s ease-out;
+    border: 7px solid transparent;
+    border-top: 7px solid rgba(0, 0, 0, 0.4);
+    transform: rotate(-90deg);
+}
+
+
+#file-path-tree .switcher.expanded {
+    display: inline-block;
+    cursor: pointer;
+    transition: transform 0.1s ease-out, border-color 0.15s ease-out;
+    border: 7px solid transparent;
+    border-top: 7px solid rgba(0, 0, 0, 0.4);
+    transform: rotate(0) translate(-2px, 2px);
+}
+
+#file-path-tree .no-switcher {
+    margin-left: 13px;
+}
+
+#file-path-tree .rendered-element {
+    display: inline-block;
+    margin-left: 4px;
+}
+
+#file-path-tree .rendered-element>.node-label {
+    cursor: pointer;
+}
+
+#file-path-tree .switcher:hover {
+    border-top: 7px solid rgba(0, 0, 0, 0.65);
+}
+
+#file-path-tree ul {
+    overflow: hidden;
+    transition: height 0.1s ease-out;
+    height: auto;
+}
+
+#file-path-tree .file-tree-icon-wrapper {
+    width: 20px;
+    height: 20px;
+    margin-right: 3px;
+    display: inline-block;
+    overflow: hidden;
+    position: relative;
+}
+
+#file-path-tree .pre-label-icon-metric {
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    background: black;
+    color: white;
+    font-size: 12px;
+    line-height: 20px;
+    text-align: center;
+    transform: translateX(-100%);
+    position: absolute;
+    z-index: 3;
+    transition: all 0.1s ease-out;
+}
+
+#file-path-tree .file-tree-icon-wrapper:hover .pre-label-icon-metric {
+    transform: translateX(0);
+}
+
+#file-path-tree .post-label-icon,
+#file-path-tree .pre-label-icon {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+}
+
+#file-path-tree .post-label-icon {
+    margin-left: 7px;
+}
+
+#file-path-tree .pre-label-icon {
+    border-radius: 5px;
+    position: absolute;
+}
+
+#file-path-tree .pre-label-icon.error-0,
+#panel .error-0 {
+    background-color: lightgreen;
+}
+
+#file-path-tree .pre-label-icon.error-1,
+#panel .error-1 {
+    background-color: #ff0;
+}
+
+#file-path-tree .pre-label-icon.error-2,
+#panel .error-2 {
+    background-color: #f77;
+}

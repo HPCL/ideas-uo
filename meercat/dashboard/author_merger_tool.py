@@ -52,7 +52,7 @@ class AuthorMergerTool:
         for name in list_of_authors:
             ratio = process.extract(str(name), list_of_authors, limit=10)
             results[name] = ratio
-        threshold = 90
+        threshold = 60
         real_names = {}
         count = 0
         done = []

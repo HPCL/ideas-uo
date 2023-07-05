@@ -3,12 +3,9 @@ import sys
 
 import logging
 
-try:
-  import src.gitutils.command as command
-  from src.gitutils.utils import *
-except: 
-  import gitutils.command as command
-  from gitutils.utils import *
+
+from .command import Command
+from .utils import *
 
 # Setup Logger
 logger = logging.getLogger('db_interface')
@@ -86,14 +83,14 @@ class GitCommand(object):
         for version in versions:
             #checkout the versions
             logger.debug('git checkout %s%s' % (prefix,version))
-            retcode, out, err = command.Command('git checkout %s%s' % (prefix,version)).run(dryrun=False)
+            retcode, out, err = Command('git checkout %s%s' % (prefix,version)).run(dryrun=False)
             #print(out)
 
 
         #git log -p # this will list all commits and the code additions in addition to dates and messages.
         # function-context for python just adds all the surrounding lines of code to the diff output
         logger.debug(f'git log -p --branches=* --all --date=iso-strict-local --function-context --since {since} --until {until}')
-        retcode, out, err = command.Command(f'git log -p --branches=* --all --date=iso-strict-local --function-context --since {since} --until {until}').run()
+        retcode, out, err = Command(f'git log -p --branches=* --all --date=iso-strict-local --function-context --since {since} --until {until}').run()
         lines = iter(out.splitlines())
 
         current_author = ''
@@ -111,7 +108,7 @@ class GitCommand(object):
                 #Retrieve all branches that contains this commit
                 branches = ''
                 if includebranches:
-                    retcode, branches, err = command.Command('git branch -a --contains %s' % commitid).run()
+                    retcode, branches, err = Command('git branch -a --contains %s' % commitid).run()
 
                 line = next(lines)
                 #print(line)
@@ -249,13 +246,13 @@ class GitCommand(object):
         for version in versions:
             #checkout the versions
             print('git checkout %s%s' % (prefix,version))
-            retcode, out, err = command.Command('git checkout %s%s' % (prefix,version)).run(dryrun=False)
+            retcode, out, err = Command('git checkout %s%s' % (prefix,version)).run(dryrun=False)
             print(out)
 
 
         #git log -p # this will list all commits and the code additions in addition to dates and messages.
         # function-context for python just adds all the surrounding lines of code to the diff output
-        retcode, out, err = command.Command('git log -p --date=iso-strict-local --function-context').run()
+        retcode, out, err = Command('git log -p --date=iso-strict-local --function-context').run()
         lines = iter(out.splitlines())
 
         #current_author = ''
@@ -271,7 +268,7 @@ class GitCommand(object):
                 #Retrieve all branches that contains this commit
                 branches = ''
                 if includebranches:
-                    retcode, branches, err = command.Command('git branch -a --contains %s' % commitid).run()
+                    retcode, branches, err = Command('git branch -a --contains %s' % commitid).run()
 
                 line = next(lines)
                 #print(line)
@@ -404,21 +401,21 @@ def repoError(repodir,err):
 
 def getYears(repodir):
     os.chdir(repodir)
-    retcode, out, err = command.Command('git log | grep Date | tail -1').run()
+    retcode, out, err = Command('git log | grep Date | tail -1').run()
     if not out.strip(): repoError(repodir,err)
     startyear = out.split()[-2]
-    retcode, out, err = command.Command('git log | grep Date | head -1').run()
+    retcode, out, err = Command('git log | grep Date | head -1').run()
     if not out.strip(): repoError(repodir,err)
     endyear = out.split()[-2]
 
     changesets = []
     for year in range(int(startyear),int(endyear)+1):
-        retcode, out, err = command.Command(getGitCmd(year)).run()
+        retcode, out, err = Command(getGitCmd(year)).run()
         if out.strip(): changesets.append(out.strip())
 
     if not changesets:
         for year in range(int(endyear),2000,-1):
-            retcode, out, err = command.Command(getGitCmd(year)).run()
+            retcode, out, err = Command(getGitCmd(year)).run()
             if out.strip(): changesets.append(out.strip())
     return changesets
 

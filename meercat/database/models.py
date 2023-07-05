@@ -4,6 +4,13 @@ from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 
 # Create your models here.
+class RecommenderFeedback(models.Model):
+    thumbs = models.BooleanField('Thumbs up', blank=False)
+    message = models.TextField('Feedback message', blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    datetime = models.DateTimeField(auto_now_add=True)
+
+
 class SupportSubmission(models.Model):
 
     class SupportTypeChoices(models.TextChoices):
@@ -56,7 +63,7 @@ class Profile(models.Model):
     gh_email = models.EmailField("GitHub email", blank=True, max_length=200)
     gl_username = models.CharField("GitLab username", blank=True, max_length=200)
     gl_email = models.EmailField("GitLab email", blank=True, max_length=200)
-    subscriptions = models.JSONField(blank=True, default=dict)
+    subscriptions = models.JSONField(blank=True, default=list)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
     class Meta:
@@ -118,8 +125,9 @@ class FileMetric(models.Model):
     
     class MetricTypeChoices(models.TextChoices):
         DOCUMENTATION = 'DOCUMENTATION', _('Documentation')
-        LINTING = 'LINTING', _('Liting')
+        LINTING = 'LINTING', _('Linting')
         DEVELOPERS = 'DEVELOPERS', _('Developers')
+        BUSFACTOR = 'BUSFACTOR', _('Busfactor')
 
     project = models.ForeignKey(Project, on_delete=models.CASCADE, blank=True, null=True)
     datetime = models.DateTimeField()
