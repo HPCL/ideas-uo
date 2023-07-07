@@ -316,21 +316,36 @@ def first_responder_function(proj_object, pull_object):
     '''
 
     #Find the files with documentation problems, i.e., that have the field 'problem_lines'
-    doc_problems = []
+    doc_problems = 0
+    doc_missing = 0
+    checkable = 0
     no_library = False
+    all_files = len(all_contexts.items())
     for filename,context in all_contexts.items():
         # documentation_status = context['documentation']  #a dictionary - see above
         # if 'problem_lines' in documentation_status:
         #     doc_problems.append([filename, documentation_status['problem_lines']]) 
         documentation_status = context['documentation_lib']  #a dictionary - see above
         if len(documentation_status['problem_fields']) > 0 or len(documentation_status['missing_fields']) > 0 or ('missing_file_fields' in documentation_status and len(documentation_status['missing_file_fields']) > 0) or  ('missing_subroutine_fields' in documentation_status and len(documentation_status['missing_subroutine_fields']) > 0):
-            doc_problems.append([filename, 'true']) 
+            doc_problems += 1 
         elif 'no Doxygen' in documentation_status['file_status']:
-            doc_problems.append([filename, 'true']) 
+            doc_missing += 1 
         elif 'No documentation checker library available' in documentation_status['file_status']:
             no_library = True
 
-    total_doc_problems = len(doc_problems)
+        if documentation_status['should_have_doc']:
+            checkable += 1
+
+    doc_message =  f"""## Out of {all_files} file(s) in this PR, {checkable} should have doxygen documentation.  {checkable-doc_missing} have doxygen documentation."""
+
+    if checkable-doc_missing > 0:
+        doc_message +=f"""
+## Out of {checkable-doc_missing} file(s) with doxygen documentation, {doc_problems} file(s) have issues."""
+    
+    if no_library:
+        doc_message =  f"""No documentation library available."""
+
+
 
     # Use metrics to compute average (and get live results for just the files in PR branch)
     linter_metrics = list(FileMetric.objects.all().filter(metric_type=FileMetric.MetricTypeChoices.LINTING, project=proj_object, branch='main'))
@@ -357,7 +372,7 @@ def first_responder_function(proj_object, pull_object):
 
     message = f"""## The MeerCat Pull-Request Assistant has information for you
 
-## {total_doc_problems} file(s) in this PR have documentation issues.
+{doc_message}
 
 ## {linter_problems} files have more linting errors than average ({average}).
 
@@ -1733,14 +1748,14 @@ def githubBot(request):
 
     prnumber = str(payload["number"])
 
-    # Only do this for new PRs (run on edited for testing)
-    if str(payload["action"]) == "opened": #or str(payload["action"]) == "edited":
+    project = list(
+        Project.objects.all()
+        .filter(source_url=str(payload["repository"]["clone_url"]))
+        .all()
+    )[0]
 
-        project = list(
-            Project.objects.all()
-            .filter(source_url=str(payload["repository"]["clone_url"]))
-            .all()
-        )[0]
+    # Only do this for new PRs (run on edited for testing)
+    if str(payload["action"]) == "opened" or (project.id == 30 and str(payload["action"]) == "edited"):
 
         # Ignore if merging into main or master
         #branch = str(payload["pull_request"]["head"]["label"])

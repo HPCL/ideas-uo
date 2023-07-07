@@ -268,6 +268,7 @@ def check_file_documentation_aux(dir_struct, lines:list, path:str):
   global units  #list of known units in Flash-X
 
   results_dict = {
+      'should_have_doc': True,
       'file_status': 'checkable',
       'missing_fields': [],
       'problem_fields': [],
@@ -276,6 +277,7 @@ def check_file_documentation_aux(dir_struct, lines:list, path:str):
 
   checkable, msg = is_file_documentation_checkable(lines, path)  #returns tuple: (bool, msg)
   if not checkable:
+    results_dict['should_have_doc'] = False
     results_dict['file_status'] = f'uncheckable: {msg}'
     return results_dict
 
@@ -284,6 +286,7 @@ def check_file_documentation_aux(dir_struct, lines:list, path:str):
   if len(the_unit)>1:
     #weird case - 2+ units on branch
     print(path_components, the_unit)
+    results_dict['should_have_doc'] = False
     results_dict['file_status'] = f'uncheckable: more than one unit on path {path}'
     return results_dict
 
@@ -295,6 +298,7 @@ def check_file_documentation_aux(dir_struct, lines:list, path:str):
       
       if not the_unit:
         #weird case - F90 file on path that does not include a unit name
+        results_dict['should_have_doc'] = False
         results_dict['file_status'] = f'uncheckable: for {path=}, no checkable unit found among {units}'
         return results_dict
 
@@ -325,6 +329,7 @@ def check_file_documentation_aux(dir_struct, lines:list, path:str):
 
     #dox files can appear above a unit folder, e.g., source/numericalTools/numericalTools.dox
     if not the_unit:
+      results_dict['should_have_doc'] = False
       results_dict['file_status'] = f'uncheckable: currently not checking dox files above unit folder.'
       return results_dict
     #could replace above with checker later if wanted
@@ -336,6 +341,7 @@ def check_file_documentation_aux(dir_struct, lines:list, path:str):
       results_dict[key] = results[key]
     return results
 
+  results_dict['should_have_doc'] = False
   results_dict['file_status'] = f'uncheckable: no checkers found'
   return results_dict
 
@@ -360,7 +366,8 @@ def check_implementation_stub(lines, path, file_name, unit, public=True):
   
   path_components = splitall(path)
 
-  problems = dict(file_status = f"checkable {'public' if public else 'private'} stub",
+  problems = dict(should_have_doc = True,
+                  file_status = f"checkable {'public' if public else 'private'} stub",
                   bogus_fields=[],  #fields that appear but should not appear in the file
                   missing_file_fields = [],  #missing fields that should appear at top of file
                   missing_subroutine_fields = [],  #pair: subroutine line, missing fields that should appear with subroutine
@@ -515,7 +522,8 @@ def check_implementation(lines, path, file_name, unit, public=True):
   
   path_components = splitall(path)
 
-  problems = dict(file_status = f"checkable {'public' if public else 'private'} stub implementation",
+  problems = dict(should_have_doc = True,
+                  file_status = f"checkable {'public' if public else 'private'} stub implementation",
                   bogus_fields=[],  #fields that appear but should not appear in the file
                   missing_file_fields = [],  #missing fields that should appear at top of file
                   missing_subroutine_fields = [],  #pair: subroutine line, missing fields that should appear with subroutine
@@ -626,7 +634,7 @@ def check_private_file(dir_struct, lines, path, file_name, unit):
 
   #No, not in localAPI. Is there a stub for the file in localApi folder?
   if not dir_struct:
-    return {'file_status': f'uncheckable: directory structure has not been set - necessary to check private implementation'}
+    return {'should_have_doc':False, 'file_status': f'uncheckable: directory structure has not been set - necessary to check private implementation'}
 
   #dir_struct is set so we can see if can find localAPI.
   #first build path to unit.
@@ -655,7 +663,7 @@ def check_private_file(dir_struct, lines, path, file_name, unit):
   return check_implementation(lines, path, file_name, unit, public=False)  #same as normal stubbed implementation
 
 def check_private_nonstubbed_implementation(lines, path, file_name, unit):
-  return {'file_status': f'uncheckable: not checking non-stubbed private files. Either no localApi folder or {file_name} not found in that folder'}
+  return {'should_have_doc':False, 'file_status': f'uncheckable: not checking non-stubbed private files. Either no localApi folder or {file_name} not found in that folder'}
 
 
 """# Check dox file
@@ -680,7 +688,8 @@ def check_unit_dox(lines, path, file_name, unit):
 
   path_components = splitall(path)
 
-  problems = dict(file_status = f"checkable dox",
+  problems = dict(should_have_doc = True,
+                  file_status = f"checkable dox",
                   bogus_fields=[],  #fields that appear but should not appear in the file
                   missing_file_fields = [],
                   missing_subroutine_fields = [],

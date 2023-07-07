@@ -165,6 +165,7 @@ def check_file_documentation_aux(dir_struct, lines:list, path:str):
   global units  #list of known units in Flash-X
 
   results_dict = {
+      'should_have_doc': False,
       'file_status': 'checkable',
       'missing_fields': [],
       'missing_file_fields': [],
