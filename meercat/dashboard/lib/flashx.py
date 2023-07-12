@@ -631,7 +631,7 @@ def check_private_file(dir_struct, lines, path, file_name, unit):
 
   #First check if we are in localApi folder.
   path_components = splitall(path)  #list of all pieces in path, e.g., ['source', 'numericalTools', 'MoL', 'MoL_advance.F90']
-  if path_components[-2] == 'localApi':
+  if path_components[-2] == 'localApi' or path_components[-2] == 'localAPI':
     return check_implementation_stub(lines, path, file_name, unit, public=False)
 
   #No, not in localAPI. Is there a stub for the file in localApi folder?
@@ -653,20 +653,26 @@ def check_private_file(dir_struct, lines, path, file_name, unit):
   localAPI_path = '/'.join(unit_path) + '/localApi'
   folder, path = find_folder_on_path(dir_struct, localAPI_path)
 
-  if path != f'/{localAPI_path}':
+  localAPI_path2 = '/'.join(unit_path) + '/localAPI'
+  folder2, path2 = find_folder_on_path(dir_struct, localAPI_path2)
+
+  if path != f'/{localAPI_path}' and path2 != f'/{localAPI_path2}':
     print(f'No localApi folder so must be non_stubbed. {localAPI_path=}')
     print(f'No localApi folder so must be non_stubbed. {path=}')
     print(f'No localApi folder so must be non_stubbed. {file_name=}')
     return check_private_nonstubbed_implementation(lines, path, file_name, unit)
 
   #localAPI does exist. check if stub in localAPI
-  if not contains_file(folder, file_name):
+  if not contains_file(folder, file_name) and not contains_file(folder2, file_name):
     print(f'localApi folder but no stub. {folder=}')
     print(f'localApi folder but no stub. {file_name=}')
     return check_private_nonstubbed_implementation(lines, path, file_name, unit)
 
   #stub exists so must be implementation of stub
-  return check_implementation(lines, path, file_name, unit, public=False)  #same as normal stubbed implementation
+  if path == f'/{localAPI_path}':
+    return check_implementation(lines, path, file_name, unit, public=False)  #same as normal stubbed implementation
+  else:
+    return check_implementation(lines, path2, file_name, unit, public=False)  #same as normal stubbed implementation
 
 def check_private_nonstubbed_implementation(lines, path, file_name, unit):
   return {'should_have_doc':False, 'file_status': f'uncheckable: not checking non-stubbed private files. Either no localApi folder or {file_name} not found in that folder'}
