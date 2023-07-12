@@ -905,7 +905,7 @@ $.ajax({
                         "<span>"+result['diffcommits'][i]['filename'] +"</span>"+
                         "<br/><a class='btn btn-xs btn-secondary' target='_blank' href='/dashboard/filex/"+project+"?filename="+result['diffcommits'][i]['filename']+"&branch="+branch+"'>View in File Explorer</a>"+
                     "</td><td>"+
-                        (cqissues < 0 ? '-' : cqissues) +
+                        (cqissues < 0 ? "-" : (cqissues > 0 ? "<span style='color:red;'>"+cqissues+"</span>" : cqissues)) +
                     "</td><td>"+
                         (cqissues > 0 ? cqbuttons : '') +
                     "</td></tr>");
@@ -925,7 +925,7 @@ $.ajax({
         }
 
 
-        if( !(project == 30 || project == 26 || project == 35 || project == 32 ) ){
+        if( !(project == 30 || project == 26 || project == 35 || project == 32 || project == 19 ) ){
             cqtable.append("<tr><td colspan='3'>"+
                     "<i>This project is not supported yet.</i>"+
                 "</td></tr>");

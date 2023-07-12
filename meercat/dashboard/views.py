@@ -359,7 +359,7 @@ def first_responder_function(proj_object, pull_object):
                 numerator += len(metric.result_json)
     if denominator > 0:
         average = (numerator/denominator)            
-    print("AVERAGE PROBLEMS: "+ str(numerator/denominator))
+        print("AVERAGE PROBLEMS: "+ str(numerator/denominator))
     average = math.floor(average)
 
     linter_problems = 0;
@@ -786,7 +786,7 @@ def file_linter(proj_object, filename):
         ):
             if result and len(result) > 0:
                 try:
-                    if 'Exactly one space after' not in result and 'Missing space' not in result and 'Trailing whitespace' not in result:
+                    if 'Exactly one space after' not in result and 'Missing space' not in result and 'Trailing whitespace' not in result and 'Line length' not in result:
                         results.append(
                             {
                                 "column": 0,
@@ -1506,7 +1506,7 @@ def getFile(request):
         ):
             if result and len(result) > 0:
                 try:
-                    if 'Exactly one space after' not in result and 'Missing space' not in result and 'Trailing whitespace' not in result:
+                    if 'Exactly one space after' not in result and 'Missing space' not in result and 'Trailing whitespace' not in result and 'Line length' not in result:
                         results.append(
                             {
                                 "column": 0,

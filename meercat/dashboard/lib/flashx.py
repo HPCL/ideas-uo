@@ -627,6 +627,8 @@ def check_private_file(dir_struct, lines, path, file_name, unit):
   Need to sort out which we are looking at.
   '''
 
+  print(f'+----------- CHECKING PRIVATE FILE -----------+ {file_name=}')
+
   #First check if we are in localApi folder.
   path_components = splitall(path)  #list of all pieces in path, e.g., ['source', 'numericalTools', 'MoL', 'MoL_advance.F90']
   if path_components[-2] == 'localApi':
@@ -646,17 +648,21 @@ def check_private_file(dir_struct, lines, path, file_name, unit):
     unit_path.append(item)
   else: assert False, f'{unit=} should be on path but is not found'
 
+  # TODO: Below is not correct.  Need to search all files in localApi to find stud def.
   #check if localApi exists under unit
   localAPI_path = '/'.join(unit_path) + '/localApi'
   folder, path = find_folder_on_path(dir_struct, localAPI_path)
 
-  if path != localAPI_path:
+  if path != f'/{localAPI_path}':
     print(f'No localApi folder so must be non_stubbed. {localAPI_path=}')
+    print(f'No localApi folder so must be non_stubbed. {path=}')
+    print(f'No localApi folder so must be non_stubbed. {file_name=}')
     return check_private_nonstubbed_implementation(lines, path, file_name, unit)
 
   #localAPI does exist. check if stub in localAPI
   if not contains_file(folder, file_name):
     print(f'localApi folder but no stub. {folder=}')
+    print(f'localApi folder but no stub. {file_name=}')
     return check_private_nonstubbed_implementation(lines, path, file_name, unit)
 
   #stub exists so must be implementation of stub
