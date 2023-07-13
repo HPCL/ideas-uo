@@ -1,5 +1,58 @@
 console.log("javascript is working...");
 
+class FeedbackSubmission {
+    constructor() {
+        this.filepath = "";
+        this.thumbs = "";
+    }
+
+    populate_feedback_modal(event) {
+        console.log(event.target.closest("tr").querySelector(".file-path-td > .file-path-span").id);
+        this.filepath = event.target.closest("tr").querySelector(".file-path-td > .file-path-span").id;
+        this.thumbs = event.target.dataset.value;
+        document.getElementById("feedback-clicked").src = `/static/images/${event.target.dataset.value}.svg`;
+    }
+
+    handle_submit() {
+        let message = document.getElementById("feedback-prid").value;
+        let prid = document.getElementById("feedback-prid").value;
+        let type = document.getElementById("feedback-type").value;
+        let submit_btn = document.getElementById("feedback-submit-btn");
+        let feedback_alert = document.getElementById("feedback-status");
+        let filepath = this.filepath;
+        let thumbs = this.thumbs;
+
+        submit_btn.innerText = "Loading...";
+        submit_btn.disabled = true;
+        $.ajax({
+            url: '/dashboard/recommender_feedback/', 
+            type: 'POST', 
+            data: { thumbs, filepath, message, prid, type }, 
+            success: (result) => {
+                if (result.success === "true") { // update DOM elements on success
+                    feedback_alert.innerText = "We received your feedback."
+                } else { // show error message on failure (due to server error)
+                    feedback_alert.innerText = "There was an error saving your feedback.";
+                }
+            },
+            error: (error) => { //  show error message on failure (due to ajax error)
+                feedback_alert.innerText = "There was an error saving your feedback.";
+                console.error(error);
+            },
+            complete: () => {
+                submit_btn.innerText = "Save Changes";
+                submit_btn.disabled = false;
+                $(feedback_alert).fadeIn();
+                setTimeout(() => $(feedback_alert).fadeOut(), 3000);
+            }
+        });
+    }
+}
+
+const feedback_submission = new FeedbackSubmission();
+
+document.querySelectorAll(".feedback-button").forEach(btn => btn.addEventListener("click", feedback_submission.populate_feedback_modal));
+document.getElementById("feedback-submit-btn").addEventListener("click", function () { feedback_submission.handle_submit() })
 
 var startdate = $("#startdate");
 var date = new Date(new Date().getTime() - (1000 * 60 * 60 * 24 * 30));
@@ -1160,7 +1213,6 @@ $.ajax({
 
     }
 });
-
 
 /*
  

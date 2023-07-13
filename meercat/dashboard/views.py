@@ -93,8 +93,8 @@ def recommender_feedback(request):
     if request.method == "POST":
         try:
             feedback = PRAFeedback(
-                thumbs = request.POST.get("thumbs", False),
-                message = request.POST.get("message", ""),
+                thumbs = request.POST.get("thumbs") == "thumb-up",
+                message = request.POST.get("message"),
                 user = request.user,
                 filepath = request.POST.get("filepath"),
                 type = request.POST.get("type"),
@@ -991,6 +991,7 @@ def pr(request, *args, **kwargs):
 
     context = {
         "pr": pr,
+        "prid": prid,
         "branch": branch,
         "commits": commits,
         "issues": issues,

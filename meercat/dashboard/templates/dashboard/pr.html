@@ -154,7 +154,27 @@
                                 </tr>
                             </thead>
                             <tbody style="font-size:10pt;">
-                                <tr><td colspan="3">Loading...</td></tr>
+                                <!-- <tr><td colspan="4">Loading...</td></tr> -->
+                                <tr>
+                                    <td class="file-path-td">
+                                        <span class="file-path-span" id="flashx_samples/FLASH_XGrid_fillGuardCells.F90">flashx_samples/FLASH_XGrid_fillGuardCells.F90</span>
+                                        <br>
+                                        <a class="btn btn-xs btn-secondary" target="_blank" href="/dashboard/filex/30?filename=flashx_samples/FLASH_XGrid_fillGuardCells.F90&amp;branch=remotes/origin/flash_test">View in File Explorer</a>
+                                    </td>
+                                    <td colspan="3">
+                                        uncheckable: for path='flashx_samples/FLASH_XGrid_fillGuardCells.F90', no checkable unit found among ['Driver', 'Grid', 'Multispecies', 'Particles', 'PhysicalConstants', 'RuntimeParameters', 'Simulation', 'MoL', 'IO', 'Eos', 'Gravity', 'HeatAD', 'Hydro', 'ImBound', 'IncompNS', 'Multiphase', 'RadTrans', 'Timers', 'Logfile', 'Debugger', 'Profiler']
+                                    </td>
+                                    <td>
+                                        <div class="d-flex justify-content-between">
+                                            <button type="button" class="btn p-0" data-bs-toggle="modal" data-bs-target="#feedback-modal">
+                                                <img class="feedback-button" data-value="thumb_up" style="width: 20px;" src="{% static 'images/thumb_up.svg' %}">
+                                            </button>
+                                            <button type="button" class="btn p-0" data-bs-toggle="modal" data-bs-target="#feedback-modal">
+                                                <img class="feedback-button" data-value="thumb_down" style="width: 20px;" src="{% static 'images/thumb_down.svg' %}">
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -167,28 +187,27 @@
     <br/>
 
     <!-- Modal -->
-    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal fade" id="feedback-modal" tabindex="-1" aria-labelledby="feedback-modal-label" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Submit your feedback</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form method="POST" action="{% url 'recommender_feedback' %}">
-                    <label for="message">Tell us what you think about this so we can improve it</label>
-                    <textarea name="message" id="message" cols="30" rows="10"></textarea>
-                    <input type="hidden" name="prid" value="{{ view.kwargs.pk }}" />
-                    <input type="hidden" name="file-path" id="feedback-filepath" />
-                    <input type="hidden" name="thumbs" id="feedback-thumbs" />
-                    <input type="hidden" name="type" value="Documentation" />
-                    <button class="btn btn-primary" type="submit">Submit</button>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
-            </div>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="feedback-modal-label">Submit your feedback</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                    <div class="modal-body">
+                            <p> You clicked <img id="feedback-clicked" style="width: 20px;"/></p>
+                            <label for="feedback-message" class="mb-2">Tell us what you think about this so we can improve it</label>
+                            <textarea id="feedback-message" cols="55" rows="5"></textarea>
+                            <input type="hidden" id="feedback-prid" value="{{ prid }}" />
+                            <input type="hidden" id="feedback-type" value="Documentation" />
+                    </div>
+                    <div class="modal-footer d-flex justify-content-between">
+                        <div>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" id="feedback-submit-btn" class="btn btn-primary">Save Changes</button>
+                        </div>
+                        <span id="feedback-status"></span>
+                    </div>
             </div>
         </div>
     </div>
