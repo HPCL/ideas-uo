@@ -54,6 +54,7 @@ from dashboard.utilities import (
 )
 from dashboard.author_merger_tool import AuthorMergerTool
 from dashboard.lib import flashx
+from dashboard.lib import default
 
 import subprocess
 import os, warnings
@@ -318,15 +319,37 @@ def first_responder_function(proj_object, pull_object):
     '''
 
     #Find the files with documentation problems, i.e., that have the field 'problem_lines'
-    doc_problems = []
+    doc_problems = 0
+    doc_missing = 0
+    checkable = 0
+    no_library = False
+    all_files = len(all_contexts.items())
     for filename,context in all_contexts.items():
-        documentation_status = context['documentation']  #a dictionary - see above
-        if 'problem_lines' in documentation_status:
-            doc_problems.append([filename, documentation_status['problem_lines']]) 
+        # documentation_status = context['documentation']  #a dictionary - see above
+        # if 'problem_lines' in documentation_status:
+        #     doc_problems.append([filename, documentation_status['problem_lines']]) 
+        documentation_status = context['documentation_lib']  #a dictionary - see above
+        if len(documentation_status['problem_fields']) > 0 or len(documentation_status['missing_fields']) > 0 or ('missing_file_fields' in documentation_status and len(documentation_status['missing_file_fields']) > 0) or  ('missing_subroutine_fields' in documentation_status and len(documentation_status['missing_subroutine_fields']) > 0):
+            doc_problems += 1 
+        elif 'no Doxygen' in documentation_status['file_status']:
+            doc_missing += 1 
+        elif 'No documentation checker library available' in documentation_status['file_status']:
+            no_library = True
 
-    total_doc_problems = len(doc_problems)
+        if documentation_status['should_have_doc']:
+            checkable += 1
 
+    doc_message =  f"""## Out of {all_files} file(s) in this PR, {checkable} should have doxygen documentation.  {checkable-doc_missing} have doxygen documentation."""
+
+    if checkable-doc_missing > 0:
+        doc_message +=f"""
+## Out of {checkable-doc_missing} file(s) with doxygen documentation, {doc_problems} file(s) have issues."""
     
+    if no_library:
+        doc_message =  f"""No documentation library available."""
+
+
+
     # Use metrics to compute average (and get live results for just the files in PR branch)
     linter_metrics = list(FileMetric.objects.all().filter(metric_type=FileMetric.MetricTypeChoices.LINTING, project=proj_object, branch='main'))
     numerator = 0
@@ -339,7 +362,7 @@ def first_responder_function(proj_object, pull_object):
                 numerator += len(metric.result_json)
     if denominator > 0:
         average = (numerator/denominator)            
-    print("AVERAGE PROBLEMS: "+ str(numerator/denominator))
+        print("AVERAGE PROBLEMS: "+ str(numerator/denominator))
     average = math.floor(average)
 
     linter_problems = 0;
@@ -349,9 +372,10 @@ def first_responder_function(proj_object, pull_object):
             linter_problems += 1
     print("TOTAL PROBLEMS OVER AVERAGE: "+ str(linter_problems))
 
+
     message = f"""## The MeerCat Pull-Request Assistant has information for you
 
-## {total_doc_problems} file(s) in this PR have documentation issues.
+{doc_message}
 
 ## {linter_problems} files have more linting errors than average ({average}).
 
@@ -384,17 +408,24 @@ def file_explorer_handler(proj_object, filename, branch ):
         context['complete_ignore'] = True
         return context
 
-    with open(
-        str(settings.REPOS_DIR) + "/" + proj_object.name + "/" + filename, "r") as f:
-        lines = f.readlines()
-        f.close()
+    try:
+        with open(
+            str(settings.REPOS_DIR) + "/" + proj_object.name + "/" + filename, "r") as f:
+            lines = f.readlines()
+            f.close()
+    except:
+        lines = []        
 
-    #dict(ignore_status, check_status doc_status, problem_lines [(msg, line), (msg, line)] )
 
     # THIS IS WHERE WE CALL THE FLASHX LIBRARY TODO: NEED TO ONLY CALL IT IF FLASHX OR ANL_TEST_REPO THOUGH
-    flashx.set_directory_structure(repo_structure(str(settings.REPOS_DIR) + "/" + proj_object.name))
-    documentation_status_lib = flashx.check_file_documentation(lines, filename)
-    # This is the old checker.  Keep it for non-flashx projects
+    if proj_object.id == 35 or proj_object.id == 30 or proj_object.id == 26:
+        flashx.set_directory_structure(repo_structure(str(settings.REPOS_DIR) + "/" + proj_object.name))
+        documentation_status_lib = flashx.check_file_documentation(lines, filename)
+    else:    
+        default.set_directory_structure(repo_structure(str(settings.REPOS_DIR) + "/" + proj_object.name))
+        documentation_status_lib = default.check_file_documentation(lines, filename)
+
+    #TODO: Remove this! This is the old checker.  Keep it for non-flashx projects for now.
     documentation_status = check_documentation(proj_object, filename, lines)
 
     dev_table = create_dev_table(proj_object, filename)
@@ -758,7 +789,7 @@ def file_linter(proj_object, filename):
         ):
             if result and len(result) > 0:
                 try:
-                    if 'Exactly one space after' not in result and 'Missing space' not in result and 'Trailing whitespace' not in result:
+                    if 'Exactly one space after' not in result and 'Missing space' not in result and 'Single space' not in result and 'Trailing whitespace' not in result and 'Line length' not in result:
                         results.append(
                             {
                                 "column": 0,
@@ -1479,7 +1510,7 @@ def getFile(request):
         ):
             if result and len(result) > 0:
                 try:
-                    if 'Exactly one space after' not in result and 'Missing space' not in result and 'Trailing whitespace' not in result:
+                    if 'Exactly one space after' not in result and 'Missing space' not in result and 'Single space' not in result and 'Trailing whitespace' not in result and 'Line length' not in result:
                         results.append(
                             {
                                 "column": 0,
@@ -1721,68 +1752,70 @@ def githubBot(request):
 
     prnumber = str(payload["number"])
 
-    if str(payload["action"]) == "opened": # or str(payload["action"]) == "edited":
+    project = list(
+        Project.objects.all()
+        .filter(source_url=str(payload["repository"]["clone_url"]))
+        .all()
+    )[0]
 
-        project = list(
-            Project.objects.all()
-            .filter(source_url=str(payload["repository"]["clone_url"]))
-            .all()
-        )[0]
+    # Only do this for new PRs (run on edited for testing)
+    if str(payload["action"]) == "opened" or (project.id == 30 and str(payload["action"]) == "edited"):
 
-        # Only post comments for anl_test_repo and FLASH5
-        if project.id == 30 or project.id == 26:
-            try:
-                # BASE_DIR = Path(__file__).resolve().parent.parent
-                with open(settings.BASE_DIR / 'meercat.config.json') as meercat_config:
-                    config = json.load(meercat_config)
-
-                repo_name = project.name
-                repo_owner = get_repo_owner(project)
-                url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues/{prnumber}/comments"
-                gh_payload = {
-                    "body": "## MeerCat is working on this PR.  Please stay tuned."
-                }
-
-                branch = str(payload["pull_request"]["head"]["label"])
-                if "staged" in branch:
-                    gh_payload = {
-                        "body": "## MeerCat will ignore this PR because it is coming from the staged branch."
-                    }
-
-                headers = {
-                    "Accept": "application/vnd.github+json",
-                    "Authorization": "token " + config['MEERCAT_USER_TOKEN'],
-                }
-                result = requests.post(url, headers=headers, data=json.dumps(gh_payload))
-            except Exception as e:
-                print(e)
-                pass        
-
-        # Need to refresh the database before
-        username = settings.DATABASES["default"]["USER"]
-        password = settings.DATABASES["default"]["PASSWORD"]
-        # cmd = f'cd .. ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {project.id}'
-        cmd = f"cd {settings.REPOS_DIR} ; . meercat/meercat-env/bin/activate ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {project.id}"
-        # os.system(cmd)
-        result = subprocess.check_output(cmd, shell=True)
-
-        pull_request = list(
-            PullRequest.objects.all()
-            .filter(project=project.id, number=int(prnumber))
-            .all()
-        )[0]
-
-        # TODO: eventually only do this for new PRs (check payload for action type I think)
+        # Ignore if merging into main or master
         #branch = str(payload["pull_request"]["head"]["label"])
         targetbranch = str(payload["pull_request"]["base"]["label"])
-        #if pull_request and "staged" not in branch:
-        if pull_request and "main" not in targetbranch and "master" not in targetbranch:
+        if  project.id == 30 or (pull_request and "main" not in targetbranch and "master" not in targetbranch):
+
+            # Only post comments for anl_test_repo and FLASH5
+            if project.id == 35 or project.id == 30 or project.id == 26:
+                try:
+                    # BASE_DIR = Path(__file__).resolve().parent.parent
+                    with open(settings.BASE_DIR / 'meercat.config.json') as meercat_config:
+                        config = json.load(meercat_config)
+
+                    repo_name = project.name
+                    repo_owner = get_repo_owner(project)
+                    url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues/{prnumber}/comments"
+                    gh_payload = {
+                        "body": "## MeerCat is working on this PR.  Please stay tuned."
+                    }
+
+                    branch = str(payload["pull_request"]["head"]["label"])
+                    if "staged" in branch:
+                        gh_payload = {
+                            "body": "## MeerCat will ignore this PR because it is coming from the staged branch."
+                        }
+
+                    headers = {
+                        "Accept": "application/vnd.github+json",
+                        "Authorization": "token " + config['MEERCAT_USER_TOKEN'],
+                    }
+                    result = requests.post(url, headers=headers, data=json.dumps(gh_payload))
+                except Exception as e:
+                    print(e)
+                    pass        
+
+            # Need to refresh the database before
+            username = settings.DATABASES["default"]["USER"]
+            password = settings.DATABASES["default"]["PASSWORD"]
+            # cmd = f'cd .. ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {project.id}'
+            cmd = f"cd {settings.REPOS_DIR} ; . meercat/meercat-env/bin/activate ; export PYTHONPATH=. ; nohup python3 ./src/gitutils/update_database.py {username} {password} {project.id}"
+            # os.system(cmd)
+            result = subprocess.check_output(cmd, shell=True)
+
+            pull_request = list(
+                PullRequest.objects.all()
+                .filter(project=project.id, number=int(prnumber))
+                .all()
+            )[0]
+
+
 
             comment, all_contexts = first_responder_function(pull_request.project, pull_request)
             print("------------")
             if comment:
                 # Only post comments for anl_test_repo and FLASH5
-                if project.id == 30 or project.id == 26:
+                if project.id == 35 or project.id == 30 or project.id == 26:
                     comment_pullrequest(pull_request, comment)
                     print("commented")
                 else:

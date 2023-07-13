@@ -154,7 +154,7 @@ function showDocEditor(docfilename, difftext) {
                 editor.setOption("mode", "text/x-c++src");
             }else if( filename.indexOf(".py") >= 0 ){
                 editor.setOption("mode", "text/x-python");
-            }else if( filename.indexOf(".F90") >= 0 ){
+            }else if( filename.indexOf(".F90") >= 0 || filename.indexOf(".dox") >= 0 ){
                 editor.setOption("mode", "text/x-fortran");
             }else{
                 editor.setOption("mode", "text/html");
@@ -194,13 +194,22 @@ function showDocEditor(docfilename, difftext) {
             }
 */
             var file_doc_results = docstring_results[filename];
-            if( filename.indexOf(".F90") >= 0 ){
+
+            if( filename.indexOf(".F90") >= 0 || filename.indexOf(".dox") >= 0 ){
                 if( file_doc_results['documentation_lib']['file_status'].indexOf("checkable") == 0 ){
                     for(var i=0; i<file_doc_results['documentation_lib']['problem_fields'].length; i++){
                         editor.markText({ line: file_doc_results['documentation_lib']['problem_fields'][i][2], ch: 0 }, { line: file_doc_results['documentation_lib']['problem_fields'][i][2], ch: 100 }, { className: "styled-background" });
                     }
-                    for(var i=0; i<file_doc_results['documentation_lib']['missing_fields'].length; i++){
+                    //for(var i=0; i<file_doc_results['documentation_lib']['missing_fields'].length; i++){
+                    if( file_doc_results['documentation_lib']['missing_fields'].length > 0){
                         editor.markText({ line: 0, ch: 0 }, { line: 0, ch: 100 }, { className: "styled-background" });
+                    }
+                    //for(var i=0; i<file_doc_results['documentation_lib']['missing_file_fields'].length; i++){
+                    if( file_doc_results['documentation_lib']['missing_file_fields'].length > 0){
+                        editor.markText({ line: 0, ch: 0 }, { line: 0, ch: 100 }, { className: "styled-background" });
+                    }
+                    for(var i=0; i<file_doc_results['documentation_lib']['missing_subroutine_fields'].length; i++){
+                        editor.markText({ line: file_doc_results['documentation_lib']['missing_subroutine_fields'][i][0], ch: 0 }, { line: file_doc_results['documentation_lib']['missing_subroutine_fields'][i][0], ch: 100 }, { className: "styled-background" });
                     }
                 }
             }else if( file_doc_results['documentation']['check_status'] && !file_doc_results['documentation']['documentation.doc_status'] ){
@@ -244,7 +253,7 @@ function showDocEditor(docfilename, difftext) {
                     }
 */  
                     var file_doc_results = docstring_results[filename];
-                    if( filename.indexOf(".F90") >= 0 ){
+                    if( filename.indexOf(".F90") >= 0 || filename.indexOf(".docx") >= 0){
                         if( file_doc_results['documentation_lib']['file_status'].indexOf("checkable") == 0 ){
                             for(var i=0; i<file_doc_results['documentation_lib']['problem_fields'].length; i++){
                                 // Problem line format: ['message', 'line', linenumber]
@@ -336,17 +345,45 @@ function showDocEditor(docfilename, difftext) {
                             editor.addWidget({ line: cursor.line, ch: 9 }, popupNode, true);
                         }
                     }
-                    for(var i=0; i<file_doc_results['documentation_lib']['missing_fields'].length; i++){
+                    //for(var i=0; i<file_doc_results['documentation_lib']['missing_fields'].length; i++){
+                    if( file_doc_results['documentation_lib']['missing_fields'].length > 0){
                         // Problem line format: ['message', linenumber]
                         if (cursor.line == 0 ) {
                             
                             popupNode.innerHTML = '';
-                            var text = document.createTextNode("Missing fields: "+file_doc_results['documentation_lib']['missing_fields'][i]);
+                            var text = document.createTextNode("Missing fields: "+file_doc_results['documentation_lib']['missing_fields']);
                             popupNode.appendChild(text);
                   
                             editor.addWidget({ line: cursor.line, ch: 9 }, popupNode, true);
                         }
                     }  
+                    //for(var i=0; i<file_doc_results['documentation_lib']['missing_file_fields'].length; i++){
+                    if( file_doc_results['documentation_lib']['missing_file_fields'].length > 0){
+                        // Problem line format: ['message', linenumber]
+                        if (cursor.line == 0 ) {
+                            
+                            popupNode.innerHTML = '';
+                            var text = document.createTextNode("Missing file fields: "+file_doc_results['documentation_lib']['missing_file_fields']);
+                            popupNode.appendChild(text);
+                  
+                            editor.addWidget({ line: cursor.line, ch: 9 }, popupNode, true);
+                        }
+                    }  
+
+                    subroutine_text = []
+                    for(var i=0; i<file_doc_results['documentation_lib']['missing_subroutine_fields'].length; i++){
+                        // Problem line format: ['message', linenumber]
+                        if (cursor.line ==  file_doc_results['documentation_lib']['missing_subroutine_fields'][i][0] ) {
+                            
+                            subroutine_text.push(file_doc_results['documentation_lib']['missing_subroutine_fields'][i][1]);
+                        }
+                    }  
+                    if( subroutine_text.length > 0 ){
+                        popupNode.innerHTML = '';
+                        var text = document.createTextNode("Missing fields: "+subroutine_text);
+                        popupNode.appendChild(text);
+                        editor.addWidget({ line: cursor.line, ch: 9 }, popupNode, true);
+                    }
                 }else{
                     for(var i=0; i<file_doc_results['documentation']['problem_lines'].length; i++){
                         // Problem line format: ['message', linenumber]
@@ -921,7 +958,7 @@ $.ajax({
                         "<span>"+result['diffcommits'][i]['filename'] +"</span>"+
                         "<br/><a class='btn btn-xs btn-secondary' target='_blank' href='/dashboard/filex/"+project+"?filename="+result['diffcommits'][i]['filename']+"&branch="+branch+"'>View in File Explorer</a>"+
                     "</td><td>"+
-                        (cqissues < 0 ? '-' : cqissues) +
+                        (cqissues < 0 ? "-" : (cqissues > 0 ? "<span style='color:red;'>"+cqissues+"</span>" : cqissues)) +
                     "</td><td>"+
                         (cqissues > 0 ? cqbuttons : '') +
                     "</td></tr>");
@@ -941,7 +978,7 @@ $.ajax({
         }
 
 
-        if( !(project == 30 || project == 26 || project == 35 || project == 32 ) ){
+        if( !(project == 30 || project == 26 || project == 35 || project == 32 || project == 19 ) ){
             cqtable.append("<tr><td colspan='3'>"+
                     "<i>This project is not supported yet.</i>"+
                 "</td></tr>");
@@ -961,15 +998,15 @@ $.ajax({
 
             var docbuttons = "";
             var docissues = -1;
-            var docstatus = "";
+            var docstatus = "-";
             docbuttons += "<button class='btn btn-sm btn-primary' onclick='showDocEditor(\"" + filename + "\",\"" + "DIFF STUFF TO GO HERE" + "\");'>View File in Editor</button><br/>";
  
             //Compute number of issues
             if( filename.indexOf(".F90") >= 0 || filename.indexOf(".dox") >= 0 ){
-                if( file_doc_results['documentation_lib']['file_status'].indexOf("checkable") == 0 ){
+                if( file_doc_results['documentation_lib']['file_status'] && file_doc_results['documentation_lib']['file_status'].indexOf("checkable") == 0 ){
                     docissues = 0;
                     try{
-                        docissues = file_doc_results['documentation_lib']['problem_fields'].length + file_doc_results['documentation_lib']['missing_fields'].length;
+                        docissues = file_doc_results['documentation_lib']['problem_fields'].length + file_doc_results['documentation_lib']['missing_fields'].length + file_doc_results['documentation_lib']['missing_file_fields'].length + file_doc_results['documentation_lib']['missing_subroutine_fields'].length;
                     }catch(error){
                         console.log(error);
                     }
@@ -984,7 +1021,8 @@ $.ajax({
                 }catch(error){}
             }
 
-            docstatus = file_doc_results['documentation_lib']['file_status']; //.replaceAll('/','/<br/>');
+            if( file_doc_results['documentation_lib']['file_status'] )
+                docstatus = file_doc_results['documentation_lib']['file_status']; //.replaceAll('/','/<br/>');
 
             if( docstatus.indexOf("uncheckable") >= 0  ){
                 if( docstatus.indexOf("no documentation") >= 0 ){
