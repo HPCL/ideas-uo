@@ -177,11 +177,17 @@ def subscriptions(request):
 
     projects = Project.objects.filter(project_role__user=request.user)
 
+    if request.user.is_staff:
+        projects = Project.objects.all()
+
     files = {}
     project_names = []
     for project in projects:
         project_names.append(project.name)
-        files[project.name] = list_project_files(project.name)
+        try:
+            files[project.name] = list_project_files(project.name)
+        except:
+            pass
 
     subscriptions = request.user.profile.subscriptions
 
@@ -379,7 +385,7 @@ def first_responder_function(proj_object, pull_object):
 
 ## {linter_problems} files have more linting errors than average ({average}).
 
-[Please see the Pull-Request Assistant page for more detail.](https://meercat.cs.uoregon.edu/dashboard/pr/{pull_object.id})
+[Please see the Pull-Request Assistant page for more detail.](https://meercat.cs.uoregon.edu/dashboard/pr/{pull_object.id}) (right-click to open in new tab)
     """
 
     # pr_file_intersection = comute_pr_file_intersection(proj_object, filenames)
@@ -1835,6 +1841,50 @@ def githubBot(request):
                 event.save()
                 print("don't bug me")
             print("------------")
+
+            # Now notify any subscribers
+
+            profiles = Profile.objects.all()
+            for profile in profiles:
+                subscriptions = profile.subscriptions
+                print("------------ CHECKING " + profile.user.username)
+                try:
+                    # Project subs is just an array of file names
+                    project_subs = subscriptions[pull_request.project.name]
+
+                    send_email = False
+
+                    # Next, see if any PR files match file in project_subs
+                    for filename,context in all_contexts.items():
+                        for filename_sub in project_subs:
+                            if filename_sub == filename:
+                                # Send the email!
+                                send_email = True
+
+                    if send_email:
+                        print("+---------- SHOULD SEND EMAIL!!!!!! -----------+")
+
+                        if profile.user.email:
+                            gmail_send_message(
+                                subject="MeerCat Notification",
+                                body="A new Pull Request has been created that you may be interested in: https://meercat.cs.uoregon.edu/dashboard/pr/"
+                                + str(pull_request.id)
+                                + "\n\nYou are receiving this because you are subscribed to a file that was modified in this Pull Request.",
+                                recipient_list=[profile.user.email],
+                            )
+                        else:
+                            gmail_send_message(
+                                subject="MeerCat Notification",
+                                body="A new Pull Request has been created that you may be interested in: https://meercat.cs.uoregon.edu/dashboard/pr/"
+                                + str(pull_request.id)
+                                + "\n\nYou are receiving this because you are subscribed to a file that was modified in this Pull Request.",
+                                recipient_list=[profile.gh_email],
+                            )
+
+                except Exception as e:
+                    print( "EXCEPTION "+str(e))
+
+
         
     return HttpResponse(
         json.dumps({"results": "success"}), content_type="application/json"
