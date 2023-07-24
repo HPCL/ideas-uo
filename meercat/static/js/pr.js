@@ -51,8 +51,9 @@ class FeedbackSubmission {
 
 const feedback_submission = new FeedbackSubmission();
 
-document.querySelectorAll(".feedback-button").forEach(btn => btn.addEventListener("click", feedback_submission.populate_feedback_modal));
-document.getElementById("feedback-submit-btn").addEventListener("click", function () { feedback_submission.handle_submit() })
+// TODO: This needs to happen after the buttons are created elsewhere
+//document.querySelectorAll(".feedback-button").forEach(btn => btn.addEventListener("click", feedback_submission.populate_feedback_modal));
+//document.getElementById("feedback-submit-btn").addEventListener("click", function () { feedback_submission.handle_submit() })
 
 var startdate = $("#startdate");
 var date = new Date(new Date().getTime() - (1000 * 60 * 60 * 24 * 30));

@@ -16,32 +16,32 @@
     {% endif %}
 
     <div class="row" style="margin-top:0px;">
-        <div class="col-sm-1"><u>Number</u>:</div> 
-        <div class="col-sm-11">{{pr.number}}</div>
+        <div class="col-sm-2"><u>Number</u>:</div> 
+        <div class="col-sm-10">{{pr.number}}</div>
     </div>
     <div class="row" style="margin-top:6px;">
-        <div class="col-sm-1"><u>Title</u>:</div> 
-        <div class="col-sm-11">{{pr.title}}</div>
+        <div class="col-sm-2"><u>Title</u>:</div> 
+        <div class="col-sm-10">{{pr.title}}</div>
     </div>
     <div class="row" style="margin-top:6px;">
-        <div class="col-sm-1"><u>Date</u>: </div>
-        <div class="col-sm-11">{{pr.created_at}}</div>
+        <div class="col-sm-2"><u>Date</u>: </div>
+        <div class="col-sm-10">{{pr.created_at}}</div>
     </div>
     <div class="row" style="margin-top:6px;">
-        <div class="col-sm-1"><u>Author</u>: </div>
-        <div class="col-sm-11">{{pr.author.username}} {% if pr.author.email %}- {{pr.author.email}}{% endif %}</div>
+        <div class="col-sm-2"><u>Author</u>: </div>
+        <div class="col-sm-10">{{pr.author.username}} {% if pr.author.email %}- {{pr.author.email}}{% endif %}</div>
     </div>
     <div class="row" style="margin-top:6px;">
-        <div class="col-sm-1"><u>Branch</u>: </div>
-        <div class="col-sm-11">{{branch}}</div>
+        <div class="col-sm-2"><u>Branch</u>: </div>
+        <div class="col-sm-10">{{branch}}</div>
     </div>
         <div class="row" style="margin-top:6px;">
-        <div class="col-sm-1"><u>Issues</u>: </div>
-        <div class="col-sm-11">{{issues|length}}</div>
+        <div class="col-sm-2"><u>Linked Issues</u>: </div>
+        <div class="col-sm-10">{{issues|length}}</div>
     </div>
     <div class="row" style="margin-top:6px; margin-bottom:8px;">
-        <div class="col-sm-1"><u>URL</u>: </div>
-        <div class="col-sm-11"><a target="_blank" href="{{pr.url}}">{{pr.url}}</a></div>
+        <div class="col-sm-2"><u>URL</u>: </div>
+        <div class="col-sm-10"><a target="_blank" href="{{pr.url}}">{{pr.url}}</a></div>
     </div>
     <br/>
 

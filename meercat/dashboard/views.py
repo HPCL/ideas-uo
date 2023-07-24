@@ -345,11 +345,11 @@ def first_responder_function(proj_object, pull_object):
         if documentation_status['should_have_doc']:
             checkable += 1
 
-    doc_message =  f"""## Out of {all_files} file(s) in this PR, {checkable} should have doxygen documentation.  {checkable-doc_missing} have doxygen documentation."""
+    doc_message =  f"""## Out of {all_files} file{'s'[:all_files^1]} in this PR, {checkable} should have doxygen documentation.  {checkable-doc_missing} have doxygen documentation."""
 
     if checkable-doc_missing > 0:
         doc_message +=f"""
-## Out of {checkable-doc_missing} file(s) with doxygen documentation, {doc_problems} file(s) have issues."""
+## Out of {checkable-doc_missing} file{'s'[:(checkable-doc_missing)^1]} with doxygen documentation, {doc_problems} file{'s'[:doc_problems^1]} have issues."""
     
     if no_library:
         doc_message =  f"""No documentation library available."""
@@ -357,7 +357,7 @@ def first_responder_function(proj_object, pull_object):
 
 
     # Use metrics to compute average (and get live results for just the files in PR branch)
-    linter_metrics = list(FileMetric.objects.all().filter(metric_type=FileMetric.MetricTypeChoices.LINTING, project=proj_object, branch='main'))
+    '''linter_metrics = list(FileMetric.objects.all().filter(metric_type=FileMetric.MetricTypeChoices.LINTING, project=proj_object, branch='main'))
     numerator = 0
     denominator = 0
     average = 0
@@ -369,21 +369,25 @@ def first_responder_function(proj_object, pull_object):
     if denominator > 0:
         average = (numerator/denominator)            
         print("AVERAGE PROBLEMS: "+ str(numerator/denominator))
-    average = math.floor(average)
+    average = math.floor(average)'''
 
     linter_problems = 0;
+    average = 0;
     for filename in filenames:
         results = file_linter(proj_object, filename)
-        if len(results) > average:
+        average += len(results)
+        if len(results) > 0:
             linter_problems += 1
     print("TOTAL PROBLEMS OVER AVERAGE: "+ str(linter_problems))
+    if linter_problems > 0:
+        average = (average/linter_problems)  
 
 
     message = f"""## The MeerCat Pull-Request Assistant has information for you
 
 {doc_message}
 
-## {linter_problems} files have more linting errors than average ({average}).
+## Out of {all_files} file{'s'[:all_files^1]} in this PR, {linter_problems} file{'s'[:linter_problems^1]} {'has' if linter_problems == 1 else 'have'} code quality errors. The average is {average} error{'s'[:average^1]}.
 
 [Please see the Pull-Request Assistant page for more detail.](https://meercat.cs.uoregon.edu/dashboard/pr/{pull_object.id}) (right-click to open in new tab)
     """
