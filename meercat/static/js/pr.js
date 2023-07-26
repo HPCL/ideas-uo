@@ -7,14 +7,16 @@ class FeedbackSubmission {
     }
 
     populate_feedback_modal(event) {
+        console.log("+----------------------------+")
         console.log(event.target.closest("tr").querySelector(".file-path-td > .file-path-span").id);
         this.filepath = event.target.closest("tr").querySelector(".file-path-td > .file-path-span").id;
         this.thumbs = event.target.dataset.value;
+        console.log(this.thumbs);
         document.getElementById("feedback-clicked").src = `/static/images/${event.target.dataset.value}.svg`;
     }
 
     handle_submit() {
-        let message = document.getElementById("feedback-prid").value;
+        let message = document.getElementById("feedback-message").value;
         let prid = document.getElementById("feedback-prid").value;
         let type = document.getElementById("feedback-type").value;
         let submit_btn = document.getElementById("feedback-submit-btn");
@@ -53,7 +55,10 @@ const feedback_submission = new FeedbackSubmission();
 
 // TODO: This needs to happen after the buttons are created elsewhere
 //document.querySelectorAll(".feedback-button").forEach(btn => btn.addEventListener("click", feedback_submission.populate_feedback_modal));
-//document.getElementById("feedback-submit-btn").addEventListener("click", function () { feedback_submission.handle_submit() })
+document.getElementById("feedback-submit-btn").addEventListener("click", function () { feedback_submission.handle_submit() })
+document.getElementById("feedback-cancel-btn").addEventListener("click", function () { document.getElementById("feedback-message").value = ''; })
+
+
 
 var startdate = $("#startdate");
 var date = new Date(new Date().getTime() - (1000 * 60 * 60 * 24 * 30));
@@ -78,6 +83,10 @@ var filename = "";
 var previousLines = 0;
 var ignoreLineChanges = true;
 var docstring_results = [];
+var doc_lines = [];
+var cq_lines = [];
+var cq_index = 0;
+var doc_index = 0;
 
 var popupNode = document.createElement("div");
 popupNode.style.border = '2px solid grey'
@@ -195,22 +204,27 @@ function showDocEditor(docfilename, difftext) {
             }
 */
             var file_doc_results = docstring_results[filename];
-
+            doc_lines = [];
+            doc_index = 0;
             if( filename.indexOf(".F90") >= 0 || filename.indexOf(".dox") >= 0 ){
                 if( file_doc_results['documentation_lib']['file_status'].indexOf("checkable") == 0 ){
                     for(var i=0; i<file_doc_results['documentation_lib']['problem_fields'].length; i++){
                         editor.markText({ line: file_doc_results['documentation_lib']['problem_fields'][i][2], ch: 0 }, { line: file_doc_results['documentation_lib']['problem_fields'][i][2], ch: 100 }, { className: "styled-background" });
+                        doc_lines.push(file_doc_results['documentation_lib']['problem_fields'][i][2]);
                     }
                     //for(var i=0; i<file_doc_results['documentation_lib']['missing_fields'].length; i++){
                     if( file_doc_results['documentation_lib']['missing_fields'].length > 0){
                         editor.markText({ line: 0, ch: 0 }, { line: 0, ch: 100 }, { className: "styled-background" });
+                        doc_lines.push(0);
                     }
                     //for(var i=0; i<file_doc_results['documentation_lib']['missing_file_fields'].length; i++){
                     if( file_doc_results['documentation_lib']['missing_file_fields'].length > 0){
                         editor.markText({ line: 0, ch: 0 }, { line: 0, ch: 100 }, { className: "styled-background" });
+                        doc_lines.push(0);
                     }
                     for(var i=0; i<file_doc_results['documentation_lib']['missing_subroutine_fields'].length; i++){
                         editor.markText({ line: file_doc_results['documentation_lib']['missing_subroutine_fields'][i][0], ch: 0 }, { line: file_doc_results['documentation_lib']['missing_subroutine_fields'][i][0], ch: 100 }, { className: "styled-background" });
+                        doc_lines.push(file_doc_results['documentation_lib']['missing_subroutine_fields'][i][0]);
                     }
                 }
             }else if( file_doc_results['documentation']['check_status'] && !file_doc_results['documentation']['documentation.doc_status'] ){
@@ -220,8 +234,11 @@ function showDocEditor(docfilename, difftext) {
                     //For some reason, the line is off by one 
                     file_doc_results['documentation']['problem_lines'][i][1] -= 1;
                     editor.markText({ line: file_doc_results['documentation']['problem_lines'][i][1], ch: 0 }, { line: file_doc_results['documentation']['problem_lines'][i][1], ch: 100 }, { className: "styled-background" });
+                    doc_lines.push(file_doc_results['documentation']['problem_lines'][i][1]);
                 }
             }
+
+            doc_lines = [...new Set(doc_lines)];
 
             /* JUST FOR DEMO */
             //editor.markText({ line: 6, ch: 0 }, { line: 7, ch: 100 }, { className: "styled-background" });
@@ -421,6 +438,14 @@ function showDocEditor(docfilename, difftext) {
 
             setTimeout(function () {
                 editor.refresh();
+                if( doc_lines.length > 0 )
+                    editor.scrollTo(null, editor.charCoords({line:Math.max(0,doc_lines[0]-4), ch:0},"local").top);
+    
+                if( doc_lines.length > 1 ){
+                    document.getElementById("docnextbutton").disabled = false;
+                }else{
+                    document.getElementById("docnextbutton").disabled = true;
+                }  
             }, 1);
 
             $('#docModal').modal('show');
@@ -679,9 +704,13 @@ function showCqEditor(docfilename, difftext) {
             //editor.markText({ line: 6, ch: 12 }, { line: 6, ch: 22 }, { className: "styled-background" });
             //editor.markText({ line: 4, ch: 2 }, { line: 4, ch: 6 }, { className: "styled-background" });
 
+            cq_lines = [];
+            cq_index = 0;
             for(var i=0; i<result['linter_results'].length; i++){
                 cqeditor.markText({ line: result['linter_results'][i].line-1, ch: result['linter_results'][i].column }, { line: result['linter_results'][i].line-1, ch: 100 }, { className: "styled-background" });
+                cq_lines.push(result['linter_results'][i].line);
             }
+            console.log(cq_lines);
 
             popupNode.remove();
 
@@ -705,6 +734,12 @@ function showCqEditor(docfilename, difftext) {
 
             setTimeout(function () {
                 cqeditor.refresh();
+                cqeditor.scrollTo(null, cqeditor.charCoords({line:Math.max(0,cq_lines[0]-4), ch:0},"local").top);
+                if( cq_lines.length > 1 ){
+                    document.getElementById("cqnextbutton").disabled = false;
+                }else{
+                    document.getElementById("cqnextbutton").disabled = true;
+                }  
             }, 1);
 
             $('#codeQualityModal').modal('show');
@@ -713,6 +748,21 @@ function showCqEditor(docfilename, difftext) {
 
 }
 
+function nextDocIssue() {
+    doc_index++;
+    if( doc_index > doc_lines.length-1 ){
+        doc_index = 0;
+    }
+    editor.scrollTo(null, editor.charCoords({line:Math.max(0,doc_lines[doc_index]-4), ch:0},"local").top);
+}
+
+function nextCQIssue() {
+    cq_index++;
+    if( cq_index > cq_lines.length-1 ){
+        cq_index = 0;
+    }
+    cqeditor.scrollTo(null, cqeditor.charCoords({line:Math.max(0,cq_lines[cq_index]-4), ch:0},"local").top);
+}
 
 function showTestEditor(docfilename, difftext) {
 
@@ -931,14 +981,14 @@ $.ajax({
 
             }
 
-            cqbuttons += "<button class='btn btn-sm btn-primary' onclick='showCqEditor(\"" + result['diffcommits'][i]['filename'] + "\",\"" + "DIFF STUFF TO GO HERE" + "\");'>View File in Editor</button><br/>";
+            cqbuttons += "<button class='btn btn-sm btn-primary' onclick='showCqEditor(\"" + result['diffcommits'][i]['filename'] + "\",\"" + "DIFF STUFF TO GO HERE" + "\");'>View Issues</button><br/>";
  
             for (var k = 0; k < result['linter_results'].length; k++) {
                 if (result['diffcommits'][i]['filename'] == result['linter_results'][k]['filename']) {
                     //for (var m = 0; m < result['docstring_results'][1][k][1].length; m++) {
-                        //if( result['docstring_results'][1][k][1][m].result.length > 0 ){
+                        if( result['diffcommits'][i]['filename'].indexOf('.py') >= 0 || result['diffcommits'][i]['filename'].indexOf('.F90') >= 0 ){
                             cqissues = result['linter_results'][k]['results'].length;
-                        //}
+                        }
                     //}
                 }
             }
@@ -954,14 +1004,27 @@ $.ajax({
                 "</td></tr>");
 
 
+
             if( project == 30 || project == 26 || project == 35 || project == 32 ){
-                cqtable.append("<tr><td>"+
-                        "<span>"+result['diffcommits'][i]['filename'] +"</span>"+
+
+                    var feedback_buttons = "<div class='d-flex justify-content-between'>" +
+                        "    <button type='button' class='btn p-0' data-bs-toggle='modal' data-bs-target='#feedback-modal' onclick='feedback_submission.populate_feedback_modal(event);'>" +
+                        "       <img class='feedback-button' data-value='thumb_up' style='width: 20px;' src='/static/images/thumb_up.svg'>" +
+                        "    </button>" +
+                        "    <button type='button' class='btn p-0' data-bs-toggle='modal' data-bs-target='#feedback-modal' onclick='feedback_submission.populate_feedback_modal(event);'>" +
+                        "       <img class='feedback-button' data-value='thumb_down' style='width: 20px;' src='/static/images/thumb_down.svg'>" +
+                        "    </button>" +
+                        "</div>";
+
+                cqtable.append("<tr><td class='file-path-td'>"+
+                        "<span class='file-path-span' id='"+result['diffcommits'][i]['filename']+"'>"+result['diffcommits'][i]['filename'] +"</span>"+
                         "<br/><a class='btn btn-xs btn-secondary' target='_blank' href='/dashboard/filex/"+project+"?filename="+result['diffcommits'][i]['filename']+"&branch="+branch+"'>View in File Explorer</a>"+
                     "</td><td>"+
                         (cqissues < 0 ? "-" : (cqissues > 0 ? "<span style='color:red;'>"+cqissues+"</span>" : cqissues)) +
                     "</td><td>"+
                         (cqissues > 0 ? cqbuttons : '') +
+                    "</td><td>"+
+                        (cqissues > 0 ? feedback_buttons : '') +
                     "</td></tr>");
             }
 

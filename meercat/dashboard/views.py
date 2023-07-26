@@ -387,7 +387,7 @@ def first_responder_function(proj_object, pull_object):
 
 {doc_message}
 
-## Out of {all_files} file{'s'[:all_files^1]} in this PR, {linter_problems} file{'s'[:linter_problems^1]} {'has' if linter_problems == 1 else 'have'} code quality errors. The average is {average} error{'s'[:average^1]}.
+## Out of {all_files} file{'s'[:all_files^1]} in this PR, {linter_problems} file{'s'[:linter_problems^1]} {'has' if linter_problems == 1 else 'have'} code quality errors. The average is {average} error{'' if average == 1 else 's'}.
 
 [Please see the Pull-Request Assistant page for more detail.](https://meercat.cs.uoregon.edu/dashboard/pr/{pull_object.id}) (right-click to open in new tab)
     """
@@ -760,6 +760,7 @@ def file_linter(proj_object, filename):
     results = []
 
     if filename.endswith(".py"):
+        rawresults = []
         try:
             # output = os.popen('export PYTHONPATH=${PYTHONPATH}:'+os.path.abspath(str(settings.REPOS_DIR)+'/'+pr.project.name)+' ; cd '+str(settings.REPOS_DIR)+'/'+pr.project.name+' ; '+str(settings.REPOS_DIR)+'/meercat/env/bin/pylint --output-format=json '+filename).read()
             output = os.popen(
@@ -772,9 +773,14 @@ def file_linter(proj_object, filename):
                 + " ; . ../meercat/meercat-env/bin/activate ; pylint --output-format=json "
                 + filename
             ).read()
-            results = json.loads(output)
+            rawresults = json.loads(output)
         except Exception as e:
             pass
+
+        results = []
+        for result in rawresults: 
+            if 'Missing function or method docstring' not in result['message'] and 'Formatting a regular string which' not in result['message'] and 'Unnecessary semicolon' not in result['message'] and 'Trailing whitespace' not in result['message'] and 'Bad indentation' not in result['message'] and 'Line too long' not in result['message']:
+                results.append(result) 
 
     if filename.endswith(".F90"):
         output = os.popen(
@@ -799,7 +805,7 @@ def file_linter(proj_object, filename):
         ):
             if result and len(result) > 0:
                 try:
-                    if 'Exactly one space after' not in result and 'Missing space' not in result and 'Single space' not in result and 'Trailing whitespace' not in result and 'Line length' not in result:
+                    if 'At least one space before comment' not in result and 'Exactly one space after' not in result and 'Missing space' not in result and 'Single space' not in result and 'Trailing whitespace' not in result and 'Line length' not in result:
                         results.append(
                             {
                                 "column": 0,
@@ -1484,17 +1490,25 @@ def getFile(request):
 
     if filename.endswith(".py"):
         # output = os.popen('export PYTHONPATH=${PYTHONPATH}:'+os.path.abspath(str(settings.REPOS_DIR)+'/'+pr.project.name)+' ; cd '+str(settings.REPOS_DIR)+'/'+pr.project.name+' ; pylint --output-format=json '+filename).read()
-        output = os.popen(
-            "export PYTHONPATH=${PYTHONPATH}:"
-            + os.path.abspath(str(settings.REPOS_DIR) + "/" + pr.project.name)
-            + " ; cd "
-            + str(settings.REPOS_DIR)
-            + "/"
-            + pr.project.name
-            + " ; . ../meercat/meercat-env/bin/activate ; pylint --output-format=json "
-            + filename
-        ).read()
-        linter_results = json.loads(output)
+        rawresults = []
+        try:
+            output = os.popen(
+                "export PYTHONPATH=${PYTHONPATH}:"
+                + os.path.abspath(str(settings.REPOS_DIR) + "/" + pr.project.name)
+                + " ; cd "
+                + str(settings.REPOS_DIR)
+                + "/"
+                + pr.project.name
+                + " ; . ../meercat/meercat-env/bin/activate ; pylint --output-format=json "
+                + filename
+            ).read()
+            rawresults = json.loads(output)
+        except Exception as e:
+            pass
+
+        for result in rawresults: 
+            if 'Missing function or method docstring' not in result['message'] and 'Formatting a regular string which' not in result['message'] and 'Unnecessary semicolon' not in result['message'] and 'Trailing whitespace' not in result['message'] and 'Bad indentation' not in result['message'] and 'Line too long' not in result['message']:
+                linter_results.append(result) 
         # docstring_results = first_responder_function(pr.project, pr)
 
     if filename.endswith(".F90"):
@@ -1520,7 +1534,7 @@ def getFile(request):
         ):
             if result and len(result) > 0:
                 try:
-                    if 'Exactly one space after' not in result and 'Missing space' not in result and 'Single space' not in result and 'Trailing whitespace' not in result and 'Line length' not in result:
+                    if 'At least one space before comment' not in result and 'Exactly one space after' not in result and 'Missing space' not in result and 'Single space' not in result and 'Trailing whitespace' not in result and 'Line length' not in result:
                         results.append(
                             {
                                 "column": 0,
