@@ -986,7 +986,7 @@ $.ajax({
             for (var k = 0; k < result['linter_results'].length; k++) {
                 if (result['diffcommits'][i]['filename'] == result['linter_results'][k]['filename']) {
                     //for (var m = 0; m < result['docstring_results'][1][k][1].length; m++) {
-                        if( result['diffcommits'][i]['filename'].indexOf('.py') >= 0 || result['diffcommits'][i]['filename'].indexOf('.F90') >= 0 ){
+                        if( result['diffcommits'][i]['filename'].indexOf('.py') >= 0 || result['diffcommits'][i]['filename'].indexOf('.F90') >= 0 || result['diffcommits'][i]['filename'].indexOf('.c') >= 0 || result['diffcommits'][i]['filename'].indexOf('.h') >= 0 ){
                             cqissues = result['linter_results'][k]['results'].length;
                         }
                     //}

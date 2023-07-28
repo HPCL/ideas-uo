@@ -841,17 +841,17 @@ def file_linter(proj_object, filename):
         ):
             if result and len(result) > 0:
                 try:
-                    # if result.split(":")[1].split("  [")[1].split("] ")[0].startswith('whitespace') == False:
-                    results.append(
-                        {
-                            "column": 0,
-                            "line": int(result.split(":")[0]),
-                            "message": result.split(":")[1].split("  [")[0].strip(),
-                            "type": result.split(":")[1]
-                            .split("  [")[1]
-                            .split("] ")[0],
-                        }
-                    )
+                    if 'Include the directory when naming header' not in result and 'Using C-style cast.' not in result:
+                        results.append(
+                            {
+                                "column": 0,
+                                "line": int(result.split(":")[0]),
+                                "message": result.split(":")[1].split("  [")[0].strip(),
+                                "type": result.split(":")[1]
+                                .split("  [")[1]
+                                .split("] ")[0],
+                            }
+                        )
                 except:
                     pass
     return results
@@ -1570,14 +1570,15 @@ def getFile(request):
         ):
             if result and len(result) > 0:
                 try:
-                    results.append(
-                        {
-                            "column": 0,
-                            "line": int(result.split(":")[0]),
-                            "message": result.split(":")[1].split("  [")[0].strip(),
-                            "type": result.split(":")[1].split("  [")[1].split("] ")[0],
-                        }
-                    )
+                    if 'Include the directory when naming header' not in result and 'Using C-style cast.' not in result:
+                        results.append(
+                            {
+                                "column": 0,
+                                "line": int(result.split(":")[0]),
+                                "message": result.split(":")[1].split("  [")[0].strip(),
+                                "type": result.split(":")[1].split("  [")[1].split("] ")[0],
+                            }
+                        )
                 except:
                     pass
         linter_results = results
