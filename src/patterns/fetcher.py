@@ -31,7 +31,8 @@ class Fetcher:
             for filename in filenames:
                 return os.path.join(root, filename)
 
-    def fetch(self, db=None, cache=True, dbpwd=None):
+    # TODO: use urlparse to get dbhost:user:pass/name:port
+    def fetch(self, db=None, cache=True, db_passwd=None):
         if cache:
             the_cache = self.find_cache()
             if the_cache:
@@ -41,11 +42,18 @@ class Fetcher:
                 return True
 
         # Do not save the database password in publicly visible files, e.g, scripts, notebooks, etc!
-        if dbpwd: db_pwd = dbpwd
-        else: db_pwd = getpass.getpass(prompt='Database password:')
         if not db:
-            self.db = MySQLdb.connect(host='sansa.cs.uoregon.edu', port=3331, user='ideas_user', passwd=db_pwd,
-                                      db='ideas_db', charset='utf8')
+            db_passwd = os.environ.get('DBPASS', db_passwd)
+            if db_passwd is None:
+                db_passwd = getpass.getpass(prompt='Database password:')
+
+            self.db = MySQLdb.connect(
+                        host = os.environ.get('DBHOST', 'sansa.cs.uoregon.edu'),
+                        port = int(os.environ.get('DBPORT', '3331')),
+                        user = os.environ.get('DBUSER', 'ideas_user'),
+                        passwd = db_passwd,
+                        db = os.environ.get('DBNAME', 'ideas_db'),
+                        charset='utf8')
         else:
             self.db = db
         self.cursor = self.db.cursor()
