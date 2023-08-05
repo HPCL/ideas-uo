@@ -1093,7 +1093,7 @@ $.ajax({
                     doctable.append("<tr><td>" +
                         "<span>"+filename +"</span>"+
                         "<br/><a class='btn btn-xs btn-secondary' target='_blank' href='/dashboard/filex/"+project+"?filename="+filename+"&branch="+branch+"'>View in File Explorer</a>"+
-                        "</td><td>" +
+                        "</td><td style='color:red;'>" +
                             docstatus +
                         "</td><td>" +
                             '-' +
@@ -1104,7 +1104,7 @@ $.ajax({
                     doctable.append("<tr><td>" +
                         "<span>"+filename +"</span>"+
                         "<br/><a class='btn btn-xs btn-secondary' target='_blank' href='/dashboard/filex/"+project+"?filename="+filename+"&branch="+branch+"'>View in File Explorer</a>"+
-                        "</td><td colspan='3'>" +
+                        "</td><td colspan='3' style='color:red;'>" +
                             docstatus +
                         "</td></tr>");
                 }

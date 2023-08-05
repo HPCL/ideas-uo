@@ -272,18 +272,19 @@ def first_responder_function(proj_object, pull_object):
             hash__in=[committag.sha for committag in pull_object.commits.all()]
         )
     )
-    assert commits_list, f"No commits found for {proj_id}"
+    # assert commits_list, f"No commits found for {proj_id}"
 
     commit_messages = [c.message for c in commits_list]
 
-    branch = commits_list[0].branch.split()[-1]
-    cmd = f"cd {settings.REPOS_DIR}/{proj_name} ; git checkout {branch}"
-
     try:
+        branch = commits_list[0].branch.split()[-1]
+        cmd = f"cd {settings.REPOS_DIR}/{proj_name} ; git checkout {branch}"
+
         import os
         os.system(cmd)
     except:
-        assert False, f"Failure to checkout branch {cmd}"
+        # assert False, f"Failure to checkout branch {cmd}"
+        pass
 
     # get all files in PR
     diffs = list(Diff.objects.all().filter(commit__in=[c for c in commits_list]))
@@ -1005,7 +1006,8 @@ def pr(request, *args, **kwargs):
             )
         )
         if len(closed_issue_list) > 0:
-            closed_issue = closed_issue_list[0]
+            closed_issue = closed_issue_list[0] #TODO: get rid of this 
+            issues = issues + closed_issue_list
 
     # issues = list(Issue.objects.all().filter(project=list(Project.objects.all().filter(name='FLASH5').all())[0], state='closed'))
     # for issue in issues:
@@ -1789,7 +1791,7 @@ def githubBot(request):
         # Ignore if merging into main or master
         #branch = str(payload["pull_request"]["head"]["label"])
         targetbranch = str(payload["pull_request"]["base"]["label"])
-        if  project.id == 30 or (pull_request and "main" not in targetbranch and "master" not in targetbranch):
+        if  project.id == 30 or ("main" not in targetbranch and "master" not in targetbranch):
 
             # Only post comments for anl_test_repo and FLASH5
             if project.id == 35 or project.id == 30 or project.id == 26:
@@ -1805,10 +1807,10 @@ def githubBot(request):
                         "body": "## MeerCat is working on this PR.  Please stay tuned."
                     }
 
-                    branch = str(payload["pull_request"]["head"]["label"])
-                    if "staged" in branch:
+                    branch = str(payload["pull_request"]["head"]["label"]) #TODO: We might not care where it is coming from
+                    if "staged" not in targetbranch: # this never gets called if target is main because already filtered above.
                         gh_payload = {
-                            "body": "## MeerCat will ignore this PR because it is coming from the staged branch."
+                            "body": "## MeerCat will ignore this PR because it is not going to the staged branch."
                         }
 
                     headers = {
@@ -1840,7 +1842,8 @@ def githubBot(request):
             print("------------")
             if comment:
                 # Only post comments for anl_test_repo and FLASH5
-                if project.id == 35 or project.id == 30 or project.id == 26:
+                branch = str(payload["pull_request"]["head"]["label"]) #TODO: maybe remove this since only care if target is staged
+                if "staged" in targetbranch and (project.id == 35 or project.id == 30 or project.id == 26):
                     comment_pullrequest(pull_request, comment)
                     print("commented")
                 else:
@@ -1903,6 +1906,32 @@ def githubBot(request):
                 except Exception as e:
                     print( "EXCEPTION "+str(e))
 
+        else:
+            # Only post comments for anl_test_repo and FLASH5
+            if project.id == 35 or project.id == 30 or project.id == 26:
+                try:
+                    # BASE_DIR = Path(__file__).resolve().parent.parent
+                    with open(settings.BASE_DIR / 'meercat.config.json') as meercat_config:
+                        config = json.load(meercat_config)
+
+                    repo_name = project.name
+                    repo_owner = get_repo_owner(project)
+                    url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues/{prnumber}/comments"
+
+                    branch = str(payload["pull_request"]["head"]["label"])
+                    if "staged" not in branch: # this means a feature branch going directly into main.
+                        gh_payload = {
+                            "body": "## MeerCat warning: The branch in this PR appears to be skipping the staged branch."
+                        }
+
+                        headers = {
+                            "Accept": "application/vnd.github+json",
+                            "Authorization": "token " + config['MEERCAT_USER_TOKEN'],
+                        }
+                        result = requests.post(url, headers=headers, data=json.dumps(gh_payload))
+                except Exception as e:
+                    print(e)
+                    pass             
 
         
     return HttpResponse(
