@@ -381,7 +381,7 @@ def first_responder_function(proj_object, pull_object):
             linter_problems += 1
     print("TOTAL PROBLEMS OVER AVERAGE: "+ str(linter_problems))
     if linter_problems > 0:
-        average = (average/linter_problems)  
+        average = round(average/linter_problems)  
 
 
     message = f"""## The MeerCat Pull-Request Assistant has information for you
@@ -806,7 +806,7 @@ def file_linter(proj_object, filename):
         ):
             if result and len(result) > 0:
                 try:
-                    if 'At least one space before comment' not in result and 'Exactly one space after' not in result and 'Missing space' not in result and 'Single space' not in result and 'Trailing whitespace' not in result and 'Line length' not in result:
+                    if 'Replace .' not in result and 'At least one space before comment' not in result and 'Exactly one space after' not in result and 'Missing space' not in result and 'Single space' not in result and 'Trailing whitespace' not in result and 'Line length' not in result:
                         results.append(
                             {
                                 "column": 0,
@@ -1536,7 +1536,7 @@ def getFile(request):
         ):
             if result and len(result) > 0:
                 try:
-                    if 'At least one space before comment' not in result and 'Exactly one space after' not in result and 'Missing space' not in result and 'Single space' not in result and 'Trailing whitespace' not in result and 'Line length' not in result:
+                    if 'Replace .' not in result and 'At least one space before comment' not in result and 'Exactly one space after' not in result and 'Missing space' not in result and 'Single space' not in result and 'Trailing whitespace' not in result and 'Line length' not in result:
                         results.append(
                             {
                                 "column": 0,

@@ -67,7 +67,13 @@ units = [
     "IncompNS",
     "Multiphase",
     "RadTrans",
-    'Timers', 'Logfile', 'Debugger', 'Profiler',  #from source/monitors
+    "Timers", 
+    "Logfile", 
+    "Debugger", 
+    "Profiler",  #from source/monitors
+    "TimeAdvance",
+    "Pipeline",
+    "Spacetime",
 ]
 
 doc_extensions_to_check = ['.F90', '.dox', '.F90-mc']  #might add more types later, e.g., .md files
@@ -260,6 +266,7 @@ def check_file_documentation(lines:list, path:str):
 
   return check_file_documentation_aux(dir_struct, lines, path)  #adds dir_struct
 
+'''
 def check_file_documentation_aux(dir_struct, lines:list, path:str):
   assert isinstance(lines, list)
   assert all([isinstance(x,str) for x in lines])
@@ -344,6 +351,135 @@ def check_file_documentation_aux(dir_struct, lines:list, path:str):
   results_dict['should_have_doc'] = False
   results_dict['file_status'] = f'uncheckable: no checkers found'
   return results_dict
+'''
+
+def check_file_documentation_aux(dir_struct, lines:list, path:str):
+  assert isinstance(lines, list)
+  assert all([isinstance(x,str) for x in lines])
+  assert isinstance(path,str)
+
+  global units  #list of known units in Flash-X
+
+  results_dict = {
+      'should_have_doc': True,
+      'file_status': 'checkable',
+      'missing_fields': [],
+      'problem_fields': [],
+      'bogus_fields': [],
+  }
+
+  checkable, msg = is_file_documentation_checkable(lines, path)  #returns tuple: (bool, msg)
+  if not checkable:
+    results_dict['should_have_doc'] = False
+    results_dict['file_status'] = f'uncheckable: {msg}'
+    return results_dict
+
+  path_components = splitall(path)  #list of all pieces in path, e.g., ['source', 'numericalTools', 'MoL', 'MoL_advance.F90']
+  for component in path_components:
+    if component[0].isupper():
+      unit = component
+      break
+  else:
+    unit = None
+
+  if not unit:
+    #no unit found
+    results_dict['should_have_doc'] = False
+    results_dict['file_status'] = f'uncheckable: no unit found on path {path}'
+    return results_dict
+
+  if 'flashUtilities' in path_components and unit != 'Pipeline':
+    results_dict['should_have_doc'] = False
+    results_dict['file_status'] = f'uncheckable: no unit found on path {path}'
+    return results_dict
+
+  name, extension = os.path.splitext(path_components[-1])  #e.g., ('MoL_advance', '.F90') notice dot included
+  if extension in ['.F90', '.F90-mc']:
+    #need to figure out if stub or implementation or private
+    the_file = os.path.basename(path)   #string of the file
+    the_header = os.path.dirname(path)  #string of path up to the file
+    
+    unit_name = unit
+
+    #check for stub - file directly under a unit folder and startswith unit name
+    if the_header.endswith(unit_name) and name.startswith(unit_name):
+        results = check_implementation_stub(lines, path, name, unit_name)
+        for key in results:
+          results_dict[key] = results[key]
+        return results_dict
+
+    #not stub - check for stubbed implementation - file not under unit folder but does start with unit name
+    if name.startswith(unit_name):
+      results = check_implementation(lines, path, name, unit_name)
+      for key in results:
+        results_dict[key] = results[key]
+      return results_dict
+
+    #not stubbed implementation - must be private
+    results = check_private_file(dir_struct, lines, path, name, unit_name)
+    for key in results:
+      results_dict[key] = results[key]
+    return results_dict
+
+  #not F90 file. Check if dox file.
+  if extension == '.dox':
+
+    #dox files can appear above a unit folder, e.g., source/numericalTools/numericalTools.dox
+    if not unit:
+      results = check_non_unit_dox(lines, path)
+      #results_dict['file_status'] = f'uncheckable: currently not checking dox files above unit folder.'
+      return results_dict
+    #could replace above with checker later if wanted
+
+    #single unit found on path
+    results = check_unit_dox(lines, path, name, unit)
+    for key in results:
+      results_dict[key] = results[key]
+    return results
+
+  results_dict['should_have_doc'] = False
+  results_dict['file_status'] = f'uncheckable: no checkers found'
+  return results_dict
+
+def check_non_unit_dox(lines, path):
+  required_fields = ['@copyright',
+                    '@par License',
+                    '@parblock',
+                    '@endparblock',
+                    '@defgroup', #containing folder
+  ]
+
+  path_components = splitall(path)
+
+  problems = dict(bogus_fields=[],  #fields that appear but should not appear in the file
+                  no_required_fields = False,
+                  missing_fields = [],  #missing fields that should appear
+                  problem_fields = [])  #appropriate fields but with a problem in content
+
+
+  found_fields = []
+  for i,line in enumerate(lines):
+    for field in required_fields:
+      if field in line: found_fields.append((field, line, i))
+
+  if not found_fields:
+    problems['no_required_fields'] = True
+    return problems
+
+  missing_fields = (set(required_fields) - set([f for f,l,i in found_fields]))
+  if missing_fields:
+    problems['missing_fields'] = list(missing_fields)
+
+  for field, line, i in found_fields:
+    if field == '@defgroup':
+      #@defgroup numericalTools Numerical Tools
+      k = line.find('@defgroup')
+      new_line = line[k+10:]
+      if not new_line.startswith(path_components[-2]):
+          problems['problem_fields'] += [(f'Expecting @defgroup {path_components[-2]} ...', line, i)]
+      break
+
+  return problems
 
 """###Public or Private stub
 
