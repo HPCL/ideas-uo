@@ -1093,7 +1093,7 @@ $.ajax({
                     doctable.append("<tr><td>" +
                         "<span>"+filename +"</span>"+
                         "<br/><a class='btn btn-xs btn-secondary' target='_blank' href='/dashboard/filex/"+project+"?filename="+filename+"&branch="+branch+"'>View in File Explorer</a>"+
-                        "</td><td colspan='2' style='color:red;'>" +
+                        "</td><td colspan='2' style='color:orange;'>" +
                             docstatus +
                         "</td><td>" +
                             "<a class='btn btn-sm btn-primary' href='#' onclick='alert(\"Still need link to doc template.\");'>View Doc Template</a><br/>" +
@@ -1113,7 +1113,7 @@ $.ajax({
                         "<br/><a class='btn btn-xs btn-secondary' target='_blank' href='/dashboard/filex/"+project+"?filename="+filename+"&branch="+branch+"'>View in File Explorer</a>"+
                         "</td><td>" +
                             docstatus +
-                        "</td><td>" +
+                        "</td><td" + (docissues > 0 ? " style='color:red;'" : '') + ">" +
                             (docissues < 0 ? '-' : docissues) +
                         "</td><td>" +
                             docbuttons +

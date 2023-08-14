@@ -607,10 +607,12 @@ def check_sub_stub(lines, lstart, lsub, required_subroutine_fields, problems, pu
 
     if field == '@param':
       components = line[line.find('@param'):].split(' ')
-      params_found.append(components[1])
-      if '<insert ' in line.lower():
-        problems['problem_fields'] += [('@param has place holder', line, i)]
-      continue
+      components = [c for c in components if c.strip()]
+      if len(components) > 1:
+        params_found.append(components[1])
+        if '<insert ' in line.lower():
+          problems['problem_fields'] += [('@param has place holder', line, i)]
+        continue
   #end for
 
   #Now check if @params missing altogether. First find actual params.
@@ -626,6 +628,7 @@ def check_sub_stub(lines, lstart, lsub, required_subroutine_fields, problems, pu
   raw_sig = " ".join(lines[lsub : i + 1]).strip("\n").replace("&", " ")[10:]
   sig_params = raw_sig[raw_sig.find("(") + 1 : raw_sig.find(")")].strip().split(",")
   sig_params = [sp.strip() for sp in sig_params]
+  sig_params = [] if sig_params == [''] else sig_params
 
   #Now know actual params. Is there a @param for each?
   for param in sig_params:
@@ -830,7 +833,7 @@ def check_unit_dox(lines, path, file_name, unit):
                     #'@internal',  only in internal folders
                     '@brief',
                     #'@ingroup',  #folder above but complicated
-                    '@details',
+                    #'@details',
                     '@defgroup', #containing folder
   ]
 
