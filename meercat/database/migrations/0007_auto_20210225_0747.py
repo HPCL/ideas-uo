@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='commit',
             name='branch',
-            field=models.CharField(default='master', max_length=16384),
+            field=models.CharField(default='master', max_length=1024),
         ),
     ]

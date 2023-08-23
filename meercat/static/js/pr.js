@@ -1052,7 +1052,7 @@ $.ajax({
         docstring_results = result['docstring_results'];
         var doctable = $("#docdiffcommittable > tbody");
         doctable.empty();
-
+        var docissuestatus = 0;    
         for (var i = 0; i < result['diffcommits'].length; i++) {
             var filename = result['diffcommits'][i]['filename'];
 
@@ -1121,8 +1121,14 @@ $.ajax({
                 
             }
 
-            if( docissues > 0 )
+            if( docissues > 0 ){
+                docissuestatus++;
                 $("#docwarning").show();
+            }
+        }
+
+        if( docissuestatus > 0 ){
+            $('#docissuestatus').html(' ('+docissuestatus+')');
         }
 
 
