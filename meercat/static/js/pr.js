@@ -239,6 +239,7 @@ function showDocEditor(docfilename, difftext) {
             }
 
             doc_lines = [...new Set(doc_lines)];
+            doc_lines.sort(function(a, b){ return a - b;});
 
             /* JUST FOR DEMO */
             //editor.markText({ line: 6, ch: 0 }, { line: 7, ch: 100 }, { className: "styled-background" });
@@ -671,6 +672,27 @@ function sendInvite(email, filenames){
     return true;
 }
 
+function sendDropdownInvite(){
+
+    console.log("Send Dropdown Invite");
+    
+
+    var email = $('#extradevsdropdown').val();
+
+    console.log(email);
+
+    $.ajax({
+        url: '/dashboard/sendinvite/', type: 'POST', data: { 'pr': pr, 'email': email, 'extra': true, 'filenames': []}, success: function (result) {
+            console.log("got invite response");
+            console.log(result);
+
+            alert('Invite sent to developer.');
+        }
+    });
+
+    return true;
+}
+
 
 function showCqEditor(docfilename, difftext) {
 
@@ -711,6 +733,8 @@ function showCqEditor(docfilename, difftext) {
                 cq_lines.push(result['linter_results'][i].line);
             }
             console.log(cq_lines);
+            cq_lines = [...new Set(cq_lines)];
+            cq_lines.sort(function(a, b){ return a - b;});
 
             popupNode.remove();
 
@@ -749,6 +773,7 @@ function showCqEditor(docfilename, difftext) {
 }
 
 function nextDocIssue() {
+    console.log("DOC NEXT: "+doc_index);
     doc_index++;
     if( doc_index > doc_lines.length-1 ){
         doc_index = 0;
@@ -757,6 +782,7 @@ function nextDocIssue() {
 }
 
 function nextCQIssue() {
+    console.log("CQ NEXT: "+cq_index);
     cq_index++;
     if( cq_index > cq_lines.length-1 ){
         cq_index = 0;
@@ -942,8 +968,8 @@ $.ajax({
         var cqtable = $("#cqdiffcommittable > tbody");
         cqtable.empty();
 
-        var atable = $("#adiffcommittable > tbody");
-        atable.empty();
+        //var atable = $("#adiffcommittable > tbody");
+        //atable.empty();
 
         for (var i = 0; i < result['diffcommits'].length; i++) {
             var commits = "";
@@ -1007,14 +1033,14 @@ $.ajax({
 
             if( project == 30 || project == 26 || project == 35 || project == 32 ){
 
-                    var feedback_buttons = "<div class='d-flex justify-content-between'>" +
-                        "    <button type='button' class='btn p-0' data-bs-toggle='modal' data-bs-target='#feedback-modal' onclick='feedback_submission.populate_feedback_modal(event);'>" +
-                        "       <img class='feedback-button' data-value='thumb_up' style='width: 20px;' src='/static/images/thumb_up.svg'>" +
-                        "    </button>" +
-                        "    <button type='button' class='btn p-0' data-bs-toggle='modal' data-bs-target='#feedback-modal' onclick='feedback_submission.populate_feedback_modal(event);'>" +
-                        "       <img class='feedback-button' data-value='thumb_down' style='width: 20px;' src='/static/images/thumb_down.svg'>" +
-                        "    </button>" +
-                        "</div>";
+                var feedback_buttons = "<div class='d-flex justify-content-between'>" +
+                    "    <button type='button' class='btn p-0' data-bs-toggle='modal' data-bs-target='#feedback-modal' onclick='feedback_submission.populate_feedback_modal(event);'>" +
+                    "       <img class='feedback-button' data-value='thumb_up' style='width: 20px;' src='/static/images/thumb_up.svg'>" +
+                    "    </button>" +
+                    "    <button type='button' class='btn p-0' data-bs-toggle='modal' data-bs-target='#feedback-modal' onclick='feedback_submission.populate_feedback_modal(event);'>" +
+                    "       <img class='feedback-button' data-value='thumb_down' style='width: 20px;' src='/static/images/thumb_down.svg'>" +
+                    "    </button>" +
+                    "</div>";
 
                 cqtable.append("<tr><td class='file-path-td'>"+
                         "<span class='file-path-span' id='"+result['diffcommits'][i]['filename']+"'>"+result['diffcommits'][i]['filename'] +"</span>"+
@@ -1028,13 +1054,14 @@ $.ajax({
                     "</td></tr>");
             }
 
-            atable.append("<tr><td>"+
+            //TODO: remove this when confirm that archeology feature is not coming back
+            /*atable.append("<tr><td>"+
                     result['diffcommits'][i]['filename']+
                     "</td><td>"+
                             doccommits+
                     "</td><td>"+
                             alinks+
-                    "</td></tr>");
+                    "</td></tr>");*/
 
             if( cqissues > 0 )
                 $("#cqwarning").show();
@@ -1042,11 +1069,11 @@ $.ajax({
         }
 
 
-        if( !(project == 30 || project == 26 || project == 35 || project == 32 || project == 19 ) ){
+        /*if( !(project == 30 || project == 26 || project == 35 || project == 32 || project == 19 ) ){
             cqtable.append("<tr><td colspan='3'>"+
                     "<i>This project is not supported yet.</i>"+
                 "</td></tr>");
-        }
+        }*/
 
 
         docstring_results = result['docstring_results'];
@@ -1260,6 +1287,14 @@ $.ajax({
                 "<a href='" + result['source_url'] +"/commit/"+ result['merged_dev_table'][i]['commit_link'] + "'>View on GitHub</a>"+
                 "</td></tr>");
 
+        }
+
+        if( result['extra_devs'].length > 0 ){
+            $("#extradevsdiv").show();
+            var extradevs = $("#extradevsdropdown");
+            for (var i = 0; i < result['extra_devs'].length; i++) {
+                extradevs.append("<option value='"+result['extra_devs'][i]+"'>"+ result['extra_devs'][i] +"</option>");
+            }
         }
 
 

@@ -106,6 +106,8 @@ class Project(models.Model):
     has_gitlab = models.BooleanField(default=False)
     github_last_updated = models.DateTimeField(auto_now=True, null=True)
     gitlab_last_updated = models.DateTimeField(auto_now=True, null=True)
+    documentation_library = models.CharField(max_length=64, null=True)
+    code_quality_library = models.CharField(max_length=64, null=True)
     complete_ignore_extensions = models.JSONField(blank=True, default=list)
     complete_ignore_filenames = models.JSONField(blank=True, default=list)
     documentation_ignore_extensions = models.JSONField(blank=True, default=list)

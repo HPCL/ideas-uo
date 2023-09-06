@@ -58,9 +58,11 @@ six==1.16.0
 sqlparse==0.4.2
 tenacity==8.0.1
 textdistance==4.2.2
+thefuzz==0.19.0
 tomli==2.0.1
 typing_extensions==4.2.0
 tzdata==2022.1
 uritemplate==4.1.1
+uo-puddles==1.87
 urllib3==1.26.9
 wrapt==1.14.1

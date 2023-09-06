@@ -2,7 +2,7 @@ import datetime
 import json
 import requests
 import os
-
+import importlib
 import configparser
 
 from django.http import HttpResponse
@@ -53,8 +53,8 @@ from dashboard.utilities import (
     dox_script,
 )
 from dashboard.author_merger_tool import AuthorMergerTool
-from dashboard.lib import flashx
-from dashboard.lib import default
+from dashboard.lib import default as default_docchecker
+from dashboard.cqlib import default as default_linter
 
 import subprocess
 import os, warnings
@@ -429,12 +429,21 @@ def file_explorer_handler(proj_object, filename, branch ):
 
 
     # THIS IS WHERE WE CALL THE FLASHX LIBRARY TODO: NEED TO ONLY CALL IT IF FLASHX OR ANL_TEST_REPO THOUGH
-    if proj_object.id == 35 or proj_object.id == 30 or proj_object.id == 26:
-        flashx.set_directory_structure(repo_structure(str(settings.REPOS_DIR) + "/" + proj_object.name))
-        documentation_status_lib = flashx.check_file_documentation(lines, filename)
+    # TODO: Replace with something like: modules = map(__import__, ['sys, 'os'])
+    # Or my_module = importlib.import_module('os.path')
+    # Or mod_name,file_ext = os.path.splitext(os.path.split(filepath)[-1])
+    #    my_module = imp.load_source(mod_name, filepath)
+
+    if proj_object.documentation_library and len(proj_object.documentation_library) > 0:
+        docchecker = importlib.import_module('dashboard.lib.'+proj_object.documentation_library)
+        docchecker.set_directory_structure(repo_structure(str(settings.REPOS_DIR) + "/" + proj_object.name))
+        documentation_status_lib = docchecker.check_file_documentation(lines, filename)
+        #elif proj_object.id == 35 or proj_object.id == 26 and proj_object.id == 30 and:
+        #flashx.set_directory_structure(repo_structure(str(settings.REPOS_DIR) + "/" + proj_object.name))
+        #documentation_status_lib = flashx.check_file_documentation(lines, filename)
     else:    
-        default.set_directory_structure(repo_structure(str(settings.REPOS_DIR) + "/" + proj_object.name))
-        documentation_status_lib = default.check_file_documentation(lines, filename)
+        default_docchecker.set_directory_structure(repo_structure(str(settings.REPOS_DIR) + "/" + proj_object.name))
+        documentation_status_lib = default_docchecker.check_file_documentation(lines, filename)
 
     #TODO: Remove this! This is the old checker.  Keep it for non-flashx projects for now.
     documentation_status = check_documentation(proj_object, filename, lines)
@@ -445,7 +454,8 @@ def file_explorer_handler(proj_object, filename, branch ):
 
     pr_links_table = create_pr_links_table(proj_object, filename)
 
-    #linting_table = create_linting_table(proj_object, lines)
+    # linting is done elsewhere and stored in linter_results
+    # linting_table = create_linting_table(proj_object, lines)
 
     context['documentation'] = documentation_status
     context['documentation_lib'] = documentation_status_lib
@@ -780,7 +790,7 @@ def file_linter(proj_object, filename):
 
         results = []
         for result in rawresults: 
-            if 'Missing function or method docstring' not in result['message'] and 'Formatting a regular string which' not in result['message'] and 'Unnecessary semicolon' not in result['message'] and 'Trailing whitespace' not in result['message'] and 'Bad indentation' not in result['message'] and 'Line too long' not in result['message']:
+            if 'Unnecessary parens after' not in result['message'] and 'doesn\'t conform to snake_case naming style' not in result['message'] and 'More than one statement on a single line' not in result['message'] and 'Missing function or method docstring' not in result['message'] and 'Formatting a regular string which' not in result['message'] and 'Unnecessary semicolon' not in result['message'] and 'Trailing whitespace' not in result['message'] and 'Bad indentation' not in result['message'] and 'Line too long' not in result['message']:
                 results.append(result) 
 
     if filename.endswith(".F90"):
@@ -1131,7 +1141,7 @@ def archeology(request, *args, **kwargs):
     return HttpResponse(template.render(context, request))
 
 
-# Refresh the GIT and GitHub data for a project (INTENTIONALLY ONLY WORKS FOR PROJECT ID 30)
+# Refresh the GIT and GitHub data for a project
 @login_required
 def refreshProject(request):
     print("REFRESH")
@@ -1162,7 +1172,7 @@ def refreshProject(request):
     return HttpResponse(json.dumps(resultdata), content_type="application/json")
 
 
-# Refresh the GIT and GitHub data for a project (INTENTIONALLY ONLY WORKS FOR PROJECT ID 30)
+# Refresh the GIT and GitHub data for a project
 @login_required
 def createPatch(request):
     print("CREATE PATCH")
@@ -1185,8 +1195,6 @@ def createPatch(request):
     pr = list(PullRequest.objects.all().filter(id=prid).all())[0]
 
     # project = list(Project.objects.all().filter(id=pid).all())[0]
-
-    # TODO pull name from request and project from pr id
 
     # with open('../ideas-uo/anl_test_repo/folder1/arithmetic.py', 'w') as f:
     with open(
@@ -1386,6 +1394,7 @@ def diffCommitData(request):
     all_authors = combined_authors["author"].to_list()
     combined_authors = combined_authors["unique_author"].to_list()
     merged_dev_table = []
+    merged_emails = []
     for date, author, count, loc, link in new_info:
         for idx, the_author in enumerate(all_authors):
             # Don't add PR author to the list
@@ -1404,6 +1413,7 @@ def diffCommitData(request):
                     if comment.author.username == author.username:
                         foundauthro = True
                 if not foundauthor:
+                    merged_emails.append(author.email)
                     merged_dev_table.append(
                         {
                             "username": author.username,
@@ -1445,6 +1455,17 @@ def diffCommitData(request):
         merged_dev_table, key=lambda d: d["most_recent_commit"], reverse=True
     )
 
+    extra_devs = []
+    roles = (
+        ProjectRole.objects.all()
+        .filter(project=pr.project)
+        .all()
+    )
+    for role in roles:
+        if role.user.email and role.user.email not in merged_emails:
+            extra_devs.append(role.user.email)
+
+
     resultdata = {
         "diffcommits": diffcommits,
         "prcommits": prcommits,
@@ -1452,6 +1473,7 @@ def diffCommitData(request):
         "linter_results": linter_results,
         "dev_table": dev_table,
         "merged_dev_table": merged_dev_table,
+        "extra_devs": extra_devs,
         "source_url": pr.project.source_url[0:-4],
         "repo_structure": repo_structure(str(settings.REPOS_DIR) + "/" + pr.project.name),
     }
@@ -1509,7 +1531,7 @@ def getFile(request):
             pass
 
         for result in rawresults: 
-            if 'Missing function or method docstring' not in result['message'] and 'Formatting a regular string which' not in result['message'] and 'Unnecessary semicolon' not in result['message'] and 'Trailing whitespace' not in result['message'] and 'Bad indentation' not in result['message'] and 'Line too long' not in result['message']:
+            if 'Unnecessary parens after' not in result['message'] and 'doesn\'t conform to snake_case naming style' not in result['message'] and 'More than one statement on a single line' not in result['message'] and 'Missing function or method docstring' not in result['message'] and 'Formatting a regular string which' not in result['message'] and 'Unnecessary semicolon' not in result['message'] and 'Trailing whitespace' not in result['message'] and 'Bad indentation' not in result['message'] and 'Line too long' not in result['message']:
                 linter_results.append(result) 
         # docstring_results = first_responder_function(pr.project, pr)
 
@@ -1651,6 +1673,10 @@ def sendInvite(request):
     if request.POST.get("email"):
         email = request.POST.get("email")
 
+    extra = False
+    if request.POST.get("extra"):
+        extra = True
+
     filenames = ""
     if request.POST.get("filenames"):
         filenames = request.POST.get("filenames")
@@ -1674,7 +1700,15 @@ def sendInvite(request):
             + " \n"
         )
 
-    if len(filenames) < 5:
+    if extra:
+        gmail_send_message(
+            subject="MeerCat Invitation",
+            body="You were invited to be a part of a new Pull Request: https://meercat.cs.uoregon.edu/dashboard/pr/"
+            + str(prid)
+            + "\n\nYou are invited to join the PR discussion if interested.",
+            recipient_list=[email],
+        )
+    elif len(filenames) < 5:
         gmail_send_message(
             subject="MeerCat Invitation",
             body="Files that you have worked on in the past are part of a new Pull Request: https://meercat.cs.uoregon.edu/dashboard/pr/"
@@ -1786,41 +1820,42 @@ def githubBot(request):
     )[0]
 
     # Only do this for new PRs (run on edited for testing)
-    if str(payload["action"]) == "opened" or (project.id == 30 and str(payload["action"]) == "edited"):
+    test_project_id = 30
+    if str(payload["action"]) == "opened" or (project.id == test_project_id and str(payload["action"]) == "edited"):
 
         # Ignore if merging into main or master
         #branch = str(payload["pull_request"]["head"]["label"])
         targetbranch = str(payload["pull_request"]["base"]["label"])
-        if  project.id == 30 or ("main" not in targetbranch and "master" not in targetbranch):
+        if  project.id == test_project_id or ("main" not in targetbranch and "master" not in targetbranch):
 
             # Only post comments for anl_test_repo and FLASH5
-            if project.id == 35 or project.id == 30 or project.id == 26:
-                try:
-                    # BASE_DIR = Path(__file__).resolve().parent.parent
-                    with open(settings.BASE_DIR / 'meercat.config.json') as meercat_config:
-                        config = json.load(meercat_config)
+            #if project.id == 35 or project.id == 30 or project.id == 26:
+            try:
+                # BASE_DIR = Path(__file__).resolve().parent.parent
+                with open(settings.BASE_DIR / 'meercat.config.json') as meercat_config:
+                    config = json.load(meercat_config)
 
-                    repo_name = project.name
-                    repo_owner = get_repo_owner(project)
-                    url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues/{prnumber}/comments"
+                repo_name = project.name
+                repo_owner = get_repo_owner(project)
+                url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues/{prnumber}/comments"
+                gh_payload = {
+                    "body": "## MeerCat is working on this PR.  Please stay tuned."
+                }
+
+                branch = str(payload["pull_request"]["head"]["label"]) #TODO: We might not care where it is coming from
+                if "staged" not in targetbranch: # this never gets called if target is main because already filtered above.
                     gh_payload = {
-                        "body": "## MeerCat is working on this PR.  Please stay tuned."
+                        "body": "## MeerCat will ignore this PR because it is not going to the staged branch."
                     }
 
-                    branch = str(payload["pull_request"]["head"]["label"]) #TODO: We might not care where it is coming from
-                    if "staged" not in targetbranch: # this never gets called if target is main because already filtered above.
-                        gh_payload = {
-                            "body": "## MeerCat will ignore this PR because it is not going to the staged branch."
-                        }
-
-                    headers = {
-                        "Accept": "application/vnd.github+json",
-                        "Authorization": "token " + config['MEERCAT_USER_TOKEN'],
-                    }
-                    result = requests.post(url, headers=headers, data=json.dumps(gh_payload))
-                except Exception as e:
-                    print(e)
-                    pass        
+                headers = {
+                    "Accept": "application/vnd.github+json",
+                    "Authorization": "token " + config['MEERCAT_USER_TOKEN'],
+                }
+                result = requests.post(url, headers=headers, data=json.dumps(gh_payload))
+            except Exception as e:
+                print(e)
+                pass        
 
             # Need to refresh the database before
             username = settings.DATABASES["default"]["USER"]
@@ -1843,17 +1878,17 @@ def githubBot(request):
             if comment:
                 # Only post comments for anl_test_repo and FLASH5
                 branch = str(payload["pull_request"]["head"]["label"]) #TODO: maybe remove this since only care if target is staged
-                if "staged" in targetbranch and (project.id == 35 or project.id == 30 or project.id == 26):
-                    comment_pullrequest(pull_request, comment)
-                    print("commented")
-                else:
+                # if "staged" in targetbranch and (project.id == 35 or project.id == 30 or project.id == 26):
+                comment_pullrequest(pull_request, comment)
+                print("commented")
+                """else:
                     event = EventLog(
                         event_type=EventLog.EventTypeChoices.NOTIFICATION,
                         log=comment,
                         pull_request=pull_request,
                         datetime=datetime.datetime.today(),
                     )
-                    event.save()
+                    event.save()"""
             else:
                 event = EventLog(
                     event_type=EventLog.EventTypeChoices.NO_NOTIFICATION,
@@ -1908,30 +1943,30 @@ def githubBot(request):
 
         else:
             # Only post comments for anl_test_repo and FLASH5
-            if project.id == 35 or project.id == 30 or project.id == 26:
-                try:
-                    # BASE_DIR = Path(__file__).resolve().parent.parent
-                    with open(settings.BASE_DIR / 'meercat.config.json') as meercat_config:
-                        config = json.load(meercat_config)
+            # if project.id == 35 or project.id == 30 or project.id == 26:
+            try:
+                # BASE_DIR = Path(__file__).resolve().parent.parent
+                with open(settings.BASE_DIR / 'meercat.config.json') as meercat_config:
+                    config = json.load(meercat_config)
 
-                    repo_name = project.name
-                    repo_owner = get_repo_owner(project)
-                    url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues/{prnumber}/comments"
+                repo_name = project.name
+                repo_owner = get_repo_owner(project)
+                url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues/{prnumber}/comments"
 
-                    branch = str(payload["pull_request"]["head"]["label"])
-                    if "staged" not in branch: # this means a feature branch going directly into main.
-                        gh_payload = {
-                            "body": "## MeerCat warning: The branch in this PR appears to be skipping the staged branch."
-                        }
+                branch = str(payload["pull_request"]["head"]["label"])
+                if "staged" not in branch: # this means a feature branch going directly into main.
+                    gh_payload = {
+                        "body": "## MeerCat warning: The branch in this PR appears to be skipping the staged branch."
+                    }
 
-                        headers = {
-                            "Accept": "application/vnd.github+json",
-                            "Authorization": "token " + config['MEERCAT_USER_TOKEN'],
-                        }
-                        result = requests.post(url, headers=headers, data=json.dumps(gh_payload))
-                except Exception as e:
-                    print(e)
-                    pass             
+                    headers = {
+                        "Accept": "application/vnd.github+json",
+                        "Authorization": "token " + config['MEERCAT_USER_TOKEN'],
+                    }
+                    result = requests.post(url, headers=headers, data=json.dumps(gh_payload))
+            except Exception as e:
+                print(e)
+                pass             
 
         
     return HttpResponse(
