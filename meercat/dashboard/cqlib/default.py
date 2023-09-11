@@ -1,6 +1,10 @@
 
-
 import os, sys
+import json
+
+from django.conf import settings
+from database.models import Project
+
 
 def splitall(path):
     allparts = []
@@ -18,7 +22,7 @@ def splitall(path):
     return allparts
 
 
-doc_extensions_to_check = ['.F90', '.dox', '.c', '.py']  #might add more types later, e.g., .md files
+doc_extensions_to_check = ['.F90', '.cpp', '.c', '.h', '.py']  #might add more types later
 filenames_to_check = []
 
 #Auxilliary function used by check_file_documentation.
@@ -27,10 +31,9 @@ filenames_to_check = []
 #   (True, '') meaning it is checkable or
 #   (False, msg:str) meaning not checkable with msg description of why
 
-def is_file_documentation_checkable(lines:list, path:str) -> tuple:
+def is_file_checkable(lines:list, path:str) -> tuple:
 
   #return (False, f"File extension currently not checkable.")
-
   return (True, '')
 
 """#Need directory structure for checking private files
@@ -40,7 +43,6 @@ Assume MeerCat calls this function.
 #Directory Structure
 
 For some projects, it may be necessary to find files or folders not directly on the file path. It is expected that MeerCat will call this function and pass in a portion of the repo directory structure. Not the content, just folder and file names in a tree like structure.
-
 If this function is not called, then it is assumed that checking a specific project's documentation does not require knowing more than what is on the path. In this case, `dir_struct` defaults to `None`.
 """
 
@@ -76,34 +78,6 @@ def find_file_or_folder(starting_folder:list , target:str, the_type:str):
   answer = iterative_search(starting_folder, '')
   return answer
 
-test_struct = [
-    {'isFile':True, 'name':'file1'},
-    {'isFile':True, 'name':'file2'},
-    {'isFile':False, 'name':'source', 'contents':[
-        {'isFile':True, 'name':'file3'},
-        {'isFile':True, 'name':'file4'},
-        {'isFile':False, 'name':'Foo', 'contents':[
-            {'isFile':True, 'name':'file7'}
-        ]},
-        {'isFile':False, 'name':'Fum', 'contents':[
-            {'isFile':True, 'name':'file8'},
-            {'isFile':False, 'name':'Fie', 'contents':[
-              {'isFile':True, 'name':'file9'}
-            ]},
-        ]},
-    ]},
-    {'isFile':False, 'name':'folder1', 'contents':[
-        {'isFile':True, 'name':'file5'},
-        {'isFile':True, 'name':'file6'},
-        {'isFile':False, 'name':'Foe', 'contents':[
-            {'isFile':True, 'name':'file10'},
-            {'isFile':False, 'name':'Fud', 'contents':[
-              {'isFile':True, 'name':'file11'}
-            ]},
-      ]},
-    ]},
-]
-
 
 def contains_folder(dir_struct, folder):
   return find_file_or_folder(dir_struct, folder, 'folder')
@@ -137,47 +111,118 @@ def find_folder_on_path(root_structure:list, path:str):
 
 Input is simply file, in form of a list of lines/strings and the path to the file, starting with `source/`.
 
-The return value is a dictionary of following form:
+The return value is a list of following form:
 
-<pre>
-'file_status': 'checkable' or 'uncheckable: msg' or 'checkable but no documentation'
-'missing_fields': list of fields as strings
-'problem_fields' = [(msg:str, line:str, line_number:int),  ...] where msg describes problem.
-'bogus_fields': e.g., [('@internal', line:str, line_number:int), ...] where @internal should not be in this file.
-</pre>
+[{},{}]
 
-For the MeerCat message that goes along with `'uncheckable: msg'` or `'checkable but no documentation'`, might use something like *"Please see Flash-X/docs/doxygen/UnitTemplate/ for templates on setting up Doxygen documentation."*
 """
 
 #This is one of two public functions that make up library API
-def check_file_documentation(lines:list, path:str):
-  assert isinstance(lines, list)
-  assert all([isinstance(x,str) for x in lines])
-  assert isinstance(path,str)
+def check_file(proj_object, settings, filename:str):
+  #assert isinstance(lines, list)
+  #assert all([isinstance(x,str) for x in lines])
+  #assert isinstance(path,str)
 
-  return check_file_documentation_aux(dir_struct, lines, path)  #adds dir_struct
+  results = []
 
-def check_file_documentation_aux(dir_struct, lines:list, path:str):
-  assert isinstance(lines, list)
-  assert all([isinstance(x,str) for x in lines])
-  assert isinstance(path,str)
+  if filename.endswith(".py"):
+      rawresults = []
+      try:
+          print("CHECKING PY FILE")
+          # output = os.popen('export PYTHONPATH=${PYTHONPATH}:'+os.path.abspath(str(settings.REPOS_DIR)+'/'+pr.project.name)+' ; cd '+str(settings.REPOS_DIR)+'/'+pr.project.name+' ; '+str(settings.REPOS_DIR)+'/meercat/env/bin/pylint --output-format=json '+filename).read()
+          output = os.popen(
+              "export PYTHONPATH=${PYTHONPATH}:"
+              + os.path.abspath(str(settings.REPOS_DIR) + "/" + proj_object.name)
+              + " ; cd "
+              + str(settings.REPOS_DIR)
+              + "/"
+              + proj_object.name
+              + " ; . ../meercat/meercat-env/bin/activate ; pylint --output-format=json "
+              + filename
+          ).read()
 
-  global units  #list of known units in Flash-X
+          rawresults = json.loads(output)
+      except Exception as e:
+          pass
 
-  results_dict = {
-      'should_have_doc': False,
-      'file_status': 'checkable',
-      'missing_fields': [],
-      'missing_file_fields': [],
-      'missing_subroutine_fields': [],
-      'problem_fields': [],
-      'bogus_fields': [],
-  }
+      results = []
+      for result in rawresults: 
+          if 'Unnecessary parens after' not in result['message'] and 'doesn\'t conform to snake_case naming style' not in result['message'] and 'More than one statement on a single line' not in result['message'] and 'Missing function or method docstring' not in result['message'] and 'Formatting a regular string which' not in result['message'] and 'Unnecessary semicolon' not in result['message'] and 'Trailing whitespace' not in result['message'] and 'Bad indentation' not in result['message'] and 'Line too long' not in result['message']:
+              results.append(result)
 
-  checkable, msg = is_file_documentation_checkable(lines, path)  #returns tuple: (bool, msg)
-  if not checkable:
-    results_dict['file_status'] = f'uncheckable: {msg}'
-    return results_dict
 
-  results_dict['file_status'] = f'uncheckable: No documentation checker library available.'
-  return results_dict
+  if filename.endswith(".F90"):
+      output = os.popen(
+          "export PYTHONPATH=${PYTHONPATH}:"
+          + os.path.abspath(str(settings.REPOS_DIR) + "/" + proj_object.name)
+          + " ; cd "
+          + str(settings.REPOS_DIR)
+          + "/"
+          + proj_object.name
+          + " ; . ../meercat/meercat-env/bin/activate ; fortran-linter "
+          + str(settings.REPOS_DIR)
+          + "/"
+          + proj_object.name
+          + "/"
+          + filename
+          + " --syntax-only"
+      ).read()
+      #linter_results.append( {"filename": filename, "results": output.split(str(settings.REPOS_DIR) + "/" + pr.project.name + "/" + filename)} )
+      results = []
+      for result in output.split(
+          str(settings.REPOS_DIR) + "/" + proj_object.name + "/" + filename + ":"
+      ):
+          if result and len(result) > 0:
+              try:
+                  if 'Replace .' not in result and 'At least one space before comment' not in result and 'Exactly one space after' not in result and 'Missing space' not in result and 'Single space' not in result and 'Trailing whitespace' not in result and 'Line length' not in result:
+                      results.append(
+                          {
+                              "column": 0,
+                              "line": int(result.split(":")[0]),
+                              "message": result.strip().split("\n")[-1].split(": ")[1],
+                              "type": result.strip().split("\n")[-1].split(": ")[0],
+                          }
+                      )
+              except:
+                  pass
+
+
+  if filename.endswith(".c"):
+      output = os.popen(
+          "export PYTHONPATH=${PYTHONPATH}:"
+          + os.path.abspath(str(settings.REPOS_DIR) + "/" + proj_object.name)
+          + " ; cd "
+          + str(settings.REPOS_DIR)
+          + "/"
+          + proj_object.name
+          + " ; . ../meercat/meercat-env/bin/activate ; cpplint --filter=-whitespace "
+          + str(settings.REPOS_DIR)
+          + "/"
+          + proj_object.name
+          + "/"
+          + filename
+          + " 2>&1"
+      ).read()
+      # linter_results.append( {'filename': filename, 'results':output.split('../'+pr.project.name+'/'+filename+':')} )
+
+      results = []
+      for result in output.split(
+          str(settings.REPOS_DIR) + "/" + proj_object.name + "/" + filename + ":"
+      ):
+          if result and len(result) > 0:
+              try:
+                  if 'Include the directory when naming header' not in result and 'Using C-style cast.' not in result:
+                      results.append(
+                          {
+                              "column": 0,
+                              "line": int(result.split(":")[0]),
+                              "message": result.split(":")[1].split("  [")[0].strip(),
+                              "type": result.split(":")[1]
+                              .split("  [")[1]
+                              .split("] ")[0],
+                          }
+                      )
+              except:
+                  pass
+  return results
+

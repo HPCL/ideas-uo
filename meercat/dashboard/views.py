@@ -278,7 +278,7 @@ def first_responder_function(proj_object, pull_object):
 
     try:
         branch = commits_list[0].branch.split()[-1]
-        cmd = f"cd {settings.REPOS_DIR}/{proj_name} ; git checkout {branch}"
+        cmd = f"cd {settings.REPOS_DIR}/{proj_name} ; git checkout --force {branch}"
 
         import os
         os.system(cmd)
@@ -375,7 +375,8 @@ def first_responder_function(proj_object, pull_object):
     linter_problems = 0;
     average = 0;
     for filename in filenames:
-        results = file_linter(proj_object, filename)
+        #results = file_linter(proj_object, filename)
+        results = default_linter.check_file(proj_object, settings, filename)
         average += len(results)
         if len(results) > 0:
             linter_problems += 1
@@ -1034,7 +1035,7 @@ def pr(request, *args, **kwargs):
     comments = list(Comment.objects.all().filter(pr=pr))
 
     # switch local repo to the branch for this PR
-    branch = "Unable to access branch for this PR"
+    branch = "Unable to analyze any files in this branch"
     if len(commits) > 0:
         branch = commits[0].branch.split()[-1]
         print("PRA Switch branches to: " + branch)
@@ -1325,7 +1326,8 @@ def diffCommitData(request):
 
     linter_results = []
     for filename in filenames:
-        results = file_linter(pr.project, filename)
+        #results = file_linter(pr.project, filename)
+        results = default_linter.check_file(pr.project, settings, filename)
         linter_results.append({"filename": filename, "results": results})
 
 
@@ -1512,7 +1514,7 @@ def getFile(request):
     linter_results = []
     # docstring_results = []
 
-    if filename.endswith(".py"):
+    '''if filename.endswith(".py"):
         # output = os.popen('export PYTHONPATH=${PYTHONPATH}:'+os.path.abspath(str(settings.REPOS_DIR)+'/'+pr.project.name)+' ; cd '+str(settings.REPOS_DIR)+'/'+pr.project.name+' ; pylint --output-format=json '+filename).read()
         rawresults = []
         try:
@@ -1605,9 +1607,12 @@ def getFile(request):
                         )
                 except:
                     pass
-        linter_results = results
+        linter_results = results'''
 
-    # print("LINTER RESULTS: "+str(linter_results))
+    linter_results = default_linter.check_file(pr.project, settings, filename)
+
+
+    print("LINTER RESULTS: "+str(linter_results))
     # print("DOC CHECKER RESULTS: "+str(docstring_results))
 
     resultdata = {"filecontents": "".join(lines), "linter_results": linter_results}
@@ -1803,7 +1808,7 @@ def githubBot(request):
 
     payload = json.loads(request.body)
 
-    # print( str(payload) )
+    print( str(payload) )
 
     print("Action Type: " + str(payload["action"]))
     print("Pull Request Number: " + str(payload["number"]))
@@ -1819,7 +1824,7 @@ def githubBot(request):
         .all()
     )[0]
 
-    # Only do this for new PRs (run on edited for testing)
+    # Only do this for opened PRs (also do for edited PRS for test project)
     test_project_id = 30
     if str(payload["action"]) == "opened" or (project.id == test_project_id and str(payload["action"]) == "edited"):
 
@@ -2836,7 +2841,7 @@ def file_explorer(request, *args, **kwargs):
     proj_object = proj_list[0]
     proj_name = proj_object.name
 
-    cmd = f"cd {settings.REPOS_DIR}/{proj_name} ; git checkout {branch}"
+    cmd = f"cd {settings.REPOS_DIR}/{proj_name} ; git checkout --force {branch}"
     try:
         import os
         os.system(cmd)
@@ -2861,7 +2866,7 @@ def file_explorer_function(project_object, branch, filename):
     proj_id = project_object.id
     proj_info = project_object.info  #need to add this field
 
-    cmd = f"cd {settings.REPOS_DIR}/{proj_name} ; git checkout {branch}"
+    cmd = f"cd {settings.REPOS_DIR}/{proj_name} ; git checkout --force {branch}"
     try:
         os.system(cmd)
     except:
