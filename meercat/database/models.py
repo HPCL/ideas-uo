@@ -4,12 +4,14 @@ from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 
 # Create your models here.
-class RecommenderFeedback(models.Model):
+class PRAFeedback(models.Model):
     thumbs = models.BooleanField('Thumbs up', blank=False)
     message = models.TextField('Feedback message', blank=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     datetime = models.DateTimeField(auto_now_add=True)
-
+    type = models.CharField("Feedback type", max_length=200, blank="False")
+    filepath = models.CharField("File path", max_length=400, blank=False)
+    pullrequest = models.ForeignKey('PullRequest', on_delete=models.CASCADE)
 
 class SupportSubmission(models.Model):
 
@@ -104,6 +106,8 @@ class Project(models.Model):
     has_gitlab = models.BooleanField(default=False)
     github_last_updated = models.DateTimeField(auto_now=True, null=True)
     gitlab_last_updated = models.DateTimeField(auto_now=True, null=True)
+    documentation_library = models.CharField(max_length=64, null=True)
+    code_quality_library = models.CharField(max_length=64, null=True)
     complete_ignore_extensions = models.JSONField(blank=True, default=list)
     complete_ignore_filenames = models.JSONField(blank=True, default=list)
     documentation_ignore_extensions = models.JSONField(blank=True, default=list)

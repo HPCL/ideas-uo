@@ -11,18 +11,20 @@ enddate.val(date.toISOString().substr(0, 10));
 
 var queryString = window.location.search;
 var urlParams = new URLSearchParams(queryString);
-var pid = urlParams.get('pid')
+//var pid = urlParams.get('pid')
+var pid = $("#project").val();
 console.log(pid);
 
-var editor = CodeMirror.fromTextArea(document.getElementById("demotext"), {
+/*var editor = CodeMirror.fromTextArea(document.getElementById("demotext"), {
     lineNumbers: true,
     mode: "text/x-python", //"text/x-c++src", //"text/html",
     matchBrackets: true,
     spellcheck: true,
     autocorrect: true,
     styleSelectedText: true
-});
+});*/
 
+/*
 let file = `#Adding this comment to just test committing and diff data
 def sub(x,y):
   """
@@ -81,6 +83,7 @@ def sub(x,y):
 editor.setValue(file);
 editor.markText({ line: 4, ch: 9 }, { line: 4, ch: 24 }, { className: "styled-background" });
 editor.markText({ line: 6, ch: 12 }, { line: 6, ch: 22 }, { className: "styled-background" });
+*/
 
 function refreshProject() {
     console.log("refreshing project...");

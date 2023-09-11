@@ -233,7 +233,7 @@ def gmail_callback(request):
     state = request.session["gmail_state"]
 
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-        "client_secret.json",
+        settings.BASE_DIR / "client_secret.json",
         scopes=[
             "https://www.googleapis.com/auth/gmail.send",
             "https://www.googleapis.com/auth/gmail.metadata",

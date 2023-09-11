@@ -11,6 +11,8 @@ from django.conf import settings
 from database.models import EventLog
 from database.utilities import get_repo_owner
 
+import smtplib
+from email.mime.text import MIMEText
 
 def save_debug_event(log, json="", pull_request=None, request=None):
     if request is not None:
@@ -500,7 +502,7 @@ def gmail_send_message(
     TODO(developer) - See https://developers.google.com/identity
     for guides on implementing OAuth2 for the application.
     """
-    creds = None
+    """creds = None
     # The file token.json stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
     # time.
@@ -553,6 +555,39 @@ def gmail_send_message(
             event_type=EventLog.EventTypeChoices.EMAIL,
             datetime=datetime.today(),
             log=str(message),
+        )
+        email_event.save()
+        print(f'Message Id: {send_message["id"]}')
+    except HttpError as error:
+        print(f"An error occurred: {error}")
+
+        # Save failed email event
+        failed_email_event = EventLog(
+            event_type=EventLog.EventTypeChoices.EMAIL_FAIL,
+            datetime=datetime.today(),
+            log=str(error),
+        )
+        failed_email_event.save()
+
+        send_message = None
+    """
+
+    try:
+        msg = MIMEText(body)
+        msg['subject'] = subject
+        msg['From'] = sender
+        msg['To'] = ', '.join(recipient_list)
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
+            smtp_server.login(sender, settings.EMAIL_PASSWORD)
+            smtp_server.sendmail(sender, recipient_list, msg.as_string())
+
+        send_message = msg
+
+        # Save email event
+        email_event = EventLog(
+            event_type=EventLog.EventTypeChoices.EMAIL,
+            datetime=datetime.today(),
+            log=msg.as_string(),
         )
         email_event.save()
         print(f'Message Id: {send_message["id"]}')

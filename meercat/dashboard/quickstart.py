@@ -29,8 +29,9 @@ def main():
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
+            # ="http://127.0.0.1:8080/"
             flow = InstalledAppFlow.from_client_secrets_file(
-                "client_secret.json", SCOPES, redirect_uri="http://127.0.0.1:8080/"
+                "client_secret.json", SCOPES, redirect_uri="https://meercat.cs.uoregon.edu/oauth/gmail_callback"
             )
             auth_uri = flow.authorization_url()
             print("please visit the following url to authorize:", auth_uri)

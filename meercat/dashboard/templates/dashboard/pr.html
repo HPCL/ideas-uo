@@ -8,7 +8,7 @@
 
 <div style="margin-left:15px; margin-top:0px;">
 
-    {% if not closed_issue %}   
+    {% if not issues %}   
         <div class="alert alert-warning alert-dismissible fade show" role="alert">
             Warning: This PR is not linked to any issues!
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -16,32 +16,32 @@
     {% endif %}
 
     <div class="row" style="margin-top:0px;">
-        <div class="col-sm-1"><u>Number</u>:</div> 
-        <div class="col-sm-11">{{pr.number}}</div>
+        <div class="col-sm-2"><u>Number</u>:</div> 
+        <div class="col-sm-10">{{pr.number}}</div>
     </div>
     <div class="row" style="margin-top:6px;">
-        <div class="col-sm-1"><u>Title</u>:</div> 
-        <div class="col-sm-11">{{pr.title}}</div>
+        <div class="col-sm-2"><u>Title</u>:</div> 
+        <div class="col-sm-10">{{pr.title}}</div>
     </div>
     <div class="row" style="margin-top:6px;">
-        <div class="col-sm-1"><u>Date</u>: </div>
-        <div class="col-sm-11">{{pr.created_at}}</div>
+        <div class="col-sm-2"><u>Date</u>: </div>
+        <div class="col-sm-10">{{pr.created_at}}</div>
     </div>
     <div class="row" style="margin-top:6px;">
-        <div class="col-sm-1"><u>Author</u>: </div>
-        <div class="col-sm-11">{{pr.author.username}} {% if pr.author.email %}- {{pr.author.email}}{% endif %}</div>
+        <div class="col-sm-2"><u>Author</u>: </div>
+        <div class="col-sm-10">{{pr.author.username}} {% if pr.author.email %}- {{pr.author.email}}{% endif %}</div>
     </div>
     <div class="row" style="margin-top:6px;">
-        <div class="col-sm-1"><u>Branch</u>: </div>
-        <div class="col-sm-11">{{branch}}</div>
+        <div class="col-sm-2"><u>Branch</u>: </div>
+        <div class="col-sm-10">{{branch}}</div>
     </div>
         <div class="row" style="margin-top:6px;">
-        <div class="col-sm-1"><u>Issues</u>: </div>
-        <div class="col-sm-11">{{issues|length}}</div>
+        <div class="col-sm-2"><u>Linked Issues</u>: </div>
+        <div class="col-sm-10">{{issues|length}}</div>
     </div>
     <div class="row" style="margin-top:6px; margin-bottom:8px;">
-        <div class="col-sm-1"><u>URL</u>: </div>
-        <div class="col-sm-11"><a target="_blank" href="{{pr.url}}">{{pr.url}}</a></div>
+        <div class="col-sm-2"><u>URL</u>: </div>
+        <div class="col-sm-10"><a target="_blank" href="{{pr.url}}">{{pr.url}}</a></div>
     </div>
     <br/>
 
@@ -88,7 +88,7 @@
             </div>
 
             <div id="issuesdiv" style="display:none; border:1px solid grey; margin:10px; padding:10px;">
-                <b>Issue closed by this PR:</b>
+                <!--<b>Issue closed by this PR:</b>
                 {% if closed_issue %}	
                     <table class="table">
                         <tr>
@@ -104,9 +104,9 @@
                         </tr>
                     </table>				
                 {% endif %}
-                <br/>
+                <br/-->
 
-                <b>Other Issues:</b>
+                <b>Linked Issues:</b>
                 <table class="table">
                     {% if issues|length < 1 %}	
                         <tr><td>None</td></tr>
@@ -148,12 +148,33 @@
                                 <tr>
                                     <th><span class="text-decoration-underline"><em>File</em></span></th>
                                     <th style="width:150px;"><span class="text-decoration-underline"><em>Status</em></span></th>
-                                    <th><span class="text-decoration-underline"><em>Issues</em></span></th>
+                                    <th><span class="text-decoration-underline"><em>Issues</em></span><em><span id="docissuestatus"></span></em></th>
                                     <th> </th>
+                                    <!--th><span class="text-decoration-underline"><em>Feedback</em></span></th-->
                                 </tr>
                             </thead>
                             <tbody style="font-size:10pt;">
-                                <tr><td colspan="3">Loading...</td></tr>
+                                <tr><td colspan="4">Loading...</td></tr>
+                                <!--tr>
+                                    <td class="file-path-td">
+                                        <span class="file-path-span" id="flashx_samples/FLASH_XGrid_fillGuardCells.F90">flashx_samples/FLASH_XGrid_fillGuardCells.F90</span>
+                                        <br>
+                                        <a class="btn btn-xs btn-secondary" target="_blank" href="/dashboard/filex/30?filename=flashx_samples/FLASH_XGrid_fillGuardCells.F90&amp;branch=remotes/origin/flash_test">View in File Explorer</a>
+                                    </td>
+                                    <td colspan="3">
+                                        uncheckable: for path='flashx_samples/FLASH_XGrid_fillGuardCells.F90', no checkable unit found among ['Driver', 'Grid', 'Multispecies', 'Particles', 'PhysicalConstants', 'RuntimeParameters', 'Simulation', 'MoL', 'IO', 'Eos', 'Gravity', 'HeatAD', 'Hydro', 'ImBound', 'IncompNS', 'Multiphase', 'RadTrans', 'Timers', 'Logfile', 'Debugger', 'Profiler']
+                                    </td>
+                                    <td>
+                                        <div class="d-flex justify-content-between">
+                                            <button type="button" class="btn p-0" data-bs-toggle="modal" data-bs-target="#feedback-modal">
+                                                <img class="feedback-button" data-value="thumb_up" style="width: 20px;" src="{% static 'images/thumb_up.svg' %}">
+                                            </button>
+                                            <button type="button" class="btn p-0" data-bs-toggle="modal" data-bs-target="#feedback-modal">
+                                                <img class="feedback-button" data-value="thumb_down" style="width: 20px;" src="{% static 'images/thumb_down.svg' %}">
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr-->
                             </tbody>
                         </table>
                     </div>
@@ -164,6 +185,34 @@
     </div>
 
     <br/>
+
+    <!-- Modal -->
+    <div class="modal fade" id="feedback-modal" tabindex="-1" aria-labelledby="feedback-modal-label" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="feedback-modal-label">Submit your feedback</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                    <div class="modal-body">
+                            <p> You clicked <img id="feedback-clicked" style="width: 20px;"/></p>
+                            <label for="feedback-message" class="mb-2">Tell us what you think about this so we can improve it</label>
+                            <textarea id="feedback-message" cols="65" rows="5"></textarea>
+                            <input type="hidden" id="feedback-prid" value="{{ prid }}" />
+                            <!--input type="hidden" id="feedback-type" value="Documentation" /-->
+                            <input type="hidden" id="feedback-type" value="CodeQuality" />
+                    </div>
+                    <div class="modal-footer d-flex justify-content-between">
+                        <div>
+                            <button type="button" id="feedback-cancel-btn" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" id="feedback-submit-btn" class="btn btn-primary">Save Changes</button>
+                        </div>
+                        <span id="feedback-status"></span>
+                    </div>
+            </div>
+        </div>
+    </div>
+    <!-- End Modal -->
 
 
     <div class="accordion" id="accordionExample6">
@@ -185,10 +234,11 @@
                                     <th><span class="text-decoration-underline"><em>File</em></span></th>
                                     <th><span class="text-decoration-underline"><em>Issues</em></span></th>
                                     <th></th>
+                                    <th><span class="text-decoration-underline"><em>Feedback</em></span></th>
                                 </tr>
                             </thead>
                             <tbody style="font-size:10pt;">
-                                <tr><td colspan="3">Loading...</td></tr>
+                                <tr><td colspan="4">Loading...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -229,6 +279,14 @@
                             <tr><td colspan="6">Loading...</td></tr>
                         </tbody>
                     </table>
+                    <br/>
+                    <div id="extradevsdiv" style="display:none;">
+                        <b>Invite other developers from this project:</b>
+                        <select id="extradevsdropdown">
+                        </select>
+                        <button class='btn btn-xs btn-success' style='margin-top:-4px;' onclick='sendDropdownInvite()'>Send Invite</button>
+
+                    </div>
                 </div>
 
             </div>
@@ -236,9 +294,9 @@
         </div>
     </div>
 
-    <br/>
+    <!--br/-->
 
-    <div class="accordion" id="accordionExample8">
+    <div class="accordion" id="accordionExample8" style="display:none;">
         <div class="accordion-item">
             <h2 class="accordion-header" id="headingEight">
             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEight" aria-expanded="false" aria-controls="collapseEight">
@@ -341,6 +399,27 @@
                 </div>
                                
             </div>
+            </div>
+        </div>
+    </div>
+
+    <br/>
+
+
+    <div class="accordion" id="accordionExample9">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingSeven">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSeven" aria-expanded="false" aria-controls="collapseSeven">
+                  <strong>LLM Critique</strong>
+                  <!-- <i class="bi bi-exclamation-triangle"></i> -->
+                </button>
+            </h2>
+            <div id="collapseSeven" class="accordion-collapse collapse" aria-labelledby="headingSeven" data-bs-parent="#accordionExample9">
+                <div class="accordion-body">
+                
+                    <b>This section is still under development</b><br/>
+
+                </div>
             </div>
         </div>
     </div>
@@ -603,57 +682,6 @@
     <b><i>Potential follow on:</i></b> <span></span>
     <br/-->
 
-    <div class="accordion" id="accordionExample9" style="display:none;">
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="headingSeven">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSeven" aria-expanded="false" aria-controls="collapseSeven">
-                  <strong>Archeology</strong> &nbsp;&nbsp; <i class="bi bi-exclamation-triangle-fill" style="color:red; font-size:16pt;"></i>
-                  <!-- <i class="bi bi-exclamation-triangle"></i> -->
-                </button>
-            </h2>
-            <div id="collapseSeven" class="accordion-collapse collapse" aria-labelledby="headingSeven" data-bs-parent="#accordionExample9">
-                <div class="accordion-body">
-                
-                    <div id="afilenamesdiv" style="border:1px solid grey; margin:10px; padding:10px;">
-                        <b>Files modified in this PR:</b>
-                        <table class="table" id="adiffcommittable" style="font-size:10pt;">
-                            <thead>
-                                <tr>
-                                    <th>File</th>
-                                    <th>Commits (last 8 weeks)</th>
-                                    <th>Results</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr><td colspan="3">Loading...</td></tr>
-                                <!--{% for file in filenames %}
-                                <tr>
-                                    <td>{{file}}</td>
-                                </tr>
-                                {% endfor %}-->
-
-                                <!--{% for key,value in diffcommits.items %}
-                                <tr>
-                                    <td>{{key}}</td>
-                                    <td>
-                                        {% for commit in value %}
-                                            {{commit}}
-                                        {% endfor %}
-                                    </td>
-                                </tr>
-                                {% endfor %}-->
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <br/>
-
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <br/>
 
 </div>
 
@@ -675,8 +703,12 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
+
+                <button id="docnextbutton" class="btn btn-sm btn-primary" onclick="nextDocIssue();" style="float:right;">
+                    Next Issue
+                </button>
             
-                <p>Suggestions highlighted for file <b><i><span id="dochelpertitle">folder1/arithmetic.py</span></i></b></p>
+                <p>Issues highlighted in yellow for file <b><i><span id="dochelpertitle">folder1/arithmetic.py</span></i></b></p>
 
                 <div class="" style="border:1px solid #ccc; margin-bottom:5px;">
 
@@ -702,7 +734,11 @@
             </div>
             <div class="modal-body">
                 
-                <p>Suggestions highlighted for file <b><i><span id="cqhelpertitle">folder1/arithmetic.py</span></i></b></p>
+                <button id="cqnextbutton" class="btn btn-sm btn-primary" onclick="nextCQIssue();" style="float:right;">
+                    Next Issue
+                </button>
+
+                <p>Issues highlighted in yellow for file <b><i><span id="cqhelpertitle">folder1/arithmetic.py</span></i></b></p>
 
                 <div class="" style="border:1px solid #ccc; margin-bottom:5px;">
 

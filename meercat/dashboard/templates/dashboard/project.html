@@ -7,7 +7,10 @@
     <i>Last updated: {{project.last_updated|date:'Y-m-d'}} {{project.last_updated|time:'h:i a'}}</i>
 
     <div style="float:right;">
+
         <a href="/dashboard/prlist/{{project.id}}" class="btn btn-sm btn-primary">View Pull Requests</a>
+
+        <a href="/dashboard/folderx/{{project.id}}?branch=main&folder=/" class="btn btn-sm btn-primary">Repo Explorer</a>
 
         <button id="refreshbutton" class="btn btn-sm btn-primary"  onclick="refreshProject();">
             <div id="spinner" class="spinner-border spinner-border-sm" role="status" style="display:none;">
@@ -102,7 +105,10 @@
     <br/>
     <br/>
 
+    <input id="project" type="hidden" value="{{ project.pk }}"/>
+
 {% endblock content %}
+
 
 
 {% block script %}
