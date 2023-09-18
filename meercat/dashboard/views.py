@@ -1824,14 +1824,43 @@ def githubBot(request):
         .all()
     )[0]
 
+
+
+
     # Only do this for opened PRs (also do for edited PRS for test project)
     test_project_id = 30
     if str(payload["action"]) == "opened" or (project.id == test_project_id and str(payload["action"]) == "edited"):
 
         # Ignore if merging into main or master
-        #branch = str(payload["pull_request"]["head"]["label"])
+        frombranch = str(payload["pull_request"]["head"]["label"])
         targetbranch = str(payload["pull_request"]["base"]["label"])
-        if  project.id == test_project_id or ("main" not in targetbranch and "master" not in targetbranch):
+
+        # Check to see if PR is from a fork
+        from_org = frombranch.split(":")[0]
+        proj_org = project.source_url[19:]
+        if proj_org is not None and from_org is not None and not proj_org.startswith(from_org):
+            try:
+                with open(settings.BASE_DIR / 'meercat.config.json') as meercat_config:
+                    config = json.load(meercat_config)
+
+                repo_name = project.name
+                repo_owner = get_repo_owner(project)
+                url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues/{prnumber}/comments"
+
+                gh_payload = {
+                    "body": "## MeerCat warning: The branch in this PR appears to be from a fork.  Currently, MeerCat cannot analyze forks."
+                }
+
+                headers = {
+                    "Accept": "application/vnd.github+json",
+                    "Authorization": "token " + config['MEERCAT_USER_TOKEN'],
+                }
+                result = requests.post(url, headers=headers, data=json.dumps(gh_payload))
+            except Exception as e:
+                print(e)
+                pass   
+
+        elif  project.id == test_project_id or ("main" not in targetbranch and "master" not in targetbranch):
 
             # Only post comments for anl_test_repo and FLASH5
             #if project.id == 35 or project.id == 30 or project.id == 26:
@@ -1848,7 +1877,7 @@ def githubBot(request):
                 }
 
                 branch = str(payload["pull_request"]["head"]["label"]) #TODO: We might not care where it is coming from
-                if "staged" not in targetbranch: # this never gets called if target is main because already filtered above.
+                if "staged" not in targetbranch: # make sure it is going into staged.
                     gh_payload = {
                         "body": "## MeerCat will ignore this PR because it is not going to the staged branch."
                     }
@@ -1861,6 +1890,7 @@ def githubBot(request):
             except Exception as e:
                 print(e)
                 pass        
+
 
             # Need to refresh the database before
             username = settings.DATABASES["default"]["USER"]
@@ -1877,23 +1907,17 @@ def githubBot(request):
             )[0]
 
 
-
+            # Analyze the files and get the message to send back to github
             comment, all_contexts = first_responder_function(pull_request.project, pull_request)
             print("------------")
             if comment:
-                # Only post comments for anl_test_repo and FLASH5
-                branch = str(payload["pull_request"]["head"]["label"]) #TODO: maybe remove this since only care if target is staged
+                # Only post comment if the target is staged
+                # branch = str(payload["pull_request"]["head"]["label"]) #TODO: maybe remove this since only care if target is staged
                 # if "staged" in targetbranch and (project.id == 35 or project.id == 30 or project.id == 26):
-                comment_pullrequest(pull_request, comment)
-                print("commented")
-                """else:
-                    event = EventLog(
-                        event_type=EventLog.EventTypeChoices.NOTIFICATION,
-                        log=comment,
-                        pull_request=pull_request,
-                        datetime=datetime.datetime.today(),
-                    )
-                    event.save()"""
+                if "staged" in targetbranch:
+                    comment_pullrequest(pull_request, comment)
+                    print("commented")
+
             else:
                 event = EventLog(
                     event_type=EventLog.EventTypeChoices.NO_NOTIFICATION,
@@ -1904,8 +1928,8 @@ def githubBot(request):
                 print("don't bug me")
             print("------------")
 
-            # Now notify any subscribers
 
+            # Now notify any subscribers
             profiles = Profile.objects.all()
             for profile in profiles:
                 subscriptions = profile.subscriptions
@@ -1958,7 +1982,7 @@ def githubBot(request):
                 repo_owner = get_repo_owner(project)
                 url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues/{prnumber}/comments"
 
-                branch = str(payload["pull_request"]["head"]["label"])
+                branch = str(payload["pull_request"]["head"]["label"]) # get the from branch
                 if "staged" not in branch: # this means a feature branch going directly into main.
                     gh_payload = {
                         "body": "## MeerCat warning: The branch in this PR appears to be skipping the staged branch."
