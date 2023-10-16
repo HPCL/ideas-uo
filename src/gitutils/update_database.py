@@ -5,12 +5,12 @@ import sys
 
 import MySQLdb
 
-HOST = 'sansa.cs.uoregon.edu'
-USERNAME = '' # edit this
-PASSWORD = '' # edit this
-PORT = 3331
-DATABASE = 'ideas_db'
-LOG_DIR = '/shared/soft/ideas_db/logs/'
+HOST = 'sansa.cs.uoregon.edu'  # edit this
+USERNAME = ''  # edit this
+PASSWORD = ''  # edit this
+PORT = 3331    # edit this
+DATABASE = 'ideas_db'  # edit this
+LOG_DIR = '/shared/soft/ideas_db/logs/'  # edit this
 PROJECT = 0
 
 if len(sys.argv)>2: 
@@ -51,7 +51,7 @@ def update():
             # Add git info
             # This can take a long time, but is not subject to any API limits, so several projects can be updated simultaneously
             git_log_path = os.path.join(LOG_DIR, f'{name}_git.log')
-            git_command = f'nohup python -m src.gitutils.db_interface --username {USERNAME} --password {PASSWORD} --add_project {source_url} 2>&1 | tee {git_log_path} '
+            git_command = f'nohup python -m src.gitutils.db_interface --username {USERNAME} --password {PASSWORD} --database {DATABASE} --host {HOST} --add_project {source_url} 2>&1 | tee {git_log_path} '
             count += 1
             all_commands += git_command
             if count % 5 == 0: all_commands += '& \n'
@@ -64,13 +64,13 @@ def update():
             # The updates below are subject to the GraphQL API limits (5000 points per hour), so these are run in order
             # Add prs
             pr_log_path = os.path.join(LOG_DIR, f'{name}_pr.log')
-            pr_command = f'nohup python -m src.gitutils.db_interface --username {USERNAME} --password {PASSWORD} --add_prs {source_url} 2>&1 | tee {pr_log_path} ;\n'
+            pr_command = f'nohup python -m src.gitutils.db_interface --username {USERNAME} --password {PASSWORD} --database {DATABASE} --host {HOST} --add_prs {source_url} 2>&1 | tee {pr_log_path} ;\n'
             # Add issues
             issue_log_path = os.path.join(LOG_DIR, f'{name}_issue.log')
-            issue_command = f'nohup python -m src.gitutils.db_interface --username {USERNAME} --password {PASSWORD} --add_issues {source_url} 2>&1 | tee {issue_log_path};\n'
+            issue_command = f'nohup python -m src.gitutils.db_interface --username {USERNAME} --password {PASSWORD} --database {DATABASE} --host {HOST} --add_issues {source_url} 2>&1 | tee {issue_log_path};\n'
             # Add events
             event_log_path = os.path.join(LOG_DIR, f'{name}_event.log')
-            event_command = f'nohup python -m src.gitutils.db_interface --username {USERNAME} --password {PASSWORD} --add_events {source_url} 2>&1 | tee {event_log_path};\n '
+            event_command = f'nohup python -m src.gitutils.db_interface --username {USERNAME} --password {PASSWORD} --database {DATABASE} --host {HOST} --add_events {source_url} 2>&1 | tee {event_log_path};\n '
             all_commands += pr_command + issue_command + event_command
 
     run(all_commands, dry_run=False)

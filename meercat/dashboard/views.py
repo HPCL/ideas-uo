@@ -4,6 +4,7 @@ import requests
 import os
 import importlib
 import configparser
+import sys
 
 from django.http import HttpResponse
 from django.template import loader
@@ -17,7 +18,7 @@ import pandas as pd
 import math
 import re
 
-import sys
+import openai
 
 sys.path.insert(1, "/shared/soft/ideas-uo/src")
 sys.path.insert(1, "../src")
@@ -1468,11 +1469,40 @@ def diffCommitData(request):
             extra_devs.append(role.user.email)
 
 
+
+    # Setup ChatGPT
+    '''with open(settings.BASE_DIR / "meercat.config.json") as meercat_config:
+        config = json.load(meercat_config)
+    openai.api_key = config["OPEN_API_KEY"]
+
+    completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role":"user", "content":"Please provide a critique-focused review of my Fortran 90 code. Ignore #include and @todo directives. Assume calls on ml_error have no problems. Ignore hard-coded indices. When checking argument typing, pay attention to use statements and derived types. Do not include a summary of the code, only problems with the code that you see."}])
+    '''
+
+    # Only call ChatGPT on F90 files for now (only calling on one file for initial testing)
+    llm = [];
+    '''for filename in filenames:
+        if os.path.isfile(str(settings.REPOS_DIR) + "/" + pr.project.name + "/" + filename):
+            if filename.endswith(".F90"):
+                # Open and read the file
+                with open(
+                    str(settings.REPOS_DIR) + "/" + pr.project.name + "/" + filename, "r"
+                ) as f:
+                    lines = f.readlines()
+                    f.close()
+                filecontents = "".join(lines)
+
+                completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role":"user", "content":filecontents}])
+
+                llm.append({"filename": filename, "results": completion.choices[0].message.content})
+
+                break'''
+
     resultdata = {
         "diffcommits": diffcommits,
         "prcommits": prcommits,
         "docstring_results": docstring_results,
         "linter_results": linter_results,
+        "llm": llm,
         "dev_table": dev_table,
         "merged_dev_table": merged_dev_table,
         "extra_devs": extra_devs,
@@ -1609,13 +1639,49 @@ def getFile(request):
                     pass
         linter_results = results'''
 
-    linter_results = default_linter.check_file(pr.project, settings, filename)
-
+    if not request.POST.get("llm"):
+        linter_results = default_linter.check_file(pr.project, settings, filename)
 
     print("LINTER RESULTS: "+str(linter_results))
     # print("DOC CHECKER RESULTS: "+str(docstring_results))
 
-    resultdata = {"filecontents": "".join(lines), "linter_results": linter_results}
+
+    # Only call ChatGPT on F90 files for now (only calling on one file for initial testing)
+    llm = "N/A"
+    if request.POST.get("llm") and filename.endswith(".F90"):
+
+        # Setup ChatGPT
+        with open(settings.BASE_DIR / "meercat.config.json") as meercat_config:
+            config = json.load(meercat_config)
+        openai.api_key = config["OPEN_API_KEY"]
+
+        print("CHATGPT: CALLING")
+
+        #completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role":"user", "content":"Please provide a critique-focused review of my Fortran 90 code. Ignore #include and @todo directives. Assume calls on ml_error have no problems. Ignore hard-coded indices. When checking argument typing, pay attention to use statements and derived types. Do not include a summary of the code, only problems with the code that you see."}])
+        #completion = openai.ChatCompletion.create(model="gpt-4", messages=[{"role":"user", "content":"Please provide a critique-focused review of my Fortran 90 code. Ignore #include and @todo directives. Assume calls on ml_error have no problems. Ignore hard-coded indices. When checking argument typing, pay attention to use statements and derived types. Do not include a summary of the code, only problems with the code that you see."}])
+
+        print("CHATGPT: INIT")
+
+        # Open and read the file
+        with open(
+            str(settings.REPOS_DIR) + "/" + pr.project.name + "/" + filename, "r"
+        ) as f:
+            lines = f.readlines()
+            f.close()
+        filecontents = "".join(lines)
+
+        #completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role":"user", "content":filecontents}])
+        #completion = openai.ChatCompletion.create(model="gpt-4", messages=[{"role":"user", "content":filecontents}])
+        #completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role":"user", "content":"Please provide a critique-focused review of my Fortran 90 code. Ignore #include and @todo directives. Assume calls on ml_error have no problems. Ignore hard-coded indices. When checking argument typing, pay attention to use statements and derived types. Do not include a summary of the code, only problems with the code that you see.\n\n"+filecontents}])
+        completion = openai.ChatCompletion.create(model="gpt-4", messages=[{"role":"user", "content":"Please provide a critique-focused review of my Fortran 90 code. Ignore #include and @todo directives. Assume calls on ml_error have no problems. Ignore hard-coded indices. When checking argument typing, pay attention to use statements and derived types. Do not include a summary of the code, only problems with the code that you see.\n\n"+filecontents}])
+
+
+        llm = completion.choices[0].message.content
+
+        print("CHATGPT: RESULTS")
+
+
+    resultdata = {"filecontents": "".join(lines), "linter_results": linter_results, "llm":llm}
 
     return HttpResponse(json.dumps(resultdata), content_type="application/json")
 
@@ -1892,6 +1958,9 @@ def githubBot(request):
                 pass        
 
 
+            # Queue
+            # Make the queue a size of one, and then put will block
+
             # Need to refresh the database before
             username = settings.DATABASES["default"]["USER"]
             password = settings.DATABASES["default"]["PASSWORD"]
@@ -1905,6 +1974,9 @@ def githubBot(request):
                 .filter(project=project.id, number=int(prnumber))
                 .all()
             )[0]
+
+            # Queue
+            # Remove item from queue
 
 
             # Analyze the files and get the message to send back to github

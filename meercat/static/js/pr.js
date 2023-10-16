@@ -83,6 +83,7 @@ var filename = "";
 var previousLines = 0;
 var ignoreLineChanges = true;
 var docstring_results = [];
+var llm_results = [];
 var doc_lines = [];
 var cq_lines = [];
 var cq_index = 0;
@@ -132,6 +133,16 @@ var testeditor = CodeMirror.fromTextArea(document.getElementById("testhelper"), 
     autocorrect: true,
     styleSelectedText: true
 });
+
+var llmeditor = CodeMirror.fromTextArea(document.getElementById("llmhelpereditor"), {
+    lineNumbers: true,
+    mode: "text/x-python", //"text/x-c++src", //"text/html",
+    matchBrackets: true,
+    spellcheck: true,
+    autocorrect: true,
+    styleSelectedText: true
+});
+
 
 function showDocEditor(docfilename, difftext) {
 
@@ -361,7 +372,10 @@ function showDocEditor(docfilename, difftext) {
                                 button.innerHTML = 'Insert docstring template'
                                 popupNode.appendChild(button);
                             }
-                            editor.addWidget({ line: cursor.line, ch: 9 }, popupNode, true);
+                            if( cursor.line >= editor.lineCount()-2 )
+                                editor.addWidget({ line: cursor.line-3, ch: 9 }, popupNode, true);
+                            else    
+                                editor.addWidget({ line: cursor.line, ch: 9 }, popupNode, true);
                         }
                     }
                     //for(var i=0; i<file_doc_results['documentation_lib']['missing_fields'].length; i++){
@@ -401,7 +415,11 @@ function showDocEditor(docfilename, difftext) {
                         popupNode.innerHTML = '';
                         var text = document.createTextNode("Missing fields: "+subroutine_text);
                         popupNode.appendChild(text);
-                        editor.addWidget({ line: cursor.line, ch: 9 }, popupNode, true);
+                        
+                        if( cursor.line >= editor.lineCount()-2 )
+                            editor.addWidget({ line: cursor.line-3, ch: 9 }, popupNode, true);
+                        else
+                            editor.addWidget({ line: cursor.line, ch: 9 }, popupNode, true);
                     }
                 }else{
                     for(var i=0; i<file_doc_results['documentation']['problem_lines'].length; i++){
@@ -422,7 +440,10 @@ function showDocEditor(docfilename, difftext) {
                                 button.innerHTML = 'Insert docstring template'
                                 popupNode.appendChild(button);
                             }
-                            editor.addWidget({ line: cursor.line, ch: 9 }, popupNode, true);
+                            if( cursor.line >= editor.lineCount()-2 )
+                                editor.addWidget({ line: cursor.line-3, ch: 9 }, popupNode, true);
+                            else
+                                editor.addWidget({ line: cursor.line, ch: 9 }, popupNode, true);
                         }
                     } 
                 }
@@ -750,7 +771,11 @@ function showCqEditor(docfilename, difftext) {
                         var text = document.createTextNode(result['linter_results'][i].type +": "+ result['linter_results'][i].message);
                         popupNode.innerHTML = '';
                         popupNode.appendChild(text);
-                        cqeditor.addWidget({ line: cursor.line, ch: 9 }, popupNode, true);
+
+                        if( cursor.line >= cqeditor.lineCount()-2 )
+                            cqeditor.addWidget({ line: cursor.line-3, ch: 9 }, popupNode, true);
+                        else
+                            cqeditor.addWidget({ line: cursor.line, ch: 9 }, popupNode, true);
                     }
                 }
             });
@@ -769,6 +794,67 @@ function showCqEditor(docfilename, difftext) {
             $('#codeQualityModal').modal('show');
         }
     });
+
+}
+
+function showLLMEditor(llmfilename, difftext) {
+
+    console.log("LLM TEST");
+
+    filename = llmfilename;
+
+    $('#llmhelpertitle').html(filename);
+
+    //console.log($('#llmbutton-'+filename.substring(filename.lastIndexOf('/')+1,filename.lastIndexOf('.'))).html());
+
+    $('#llmbutton-'+filename.substring(filename.lastIndexOf('/')+1,filename.lastIndexOf('.'))).prop("disabled", true);
+    $('#llmbutton-'+filename.substring(filename.lastIndexOf('/')+1,filename.lastIndexOf('.'))).addClass("disabled");
+    $('#llmbutton-'+filename.substring(filename.lastIndexOf('/')+1,filename.lastIndexOf('.'))).html("Loading...");
+
+    $.ajax({
+        url: '/dashboard/getfile/', type: 'POST', data: { 'pr': pr, 'filename': filename, 'llm':'true' }, success: function (result) {
+            console.log("get file contents");
+            console.log(filename);
+            console.log(result['llm']);
+
+            if( filename.indexOf(".h") >= 0 || filename.indexOf(".c") ){
+                llmeditor.setOption("mode", "text/x-c++src");
+            }else if( filename.indexOf(".py") >= 0 ){
+                llmeditor.setOption("mode", "text/x-python");
+            }else if( filename.indexOf(".F90") >= 0 || filename.indexOf(".dox") >= 0 ){
+                llmeditor.setOption("mode", "text/x-fortran");
+            }else{
+                llmeditor.setOption("mode", "text/html");
+            }
+
+            llmeditor.setValue(result['filecontents']);
+
+
+            var results = ""
+            //for (var k = 0; k < llm_results.length; k++) {
+            //    if( llm_results[k].filename == llmfilename )
+            //        results = llm_results[k].results;
+            //}
+            results = result['llm'];
+
+            results = results.replaceAll('\n', '<br/>');
+                        
+            $('#llmhelper').html(results);
+
+            setTimeout(function () {
+                llmeditor.setSize(null, 400);
+                llmeditor.refresh();
+                llmeditor.scrollTo(null, llmeditor.charCoords({line:0, ch:0},"local").top);
+            }, 1);
+
+            $('#llmModal').modal('show');
+
+            $('#llmbutton-'+filename.substring(filename.lastIndexOf('/')+1,filename.lastIndexOf('.'))).prop("disabled", false);
+            $('#llmbutton-'+filename.substring(filename.lastIndexOf('/')+1,filename.lastIndexOf('.'))).removeClass("disabled");
+            $('#llmbutton-'+filename.substring(filename.lastIndexOf('/')+1,filename.lastIndexOf('.'))).html("View Critique");
+        }
+    });
+
 
 }
 
@@ -976,9 +1062,12 @@ $.ajax({
             var diffs = "";
             var doccommits = "";
             var cqbuttons = "";
+            var llmbuttons = "";
             var alinks = "";
 
             var cqissues = -1;
+
+            llm_results = result['llm'];
 
             for (var j = 0; j < result['diffcommits'][i]['commits'].length; j++) {
 
@@ -1008,7 +1097,8 @@ $.ajax({
             }
 
             cqbuttons += "<button class='btn btn-sm btn-primary' onclick='showCqEditor(\"" + result['diffcommits'][i]['filename'] + "\",\"" + "DIFF STUFF TO GO HERE" + "\");'>View Issues</button><br/>";
- 
+            llmbuttons = "<button id='llmbutton-"+result['diffcommits'][i]['filename'].substring(result['diffcommits'][i]['filename'].lastIndexOf('/')+1,result['diffcommits'][i]['filename'].lastIndexOf('.'))+"' class='btn btn-sm btn-primary' onclick='showLLMEditor(\"" + result['diffcommits'][i]['filename'] + "\",\"" + "DIFF STUFF TO GO HERE" + "\");'>View Critique</button><br/>";
+
             for (var k = 0; k < result['linter_results'].length; k++) {
                 if (result['diffcommits'][i]['filename'] == result['linter_results'][k]['filename']) {
                     //for (var m = 0; m < result['docstring_results'][1][k][1].length; m++) {
@@ -1042,6 +1132,17 @@ $.ajax({
                     "    </button>" +
                     "</div>";
 
+                var showLLM = false;
+                if( project == 30 ){
+                    /*for (var k = 0; k < llm_results.length; k++) {
+                        if( llm_results[k].filename == result['diffcommits'][i]['filename'] )
+                            showLLM = true;
+                    }*/
+                     if( result['diffcommits'][i]['filename'].indexOf('.F90') >= 0 )
+                        showLLM = true;
+
+                }
+                    
                 cqtable.append("<tr><td class='file-path-td'>"+
                         "<span class='file-path-span' id='"+result['diffcommits'][i]['filename']+"'>"+result['diffcommits'][i]['filename'] +"</span>"+
                         "<br/><a class='btn btn-xs btn-secondary' target='_blank' href='/dashboard/filex/"+project+"?filename="+result['diffcommits'][i]['filename']+"&branch="+branch+"'>View in File Explorer</a>"+
@@ -1051,6 +1152,8 @@ $.ajax({
                         (cqissues > 0 ? cqbuttons : '') +
                     "</td><td>"+
                         (cqissues > 0 ? feedback_buttons : '') +
+                    "</td><td>"+
+                        ( showLLM ? llmbuttons : '') +
                     "</td></tr>");
             }
 

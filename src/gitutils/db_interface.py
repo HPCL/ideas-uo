@@ -793,7 +793,7 @@ class DatabaseInterface:
         for thing in os.listdir(start):
             thing = os.path.join(start, thing)
             if os.path.isfile(thing):
-                if thing.endswith(".F90"):
+                if thing.endswith(".F90"): #TODO: remove this and just check every file
 
                     lines = []
                     with open(thing, "r") as f:
@@ -1022,7 +1022,7 @@ class DatabaseInterface:
                     ):
                         if result and len(result) > 0:
                             try:
-                                if 'Exactly one space after' not in result and 'Missing space' not in result and 'Trailing whitespace' not in result:
+                                if 'Exactly one space after' not in result and 'Missing space' not in result and 'Single space' not in result and 'Trailing whitespace' not in result and 'Line length' not in result:
                                     results.append(
                                         {
                                             "column": 0,

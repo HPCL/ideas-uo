@@ -235,10 +235,11 @@
                                     <th><span class="text-decoration-underline"><em>Issues</em></span></th>
                                     <th></th>
                                     <th><span class="text-decoration-underline"><em>Feedback</em></span></th>
+                                     <th><span class="text-decoration-underline"><em>LLM</em></span></th>
                                 </tr>
                             </thead>
                             <tbody style="font-size:10pt;">
-                                <tr><td colspan="4">Loading...</td></tr>
+                                <tr><td colspan="5">Loading...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -406,7 +407,7 @@
     <br/>
 
 
-    <div class="accordion" id="accordionExample9">
+    <div class="accordion" id="accordionExample9" style="display:none;">
         <div class="accordion-item">
             <h2 class="accordion-header" id="headingSeven">
                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSeven" aria-expanded="false" aria-controls="collapseSeven">
@@ -424,7 +425,8 @@
         </div>
     </div>
 
-    <br/>
+    <!--br/-->
+
 
     <div class="accordion" id="accordionExample2">
         <div class="accordion-item">
@@ -782,6 +784,40 @@
     </div>
 </div>
 
+
+<div id="llmModal" class="modal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">LLM Critique</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                
+                <p>Critiques for file <b><i><span id="llmhelpertitle">folder1/arithmetic.py</span></i></b></p>
+
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="" style="border:1px solid #ccc; margin-bottom:5px; height:100%;">
+                            <textarea id="llmhelpereditor" style="height:100%;"></textarea>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="" style="border:1px solid #ccc; margin-bottom:5px; height:100%;">
+                            <div id="llmhelper" style="overflow-y:auto; max-height:400px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div></div> <!-- 2 way chat input can go here -->
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 <input id="pr" type="hidden" value="{{ pr.pk }}"/>
