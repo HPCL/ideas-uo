@@ -125,29 +125,6 @@ class Project(models.Model):
     def __str__(self):
         return self.name
 
-class FileMetric(models.Model):
-    
-    class MetricTypeChoices(models.TextChoices):
-        DOCUMENTATION = 'DOCUMENTATION', _('Documentation')
-        LINTING = 'LINTING', _('Linting')
-        DEVELOPERS = 'DEVELOPERS', _('Developers')
-        BUSFACTOR = 'BUSFACTOR', _('Busfactor')
-
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, blank=True, null=True)
-    datetime = models.DateTimeField()
-    metric_type = models.CharField(max_length=25, choices=MetricTypeChoices.choices)
-    file_path = models.FilePathField(max_length=256)
-    branch = models.CharField(max_length=256)
-    result_string = models.TextField(blank=True)
-    result_json = models.JSONField(blank=True, null=True)
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=['project', 'metric_type', 'file_path', 'branch'], name='unique_file_metric'
-            )
-        ]
-
 class ProjectRole(models.Model):
 
     class RoleChoices(models.TextChoices):
@@ -585,3 +562,28 @@ class Event(models.Model):
         ordering = ['id']
         verbose_name = 'event'
         verbose_name_plural = 'events'
+
+class FileMetric(models.Model):
+    
+    class MetricTypeChoices(models.TextChoices):
+        DOCUMENTATION = 'DOCUMENTATION', _('Documentation')
+        LINTING = 'LINTING', _('Linting')
+        DEVELOPERS = 'DEVELOPERS', _('Developers')
+        BUSFACTOR = 'BUSFACTOR', _('Busfactor')
+        LLM = 'LLM', _('LLM')
+
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, blank=True, null=True)
+    datetime = models.DateTimeField()
+    metric_type = models.CharField(max_length=25, choices=MetricTypeChoices.choices)
+    file_path = models.FilePathField(max_length=256)
+    pull_request = models.ForeignKey(PullRequest, on_delete=models.CASCADE, blank=True, null=True)
+    branch = models.CharField(max_length=256)
+    result_string = models.TextField(blank=True)
+    result_json = models.JSONField(blank=True, null=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['project', 'metric_type', 'file_path', 'branch'], name='unique_file_metric'
+            )
+        ]

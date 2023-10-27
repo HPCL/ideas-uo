@@ -1138,7 +1138,7 @@ $.ajax({
                         if( llm_results[k].filename == result['diffcommits'][i]['filename'] )
                             showLLM = true;
                     }*/
-                     if( result['diffcommits'][i]['filename'].indexOf('.F90') >= 0 )
+                    if( result['diffcommits'][i]['filename'].indexOf('.F90') >= 0 || result['diffcommits'][i]['filename'].indexOf('.py') >= 0 )
                         showLLM = true;
 
                 }
@@ -1229,6 +1229,7 @@ $.ajax({
                             "<a class='btn btn-sm btn-primary' href='#' onclick='alert(\"Still need link to doc template.\");'>View Doc Template</a><br/>" +
                         "</td></tr>");
                 }else{
+                    docissues = 0;
                     doctable.append("<tr><td>" +
                         "<span>"+filename +"</span>"+
                         "<br/><a class='btn btn-xs btn-secondary' target='_blank' href='/dashboard/filex/"+project+"?filename="+filename+"&branch="+branch+"'>View in File Explorer</a>"+

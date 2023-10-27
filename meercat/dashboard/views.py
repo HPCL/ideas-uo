@@ -1648,37 +1648,48 @@ def getFile(request):
 
     # Only call ChatGPT on F90 files for now (only calling on one file for initial testing)
     llm = "N/A"
-    if request.POST.get("llm") and filename.endswith(".F90"):
+    if request.POST.get("llm") and (filename.endswith(".F90") or filename.endswith(".py")):
 
         # Setup ChatGPT
         with open(settings.BASE_DIR / "meercat.config.json") as meercat_config:
             config = json.load(meercat_config)
         openai.api_key = config["OPEN_API_KEY"]
 
-        print("CHATGPT: CALLING")
+        print("CHATGPT: LLM")
 
         #completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role":"user", "content":"Please provide a critique-focused review of my Fortran 90 code. Ignore #include and @todo directives. Assume calls on ml_error have no problems. Ignore hard-coded indices. When checking argument typing, pay attention to use statements and derived types. Do not include a summary of the code, only problems with the code that you see."}])
         #completion = openai.ChatCompletion.create(model="gpt-4", messages=[{"role":"user", "content":"Please provide a critique-focused review of my Fortran 90 code. Ignore #include and @todo directives. Assume calls on ml_error have no problems. Ignore hard-coded indices. When checking argument typing, pay attention to use statements and derived types. Do not include a summary of the code, only problems with the code that you see."}])
+        
+        # First check to see if we have cached results
+        llm_metrics = list(FileMetric.objects.all().filter(file_path=filename, pull_request=pr, metric_type=FileMetric.MetricTypeChoices.LLM))
+        llm = ""
 
-        print("CHATGPT: INIT")
+        # If no cache, call ChatGPT and then cache the results
+        if len(llm_metrics) < 1:
 
-        # Open and read the file
-        with open(
-            str(settings.REPOS_DIR) + "/" + pr.project.name + "/" + filename, "r"
-        ) as f:
-            lines = f.readlines()
-            f.close()
-        filecontents = "".join(lines)
+            print("CHATGPT: CALLING API")
 
-        #completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role":"user", "content":filecontents}])
-        #completion = openai.ChatCompletion.create(model="gpt-4", messages=[{"role":"user", "content":filecontents}])
-        #completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role":"user", "content":"Please provide a critique-focused review of my Fortran 90 code. Ignore #include and @todo directives. Assume calls on ml_error have no problems. Ignore hard-coded indices. When checking argument typing, pay attention to use statements and derived types. Do not include a summary of the code, only problems with the code that you see.\n\n"+filecontents}])
-        completion = openai.ChatCompletion.create(model="gpt-4", messages=[{"role":"user", "content":"Please provide a critique-focused review of my Fortran 90 code. Ignore #include and @todo directives. Assume calls on ml_error have no problems. Ignore hard-coded indices. When checking argument typing, pay attention to use statements and derived types. Do not include a summary of the code, only problems with the code that you see.\n\n"+filecontents}])
+            # Open and read the file
+            filecontents = "".join(lines)
 
+            prompt = "Please provide a critique-focused review of my Fortran 90 code. Ignore #include and @todo directives. Assume calls on ml_error have no problems. Ignore hard-coded indices. When checking argument typing, pay attention to use statements and derived types. Do not include a summary of the code, only problems with the code that you see.\n\n"
+            if filename.endswith(".py"):
+                prompt = "Please provide a critique-focused review of my python code. Do not include a summary of the code, only problems with the code that you see.\n\n"
 
-        llm = completion.choices[0].message.content
+            #completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role":"user", "content":filecontents}])
+            #completion = openai.ChatCompletion.create(model="gpt-4", messages=[{"role":"user", "content":filecontents}])
+            completion = openai.ChatCompletion.create(model="gpt-3.5-turbo-16k", messages=[{"role":"user", "content":prompt+filecontents}])
+            #completion = openai.ChatCompletion.create(model="gpt-4", messages=[{"role":"user", "content":"Please provide a critique-focused review of my Fortran 90 code. Ignore #include and @todo directives. Assume calls on ml_error have no problems. Ignore hard-coded indices. When checking argument typing, pay attention to use statements and derived types. Do not include a summary of the code, only problems with the code that you see.\n\n"+filecontents}])
 
-        print("CHATGPT: RESULTS")
+            llm = completion.choices[0].message.content
+
+            FileMetric.objects.create(datetime=datetime.datetime.today(), file_path=filename, pull_request=pr, metric_type=FileMetric.MetricTypeChoices.LLM, result_string=llm)
+
+        # Else load the cached results
+        else:  
+            print("CHATGPT: USING CACHE")
+
+            llm = llm_metrics[0].result_string  
 
 
     resultdata = {"filecontents": "".join(lines), "linter_results": linter_results, "llm":llm}

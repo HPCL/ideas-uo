@@ -475,8 +475,10 @@ def check_non_unit_dox(lines, path):
       #@defgroup numericalTools Numerical Tools
       k = line.find('@defgroup')
       new_line = line[k+10:]
-      if not new_line.startswith(path_components[-2]):
-          problems['problem_fields'] += [(f'Expecting @defgroup {path_components[-2]} ...', line, i)]
+      #if not new_line.startswith(path_components[-2]):
+      if not new_line.startswith(path[:path.rindex('/')]):
+        trimmedpath = path[:path.rindex('/')]
+        problems['problem_fields'] += [(f'Expecting @defgroup {trimmedpath} ...', line, i)]
       break
 
   return problems
@@ -914,8 +916,10 @@ def check_unit_dox(lines, path, file_name, unit):
     if field == '@defgroup':
       if path_components[-1].startswith(unit):
         #file name starts with unit
-        if path_components[-2] not in line:
-          problems['problem_fields'] += [(f'Expecting @defgroup {path_components[-2]}', line, i)]
+        #if path_components[-2] not in line:
+        if path[:path.rindex('/')] not in line:
+          trimmedpath = path[:path.rindex('/')]
+          problems['problem_fields'] += [(f'Expecting @defgroup {trimmedpath}', line, i)]
       else:
         #file name does not start with unit so must be private
         if f'{unit}Private' not in line:

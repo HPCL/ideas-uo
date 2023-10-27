@@ -174,7 +174,7 @@ def check_file(proj_object, settings, filename:str):
       ):
           if result and len(result) > 0:
               try:
-                  if 'Replace .' not in result and 'At least one space before comment' not in result and 'Exactly one space after' not in result and 'Missing space' not in result and 'Single space' not in result and 'Trailing whitespace' not in result and 'Line length' not in result:
+                  if 'Types should be lowercased' not in result and 'Replace .' not in result and 'At least one space before comment' not in result and 'Exactly one space after' not in result and 'Missing space' not in result and 'Single space' not in result and 'Trailing whitespace' not in result and 'Line length' not in result:
                       results.append(
                           {
                               "column": 0,
