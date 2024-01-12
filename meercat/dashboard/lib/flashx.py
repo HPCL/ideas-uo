@@ -476,9 +476,13 @@ def check_non_unit_dox(lines, path):
       k = line.find('@defgroup')
       new_line = line[k+10:]
       #if not new_line.startswith(path_components[-2]):
-      if not new_line.startswith(path[:path.rindex('/')]):
-        trimmedpath = path[:path.rindex('/')]
-        problems['problem_fields'] += [(f'Expecting @defgroup {trimmedpath} ...', line, i)]
+      #if not new_line.startswith(path[:path.rindex('/')]):
+      new_path = path.split('source/')[1]
+      new_path = new_path[:new_path.rindex('/')]
+      new_path = new_path.replace('/','_')
+      if not new_line.startswith(new_path):
+        #trimmedpath = path[:path.rindex('/')]
+        problems['problem_fields'] += [(f'Expecting @defgroup {new_path} ...', line, i)]
       break
 
   return problems
@@ -914,12 +918,17 @@ def check_unit_dox(lines, path, file_name, unit):
 
     #a bit complicated. Determine if dox for public or dox for private.
     if field == '@defgroup':
-      if path_components[-1].startswith(unit):
+      if True:  #This breaks for unitTests  path_components[-1].startswith(unit):
+        
         #file name starts with unit
         #if path_components[-2] not in line:
-        if path[:path.rindex('/')] not in line:
-          trimmedpath = path[:path.rindex('/')]
-          problems['problem_fields'] += [(f'Expecting @defgroup {trimmedpath}', line, i)]
+        #if path[:path.rindex('/')] not in line:
+        new_path = path.split('source/')[1]
+        new_path = new_path[:new_path.rindex('/')]
+        new_path = new_path.replace('/','_')
+        if new_path not in line:
+          #trimmedpath = path[:path.rindex('/')]
+          problems['problem_fields'] += [(f'Expecting @defgroup {new_path}', line, i)]
       else:
         #file name does not start with unit so must be private
         if f'{unit}Private' not in line:

@@ -1121,7 +1121,7 @@ $.ajax({
 
 
 
-            if( project == 30 || project == 26 || project == 35 || project == 32 ){
+            if( project == 30 || project == 26 || project == 35 || project == 32 || project == 40 ){
 
                 var feedback_buttons = "<div class='d-flex justify-content-between'>" +
                     "    <button type='button' class='btn p-0' data-bs-toggle='modal' data-bs-target='#feedback-modal' onclick='feedback_submission.populate_feedback_modal(event);'>" +
@@ -1244,7 +1244,7 @@ $.ajax({
                         "<br/><a class='btn btn-xs btn-secondary' target='_blank' href='/dashboard/filex/"+project+"?filename="+filename+"&branch="+branch+"'>View in File Explorer</a>"+
                         "</td><td>" +
                             docstatus +
-                        "</td><td" + (docissues > 0 ? " style='color:red;'" : '') + ">" +
+                        "</td><td" + (docissues > 0 ? " style='color:red;'" : " style='color:green;'") + ">" +
                             (docissues < 0 ? '-' : docissues) +
                         "</td><td>" +
                             docbuttons +

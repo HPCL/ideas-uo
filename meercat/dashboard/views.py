@@ -347,11 +347,17 @@ def first_responder_function(proj_object, pull_object):
         if documentation_status['should_have_doc']:
             checkable += 1
 
-    doc_message =  f"""## Out of {all_files} file{'s'[:all_files^1]} in this PR, {checkable} should have doxygen documentation.  {checkable-doc_missing} have doxygen documentation."""
+    have = "have"
+    if checkable-doc_missing == 1:
+        have = "has"
+    doc_message =  f"""## Out of {all_files} file{'s'[:all_files^1]} in this PR, {checkable} should have doxygen documentation.  {checkable-doc_missing} {have} doxygen documentation."""
 
     if checkable-doc_missing > 0:
+        have = "have"
+        if doc_problems == 1:
+            have = "has"
         doc_message +=f"""
-## Out of {checkable-doc_missing} file{'s'[:(checkable-doc_missing)^1]} with doxygen documentation, {doc_problems} file{'s'[:doc_problems^1]} have issues."""
+## Out of {checkable-doc_missing} file{'s'[:(checkable-doc_missing)^1]} with doxygen documentation, {doc_problems} file{'s'[:doc_problems^1]} {have} issues."""
     
     if no_library:
         doc_message =  f"""No documentation library available."""
@@ -1004,16 +1010,16 @@ def pr(request, *args, **kwargs):
 
     # Find any issue that this PR closed
     closed_issue = None
-    issue_number = re.search(r"#\d+", pr.description)
-    if issue_number:
-        print(issue_number.group())
+    issue_numbers = re.findall(r"#\d+", pr.description)
+    for issue_number in issue_numbers:
+        print(issue_number)
         print(
-            pr.project.source_url.replace(".git", "/issues/" + issue_number.group()[1:])
+            pr.project.source_url.replace(".git", "/issues/" + issue_number[1:])
         )
         closed_issue_list = list(
             Issue.objects.all().filter(
                 url=pr.project.source_url.replace(
-                    ".git", "/issues/" + issue_number.group()[1:]
+                    ".git", "/issues/" + issue_number[1:]
                 )
             )
         )
@@ -1916,7 +1922,7 @@ def githubBot(request):
         from_org = frombranch.split(":")[0]
         proj_org = project.source_url[19:]
         if proj_org is not None and from_org is not None and not proj_org.startswith(from_org):
-            try:
+            '''try:
                 with open(settings.BASE_DIR / 'meercat.config.json') as meercat_config:
                     config = json.load(meercat_config)
 
@@ -1935,13 +1941,22 @@ def githubBot(request):
                 result = requests.post(url, headers=headers, data=json.dumps(gh_payload))
             except Exception as e:
                 print(e)
-                pass   
+                pass'''
 
-        elif  project.id == test_project_id or ("main" not in targetbranch and "master" not in targetbranch):
+            #  git fetch origin pull/610/head:fork610  
+            #  git checkout fork610  
+            print("+-------- PULL REQUEST FROM A FORK --------+")
+            cmd = f"cd {settings.REPOS_DIR}/{project.name} ; git fetch origin pull/{prnumber}/head:fork{prnumber} ; git checkout --force fork{prnumber}"
+            try:
+                os.system(cmd)
+            except:
+                print(f"Failure to checkout the pull {cmd}")
+
+        if  project.id == test_project_id or ("main" not in targetbranch and "master" not in targetbranch):
 
             # Only post comments for anl_test_repo and FLASH5
             #if project.id == 35 or project.id == 30 or project.id == 26:
-            try:
+            '''try:
                 # BASE_DIR = Path(__file__).resolve().parent.parent
                 with open(settings.BASE_DIR / 'meercat.config.json') as meercat_config:
                     config = json.load(meercat_config)
@@ -1966,7 +1981,7 @@ def githubBot(request):
                 result = requests.post(url, headers=headers, data=json.dumps(gh_payload))
             except Exception as e:
                 print(e)
-                pass        
+                pass'''        
 
 
             # Queue
