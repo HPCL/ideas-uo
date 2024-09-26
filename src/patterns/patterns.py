@@ -206,13 +206,20 @@ class Patterns(Fetcher):
         # print(lines_list)
         summary, old, new = "", "", ""
         for line in lines_list:
-            # We consider lines starting with a single '+' or '-' character
-            if len(line) > 2 and line[0] in ["-", "+"] and line[1] == " ":
-                summary += line[0]
-                if line[0] == "-":
-                    old += line
-                if line[0] == "+":
-                    new += line
+            #check if line signals whole file change, e.g., move or rename of file.
+            if line[:4] in ['+++ ', '--- ']: continue  #skip over file change lines
+            if line.startswith("-"):
+                summary += "-"
+                if len(line)==1:
+                  old += ' '  #kind of a kluge. A single - signifies removing a blank line. Using a space to stand in for \n
+                else:
+                  old += line[1:]  #skip over - char
+            elif line.startswith("+"):
+                summary += "+"
+                if len(line)==1:
+                  new += ' '  #kind of a kluge. A single + signifies adding a blank line. Using a space to stand in for \n
+                else:
+                  new += line[1:]  #skip over + char
 
         # Update "change" (vs. adding or removing lines), e.g.,  --++ means that two lines are modified, not that
         # two lines are deleted and then two added (line count 2 vs 4).
